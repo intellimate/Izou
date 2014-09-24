@@ -18,6 +18,13 @@ public class EventManagerTest {
         EventManager.ActivatorEventCaller caller = manager.registerActivatorEvent("1");
         final boolean[] isWorking = {false};
         manager.addActivatorEventListener("1", id -> isWorking[0] = true);
+        //the same, just without lambda
+        manager.addActivatorEventListener("1", new EventManager.ActivatorEventListener() {
+            @Override
+            public void activatorEventFired(String id) {
+                isWorking[0] = true;
+            }
+        });
         caller.fire();
         assertTrue(isWorking[0]);
     }
