@@ -93,10 +93,7 @@ public class EventManager {
             return;
         }
         for (ActivatorEventListener next : contentGeneratorListeners) {
-            //TODO: retrieve Data
-            //TODO: call them concurrent
             next.activatorEventFired(id);
-            //TODO: Give Data to OutputManager
         }
 
     }
