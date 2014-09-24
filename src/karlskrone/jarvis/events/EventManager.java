@@ -25,6 +25,9 @@ public class EventManager {
      * @return returns an ActivatorEventCaller, ActivatorEventCaller.fire() will fire an event
      */
     public ActivatorEventCaller registerActivatorEvent(String id) {
+        if (id == null || id.isEmpty()) {
+            return null;
+        }
         ActivatorEventCaller activatorEventCaller = new ActivatorEventCaller(id);
         ArrayList<ActivatorEventCaller> callers = this.callers.get(id);
         if (callers == null) {
