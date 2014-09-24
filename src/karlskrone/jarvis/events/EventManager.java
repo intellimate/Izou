@@ -21,12 +21,13 @@ public class EventManager {
      *
      * Multiple activators can register the same event and fire the same event.
      *
-     * @param id the ID of the Event
+     * @param id the ID of the Event, format: package.class.name
+     * @throws IllegalArgumentException when id is null or empty
      * @return returns an ActivatorEventCaller, ActivatorEventCaller.fire() will fire an event
      */
-    public ActivatorEventCaller registerActivatorEvent(String id) {
+    public ActivatorEventCaller registerActivatorEvent(String id) throws IllegalArgumentException{
         if (id == null || id.isEmpty()) {
-            return null;
+           throw new IllegalArgumentException();
         }
         ActivatorEventCaller activatorEventCaller = new ActivatorEventCaller(id);
         ArrayList<ActivatorEventCaller> callers = this.callers.get(id);
@@ -41,7 +42,7 @@ public class EventManager {
     /**
      * Unregisters with the EventManager.
      *
-     * @param id the ID of the Event
+     * @param id the ID of the Event, format: package.class.name
      * @param call the ActivatorEventCaller-instance which was used by the class to fire the event
      */
     public void unregisterActivatorEvent(String id, ActivatorEventCaller call) {
@@ -56,7 +57,7 @@ public class EventManager {
     /**
      * Adds an listener for events from the activators.
      *
-     * @param id the ID of the Event
+     * @param id the ID of the Event, format: package.class.name
      * @param activatorEventListener the ActivatorEventListener-interface for receiving activator events
      */
     public void addActivatorEventListener (String id, ActivatorEventListener activatorEventListener) {
@@ -71,7 +72,7 @@ public class EventManager {
     /**
      * Removes an listener for events from the activators
      *
-     * @param id the ID of the Event
+     * @param id the ID of the Event, format: package.class.name
      * @param activatorEventListener the ActivatorEventListener used to listen for events
      */
     public void deleteActivatorEventListener (String id, ActivatorEventListener activatorEventListener) {
@@ -85,11 +86,11 @@ public class EventManager {
     /**
      * this method actually used to fire an event.
      *
-     * @param id the ID of the Event
-     * @throws Exception an Exception will be thrown if there are currently other events fired
+     * @param id the ID of the Event, format: package.class.name
+     * @throws MultipleEventsException an Exception will be thrown if there are currently other events fired
      */
     @SuppressWarnings("RedundantThrows")
-    private void fireActivatorEvent(String id) throws Exception{
+    private void fireActivatorEvent(String id) throws MultipleEventsException{
         ArrayList<ActivatorEventListener> contentGeneratorListeners = this.listeners.get(id);
         //TODO: Protect EventManager from multiple events fired simultaneously
         if (contentGeneratorListeners == null) {
@@ -111,7 +112,7 @@ public class EventManager {
 
         /**
          * Invoked when an activator-event occurs.
-         * @param id the ID of the Event
+         * @param id the ID of the Event, format: package.class.name
          */
         public void activatorEventFired(String id);
     }
@@ -137,9 +138,9 @@ public class EventManager {
         /**
          * This method is used to fire the event.
          *
-         * @throws Exception an Exception will be thrown if there are currently other events fired
+         * @throws MultipleEventsException an Exception will be thrown if there are currently other events fired
          */
-        public void fire() throws Exception {
+        public void fire() throws MultipleEventsException {
             fireActivatorEvent(id);
         }
     }
@@ -151,5 +152,11 @@ public class EventManager {
         public static final String fullWelcomeEvent = CommonEvents.class.getCanonicalName() + ".FullWelcomeEvent";
         public static final String majorWelcomeEvent = CommonEvents.class.getCanonicalName() + ".MajorWelcomeEvent";
         public static final String minorWelcomeEvent = CommonEvents.class.getCanonicalName() + ".MinorWelcomeEvent";
+    }
+
+    /**
+     * Thrown if there are multiple Events fired at the same time
+     */
+    public class MultipleEventsException extends Exception {
     }
 }
