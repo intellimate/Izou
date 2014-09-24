@@ -119,7 +119,7 @@ public class EventManager {
      * To fire events a class must register with registerActivatorEvent, then this class will be returned.
      * Use fire() to fire the event;
      */
-    public class ActivatorEventCaller {
+    public final class ActivatorEventCaller {
         private String id;
         //private, so that this class can only constructed by EventManager
         private ActivatorEventCaller(String id) {
@@ -139,5 +139,14 @@ public class EventManager {
         public void fire() throws Exception {
             fireActivatorEvent(id);
         }
+    }
+
+    /**
+     * The class that holds all the Event-IDs for the common Events.
+     */
+    public static class CommonEvents {
+        public static final String fullWelcomeEvent = CommonEvents.class.getCanonicalName() + ".FullWelcomeEvent";
+        public static final String majorWelcomeEvent = CommonEvents.class.getCanonicalName() + ".MajorWelcomeEvent";
+        public static final String minorWelcomeEvent = CommonEvents.class.getCanonicalName() + ".MinorWelcomeEvent";
     }
 }

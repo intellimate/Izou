@@ -63,4 +63,9 @@ public class EventManagerTest {
         caller.fire();
         assertFalse(isWorking[0]);
     }
+
+    @Test
+    public void testCommonEvents() throws Exception {
+        assertEquals(EventManager.CommonEvents.fullWelcomeEvent, "karlskrone.jarvis.events.EventManager.CommonEvents.FullWelcomeEvent");
+    }
 }
