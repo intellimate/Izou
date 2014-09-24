@@ -37,6 +37,15 @@ public abstract class Activator implements Runnable{
     public abstract void activatorStarts() throws InterruptedException;
 
     /**
+     * This method gets called when the Activator Thread got terminated.
+     *
+     * This is an unusual way of ending a thread. The main reason for this should be, that the activator was hanging
+     *
+     * @deprecated because the logic behind is probably not working yet
+     */
+    public void activatorTerminated(){};
+
+    /**
      * registers an Event.
      *
      * To fire an event you first have to register it. After that you can call the fireEvent() method.

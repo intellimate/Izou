@@ -1,11 +1,12 @@
 package karlskrone.jarvis.activator;
 
+import java.lang.reflect.Field;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 /**
- * Created by Leander on 24.09.2014.
+ * The ActivatorManager holds all the Activator-instances and runs them parallel in Threads.
  */
 public class ActivatorManager {
     ExecutorService executor = Executors.newCachedThreadPool(new CustomThreadFactory());
@@ -27,7 +28,18 @@ public class ActivatorManager {
                     try {
                         r.run();
                     } finally {
-                        //TODO: Handling when Thread gets terminated
+                        //TODO: Is this working? What is the definition of Threads not used? Does Sleep count
+                        /*
+                        try {
+                            Field target = Thread.class.getDeclaredField("target");
+                            target.setAccessible(true);
+                            Activator activator = (Activator) target.get(this);
+
+                        } catch (NoSuchFieldException | IllegalAccessException | ClassCastException e ) {
+                            Errorhandling is not implemented jet
+                            e.printStackTrace();
+                        }
+                         */
                     }
                 }
             };
