@@ -15,6 +15,9 @@ public class ActivatorTest {
         activator = new Activator(manager) {
             @Override
             public void activatorStarts() throws InterruptedException {}
+
+            @Override
+            public void terminated(Exception e) {}
         };
     }
 
