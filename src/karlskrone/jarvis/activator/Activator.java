@@ -27,6 +27,9 @@ public abstract class Activator implements Runnable{
         catch (InterruptedException e) {
             return;
         }
+        catch (Exception e) {
+            this.terminated(e);
+        }
     }
 
     /**
@@ -35,6 +38,16 @@ public abstract class Activator implements Runnable{
      * @throws InterruptedException will be caught by the Activator implementation, used to stop the Activator Thread
      */
     public abstract void activatorStarts() throws InterruptedException;
+
+    /**
+     * This method gets called when the Activator Thread got terminated.
+     *
+     * This is an unusual way of ending a thread. The main reason for this should be, that the activator was interrupted
+     * by an uncaught exception.
+     *
+     * @param e if not null, the exception, which caused the termination
+     */
+    public abstract void terminated(Exception e);
 
     /**
      * registers an Event.
