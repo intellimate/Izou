@@ -52,10 +52,6 @@ public class ActivatorManager {
                         } catch (NoSuchFieldException | IllegalAccessException | ClassCastException ecp ) {
                             //TODO: real Exception handling is not implemented jet
                             e.printStackTrace();
-                            asd
-                                    asd
-                                    asd
-                                            asd1
                         }
                     }
                 }
