@@ -52,7 +52,7 @@ public class ContentGeneratorManager {
      *
      * @param contentGenerator an instance of the ContentGenerator
      */
-    public void deleteContentGenerators (ContentGenerator contentGenerator) {
+    public void deleteContentGenerator (ContentGenerator contentGenerator) {
         contentGenerator.unregisterAllEvents();
         contentGeneratorList.remove(contentGenerator);
     }

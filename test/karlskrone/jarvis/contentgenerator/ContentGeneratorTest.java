@@ -1,6 +1,5 @@
 package karlskrone.jarvis.contentgenerator;
 
-import karlskrone.jarvis.events.EventManagerTest;
 import karlskrone.jarvis.events.EventManagerTestSetup;
 import org.junit.Test;
 
