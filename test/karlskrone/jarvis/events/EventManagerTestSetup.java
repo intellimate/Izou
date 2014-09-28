@@ -2,6 +2,7 @@ package karlskrone.jarvis.events;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Created by Leander on 28.09.2014.
@@ -52,6 +53,14 @@ public class EventManagerTestSetup {
             }
         }
         assertFalse(isWorking[0]);
+    }
+
+    public void testFireEvent(String id) {
+        try {
+            manager.registerActivatorCaller(id).fire();
+        } catch (EventManager.MultipleEventsException e) {
+            fail();
+        }
     }
 
     public void waitForMultith() throws InterruptedException {
