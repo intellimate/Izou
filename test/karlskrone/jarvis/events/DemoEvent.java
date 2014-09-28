@@ -1,5 +1,7 @@
 package karlskrone.jarvis.events;
 
+import java.util.concurrent.Future;
+
 /**
  * Demo Event Reciever to explain the Event-Listening.
  *
@@ -10,9 +12,10 @@ public class DemoEvent implements EventManager.ActivatorEventListener{
     EventManager manager;
 
     @Override
-    public void activatorEventFired(String id) {
+    public Future activatorEventFired(String id) {
        //code here will be executed whe an event was fired
        System.out.println("Hello!");
+        return null;
     }
 
     public DemoEvent() {
@@ -23,8 +26,8 @@ public class DemoEvent implements EventManager.ActivatorEventListener{
         manager.addActivatorEventListener("1", this);
 
 
-        //to fire an event you have to retrieve an ActivatorEventCaller through the registerActivatorEvent method
-        EventManager.ActivatorEventCaller caller1 = manager.registerActivatorEvent("1");
+        //to fire an event you have to retrieve an ActivatorEventCaller through the registerActivatorCaller method
+        EventManager.ActivatorEventCaller caller1 = manager.registerActivatorCaller("1");
         try {
             //the method fire fires the event
             caller1.fire();

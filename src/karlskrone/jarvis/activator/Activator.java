@@ -59,7 +59,7 @@ public abstract class Activator implements Runnable {
      * @throws IllegalArgumentException thrown if the ID is null or empty
      */
     public void registerEvent(String id) throws IllegalArgumentException {
-        EventManager.ActivatorEventCaller caller = manager.registerActivatorEvent(id);
+        EventManager.ActivatorEventCaller caller = manager.registerActivatorCaller(id);
         callers.put(id, caller);
     }
 
@@ -76,8 +76,25 @@ public abstract class Activator implements Runnable {
         if (caller == null) {
             throw new IllegalArgumentException();
         }
-        manager.unregisterActivatorEvent(id, caller);
+        manager.unregisterActivatorCaller(id, caller);
         callers.remove(id);
+    }
+
+    /**
+     * unregisters all Event at EventManager.
+     * <p>
+     * If you don't need this class anymore, you should unregister all events to avoid memory leaks.
+     * @throws IllegalArgumentException thrown if the ID is null or empty
+     */
+    public void unregisterAllEvents() throws IllegalArgumentException {
+        for (String key : callers.keySet()) {
+            EventManager.ActivatorEventCaller caller = callers.get(key);
+            if (caller == null) {
+                throw new IllegalArgumentException();
+            }
+            manager.unregisterActivatorCaller(key, caller);
+        }
+        callers.clear();
     }
 
     /**

@@ -1,7 +1,12 @@
 package karlskrone.jarvis.events;
 
+import karlskrone.jarvis.contentgenerator.ContentData;
+
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * This class is used to manage events.
@@ -9,8 +14,7 @@ import java.util.HashMap;
  *
  * Event-IDs are used in the following form: package.class.name
  */
-public class EventManager {
-
+public class EventManager implements Runnable{
     //common Events:
     /**
      * Event for a Welcome with maximum response.
@@ -32,20 +36,26 @@ public class EventManager {
     public static final String minorWelcomeEvent = EventManager.class.getCanonicalName() + ".MinorWelcomeEvent";
 
     //here are all the ContentGenerators-Listeners stored
-    private final HashMap<String, ArrayList<ActivatorEventListener>> listeners = new HashMap<>();
+    private final ConcurrentHashMap<String, ArrayList<ActivatorEventListener>> listeners = new ConcurrentHashMap<>();
     //here are all the Instances to fire events stored
-    private final HashMap<String, ArrayList<ActivatorEventCaller>> callers = new HashMap<>();
+    private final ConcurrentHashMap<String, ArrayList<ActivatorEventCaller>> callers = new ConcurrentHashMap<>();
+    //the queue where all the Events are stored (if there are more than one,
+    private final BlockingQueue<String> events = new LinkedBlockingQueue<>(1);
+    //if false, run() will stop
+    private boolean stop = false;
 
     /**
      * Registers with the EventManager to fire an event.
      *
      * Multiple activators can register the same event and fire the same event.
+     * Method is thread-safe.
      *
      * @param id the ID of the Event, format: package.class.name
      * @throws IllegalArgumentException when id is null or empty
      * @return returns an instance of ActivatorEventCaller, ActivatorEventCaller.fire() will fire an event
      */
-    public ActivatorEventCaller registerActivatorEvent(String id) throws IllegalArgumentException{
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+    public ActivatorEventCaller registerActivatorCaller(String id) throws IllegalArgumentException{
         checkID(id);
         ActivatorEventCaller activatorEventCaller = new ActivatorEventCaller(id);
         ArrayList<ActivatorEventCaller> callers = this.callers.get(id);
@@ -53,68 +63,87 @@ public class EventManager {
             this.callers.put(id, new ArrayList<>());
             callers = this.callers.get(id);
         }
-        callers.add(activatorEventCaller);
+        synchronized (callers) {
+            callers.add(activatorEventCaller);
+        }
         return activatorEventCaller;
     }
 
     /**
      * Unregisters with the EventManager.
      *
+     * Method is thread-safe.
+     *
      * @param id the ID of the Event, format: package.class.name
      * @param call the ActivatorEventCaller-instance which was used by the class to fire the event
      */
-    public void unregisterActivatorEvent(String id, ActivatorEventCaller call) {
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+    public void unregisterActivatorCaller(String id, ActivatorEventCaller call) {
         checkID(id);
         call.setId("-1");
         ArrayList<ActivatorEventCaller> callers = this.callers.get(id);
         if (callers == null) {
             return;
         }
-        callers.remove(call);
+        synchronized (callers) {
+            callers.remove(call);
+        }
     }
 
     /**
      * Adds an listener for events from the activators.
      *
+     * Method is thread-safe.
+     *
      * @param id the ID of the Event, format: package.class.name
      * @param activatorEventListener the ActivatorEventListener-interface for receiving activator events
+     * @throws IllegalArgumentException if Listener is already listening to the Event or the id is not allowed
      */
-    public void addActivatorEventListener (String id, ActivatorEventListener activatorEventListener) {
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+    public void addActivatorEventListener (String id, ActivatorEventListener activatorEventListener) throws IllegalArgumentException{
         checkID(id);
         ArrayList<ActivatorEventListener> listenersList = listeners.get(id);
         if (listenersList == null) {
             listeners.put(id, new ArrayList<>());
             listenersList = listeners.get(id);
         }
-        listenersList.add(activatorEventListener);
+        if(listenersList.contains(activatorEventListener)) {
+            throw new IllegalArgumentException("Listener already listening to this event");
+        }
+        synchronized (listenersList) {
+            listenersList.add(activatorEventListener);
+        }
     }
 
     /**
      * Removes an listener for events from the activators
      *
+     * Method is thread-safe.
+     *
      * @param id the ID of the Event, format: package.class.name
      * @param activatorEventListener the ActivatorEventListener used to listen for events
+     * @throws IllegalArgumentException if Listener is already listening to the Event or the id is not allowed
      */
-    public void deleteActivatorEventListener (String id, ActivatorEventListener activatorEventListener) {
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+    public void deleteActivatorEventListener (String id, ActivatorEventListener activatorEventListener) throws IllegalArgumentException{
         checkID(id);
         ArrayList<ActivatorEventListener> listenersList = listeners.get(id);
         if (listenersList == null) {
             return;
         }
-        listenersList.remove(activatorEventListener);
+        synchronized (listenersList) {
+            listenersList.remove(activatorEventListener);
+        }
     }
 
     /**
      * this method actually used to fire an event.
      *
      * @param id the ID of the Event, format: package.class.name
-     * @throws MultipleEventsException an Exception will be thrown if there are currently other events fired
      */
-    @SuppressWarnings("RedundantThrows")
-    private void fireActivatorEvent(String id) throws MultipleEventsException{
+    private void fireActivatorEvent (String id){
         checkID(id);
         ArrayList<ActivatorEventListener> contentGeneratorListeners = this.listeners.get(id);
-        //TODO: Protect EventManager from multiple events fired simultaneously
         if (contentGeneratorListeners == null) {
             return;
         }
@@ -139,6 +168,39 @@ public class EventManager {
         }
     }
 
+    @Override
+    public void run() {
+        stop = false;
+        while (!stop) {
+            try {
+                fireActivatorEvent(events.take());
+            } catch (InterruptedException e) {
+                break;
+            }
+        }
+    }
+
+    /**
+     * returns the BlockingQueue containing the events.
+     *
+     * @return an instance of BlockingQueue
+     */
+    public BlockingQueue<String> getEvents() {
+        return events;
+    }
+
+    /**
+     * Should stop the EventManager.
+     *
+     * The method run() is a while-loop that repeats itself as long as a variable isn't true. This sets the variable true
+     * but does NOT interrupt the execution! If its not processing, it is waiting for an event, so this Thread still may
+     * not stop without interruption.
+     */
+    @SuppressWarnings("UnusedDeclaration")
+    public void stop() {
+        stop = true;
+    }
+
     /**
      * Interface for listening to events.
      *
@@ -149,15 +211,17 @@ public class EventManager {
 
         /**
          * Invoked when an activator-event occurs.
+         *
          * @param id the ID of the Event, format: package.class.name
+         * @return a Future representing pending completion of the task
          */
-        public void activatorEventFired(String id);
+        public Future<ContentData> activatorEventFired(String id);
     }
 
     /**
      * Class used to fire events.
      *
-     * To fire events a class must register with registerActivatorEvent, then this class will be returned.
+     * To fire events a class must register with registerActivatorCaller, then this class will be returned.
      * Use fire() to fire the event;
      */
     public final class ActivatorEventCaller {
@@ -178,7 +242,13 @@ public class EventManager {
          * @throws MultipleEventsException an Exception will be thrown if there are currently other events fired
          */
         public void fire() throws MultipleEventsException {
-            fireActivatorEvent(id);
+            if(events.isEmpty()) {
+                events.add(id);
+            }
+            else
+            {
+                throw new MultipleEventsException();
+            }
         }
     }
 

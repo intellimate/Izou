@@ -1,71 +1,108 @@
 package karlskrone.jarvis.events;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
 public class EventManagerTest {
     static EventManager manager;
+    Thread thread;
+    private static final class Lock { }
+    private final Object lock = new Lock();
 
-    @Before
-    public void setUp() throws Exception {
+    public EventManagerTest() {
         manager = new EventManager();
+        thread = new Thread(manager);
+        thread.start();
     }
 
     @Test
     public void testRegisterActivatorEvent() throws Exception {
-        EventManager.ActivatorEventCaller caller = manager.registerActivatorEvent("1");
+        EventManager.ActivatorEventCaller caller = manager.registerActivatorCaller("1");
         final boolean[] isWorking = {false};
-        manager.addActivatorEventListener("1", id -> isWorking[0] = true);
-        //the same, just without lambda
-        manager.addActivatorEventListener("1", new EventManager.ActivatorEventListener() {
-            @Override
-            public void activatorEventFired(String id) {
-                isWorking[0] = true;
-            }
+        manager.addActivatorEventListener("1", id -> {
+            isWorking[0] = true;
+            return null;
+        });
+        manager.addActivatorEventListener("1", id -> {
+            isWorking[0] = true;
+            return null;
         });
         caller.fire();
+
+        synchronized (lock) {
+            while(!manager.getEvents().isEmpty() || !(thread.getState() == Thread.State.WAITING))
+            {
+                lock.wait(2);
+            }
+        }
         assertTrue(isWorking[0]);
     }
 
     @Test
     public void testUnregisterActivatorEvent() throws Exception {
-        EventManager.ActivatorEventCaller caller = manager.registerActivatorEvent("2");
+        EventManager.ActivatorEventCaller caller = manager.registerActivatorCaller("2");
         final boolean[] isWorking = {false};
-        manager.unregisterActivatorEvent("2", caller);
-        manager.addActivatorEventListener("2", id -> isWorking[0] = true);
+        manager.unregisterActivatorCaller("2", caller);
+        manager.addActivatorEventListener("2", id -> {
+            isWorking[0] = true;
+            return null;
+        });
         caller.fire();
+
+
+        synchronized (lock) {
+            while(!manager.getEvents().isEmpty() || !(thread.getState() == Thread.State.WAITING))
+            {
+                lock.wait(2);
+            }
+        }
         assertFalse(isWorking[0]);
     }
 
     @Test
     public void testAddActivatorEventListener() throws Exception {
-        EventManager.ActivatorEventCaller caller = manager.registerActivatorEvent("3");
+        EventManager.ActivatorEventCaller caller = manager.registerActivatorCaller("3");
         final boolean[] isWorking = {false};
-        manager.addActivatorEventListener("3", id -> isWorking[0] = true);
+        manager.addActivatorEventListener("3", id -> {
+            isWorking[0] = true;
+            return null;
+        });
         caller.fire();
+
+        synchronized (lock) {
+            while(!manager.getEvents().isEmpty() || !(thread.getState() == Thread.State.WAITING))
+            {
+                lock.wait(2);
+            }
+        }
         assertTrue(isWorking[0]);
     }
 
     @Test
-    public void testRemoveActivatorEventListener() throws Exception {
-        EventManager.ActivatorEventCaller caller = manager.registerActivatorEvent("4");
+    public void testDeleteActivatorEventListener() throws Exception {
+        EventManager.ActivatorEventCaller caller = manager.registerActivatorCaller("4");
         final boolean[] isWorking = {false};
         EventManager.ActivatorEventListener listener1;
-        manager.addActivatorEventListener("4", listener1 = new EventManager.ActivatorEventListener() {
-            @Override
-            public void activatorEventFired(String id) {
-                isWorking[0] = true;
-            }
+        manager.addActivatorEventListener("4", listener1 = id -> {
+            isWorking[0] = true;
+            return null;
         });
         manager.deleteActivatorEventListener("4", listener1);
         caller.fire();
+
+
+        synchronized (lock) {
+            while(!manager.getEvents().isEmpty() || !(thread.getState() == Thread.State.WAITING))
+            {
+                lock.wait(2);
+            }
+        }
         assertFalse(isWorking[0]);
     }
 
     @Test
     public void testCommonEvents() throws Exception {
-        assertEquals(EventManager.CommonEvents.fullWelcomeEvent, "karlskrone.jarvis.events.EventManager.CommonEvents.FullWelcomeEvent");
+        assertEquals(EventManager.fullWelcomeEvent, "karlskrone.jarvis.events.EventManager.FullWelcomeEvent");
     }
 }

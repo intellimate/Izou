@@ -1,6 +1,7 @@
 package karlskrone.jarvis.activator;
 
 import karlskrone.jarvis.events.EventManager;
+import karlskrone.jarvis.events.EventManagerTestSetup;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -9,14 +10,15 @@ import java.util.concurrent.Future;
 import static org.junit.Assert.*;
 
 public class ActivatorManagerTest {
-    static EventManager manager;
+    EventManagerTestSetup eventMangrSetup;
     static ActivatorManager activatorManager;
     private static final class Lock { }
     private final Object lock = new Lock();
 
-    @Before
-    public void setUp() throws Exception {
-        manager = new EventManager();
+    public ActivatorManagerTest() {
+        eventMangrSetup = new EventManagerTestSetup();
+        Thread thread = new Thread(eventMangrSetup.getManager());
+        thread.start();
         activatorManager = new ActivatorManager();
     }
 
@@ -24,7 +26,7 @@ public class ActivatorManagerTest {
     public void testAddActivator() throws Exception {
         final boolean[] isWorking = {false};
 
-        Activator activator = new Activator(manager) {
+        Activator activator = new Activator(eventMangrSetup.getManager()) {
             @Override
             public void activatorStarts() throws InterruptedException {
                 registerEvent("1");
@@ -39,7 +41,10 @@ public class ActivatorManagerTest {
             public void terminated(Exception e) {}
         };
 
-        manager.addActivatorEventListener("1", id -> isWorking[0] = true);
+        eventMangrSetup.getManager().addActivatorEventListener("1", id -> {
+            isWorking[0] = true;
+            return null;
+        });
 
         Future<?> future = activatorManager.addActivator(activator);
 

@@ -1,18 +1,19 @@
 package karlskrone.jarvis.activator;
 
 import karlskrone.jarvis.events.EventManager;
+import karlskrone.jarvis.events.EventManagerTestSetup;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
 public class ActivatorTest {
-    static EventManager manager;
+    static EventManagerTestSetup eventManagerTestSetup;
     static Activator activator;
-    @Before
-    public void setUp() throws Exception {
-        manager = new EventManager();
-        activator = new Activator(manager) {
+
+    public ActivatorTest() {
+        eventManagerTestSetup = new EventManagerTestSetup();
+        activator = new Activator(eventManagerTestSetup.getManager()) {
             @Override
             public void activatorStarts() throws InterruptedException {}
 
@@ -25,8 +26,12 @@ public class ActivatorTest {
     public void testRegisterEvent() throws Exception {
         activator.registerEvent("1");
         final boolean[] isWorking = {false};
-        manager.addActivatorEventListener("1", id -> isWorking[0] = true);
+        eventManagerTestSetup.getManager().addActivatorEventListener("1", id -> {
+            isWorking[0] = true;
+            return null;
+        });
         activator.fireEvent("1");
+        eventManagerTestSetup.waitForMultith();
         assertTrue(isWorking[0]);
     }
 
@@ -37,6 +42,29 @@ public class ActivatorTest {
         activator.unregisterEvent("2");
         try {
             activator.fireEvent("2");
+        }
+        catch (IllegalArgumentException e)
+        {
+            isWorking = true;
+        }
+        assertTrue(isWorking);
+    }
+
+    @Test
+    public void testUnregisterAllEvent() throws Exception {
+        activator.registerEvent("5");
+        activator.registerEvent("6");
+        boolean isWorking = false;
+        activator.unregisterAllEvents();
+        try {
+            activator.fireEvent("5");
+        }
+        catch (IllegalArgumentException e)
+        {
+            isWorking = true;
+        }
+        try {
+            activator.fireEvent("6");
         }
         catch (IllegalArgumentException e)
         {
@@ -62,8 +90,12 @@ public class ActivatorTest {
     public void testFireEvent() throws Exception {
         activator.registerEvent("4");
         final boolean[] isWorking = {false};
-        manager.addActivatorEventListener("4", id -> isWorking[0] = true);
+        eventManagerTestSetup.getManager().addActivatorEventListener("4", id -> {
+            isWorking[0] = true;
+            return null;
+        });
         activator.fireEvent("4");
+        eventManagerTestSetup.waitForMultith();
         assertTrue(isWorking[0]);
     }
 }
