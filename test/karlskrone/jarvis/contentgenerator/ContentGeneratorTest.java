@@ -4,6 +4,7 @@ import karlskrone.jarvis.events.EventManagerTest;
 import karlskrone.jarvis.events.EventManagerTestSetup;
 import org.junit.Test;
 
+import java.util.List;
 import java.util.concurrent.Future;
 
 import static org.junit.Assert.*;
@@ -97,21 +98,71 @@ public class ContentGeneratorTest {
 
     @Test
     public void testRegisterEvent() throws Exception {
+        final boolean[] isWorking = {false};
+        ContentGenerator cg = new ContentGenerator(eventManagerTestSetup.getManager()) {
+            @Override
+            public ContentData generate(String eventID) throws Exception {
+                if(eventID.equals("5")) isWorking[0] = true;
+                return null;
+            }
 
+            @Override
+            public void handleError(Exception e) {}
+        };
+        cg.setContentGeneratorManager(contentGeneratorManager);
+        cg.registerEvent("5");
+        eventManagerTestSetup.testFireEvent("5");
+        eventManagerTestSetup.waitForMultith();
+        assertTrue(isWorking[0]);
     }
 
     @Test
     public void testUnregisterEvent() throws Exception {
+        final boolean[] isWorking = {false};
+        ContentGenerator cg = new ContentGenerator(eventManagerTestSetup.getManager()) {
+            @Override
+            public ContentData generate(String eventID) throws Exception {
+                isWorking[0] = true;
+                return null;
+            }
 
+            @Override
+            public void handleError(Exception e) {}
+        };
+        cg.setContentGeneratorManager(contentGeneratorManager);
+        cg.registerEvent("6");
+        cg.unregisterEvent("6");
+        eventManagerTestSetup.testFireEvent("6");
+        eventManagerTestSetup.waitForMultith();
+        assertFalse(isWorking[0]);
     }
 
     @Test
     public void testUnregisterAllEvents() throws Exception {
+        final boolean[] isWorking = {false};
+        ContentGenerator cg = new ContentGenerator(eventManagerTestSetup.getManager()) {
+            @Override
+            public ContentData generate(String eventID) throws Exception {
+                isWorking[0] = true;
+                return null;
+            }
 
+            @Override
+            public void handleError(Exception e) {}
+        };
+        cg.setContentGeneratorManager(contentGeneratorManager);
+        cg.registerEvent("7");
+        cg.unregisterAllEvents();
+        eventManagerTestSetup.testFireEvent("7");
+        eventManagerTestSetup.waitForMultith();
+        assertFalse(isWorking[0]);
     }
 
     @Test
     public void testGetRegisteredEvents() throws Exception {
-
+        contentGenerator.unregisterAllEvents();
+        contentGenerator.registerEvent("6");
+        List list= contentGenerator.getRegisteredEvents();
+        assertTrue( (list.size() == 1) && list.contains("6") );
     }
 }
