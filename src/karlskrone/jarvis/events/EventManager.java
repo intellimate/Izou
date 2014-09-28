@@ -7,9 +7,29 @@ import java.util.HashMap;
  * This class is used to manage events.
  * Activators can register with an id to fire events und ContentGenerators can subscribe to them.
  *
- * Event-IDs are used in the following form: package.class.nameOfTheEvent
+ * Event-IDs are used in the following form: package.class.name
  */
 public class EventManager {
+
+    //common Events:
+    /**
+     * Event for a Welcome with maximum response.
+     *
+     * Every component that can contribute should contribute to this Event.
+     */
+    public static final String fullWelcomeEvent = EventManager.class.getCanonicalName() + ".FullWelcomeEvent";
+    /**
+     * Event for a Welcome with major response.
+     *
+     * Every component that is import should contribute to this Event.
+     */
+    public static final String majorWelcomeEvent = EventManager.class.getCanonicalName() + ".MajorWelcomeEvent";
+    /**
+     * Event for a Welcome with major response.
+     *
+     * Only components that have information of great importance should contribute to this event.
+     */
+    public static final String minorWelcomeEvent = EventManager.class.getCanonicalName() + ".MinorWelcomeEvent";
 
     //here are all the ContentGenerators-Listeners stored
     private final HashMap<String, ArrayList<ActivatorEventListener>> listeners = new HashMap<>();
@@ -23,12 +43,10 @@ public class EventManager {
      *
      * @param id the ID of the Event, format: package.class.name
      * @throws IllegalArgumentException when id is null or empty
-     * @return returns an ActivatorEventCaller, ActivatorEventCaller.fire() will fire an event
+     * @return returns an instance of ActivatorEventCaller, ActivatorEventCaller.fire() will fire an event
      */
     public ActivatorEventCaller registerActivatorEvent(String id) throws IllegalArgumentException{
-        if (id == null || id.isEmpty()) {
-           throw new IllegalArgumentException();
-        }
+        checkID(id);
         ActivatorEventCaller activatorEventCaller = new ActivatorEventCaller(id);
         ArrayList<ActivatorEventCaller> callers = this.callers.get(id);
         if (callers == null) {
@@ -46,6 +64,7 @@ public class EventManager {
      * @param call the ActivatorEventCaller-instance which was used by the class to fire the event
      */
     public void unregisterActivatorEvent(String id, ActivatorEventCaller call) {
+        checkID(id);
         call.setId("-1");
         ArrayList<ActivatorEventCaller> callers = this.callers.get(id);
         if (callers == null) {
@@ -61,6 +80,7 @@ public class EventManager {
      * @param activatorEventListener the ActivatorEventListener-interface for receiving activator events
      */
     public void addActivatorEventListener (String id, ActivatorEventListener activatorEventListener) {
+        checkID(id);
         ArrayList<ActivatorEventListener> listenersList = listeners.get(id);
         if (listenersList == null) {
             listeners.put(id, new ArrayList<>());
@@ -76,6 +96,7 @@ public class EventManager {
      * @param activatorEventListener the ActivatorEventListener used to listen for events
      */
     public void deleteActivatorEventListener (String id, ActivatorEventListener activatorEventListener) {
+        checkID(id);
         ArrayList<ActivatorEventListener> listenersList = listeners.get(id);
         if (listenersList == null) {
             return;
@@ -91,11 +112,13 @@ public class EventManager {
      */
     @SuppressWarnings("RedundantThrows")
     private void fireActivatorEvent(String id) throws MultipleEventsException{
+        checkID(id);
         ArrayList<ActivatorEventListener> contentGeneratorListeners = this.listeners.get(id);
         //TODO: Protect EventManager from multiple events fired simultaneously
         if (contentGeneratorListeners == null) {
             return;
         }
+        //TODO get Data and hand it to Output
         for (ActivatorEventListener next : contentGeneratorListeners) {
             next.activatorEventFired(id);
         }
@@ -103,7 +126,21 @@ public class EventManager {
     }
 
     /**
-     * The listener interface for receiving activator events.
+     * Checks whether a ID is valid.
+     *
+     * Currently only throws error if id is null or empty.
+     *
+     * @param id the ID to check
+     * @throws IllegalArgumentException if the id is null or empty
+     */
+    private void checkID(String id) throws IllegalArgumentException{
+        if (id == null || id.isEmpty()) {
+            throw new IllegalArgumentException("Event-ID not Allowed");
+        }
+    }
+
+    /**
+     * Interface for listening to events.
      *
      * To receive events a class must implements this interface and register with the addActivatorEventListener-method.
      * When the activator event occurs, that object's activatorEventFired method is invoked.
@@ -118,7 +155,7 @@ public class EventManager {
     }
 
     /**
-     * The class for firing events.
+     * Class used to fire events.
      *
      * To fire events a class must register with registerActivatorEvent, then this class will be returned.
      * Use fire() to fire the event;
@@ -146,17 +183,12 @@ public class EventManager {
     }
 
     /**
-     * The class that holds all the Event-IDs for the common Events.
+     * Exception thrown if there are multiple Events fired at the same time.
      */
-    public static class CommonEvents {
-        public static final String fullWelcomeEvent = CommonEvents.class.getCanonicalName() + ".FullWelcomeEvent";
-        public static final String majorWelcomeEvent = CommonEvents.class.getCanonicalName() + ".MajorWelcomeEvent";
-        public static final String minorWelcomeEvent = CommonEvents.class.getCanonicalName() + ".MinorWelcomeEvent";
-    }
-
-    /**
-     * Thrown if there are multiple Events fired at the same time
-     */
+    @SuppressWarnings("WeakerAccess")
     public class MultipleEventsException extends Exception {
+        public MultipleEventsException() {
+            super("Multiple Events fired at the same time");
+        }
     }
 }
