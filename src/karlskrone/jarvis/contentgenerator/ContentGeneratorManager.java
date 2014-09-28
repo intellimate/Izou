@@ -22,7 +22,7 @@ public class ContentGeneratorManager {
      *
      * @param contentGenerator an instance of the ContentGenerator
      */
-    public void addContentGenerators (ContentGenerator contentGenerator) {
+    public void addContentGenerator (ContentGenerator contentGenerator) {
         contentGenerator.setContentGeneratorManager(this);
         contentGeneratorList.add(contentGenerator);
     }
