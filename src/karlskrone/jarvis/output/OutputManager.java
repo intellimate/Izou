@@ -24,31 +24,12 @@ public class OutputManager {
      * @param outputExtension the outputExtension to be added
      * @param outputPluginId the output-plugin the outputExtension is to be added to
      */
-    public void addOutputExtension(OutputExtension outputExtension, String outputPluginId) throws InterruptedException {
+    public void addOutputExtension(OutputExtension outputExtension, String outputPluginId) {
         OutputPlugin outputPlugin;
         for(int i = 0; i < outputPluginsList.size(); i++) {
             if(outputPluginsList.get(i).getId().equals(outputPluginId)) {
                 outputPlugin = outputPluginsList.get(i);
-
-                //loop tries to add 3 times in case of failure, then it prints out the exception
-                int addingTries = 0;
-                while(addingTries < 3) {
-                    try {
-                        outputPlugin.addOutputExtension(outputExtension);
-                        addingTries = 4; //quit the loop since it added successfully
-                    } catch(IOException ioExcep) {
-                        try {
-                            Thread.sleep(500);
-                        } catch (InterruptedException inExcep) {
-                            System.out.println(inExcep.toString());
-                        }
-
-                        addingTries++;
-                        if(addingTries >= 3) {
-                            System.out.println(ioExcep.toString());
-                        }
-                    }
-                }
+                outputPlugin.addOutputExtension(outputExtension);
                 break;
             }
         }
