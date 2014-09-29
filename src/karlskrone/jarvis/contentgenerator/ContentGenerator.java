@@ -64,6 +64,8 @@ public abstract class ContentGenerator<T> implements Callable<ContentData<T>>, E
             ContentData<T> contentData = generate(eventID);
             eventID = null;
             return contentData;
+        } catch (InterruptedException inter) {
+            return null;
         } catch (Exception e) {
             handleError(e);
         }

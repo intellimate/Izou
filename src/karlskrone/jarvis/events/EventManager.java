@@ -3,6 +3,8 @@ package karlskrone.jarvis.events;
 import karlskrone.jarvis.contentgenerator.ContentData;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
@@ -27,12 +29,14 @@ public class EventManager implements Runnable{
      *
      * Every component that is import should contribute to this Event.
      */
+    @SuppressWarnings("UnusedDeclaration")
     public static final String majorWelcomeEvent = EventManager.class.getCanonicalName() + ".MajorWelcomeEvent";
     /**
      * Event for a Welcome with major response.
      *
      * Only components that have information of great importance should contribute to this event.
      */
+    @SuppressWarnings("UnusedDeclaration")
     public static final String minorWelcomeEvent = EventManager.class.getCanonicalName() + ".MinorWelcomeEvent";
 
     //here are all the ContentGenerators-Listeners stored
@@ -141,17 +145,38 @@ public class EventManager implements Runnable{
      *
      * @param id the ID of the Event, format: package.class.name
      */
-    private void fireActivatorEvent (String id){
+    private void fireActivatorEvent (String id) throws InterruptedException {
         checkID(id);
         ArrayList<ActivatorEventListener> contentGeneratorListeners = this.listeners.get(id);
         if (contentGeneratorListeners == null) {
             return;
         }
-        //TODO get Data and hand it to Output
+        List<Future<ContentData>> futures = new ArrayList<>();
         for (ActivatorEventListener next : contentGeneratorListeners) {
-            next.activatorEventFired(id);
+            futures.add(next.activatorEventFired(id));
         }
-
+        boolean sleep = false;
+        int count = 0;
+        do {
+            boolean change = false;
+            for (Future future : futures) {
+                if(!future.isDone()) change = true;
+            }
+            if(change) Thread.sleep(10);
+            sleep = change;
+            count++;
+        }
+        while(sleep && (count < 20));
+        if(count >= 20)
+        {
+            for (Iterator<Future<ContentData>> iterator = futures.iterator(); iterator.hasNext(); ) {
+                Future<ContentData> next = iterator.next();
+                if(!next.isDone()) {
+                    next.cancel(true);
+                    iterator.remove();
+                }
+            }
+        }
     }
 
     /**
