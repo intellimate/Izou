@@ -1,5 +1,7 @@
 package karlskrone.jarvis.output;
 
+import karlskrone.jarvis.contentgenerator.ContentData;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -20,6 +22,12 @@ public class OutputPlugin implements Runnable{
      */
     private List<OutputExtension> outputExtensionList;
 
+
+    /**
+     * list contains all the content-data objects that will be distributed to outputExtension in distributeContentData
+     */
+    private List<ContentData> contentDataList;
+
     /**
      * responsible for running output-extensions in different threads
      */
@@ -29,7 +37,23 @@ public class OutputPlugin implements Runnable{
     public OutputPlugin(String id) {
         this.id = id;
         outputExtensionList = new ArrayList<>();
+        contentDataList = new ArrayList<>();
         executor = Executors.newCachedThreadPool();
+    }
+
+    /**
+     * get contentDataList from outputPlugin
+     */
+    public List<ContentData> getContentDataList() {
+        return contentDataList;
+    }
+
+    /**
+     * set contentDataList equal to the contentDataList of the OutputPlugin
+     * @param contentDataList the list to be set equal to the contentDataList pertaining to outputPlugin
+     */
+    public void setContentDataList(List<ContentData> contentDataList) {
+        this.contentDataList = contentDataList;
     }
 
     /**
@@ -38,8 +62,14 @@ public class OutputPlugin implements Runnable{
      */
     public String getId() {
         return this.id;
+
     }
 
+    /**
+     * add outputExtension to outputExtensionList
+     *
+     * @param outputExtension the output-extension to be added to outputExtensionList
+     */
     public void addOutputExtension(OutputExtension outputExtension) {
         outputExtensionList.add(outputExtension);
     }

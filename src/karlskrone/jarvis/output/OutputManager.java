@@ -1,5 +1,7 @@
 package karlskrone.jarvis.output;
 
+import karlskrone.jarvis.contentgenerator.ContentData;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +41,14 @@ public class OutputManager {
      *
      * @param dataList list filled with content-data objects. ContentData holds the output of the DataGenerator Package
      */
-    public void passDataToOutputPlugin(List<Object> dataList) {
-
+    public void passDataToOutputPlugin(List<ContentData> dataList, String outputPluginId) {
+        OutputPlugin outputPlugin;
+        for(int i = 0; i < outputPluginsList.size(); i++) {
+            if(outputPluginsList.get(i).getId().equals(outputPluginId)) {
+                outputPlugin = outputPluginsList.get(i);
+                outputPlugin.setContentDataList(dataList);
+                break;
+            }
+        }
     }
 }

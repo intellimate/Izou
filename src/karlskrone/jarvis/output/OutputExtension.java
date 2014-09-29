@@ -1,5 +1,7 @@
 package karlskrone.jarvis.output;
 
+import karlskrone.jarvis.contentgenerator.ContentData;
+
 import java.util.concurrent.Callable;
 
 /**
@@ -7,7 +9,15 @@ import java.util.concurrent.Callable;
  */
 public class OutputExtension implements Callable{
     private String id;
+    private ContentData contentData;
 
+    public ContentData getContentData() {
+        return contentData;
+    }
+
+    public void setContentData(ContentData contentData) {
+        this.contentData = contentData;
+    }
 
     public String getId() {
         return id;
