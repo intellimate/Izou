@@ -153,7 +153,10 @@ public class EventManager implements Runnable{
         }
         List<Future<ContentData>> futures = new ArrayList<>();
         for (ActivatorEventListener next : contentGeneratorListeners) {
-            futures.add(next.activatorEventFired(id));
+            Future futureTemp = next.activatorEventFired(id);
+            if (futureTemp != null) {
+                futures.add(futureTemp);
+            }
         }
         boolean sleep = false;
         int count = 0;
