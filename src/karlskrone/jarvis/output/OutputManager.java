@@ -35,7 +35,11 @@ public class OutputManager {
         }
     }
 
-    public void passDataToOutputPlugin(Object data) {
+    /**
+     *
+     * @param dataList list filled with content-data objects. ContentData holds the output of the DataGenerator Package
+     */
+    public void passDataToOutputPlugin(List<Object> dataList) {
 
     }
 }
