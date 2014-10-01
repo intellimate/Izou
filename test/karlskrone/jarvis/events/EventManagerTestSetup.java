@@ -51,7 +51,7 @@ public class EventManagerTestSetup {
     /**
      * checks if is working is set everywhere to false, [0] should be reserved for the test here
      */
-    public void testListenerfalse(final boolean[] isWorking, String eventId) throws InterruptedException {
+    public void testListenerFalse(final boolean[] isWorking, String eventId) throws InterruptedException {
         manager.addActivatorEventListener(eventId, id -> {
             isWorking[0] = true;
             return null;

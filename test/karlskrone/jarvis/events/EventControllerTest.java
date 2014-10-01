@@ -14,7 +14,7 @@ public class EventControllerTest {
         };
         eventManagerTestSetup.getManager().addEventController(eventController);
         try {
-            eventManagerTestSetup.testListenerfalse(isWorking, "1");
+            eventManagerTestSetup.testListenerFalse(isWorking, "1");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
