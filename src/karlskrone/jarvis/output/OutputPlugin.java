@@ -8,7 +8,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * The OutputPlugin class manages
+ * The OutputPlugin class gets contentData and then starts threads filled with output-extension tasks to create the final
+ * output and then render it on its own medium
  *
  * Created by julianbrendl on 9/27/14.
  */
@@ -34,6 +35,11 @@ public class OutputPlugin implements Runnable{
     private final ExecutorService executor;
 
 
+    /**
+     * creates a new output-plugin with a new id
+     *
+     * @param id the id of the new output-plugin
+     */
     public OutputPlugin(String id) {
         this.id = id;
         outputExtensionList = new ArrayList<>();
@@ -57,7 +63,24 @@ public class OutputPlugin implements Runnable{
     }
 
     /**
+     * distributes the content-Data elements in the contentDataList to the output-extensions that will need them
+     *
+     * it uses the id of the contentData which is the same as the id of the outputExtension to identify which output-extension
+     * it should send the content-data to
+     */
+    public void distributContentData() {
+        for(ContentData cD: contentDataList) {
+            for(OutputExtension ext: outputExtensionList) {
+                if(cD.getId().equals(ext.getId())) {
+                    ext.setContentData(cD);
+                }
+            }
+        }
+    }
+
+    /**
      * Gets the id of the outputPlugin
+     *
      * @return id of the outputPlugin
      */
     public String getId() {
@@ -83,17 +106,17 @@ public class OutputPlugin implements Runnable{
      * @param id the id of the output extension to be removed
      */
     public void removeOutputExtension(String id) {
-        //removes outputExtension itself
-        int index = 0;
-        for(int i = 0; i < outputExtensionList.size(); i++) {
-            if(outputExtensionList.get(i).getId().equals(id)) {
-                index = i;
+        for(OutputExtension ext: outputExtensionList) {
+            if(ext.getId().equals(id)) {
+                outputExtensionList.remove(ext);
                 break;
             }
         }
-        outputExtensionList.remove(index);
     }
 
+    /**
+     * main method for outputPlugin, runs the data-conversion and output-renderer
+     */
     @Override
     public void run() {
         for(OutputExtension ext: outputExtensionList)
