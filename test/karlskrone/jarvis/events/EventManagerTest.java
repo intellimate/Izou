@@ -102,7 +102,57 @@ public class EventManagerTest {
     }
 
     @Test
+    public void testAddEventController() throws Exception {
+        boolean[] isWorking = {false, true};
+        EventManager.ActivatorEventCaller caller = manager.registerActivatorCaller("5");
+        manager.addActivatorEventListener("5", id -> {
+            isWorking[0] = true;
+            return null;
+        });
+        EventController eventController = eventID -> {
+            isWorking[1] = false;
+            return false;
+        };
+        manager.addEventController(eventController);
+        caller.fire();
+
+        synchronized (lock) {
+            while(!manager.getEvents().isEmpty() || !(thread.getState() == Thread.State.WAITING))
+            {
+                lock.wait(2);
+            }
+        }
+        manager.removeEventController(eventController);
+        assertFalse(isWorking[0] && isWorking[1]);
+    }
+
+    @Test
+    public void testRemoveEventController() throws Exception {
+        boolean[] isWorking = {false, true};
+        EventManager.ActivatorEventCaller caller = manager.registerActivatorCaller("5");
+        manager.addActivatorEventListener("5", id -> {
+            isWorking[0] = true;
+            return null;
+        });
+        EventController eventController = eventID -> {
+            isWorking[1] = false;
+            return false;
+        };
+        manager.addEventController(eventController);
+        manager.removeEventController(eventController);
+        caller.fire();
+
+        synchronized (lock) {
+            while(!manager.getEvents().isEmpty() || !(thread.getState() == Thread.State.WAITING))
+            {
+                lock.wait(2);
+            }
+        }
+        assertTrue(isWorking[0] && isWorking[1]);
+    }
+
+    @Test
     public void testCommonEvents() throws Exception {
-        assertEquals(EventManager.fullWelcomeEvent, "karlskrone.jarvis.events.EventManager.FullWelcomeEvent");
+        assertEquals(EventManager.FULL_WELCOME_EVENT, "karlskrone.jarvis.events.EventManager.FullWelcomeEvent");
     }
 }

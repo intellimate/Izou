@@ -3,12 +3,8 @@ package karlskrone.jarvis.events;
 import karlskrone.jarvis.contentgenerator.ContentData;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.*;
 
 /**
  * This class is used to manage events.
@@ -23,26 +19,28 @@ public class EventManager implements Runnable{
      *
      * Every component that can contribute should contribute to this Event.
      */
-    public static final String fullWelcomeEvent = EventManager.class.getCanonicalName() + ".FullWelcomeEvent";
+    public static final String FULL_WELCOME_EVENT = EventManager.class.getCanonicalName() + ".FullWelcomeEvent";
     /**
      * Event for a Welcome with major response.
      *
      * Every component that is import should contribute to this Event.
      */
     @SuppressWarnings("UnusedDeclaration")
-    public static final String majorWelcomeEvent = EventManager.class.getCanonicalName() + ".MajorWelcomeEvent";
+    public static final String MAJOR_WELCOME_EVENT = EventManager.class.getCanonicalName() + ".MajorWelcomeEvent";
     /**
      * Event for a Welcome with major response.
      *
      * Only components that have information of great importance should contribute to this event.
      */
     @SuppressWarnings("UnusedDeclaration")
-    public static final String minorWelcomeEvent = EventManager.class.getCanonicalName() + ".MinorWelcomeEvent";
+    public static final String MINOR_WELCOME_EVENT = EventManager.class.getCanonicalName() + ".MinorWelcomeEvent";
 
     //here are all the ContentGenerators-Listeners stored
     private final ConcurrentHashMap<String, ArrayList<ActivatorEventListener>> listeners = new ConcurrentHashMap<>();
     //here are all the Instances to fire events stored
     private final ConcurrentHashMap<String, ArrayList<ActivatorEventCaller>> callers = new ConcurrentHashMap<>();
+    //here are all the Instances to to control the Event-dispatching stored
+    private final ConcurrentLinkedQueue<EventController> eventControllers = new ConcurrentLinkedQueue<>();
     //the queue where all the Events are stored (if there are more than one,
     private final BlockingQueue<String> events = new LinkedBlockingQueue<>(1);
     //if false, run() will stop
@@ -141,45 +139,93 @@ public class EventManager implements Runnable{
     }
 
     /**
+     * Adds an EventController to control EventDispatching-Behaviour
+     *
+     * Method is thread-safe.
+     * It is expected that this method executes quickly.
+     *
+     * @param controller the EventController Interface to control event-dispatching
+     */
+    public void addEventController (EventController controller) throws IllegalArgumentException{
+        eventControllers.add(controller);
+    }
+
+    /**
+     * Removes an EventController
+     *
+     * Method is thread-safe.
+     *
+     * @param controller the EventController Interface to remove
+     */
+    public void removeEventController (EventController controller) throws IllegalArgumentException{
+        eventControllers.remove(controller);
+    }
+
+    /**
+     * Checks whether to dispatch an event
+     *
+     * @param id the ID of the Event, format: package.class.name
+     * @return true if the event should be fired
+     */
+    private boolean checkEventControllers(String id) {
+        boolean shouldExecute = true;
+        for (EventController controller : eventControllers) {
+            if (!controller.controlEventDispatcher(id)) {
+                shouldExecute = false;
+            }
+        }
+        return shouldExecute;
+    }
+
+    /**
      * this method actually used to fire an event.
      *
      * @param id the ID of the Event, format: package.class.name
      */
     private void fireActivatorEvent (String id) throws InterruptedException {
         checkID(id);
+        if(!checkEventControllers(id)) return;
         ArrayList<ActivatorEventListener> contentGeneratorListeners = this.listeners.get(id);
         if (contentGeneratorListeners == null) {
             return;
         }
         List<Future<ContentData>> futures = new ArrayList<>();
         for (ActivatorEventListener next : contentGeneratorListeners) {
-            Future futureTemp = next.activatorEventFired(id);
+            Future<ContentData> futureTemp = next.activatorEventFired(id);
             if (futureTemp != null) {
                 futures.add(futureTemp);
             }
         }
-        boolean sleep = false;
+        //workaround -> timeout for ALL futures of a little bit less than 1 sec
+        boolean change;
+        int countLimit = 80;
         int count = 0;
         do {
-            boolean change = false;
+            change = false;
             for (Future future : futures) {
                 if(!future.isDone()) change = true;
             }
             if(change) Thread.sleep(10);
-            sleep = change;
             count++;
         }
-        while(sleep && (count < 20));
-        if(count >= 20)
+        while(change && (count < countLimit));
+        List<ContentData> data = new ArrayList<>();
+        if(count < countLimit)
         {
-            for (Iterator<Future<ContentData>> iterator = futures.iterator(); iterator.hasNext(); ) {
-                Future<ContentData> next = iterator.next();
-                if(!next.isDone()) {
+            for (Future<ContentData> next : futures) {
+                if (!next.isDone()) {
                     next.cancel(true);
-                    iterator.remove();
+                } else {
+                    try {
+                        data.add(next.get(10, TimeUnit.MILLISECONDS));
+                    } catch (Exception e) {
+                        //TODO: implement Error logging
+                        e.printStackTrace();
+                    }
                 }
             }
         }
+        //TODO: connect to Output
     }
 
     /**
