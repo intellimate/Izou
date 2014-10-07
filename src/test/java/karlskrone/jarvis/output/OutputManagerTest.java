@@ -13,7 +13,12 @@ public class OutputManagerTest {
     @Test
     public void testAddOutputExtension() throws Exception {
         OutputManager outputManager = new OutputManager();
-        OutputPlugin outputPlugin = new OutputPlugin("1234");
+        OutputPlugin outputPlugin = new OutputPlugin("1234") {
+            @Override
+            public void finalOutput() {
+
+            }
+        };
         OutputExtension outputExtension = new OutputExtension("abcd") {
             @Override
             public Object call() throws Exception {
@@ -28,7 +33,12 @@ public class OutputManagerTest {
     @Test
     public void testRemoveOutputExtension() throws Exception {
         OutputManager outputManager = new OutputManager();
-        OutputPlugin outputPlugin = new OutputPlugin("1234");
+        OutputPlugin outputPlugin = new OutputPlugin("1234") {
+            @Override
+            public void finalOutput() {
+
+            }
+        };
         OutputExtension outputExtension = new OutputExtension("abcd") {
             @Override
             public Object call() throws Exception {
@@ -45,7 +55,12 @@ public class OutputManagerTest {
     public void testPassDataToOutputPlugin() throws Exception {
         List<ContentData> list = new ArrayList<>();
         OutputManager outputManager = new OutputManager();
-        OutputPlugin outputPlugin = new OutputPlugin("1234");
+        OutputPlugin outputPlugin = new OutputPlugin("1234") {
+            @Override
+            public void finalOutput() {
+
+            }
+        };
         OutputExtension outputExtension = new OutputExtension("abcd") {
             @Override
             public Object call() throws Exception {
