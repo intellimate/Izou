@@ -3,9 +3,11 @@ package karlskrone.jarvis.output;
 import karlskrone.jarvis.contentgenerator.ContentData;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * The OutputPlugin class gets contentData and then starts threads filled with output-extension tasks to create the final
@@ -13,16 +15,16 @@ import java.util.concurrent.Executors;
  *
  * Created by julianbrendl on 9/27/14.
  */
-public class OutputPlugin implements Runnable{
+public class OutputPlugin<T> implements Runnable{
     /**
      * id of the of OutputPlugin, it is primarily used by OutputManager to communicate with specific output plugins
      */
     private final String id;
+
     /**
      * a List containing all the output-extensions the plugin requires to successfully create its final output
      */
-    private List<OutputExtension> outputExtensionList;
-
+    private List<OutputExtension<T>> outputExtensionList;
 
     /**
      * list contains all the content-data objects that will be distributed to outputExtension in distributeContentData
@@ -33,6 +35,11 @@ public class OutputPlugin implements Runnable{
      * responsible for running output-extensions in different threads
      */
     private final ExecutorService executor;
+
+    /**
+     * list that contains the future objects each output-extension returns
+     */
+    private LinkedList<Future<T>> futureList;
 
 
     /**
@@ -45,13 +52,30 @@ public class OutputPlugin implements Runnable{
         outputExtensionList = new ArrayList<>();
         contentDataList = new ArrayList<>();
         executor = Executors.newCachedThreadPool();
+        futureList = new LinkedList<>();
     }
 
+    /**
+     * get the outputExtensionList
+     *
+     * @return gets the list of output-extensions in the output-plugin
+     */
+    public List<OutputExtension<T>> getOutputExtensionList() {
+        return outputExtensionList;
+    }
     /**
      * get contentDataList from outputPlugin
      */
     public List<ContentData> getContentDataList() {
         return contentDataList;
+    }
+
+    /**
+     * gets the futureList of the output-Plugin, which contains the processed data of the output-extensions
+     * @return the futureList to be returnt
+     */
+    public LinkedList<Future<T>> getFutureList() {
+        return futureList;
     }
 
     /**
@@ -68,11 +92,14 @@ public class OutputPlugin implements Runnable{
      * it uses the id of the contentData which is the same as the id of the outputExtension to identify which output-extension
      * it should send the content-data to
      */
-    public void distributContentData() {
-        for(ContentData cD: contentDataList) {
-            for(OutputExtension ext: outputExtensionList) {
-                if(cD.getId().equals(ext.getId())) {
-                    ext.setContentData(cD);
+    public void distributeContentData() {
+        for(OutputExtension ext: outputExtensionList) {
+            List<String> contentDataWishList = ext.getContentDataWishList();
+            for(String strWish: contentDataWishList) {
+                for(ContentData cD: contentDataList) {
+                    if (strWish.equals(cD.getId())) {
+                        ext.addContentData(cD);
+                    }
                 }
             }
         }
@@ -93,7 +120,7 @@ public class OutputPlugin implements Runnable{
      *
      * @param outputExtension the output-extension to be added to outputExtensionList
      */
-    public void addOutputExtension(OutputExtension outputExtension) {
+    public void addOutputExtension(OutputExtension<T> outputExtension) {
         outputExtensionList.add(outputExtension);
     }
 
@@ -119,7 +146,7 @@ public class OutputPlugin implements Runnable{
      */
     @Override
     public void run() {
-        for(OutputExtension ext: outputExtensionList)
-            executor.submit(ext);
+        for(OutputExtension<T> ext: outputExtensionList)
+            futureList.add(executor.submit(ext));
     }
 }

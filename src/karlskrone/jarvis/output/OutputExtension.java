@@ -2,6 +2,8 @@ package karlskrone.jarvis.output;
 
 import karlskrone.jarvis.contentgenerator.ContentData;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 /**
@@ -10,15 +12,20 @@ import java.util.concurrent.Callable;
  *
  * Created by julianbrendl on 9/27/14.
  */
-public class OutputExtension implements Callable{
+public abstract class OutputExtension<T> implements Callable<T> {
     /**
      * the id of the outputExtension, same as the id of its contentData
      */
     private final String id;
     /**
-     * the contentData which it will convert to the desired Data type
+     * the contentDatas which it will convert to the desired Data type
      */
-    private ContentData contentData;
+    private List<ContentData> contentDataList;
+
+    /**
+     * a list of all the contentData's which the outputExtension would like to receive theoretically to work with
+     */
+    private List<String> contentDataWishList;
 
 
     /**
@@ -27,23 +34,61 @@ public class OutputExtension implements Callable{
      */
     public OutputExtension(String id) {
         this.id = id;
+        contentDataList = new ArrayList<>();
+        contentDataWishList = new ArrayList<>();
     }
 
     /**
-     * returns its contentData
-     * @return the contentData to return
+     * returns its contentDataList
+     * @return the contentDataList to return
      */
-    public ContentData getContentData() {
-        return contentData;
+    public List<ContentData> getContentDataList() {
+        return contentDataList;
     }
 
     /**
-     * sets the contentData so that it can be further used
+     * returns its contentDataWishList
+     * @return the contentDataWishList to return
+     */
+    public List<String> getContentDataWishList() {
+        return contentDataWishList;
+    }
+
+    /**
+     * adds contentData to the contentDataList
      *
-     * @param contentData the content-data to be set
+     * @param contentData the content-data to be added
      */
-    public void setContentData(ContentData contentData) {
-        this.contentData = contentData;
+    public void addContentData(ContentData contentData) {
+        contentDataList.add(contentData);
+    }
+
+    /**
+     * removes content-data with id: id from the contentDataList
+     *
+     * @param id the id of the content-data to be removed
+     */
+    public void removeContentData(String id) {
+        for(ContentData cD: contentDataList) {
+            if(cD.getId().equals(id))
+                contentDataList.remove(cD);
+        }
+    }
+
+    public void addContentDataToWishList(String id) {
+        contentDataWishList.add(id);
+    }
+
+    /**
+     * removes content-data with id: id from the contentDataWishList
+     *
+     * @param id the id of the content-data to be removed
+     */
+    public void removeContentDataFromWishList(String id) {
+        for(String str: contentDataWishList) {
+            if(str.equals(id))
+                contentDataWishList.remove(str);
+        }
     }
 
     /**
@@ -60,8 +105,6 @@ public class OutputExtension implements Callable{
      * the main method of the outputExtension, it converts the contentData into the necessary data format and returns it
      * to the outputPlugin
      */
-    public Object call() throws Exception {
-        return null;
-    }
+    public abstract T call() throws Exception;
 }
 

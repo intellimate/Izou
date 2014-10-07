@@ -26,6 +26,36 @@ public class OutputManager {
     }
 
     /**
+     * returns the list containing all the registered outputPlugins of the output-manager
+     *
+     * @return list containing all the registered outputPlugins
+     */
+    public List<OutputPlugin> getOutputPluginsList() {
+        return outputPluginsList;
+    }
+
+    /**
+     * adds outputPlugin to outputPluginList
+     */
+    public void addOutputPlugin(OutputPlugin outputPlugin) {
+        outputPluginsList.add(outputPlugin);
+    }
+
+    /**
+     * removes the output-plugin of id: pluginId from outputPluginList
+     *
+     * @param pluginId the id of the output-plugin to remove
+     */
+    public void removeOutputPlugin(String pluginId) {
+        for(OutputPlugin oPlug: outputPluginsList) {
+            if(oPlug.getId().equals(pluginId)) {
+                outputPluginsList.remove(oPlug);
+                break;
+            }
+        }
+    }
+
+    /**
      * adds output extension to desired outputPlugin
      *
      * adds output extension to desired outputPlugin, so that the output-plugin can start and stop the outputExtension
@@ -44,14 +74,15 @@ public class OutputManager {
     }
 
     /**
-     * removes the outputplugin of id: id from outputPluginList
+     * removes the output-extension of id: extensionId from outputPluginList
      *
-     * @param id the id of the output-plugin to remove
+     * @param pluginId the id of the output-plugin in which the output-extension should be removed
+     * @param extensionId the id of output-extension to be removed
      */
-    public void removeOutputExtension(String id) {
+    public void removeOutputExtension(String pluginId, String extensionId) {
         for(OutputPlugin oPlug: outputPluginsList) {
-            if(oPlug.getId().equals(id)) {
-                outputPluginsList.remove(oPlug);
+            if(oPlug.getId().equals(pluginId)) {
+                oPlug.removeOutputExtension(extensionId);
                 break;
             }
         }
