@@ -18,14 +18,14 @@ public class ActivatorManagerTest {
         eventMangrSetup = new EventManagerTestSetup();
         Thread thread = new Thread(eventMangrSetup.getManager());
         thread.start();
-        activatorManager = new ActivatorManager();
+        activatorManager = new ActivatorManager(eventMangrSetup.getManager());
     }
 
     @Test
     public void testAddActivator() throws Exception {
         final boolean[] isWorking = {false};
 
-        Activator activator = new Activator(eventMangrSetup.getManager()) {
+        Activator activator = new Activator() {
             @Override
             public void activatorStarts() throws InterruptedException {
                 registerEvent("1");
@@ -37,7 +37,7 @@ public class ActivatorManagerTest {
             }
 
             @Override
-            public void terminated(Exception e) {}
+            public boolean terminated(Exception e) {return false;}
         };
 
         eventMangrSetup.getManager().addActivatorEventListener("1", id -> {

@@ -16,8 +16,8 @@ public class ContentGeneratorManagerTest {
 
     public ContentGeneratorManagerTest() {
         eventManagerTestSetup = new EventManagerTestSetup();
-        contentGeneratorManager = new ContentGeneratorManager();
-        contentGenerator = new ContentGenerator<Boolean>(eventManagerTestSetup.getManager()) {
+        contentGeneratorManager = new ContentGeneratorManager(eventManagerTestSetup.getManager());
+        contentGenerator = new ContentGenerator<Boolean>("1") {
             @Override
             public ContentData<Boolean> generate(String eventID) throws Exception {
                 ContentData<Boolean> cd = new ContentData<>("1");
@@ -35,7 +35,7 @@ public class ContentGeneratorManagerTest {
 
     @Test
     public void testAddAndGetContentGenerator() throws Exception {
-        ContentGeneratorManager cntmgr = new ContentGeneratorManager();
+        ContentGeneratorManager cntmgr = new ContentGeneratorManager(eventManagerTestSetup.getManager());
         cntmgr.addContentGenerator(contentGenerator);
         List<ContentGenerator> list = cntmgr.getContentGeneratorList();
         assertTrue((list.size() == 1) && list.contains(contentGenerator));
@@ -43,7 +43,7 @@ public class ContentGeneratorManagerTest {
 
     @Test
     public void testRemoveContentGenerators() throws Exception {
-        ContentGeneratorManager cntmgr = new ContentGeneratorManager();
+        ContentGeneratorManager cntmgr = new ContentGeneratorManager(eventManagerTestSetup.getManager());
         cntmgr.addContentGenerator(contentGenerator);
         cntmgr.removeContentGenerators(contentGenerator);
         List<ContentGenerator> list = cntmgr.getContentGeneratorList();
@@ -52,7 +52,7 @@ public class ContentGeneratorManagerTest {
 
     @Test
     public void testDeleteContentGenerators() throws Exception {
-        ContentGeneratorManager cntmgr = new ContentGeneratorManager();
+        ContentGeneratorManager cntmgr = new ContentGeneratorManager(eventManagerTestSetup.getManager());
         cntmgr.addContentGenerator(contentGenerator);
         cntmgr.deleteContentGenerator(contentGenerator);
         List<ContentGenerator> list = cntmgr.getContentGeneratorList();

@@ -1,5 +1,7 @@
 package karlskrone.jarvis.contentgenerator;
 
+import karlskrone.jarvis.events.EventManager;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -14,6 +16,11 @@ public class ContentGeneratorManager {
     private final ExecutorService executor = Executors.newCachedThreadPool();
      //holds the contentGenerators
     private final List<ContentGenerator> contentGeneratorList = new ArrayList<>();
+    private final EventManager eventManager;
+
+    public ContentGeneratorManager(EventManager eventManager) {
+        this.eventManager = eventManager;
+    }
 
     /**
      * Adds an ContentGenerator.
@@ -24,6 +31,7 @@ public class ContentGeneratorManager {
      */
     public void addContentGenerator (ContentGenerator contentGenerator) {
         contentGenerator.setContentGeneratorManager(this);
+        contentGenerator.setEventManager(eventManager);
         contentGeneratorList.add(contentGenerator);
     }
 

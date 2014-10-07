@@ -1,5 +1,7 @@
 package karlskrone.jarvis.events;
 
+import karlskrone.jarvis.output.OutputManager;
+
 import java.util.concurrent.Future;
 
 /**
@@ -20,7 +22,7 @@ public class DemoEvent implements EventManager.ActivatorEventListener{
 
     public DemoEvent() {
         //first you have create an EventManager instance
-        manager = new EventManager();
+        manager = new EventManager(new OutputManager());
 
         //this function lets this class listen to the event "1"
         manager.addActivatorEventListener("1", this);

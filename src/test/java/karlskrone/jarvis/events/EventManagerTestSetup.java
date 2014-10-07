@@ -1,5 +1,9 @@
 package karlskrone.jarvis.events;
 
+import karlskrone.jarvis.output.OutputManager;
+
+import java.util.Objects;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -12,12 +16,14 @@ public class EventManagerTestSetup {
 
     private static EventManager manager;
     Thread thread;
+    private OutputManager outputManager;
     private static final class Lock { }
 
     private final Object lock = new Lock();
 
     public EventManagerTestSetup() {
-        manager = new EventManager();
+        outputManager = new OutputManager();
+        manager = new EventManager(outputManager);
         thread = new Thread(manager);
         thread.start();
     }

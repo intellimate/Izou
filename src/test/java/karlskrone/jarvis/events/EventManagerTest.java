@@ -1,5 +1,6 @@
 package karlskrone.jarvis.events;
 
+import karlskrone.jarvis.output.OutputManager;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -9,9 +10,11 @@ public class EventManagerTest {
     Thread thread;
     private static final class Lock { }
     private final Object lock = new Lock();
+    private OutputManager outputManager;
 
     public EventManagerTest() {
-        manager = new EventManager();
+        outputManager = new OutputManager();
+        manager = new EventManager(outputManager);
         thread = new Thread(manager);
         thread.start();
     }

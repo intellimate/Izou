@@ -12,13 +12,15 @@ import java.util.HashMap;
  */
 public abstract class Activator implements Runnable {
 
-    private final HashMap<String, EventManager.ActivatorEventCaller> callers = new HashMap<>();
-    private final EventManager manager;
+    private HashMap<String, EventManager.ActivatorEventCaller> callers = null;
+    private EventManager eventManager;
+    private ActivatorManager activatorManager;
+    //counts the exception
+    private int exceptionCount = 0;
+    //limit of the exceptionCount
+    @SuppressWarnings("FieldCanBeLocal")
+    private final int exceptionLimit = 100;
 
-
-    public Activator(EventManager manager) {
-        this.manager = manager;
-    }
 
     /**
      * This method implements runnable and should only be called by a Thread.
@@ -28,8 +30,10 @@ public abstract class Activator implements Runnable {
         try {
             activatorStarts();
         } catch (InterruptedException e) {
+            //noinspection UnnecessaryReturnStatement
+            return;
         } catch (Exception e) {
-            this.terminated(e);
+            this.exceptionThrown(e);
         }
     }
 
@@ -38,29 +42,53 @@ public abstract class Activator implements Runnable {
      *
      * @throws InterruptedException will be caught by the Activator implementation, used to stop the Activator Thread
      */
-    public abstract void activatorStarts() throws InterruptedException, EventManager.MultipleEventsException;
+    public abstract void activatorStarts() throws InterruptedException;
 
     /**
-     * This method gets called when the Activator Thread got terminated.
+     * wrapper for terminated.
+     *
+     * This method counts the exceptions, if they are above the limit, doesn't call terminated
+     * @param e if not null, the exception, which caused the termination
+     */
+    public final void exceptionThrown(Exception e) {
+        exceptionCount++;
+        if(exceptionCount < exceptionLimit) {
+            if(terminated(e) && activatorManager != null)
+            {
+                activatorManager.addActivator(this);
+            }
+        }
+    }
+
+    /**
+     * This method gets called when the Activator Thread got exceptionThrown.
      * <p>
      * This is an unusual way of ending a thread. The main reason for this should be, that the activator was interrupted
      * by an uncaught exception.
      *
      * @param e if not null, the exception, which caused the termination
+     * @return true if the Thread should be restarted
      */
-    public abstract void terminated(Exception e);
+    public abstract boolean terminated(Exception e);
 
     /**
      * registers an Event.
      * <p>
      * To fire an event you first have to register it. After that you can call the fireEvent() method.
+     * Only use this method inside activatorStarts();
      *
      * @param id the ID for the Event, format: package.class.name
      * @throws IllegalArgumentException thrown if the ID is null or empty
+     * @throws java.lang.IllegalStateException thrown if not called inside activatorStarts();
      */
     public void registerEvent(String id) throws IllegalArgumentException {
-        EventManager.ActivatorEventCaller caller = manager.registerActivatorCaller(id);
-        callers.put(id, caller);
+        if (callers == null) {
+            throw new IllegalStateException("This method got called outside activatorStarts()");
+        }
+        else {
+            EventManager.ActivatorEventCaller caller = eventManager.registerActivatorCaller(id);
+            callers.put(id, caller);
+        }
     }
 
     /**
@@ -72,11 +100,12 @@ public abstract class Activator implements Runnable {
      * @throws IllegalArgumentException thrown if the ID is null or empty
      */
     public void unregisterEvent(String id) throws IllegalArgumentException {
-        EventManager.ActivatorEventCaller caller = callers.get(id);
+        EventManager.ActivatorEventCaller caller = null;
+        if(callers != null) caller = callers.get(id);
         if (caller == null) {
             throw new IllegalArgumentException();
         }
-        manager.unregisterActivatorCaller(id, caller);
+        eventManager.unregisterActivatorCaller(id, caller);
         callers.remove(id);
     }
 
@@ -92,7 +121,7 @@ public abstract class Activator implements Runnable {
             if (caller == null) {
                 throw new IllegalArgumentException();
             }
-            manager.unregisterActivatorCaller(key, caller);
+            eventManager.unregisterActivatorCaller(key, caller);
         }
         callers.clear();
     }
@@ -104,6 +133,9 @@ public abstract class Activator implements Runnable {
      */
     public String[] getAllRegisteredEvents() {
         String[] temp = new String[0];
+        if (callers == null) {
+            return null;
+        }
         return callers.keySet().toArray(temp);
     }
 
@@ -124,4 +156,19 @@ public abstract class Activator implements Runnable {
         }
         caller.fire();
     }
+
+    void registerAllNeededDependencies(EventManager eventManager, ActivatorManager activatorManager) {
+        callers = new HashMap<>();
+        setEventManager(eventManager);
+        setActivatorManager(activatorManager);
+    }
+    private void setEventManager(EventManager eventManager) {
+        this.eventManager = eventManager;
+
+    }
+
+    private void setActivatorManager(ActivatorManager activatorManager) {
+        this.activatorManager = activatorManager;
+    }
+
 }

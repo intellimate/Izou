@@ -15,26 +15,50 @@ import java.util.concurrent.Future;
  */
 public abstract class ContentGenerator<T> implements Callable<ContentData<T>>, EventManager.ActivatorEventListener{
     private ContentGeneratorManager contentGeneratorManager;
-    private final EventManager eventManager;
+    //stores the ID of the ContentGenerator
+    private final String contentGeneratorID;
+    private EventManager eventManager = null;
     //stores the eventID, will be retrieved when Thread started
     private String eventID = null;
     //stores all registered events
     private final List<String> registeredEvents = new LinkedList<>();
 
-    public ContentGenerator(EventManager eventManager) {
-        this.eventManager = eventManager;
+    /**
+     * Creates an Instance of ContentGenerator
+     * @param contentGeneratorID the ID of the ContentGenerator in the form: package.class
+     */
+    public ContentGenerator(String contentGeneratorID) {
+        this.contentGeneratorID = contentGeneratorID;
     }
 
     /**
      * Sets the ContentGenerator.
      *
-     * The ContentGeneratorManager will usually be set when you add the ContentGenerator to the ContentGeneratorManager
+     * The ContentGeneratorManager will usually be set when you add the ContentGenerator to the ContentGeneratorManager.
      * via ContentGeneratorManager.addContentGenerator();
      *
      * @param contentGeneratorManager the contentGeneratorManager
      */
-    public void setContentGeneratorManager(ContentGeneratorManager contentGeneratorManager) {
+    protected void setContentGeneratorManager(ContentGeneratorManager contentGeneratorManager) {
         this.contentGeneratorManager = contentGeneratorManager;
+    }
+
+    /**
+     * Sets the EventManager and registers all Events
+     *
+     * The EventManager will usually be set when you add the ContentGenerator to the ContentGeneratorManager.
+     *
+     * @param eventManager an instance of EventManager
+     */
+    void setEventManager(EventManager eventManager) {
+        this.eventManager = eventManager;
+        for (String eventID : registeredEvents) {
+            try {
+                eventManager.addActivatorEventListener(eventID, this);
+            } catch (IllegalArgumentException e) {
+                handleError(e);
+            }
+        }
     }
 
     /**
@@ -77,12 +101,19 @@ public abstract class ContentGenerator<T> implements Callable<ContentData<T>>, E
      *
      * The ContentGenerator listens to events, and when fired will be started in a Thread in ContentGeneratorManager.
      * The method generate() will then be called and can compute a result.
+     * But the events will only be registered when added to the System (registered at the ContentGeneratorManagers).
+     * If there is a problem with the events, the exception will be thrown later (handleError()).
      *
      * @param eventID the ID of the Event, format: package.class.name
-     * @throws IllegalArgumentException if the id is null or empty
      */
-    public void registerEvent(String eventID) throws IllegalArgumentException{
-        eventManager.addActivatorEventListener(eventID, this);
+    public void registerEvent(String eventID){
+        if(eventManager != null) {
+            try {
+                eventManager.addActivatorEventListener(eventID, this);
+            } catch (IllegalArgumentException e) {
+                handleError(e);
+            }
+        }
         registeredEvents.add(eventID);
     }
 
@@ -90,22 +121,37 @@ public abstract class ContentGenerator<T> implements Callable<ContentData<T>>, E
      * Unregisters an Event.
      *
      * @param eventID the ID of the Event, format: package.class.name
-     * @throws IllegalArgumentException if the id is null or empty
+     * But the events will only be registered when added to the System (registered at the ContentGeneratorManagers).
+     * If there is a problem with the events, the exception will be thrown later (handleError()).
      */
-    public void unregisterEvent(String eventID) throws IllegalArgumentException{
-        eventManager.deleteActivatorEventListener(eventID, this);
+    public void unregisterEvent(String eventID){
+        if(eventManager != null) {
+            try {
+               eventManager.deleteActivatorEventListener(eventID, this);
+            }
+            catch (IllegalStateException e) {
+                handleError(e);
+            }
+        }
         registeredEvents.remove(eventID);
     }
 
     /**
      * Unregisters all events.
      *
-     * @throws IllegalArgumentException if this exception will be thrown, there is a problem in the Event-System
+     * But the events will only be registered when added to the System (registered at the ContentGeneratorManagers).
+     * If there is a problem with the events, the exception will be thrown later (handleError()).
      */
     public void unregisterAllEvents() throws IllegalArgumentException{
         for (String id : registeredEvents)
         {
-            eventManager.deleteActivatorEventListener(id, this);
+            if(eventManager != null) {
+                try {
+                    eventManager.deleteActivatorEventListener(id, this);
+                } catch (IllegalArgumentException e) {
+                    handleError(e);
+                }
+            }
         }
         registeredEvents.clear();
     }
@@ -131,12 +177,22 @@ public abstract class ContentGenerator<T> implements Callable<ContentData<T>>, E
     public abstract ContentData<T> generate(String eventID) throws Exception;
 
     /**
-     * Handles the Errors during Computation.
+     * Handles the Errors during Computation and registering Events.
      *
      * This method handles the errors thrown during Computation by generate(). Note that this can also include
      * Interruption Exceptions if the Thread takes to long.
+     * Another possibility is that an EventID is malformed or null. Note that this exception can only be thrown as soon
+     * as this instance is registered.
      *
      * @param e the exception which was thrown
      */
     public abstract void handleError(Exception e);
+
+    /**
+     * gets the ContentGeneratorID
+     * @return a String
+     */
+    public String getContentGeneratorID() {
+        return contentGeneratorID;
+    }
 }

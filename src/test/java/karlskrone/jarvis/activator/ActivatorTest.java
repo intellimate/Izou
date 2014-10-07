@@ -13,12 +13,12 @@ public class ActivatorTest {
 
     public ActivatorTest() {
         eventManagerTestSetup = new EventManagerTestSetup();
-        activator = new Activator(eventManagerTestSetup.getManager()) {
+        activator = new Activator() {
             @Override
             public void activatorStarts() throws InterruptedException {}
 
             @Override
-            public void terminated(Exception e) {}
+            public boolean terminated(Exception e) {return false;}
         };
     }
 

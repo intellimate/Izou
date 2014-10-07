@@ -1,6 +1,7 @@
 package karlskrone.jarvis.events;
 
 import karlskrone.jarvis.contentgenerator.ContentData;
+import karlskrone.jarvis.output.OutputManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +46,11 @@ public class EventManager implements Runnable{
     private final BlockingQueue<String> events = new LinkedBlockingQueue<>(1);
     //if false, run() will stop
     private boolean stop = false;
+    private final OutputManager outputManager;
+
+    public EventManager(OutputManager outputManager) {
+        this.outputManager = outputManager;
+    }
 
     /**
      * Registers with the EventManager to fire an event.
@@ -53,7 +59,7 @@ public class EventManager implements Runnable{
      * Method is thread-safe.
      *
      * @param id the ID of the Event, format: package.class.name
-     * @throws IllegalArgumentException when id is null or empty
+     * @throws IllegalArgumentException when id is null or empty, or the
      * @return returns an instance of ActivatorEventCaller, ActivatorEventCaller.fire() will fire an event
      */
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
@@ -225,7 +231,7 @@ public class EventManager implements Runnable{
                 }
             }
         }
-        //TODO: connect to Output
+        outputManager.passDataToOutputPlugins(data);
     }
 
     /**
