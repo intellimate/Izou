@@ -3,8 +3,6 @@ package karlskrone.jarvis.fullplugintesting;
 import karlskrone.jarvis.contentgenerator.ContentData;
 import karlskrone.jarvis.output.OutputExtension;
 
-import java.util.List;
-
 /**
  * Created by julianbrendl on 10/7/14.
  */

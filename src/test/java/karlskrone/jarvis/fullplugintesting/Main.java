@@ -1,6 +1,5 @@
 package karlskrone.jarvis.fullplugintesting;
 
-import karlskrone.jarvis.activator.Activator;
 import karlskrone.jarvis.activator.ActivatorManager;
 import karlskrone.jarvis.contentgenerator.ContentGeneratorManager;
 import karlskrone.jarvis.events.EventManager;
