@@ -5,6 +5,7 @@ import karlskrone.jarvis.contentgenerator.ContentData;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -15,7 +16,7 @@ import java.util.concurrent.Future;
  *
  * Created by julianbrendl on 9/27/14.
  */
-public class OutputPlugin<T> implements Runnable{
+public abstract class OutputPlugin<T> implements Runnable{
     /**
      * id of the of OutputPlugin, it is primarily used by OutputManager to communicate with specific output plugins
      */
@@ -41,6 +42,11 @@ public class OutputPlugin<T> implements Runnable{
      */
     private LinkedList<Future<T>> futureList;
 
+    /**
+     *
+     */
+    private List<T> tDoneList;
+
 
     /**
      * creates a new output-plugin with a new id
@@ -53,6 +59,11 @@ public class OutputPlugin<T> implements Runnable{
         contentDataList = new ArrayList<>();
         executor = Executors.newCachedThreadPool();
         futureList = new LinkedList<>();
+        tDoneList = new ArrayList<>();
+    }
+
+    public List<T> getTDoneList() {
+        return tDoneList;
     }
 
     /**
@@ -141,6 +152,8 @@ public class OutputPlugin<T> implements Runnable{
         }
     }
 
+    public abstract void finalOutput();
+
     /**
      * main method for outputPlugin, runs the data-conversion and output-renderer
      */
@@ -148,5 +161,26 @@ public class OutputPlugin<T> implements Runnable{
     public void run() {
         for(OutputExtension<T> ext: outputExtensionList)
             futureList.add(executor.submit(ext));
+
+        boolean isWorking;
+        do {
+            isWorking = true;
+            for(Future<T> cDF: futureList) {
+                if(cDF.isDone())
+                    isWorking = false;
+            }
+        } while(isWorking);
+
+        for(Future<T> tF: futureList) {
+            try {
+                tDoneList.add(tF.get());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+
+        finalOutput();
     }
 }

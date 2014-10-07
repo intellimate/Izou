@@ -26,7 +26,12 @@ public class OutputPluginTest {
         cdList.add(cd2);
         cdList.add(cd3);
 
-        OutputPlugin outputPlugin = new OutputPlugin("abcd");
+        OutputPlugin outputPlugin = new OutputPlugin("abcd") {
+            @Override
+            public void finalOutput() {
+
+            }
+        };
         OutputExtension ext1 = new OutputExtension("789") {
             @Override
             public Object call() throws Exception {
@@ -55,7 +60,12 @@ public class OutputPluginTest {
 
     @Test
     public void testAddOutputExtension() throws Exception {
-        OutputPlugin outputPlugin = new OutputPlugin("abcd");
+        OutputPlugin outputPlugin = new OutputPlugin("abcd") {
+            @Override
+            public void finalOutput() {
+
+            }
+        };
         OutputExtension ext1 = new OutputExtension("789") {
             @Override
             public Object call() throws Exception {
@@ -75,7 +85,12 @@ public class OutputPluginTest {
 
     @Test
     public void testRemoveOutputExtension() throws Exception {
-        OutputPlugin outputPlugin = new OutputPlugin("abcd");
+        OutputPlugin outputPlugin = new OutputPlugin("abcd") {
+            @Override
+            public void finalOutput() {
+
+            }
+        };
         OutputExtension ext1 = new OutputExtension("789") {
             @Override
             public Object call() throws Exception {
@@ -97,7 +112,12 @@ public class OutputPluginTest {
     @Test
     public void testRun() throws Exception {
         boolean[] isWorking = {false, false, false};
-        OutputPlugin outputPlugin = new OutputPlugin("abcd");
+        OutputPlugin outputPlugin = new OutputPlugin("abcd") {
+            @Override
+            public void finalOutput() {
+
+            }
+        };
 
         OutputExtension ext1 = new OutputExtension("789") {
             @Override

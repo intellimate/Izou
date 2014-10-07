@@ -1,12 +1,13 @@
 package karlskrone.jarvis.events;
 
 import karlskrone.jarvis.contentgenerator.ContentData;
+import karlskrone.jarvis.output.OutputManager;
+import karlskrone.jarvis.output.OutputPlugin;
 
 import java.util.ArrayList;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.*;
 
 /**
  * This class is used to manage events.
@@ -141,16 +142,38 @@ public class EventManager implements Runnable{
      *
      * @param id the ID of the Event, format: package.class.name
      */
-    private void fireActivatorEvent (String id){
+    private void fireActivatorEvent (String id) throws ExecutionException, InterruptedException {
         checkID(id);
         ArrayList<ActivatorEventListener> contentGeneratorListeners = this.listeners.get(id);
         if (contentGeneratorListeners == null) {
             return;
         }
-        //TODO get Data and hand it to Output
+
+        LinkedList<Future<ContentData>> cDFutureList = new LinkedList<>();
         for (ActivatorEventListener next : contentGeneratorListeners) {
-            next.activatorEventFired(id);
+            cDFutureList.add(next.activatorEventFired(id));
         }
+
+        boolean isWorking;
+        do {
+            isWorking = true;
+            for(Future<ContentData> cDF: cDFutureList) {
+                if(cDF.isDone())
+                    isWorking = false;
+            }
+        } while(isWorking);
+
+        List<ContentData> cDList = new ArrayList<>();
+
+        for(Future<ContentData> cDF: cDFutureList) {
+            cDList.add(cDF.get());
+        }
+
+        OutputManager outputManager = OutputManager.getoMStatic();
+        OutputPlugin outputPlugin = outputManager.getOutputPlugin("1");
+        outputPlugin.setContentDataList(cDList);
+        outputPlugin.distributeContentData();
+        outputPlugin.run();
 
     }
 
@@ -174,7 +197,7 @@ public class EventManager implements Runnable{
         while (!stop) {
             try {
                 fireActivatorEvent(events.take());
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
                 break;
             }
         }

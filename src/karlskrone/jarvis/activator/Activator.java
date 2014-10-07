@@ -38,7 +38,7 @@ public abstract class Activator implements Runnable {
      *
      * @throws InterruptedException will be caught by the Activator implementation, used to stop the Activator Thread
      */
-    public abstract void activatorStarts() throws InterruptedException;
+    public abstract void activatorStarts() throws InterruptedException, EventManager.MultipleEventsException;
 
     /**
      * This method gets called when the Activator Thread got terminated.

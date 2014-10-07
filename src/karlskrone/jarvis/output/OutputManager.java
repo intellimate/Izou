@@ -18,11 +18,14 @@ public class OutputManager {
      */
     private List<OutputPlugin> outputPluginsList;
 
+    private static OutputManager oMStatic;
+
     /**
      * Creates a new output-manager with a list of output-plugins
      */
     public OutputManager() {
         outputPluginsList = new ArrayList<>();
+        oMStatic = this;
     }
 
     /**
@@ -39,6 +42,23 @@ public class OutputManager {
      */
     public void addOutputPlugin(OutputPlugin outputPlugin) {
         outputPluginsList.add(outputPlugin);
+    }
+
+    /**
+     * method to get outputManager instance anywhere in the project
+     * @return current instance of outputManager
+     */
+    public static OutputManager getoMStatic() {
+        return oMStatic;
+    }
+
+    public OutputPlugin getOutputPlugin(String id) {
+        for (OutputPlugin oP: outputPluginsList) {
+            if (oP.getId().equals(id)) {
+                return oP;
+            }
+        }
+        return null;
     }
 
     /**
