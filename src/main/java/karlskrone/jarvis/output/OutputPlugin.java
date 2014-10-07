@@ -43,7 +43,7 @@ public abstract class OutputPlugin<T> implements Runnable{
     private LinkedList<Future<T>> futureList;
 
     /**
-     *
+     * list of future objects that now finished processing and were added to this list
      */
     private List<T> tDoneList;
 
@@ -62,6 +62,10 @@ public abstract class OutputPlugin<T> implements Runnable{
         tDoneList = new ArrayList<>();
     }
 
+    /**
+     * gets list of finished future objects
+     * @return list of finished future objects
+     */
     public List<T> getTDoneList() {
         return tDoneList;
     }
@@ -74,6 +78,7 @@ public abstract class OutputPlugin<T> implements Runnable{
     public List<OutputExtension<T>> getOutputExtensionList() {
         return outputExtensionList;
     }
+
     /**
      * get contentDataList from outputPlugin
      */
@@ -152,7 +157,10 @@ public abstract class OutputPlugin<T> implements Runnable{
         }
     }
 
-    public abstract void finalOutput();
+    /**
+     * method that uses tDoneList to generate a final output that wil then be rendered
+     */
+    public abstract void renderFinalOutput();
 
     /**
      * main method for outputPlugin, runs the data-conversion and output-renderer
@@ -181,6 +189,6 @@ public abstract class OutputPlugin<T> implements Runnable{
             }
         }
 
-        finalOutput();
+        renderFinalOutput();
     }
 }

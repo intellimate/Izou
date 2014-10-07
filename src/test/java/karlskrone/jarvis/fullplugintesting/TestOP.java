@@ -14,7 +14,7 @@ public class TestOP extends OutputPlugin<TestOD> {
     }
 
     @Override
-    public void finalOutput() {
+    public void renderFinalOutput() {
         List<TestOD> testODList = this.getTDoneList();
         String finalOutput = "";
         for(TestOD testOD: testODList)
