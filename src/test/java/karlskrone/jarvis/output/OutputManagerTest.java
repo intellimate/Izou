@@ -15,7 +15,7 @@ public class OutputManagerTest {
         OutputManager outputManager = new OutputManager();
         OutputPlugin outputPlugin = new OutputPlugin("1234") {
             @Override
-            public void finalOutput() {
+            public void renderFinalOutput() {
 
             }
         };
@@ -35,7 +35,7 @@ public class OutputManagerTest {
         OutputManager outputManager = new OutputManager();
         OutputPlugin outputPlugin = new OutputPlugin("1234") {
             @Override
-            public void finalOutput() {
+            public void renderFinalOutput() {
 
             }
         };
@@ -57,7 +57,7 @@ public class OutputManagerTest {
         OutputManager outputManager = new OutputManager();
         OutputPlugin outputPlugin = new OutputPlugin("1234") {
             @Override
-            public void finalOutput() {
+            public void renderFinalOutput() {
 
             }
         };
@@ -68,7 +68,7 @@ public class OutputManagerTest {
             }
         };
         outputManager.addOutputPlugin(outputPlugin);
-        outputManager.passDataToOutputPlugin(list, outputPlugin.getId());
+        outputManager.passDataToOutputPlugins(list);
         assertTrue(outputManager.getOutputPluginsList().get(0).getContentDataList() != null);
     }
 }
