@@ -111,11 +111,12 @@ public class OutputManager {
     /**
      * gets a list of ContentData's and sends it to the right outputPlugin for further processsing
      *
-     * passDataToOutputPlugin is the main method of OutputManger. It is called whenever the output process has to be started
+     * passDataToOutputPlugins is the main method of OutputManger. It is called whenever the output process has to be started
      *
      * @param dataList list filled with content-data objects. ContentData holds the output of the DataGenerator Package
      */
-    public void passDataToOutputPlugin(List<ContentData> dataList, String outputPluginId) {
+    public void passDataToOutputPlugins(List<ContentData> dataList) {
+        /*
         OutputPlugin outputPlugin = null;
         for(int i = 0; i < outputPluginsList.size(); i++) {
             if(outputPluginsList.get(i).getId().equals(outputPluginId)) {
@@ -126,5 +127,6 @@ public class OutputManager {
         }
         if(outputPlugin != null)
             outputPlugin.run();
+            */
     }
 }
