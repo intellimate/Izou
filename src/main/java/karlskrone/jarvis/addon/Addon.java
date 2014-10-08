@@ -5,6 +5,7 @@ import karlskrone.jarvis.contentgenerator.ContentGenerator;
 import karlskrone.jarvis.events.EventController;
 import karlskrone.jarvis.output.OutputExtension;
 import karlskrone.jarvis.output.OutputPlugin;
+import ro.fortsoft.pf4j.ExtensionPoint;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,9 +17,7 @@ import java.util.Properties;
  * It will be instantiated and its registering-methods will be called by the PluginManager.
  * This class has method for a properties-file named addOnID.properties (AddOnsID in the form: package.class)
  */
-public abstract class AddOn
-        //extends ExtensionPoint
-{
+public abstract class AddOn implements ExtensionPoint {
     private final Properties properties;
     private final String addOnID;
 
@@ -41,6 +40,10 @@ public abstract class AddOn
         }
     }
 
+    /**
+     * use this method to build your instances etc.
+     */
+    public abstract void prepare();
     /**
      * use this method to register (if needed) your Activators.
      */

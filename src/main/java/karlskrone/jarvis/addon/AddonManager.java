@@ -9,7 +9,14 @@ import karlskrone.jarvis.events.EventManager;
 import karlskrone.jarvis.output.OutputExtension;
 import karlskrone.jarvis.output.OutputManager;
 import karlskrone.jarvis.output.OutputPlugin;
+import ro.fortsoft.pf4j.DefaultPluginManager;
+import ro.fortsoft.pf4j.PluginManager;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -24,6 +31,7 @@ public class AddOnManager {
 
     public AddOnManager(OutputManager outputManager, EventManager eventManager,
                         ContentGeneratorManager contentGeneratorManager, ActivatorManager activatorManager) {
+        addOnList = new LinkedList<>();
         this.outputManager = outputManager;
         this.eventManager = eventManager;
         this.contentGeneratorManager = contentGeneratorManager;
@@ -80,8 +88,7 @@ public class AddOnManager {
     private void registerOutputExtensions(){
         for (AddOn addOn : addOnList) {
             for(OutputExtension outputExtension : addOn.registerOutputExtension()) {
-                //TODO: OutputPluginID
-                //outputManager.addOutputExtension(outputExtension, );
+                outputManager.addOutputExtension(outputExtension, outputExtension.getPluginId());
             }
         }
     }
@@ -91,13 +98,38 @@ public class AddOnManager {
      */
     public void retrieveAndRegisterAddOns() {
         addAllAddOns();
+        prepareAllAddOns();
         registerAllAddOns();
     }
 
+    /**
+     * This method searches all the "/lib"-directory for AddOns and adds them to the addOnList
+     */
     private void addAllAddOns() {
-        //addOnList.add();
+        Path libPath = Paths.get("/lib");
+        if(!Files.exists(libPath)) try {
+            Files.createDirectories(libPath);
+        } catch (IOException e) {
+            //TODO: implement Exception handling
+            e.printStackTrace();
+        }
+        PluginManager pluginManager = new DefaultPluginManager(libPath.toFile());
+        List<AddOn> addOns = pluginManager.getExtensions(AddOn.class);
+        addOnList.addAll(addOns);
     }
 
+    /**
+     * prepares all AddOns
+     */
+    private void prepareAllAddOns() {
+        for (AddOn addOn : addOnList) {
+            addOn.prepare();
+        }
+    }
+
+    /**
+     * registers all AddOns
+     */
     private void registerAllAddOns() {
         registerOutputPlugins();
         registerOutputExtensions();
