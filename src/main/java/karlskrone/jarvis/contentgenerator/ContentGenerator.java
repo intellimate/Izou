@@ -1,7 +1,9 @@
 package karlskrone.jarvis.contentgenerator;
 
+import karlskrone.jarvis.activator.ActivatorManager;
 import karlskrone.jarvis.events.EventManager;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -32,14 +34,23 @@ public abstract class ContentGenerator<T> implements Callable<ContentData<T>>, E
     }
 
     /**
-     * Sets the ContentGenerator.
-     *
-     * The ContentGeneratorManager will usually be set when you add the ContentGenerator to the ContentGeneratorManager.
-     * via ContentGeneratorManager.addContentGenerator();
-     *
-     * @param contentGeneratorManager the contentGeneratorManager
+     * registers all needed Dependencies to function
+     * @param contentGeneratorManager an instance of ContentGeneratorManager
+     * @param eventManager an instance of EventManager
      */
-    protected void setContentGeneratorManager(ContentGeneratorManager contentGeneratorManager) {
+    void registerAllNeededDependencies(ContentGeneratorManager contentGeneratorManager, EventManager eventManager) {
+        setContentGeneratorManager(contentGeneratorManager);
+        setEventManager(eventManager);
+    }
+        /**
+         * Sets the ContentGenerator.
+         *
+         * The ContentGeneratorManager will usually be set when you add the ContentGenerator to the ContentGeneratorManager.
+         * via ContentGeneratorManager.addContentGenerator();
+         *
+         * @param contentGeneratorManager the contentGeneratorManager
+         */
+    private void setContentGeneratorManager(ContentGeneratorManager contentGeneratorManager) {
         this.contentGeneratorManager = contentGeneratorManager;
     }
 
@@ -50,7 +61,7 @@ public abstract class ContentGenerator<T> implements Callable<ContentData<T>>, E
      *
      * @param eventManager an instance of EventManager
      */
-    void setEventManager(EventManager eventManager) {
+    private void setEventManager(EventManager eventManager) {
         this.eventManager = eventManager;
         for (String eventID : registeredEvents) {
             try {

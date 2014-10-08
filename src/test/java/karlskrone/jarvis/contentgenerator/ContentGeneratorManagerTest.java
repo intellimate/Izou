@@ -30,7 +30,7 @@ public class ContentGeneratorManagerTest {
 
             }
         };
-        contentGenerator.setContentGeneratorManager(contentGeneratorManager);
+        contentGenerator.registerAllNeededDependencies(contentGeneratorManager, eventManagerTestSetup.getManager());
     }
 
     @Test

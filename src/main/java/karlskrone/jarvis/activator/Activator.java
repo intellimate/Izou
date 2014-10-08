@@ -81,7 +81,7 @@ public abstract class Activator implements Runnable {
      * @throws IllegalArgumentException thrown if the ID is null or empty
      * @throws java.lang.IllegalStateException thrown if not called inside activatorStarts();
      */
-    public void registerEvent(String id) throws IllegalArgumentException {
+    public void registerEvent(String id) throws IllegalArgumentException, IllegalStateException {
         if (callers == null) {
             throw new IllegalStateException("This method got called outside activatorStarts()");
         }
@@ -98,10 +98,14 @@ public abstract class Activator implements Runnable {
      *
      * @param id the ID for the Event, format: package.class.name
      * @throws IllegalArgumentException thrown if the ID is null or empty
+     * @throws java.lang.IllegalStateException thrown if not called inside activatorStarts();
      */
-    public void unregisterEvent(String id) throws IllegalArgumentException {
+    public void unregisterEvent(String id) throws IllegalArgumentException, IllegalStateException {
+        if (callers == null) {
+            throw new IllegalStateException("This method got called outside activatorStarts()");
+        }
         EventManager.ActivatorEventCaller caller = null;
-        if(callers != null) caller = callers.get(id);
+        caller = callers.get(id);
         if (caller == null) {
             throw new IllegalArgumentException();
         }
@@ -114,8 +118,12 @@ public abstract class Activator implements Runnable {
      * <p>
      * If you don't need this class anymore, you should unregister all events to avoid memory leaks.
      * @throws IllegalArgumentException thrown if the ID is null or empty
+     * java.lang.IllegalStateException thrown if not called inside activatorStarts();
      */
-    public void unregisterAllEvents() throws IllegalArgumentException {
+    public void unregisterAllEvents() throws IllegalArgumentException, IllegalStateException {
+        if (callers == null) {
+            throw new IllegalStateException("This method got called outside activatorStarts()");
+        }
         for (String key : callers.keySet()) {
             EventManager.ActivatorEventCaller caller = callers.get(key);
             if (caller == null) {
@@ -157,6 +165,11 @@ public abstract class Activator implements Runnable {
         caller.fire();
     }
 
+    /**
+     * registers all needed Dependencies to function
+     * @param eventManager an instance of EventManager
+     * @param activatorManager an instance of activatorManager
+     */
     void registerAllNeededDependencies(EventManager eventManager, ActivatorManager activatorManager) {
         callers = new HashMap<>();
         setEventManager(eventManager);

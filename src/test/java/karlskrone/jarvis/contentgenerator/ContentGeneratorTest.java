@@ -31,7 +31,7 @@ public class ContentGeneratorTest {
 
             }
         };
-        contentGenerator.setContentGeneratorManager(contentGeneratorManager);
+        contentGenerator.registerAllNeededDependencies(contentGeneratorManager, eventManagerTestSetup.getManager());
     }
 
     @Test
@@ -49,7 +49,7 @@ public class ContentGeneratorTest {
 
             }
         };
-        cg.setContentGeneratorManager(contentGeneratorManager);
+        cg.registerAllNeededDependencies(contentGeneratorManager, eventManagerTestSetup.getManager());
         Future future = cg.activatorEventFired("1");
         synchronized (lock) {
             while (!future.isDone())
@@ -84,7 +84,7 @@ public class ContentGeneratorTest {
                 isWorking[1] = true;
             }
         };
-        cg.setContentGeneratorManager(contentGeneratorManager);
+        cg.registerAllNeededDependencies(contentGeneratorManager, eventManagerTestSetup.getManager());
         Future future = cg.activatorEventFired("3");
         synchronized (lock) {
             while (!future.isDone())
@@ -108,7 +108,7 @@ public class ContentGeneratorTest {
             @Override
             public void handleError(Exception e) {}
         };
-        cg.setContentGeneratorManager(contentGeneratorManager);
+        cg.registerAllNeededDependencies(contentGeneratorManager, eventManagerTestSetup.getManager());
         cg.registerEvent("5");
         eventManagerTestSetup.testFireEvent("5");
         eventManagerTestSetup.waitForMultith();
@@ -128,7 +128,7 @@ public class ContentGeneratorTest {
             @Override
             public void handleError(Exception e) {}
         };
-        cg.setContentGeneratorManager(contentGeneratorManager);
+        cg.registerAllNeededDependencies(contentGeneratorManager, eventManagerTestSetup.getManager());
         cg.registerEvent("6");
         cg.unregisterEvent("6");
         eventManagerTestSetup.testFireEvent("6");
@@ -149,7 +149,7 @@ public class ContentGeneratorTest {
             @Override
             public void handleError(Exception e) {}
         };
-        cg.setContentGeneratorManager(contentGeneratorManager);
+        cg.registerAllNeededDependencies(contentGeneratorManager, eventManagerTestSetup.getManager());
         cg.registerEvent("7");
         cg.unregisterAllEvents();
         eventManagerTestSetup.testFireEvent("7");

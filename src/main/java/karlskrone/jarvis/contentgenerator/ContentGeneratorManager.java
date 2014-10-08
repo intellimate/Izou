@@ -30,8 +30,7 @@ public class ContentGeneratorManager {
      * @param contentGenerator an instance of the ContentGenerator
      */
     public void addContentGenerator (ContentGenerator contentGenerator) {
-        contentGenerator.setContentGeneratorManager(this);
-        contentGenerator.setEventManager(eventManager);
+        contentGenerator.registerAllNeededDependencies(this, eventManager);
         contentGeneratorList.add(contentGenerator);
     }
 
