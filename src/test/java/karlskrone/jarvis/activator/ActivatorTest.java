@@ -10,6 +10,7 @@ import static org.junit.Assert.*;
 public class ActivatorTest {
     static EventManagerTestSetup eventManagerTestSetup;
     static Activator activator;
+    static ActivatorManager activatorManager;
 
     public ActivatorTest() {
         eventManagerTestSetup = new EventManagerTestSetup();
@@ -20,6 +21,8 @@ public class ActivatorTest {
             @Override
             public boolean terminated(Exception e) {return false;}
         };
+        activatorManager = new ActivatorManager(eventManagerTestSetup.getManager());
+        activatorManager.addActivator(activator);
     }
 
     @Test

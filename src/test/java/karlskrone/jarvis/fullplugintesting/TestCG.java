@@ -9,8 +9,8 @@ import karlskrone.jarvis.events.EventManager;
  */
 public class TestCG extends ContentGenerator<String> {
 
-    public TestCG(EventManager eventManager) {
-        super(eventManager);
+    public TestCG(String contentGeneratorID) {
+        super(contentGeneratorID);
         this.registerEvent("1");
     }
 

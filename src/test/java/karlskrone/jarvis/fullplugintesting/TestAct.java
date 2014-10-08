@@ -10,8 +10,7 @@ import karlskrone.jarvis.events.EventManager;
 public class TestAct extends Activator {
     private boolean start;
 
-    public TestAct(EventManager eventManager) {
-        super(eventManager);
+    public TestAct() {
         start = false;
     }
 
@@ -20,11 +19,15 @@ public class TestAct extends Activator {
     }
 
     @Override
-    public void activatorStarts() throws InterruptedException, EventManager.MultipleEventsException {
+    public void activatorStarts() throws InterruptedException{
         while (true) {
             if(start) {
                 this.registerEvent("1");
-                this.fireEvent("1");
+                try {
+                    this.fireEvent("1");
+                } catch (EventManager.MultipleEventsException e) {
+                    e.printStackTrace();
+                }
                 start = false;
             }
             else {
@@ -35,7 +38,7 @@ public class TestAct extends Activator {
     }
 
     @Override
-    public void terminated(Exception e) {
-
+    public boolean terminated(Exception e) {
+        return false;
     }
 }
