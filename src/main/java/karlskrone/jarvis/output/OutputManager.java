@@ -16,11 +16,11 @@ import java.util.concurrent.Future;
  * Created by Julian Brendl on 9/27/14.
  */
 public class OutputManager {
+
     /**
      * a list that contains all the registered output-plugins of Jarvis
      */
     private List<OutputPlugin> outputPluginsList;
-
 
     /**
      * responsible for running output-plugins in different threads
@@ -33,12 +33,19 @@ public class OutputManager {
     private HashMap<String, Future> futureHashMap;
 
     /**
+     * a HashMap that stores all outputExtensions which were to be added to a still non-existent output-plugins,
+     * this HashMap gets checked every time a new output-plugin is added for relevant output-extensions
+     */
+    private HashMap<String, List<OutputExtension>> tempExtensionStorage;
+
+    /**
      * Creates a new output-manager with a list of output-plugins
      */
     public OutputManager() {
         outputPluginsList = new ArrayList<>();
         executor = Executors.newCachedThreadPool();
         futureHashMap = new HashMap<>();
+        tempExtensionStorage = new HashMap<>();
     }
 
     /**
@@ -66,6 +73,12 @@ public class OutputManager {
             }
         }
 
+        if (tempExtensionStorage.containsKey(outputPlugin.getId())) {
+            for(OutputExtension oE: tempExtensionStorage.get(outputPlugin.getId())) {
+                outputPlugin.addOutputExtension(oE);
+            }
+            tempExtensionStorage.remove(outputPlugin.getId());
+        }
     }
 
     public OutputPlugin getOutputPlugin(String id) {
@@ -104,11 +117,23 @@ public class OutputManager {
      * @param outputPluginId the output-plugin the outputExtension is to be added to
      */
     public void addOutputExtension(OutputExtension outputExtension, String outputPluginId) {
-        for(OutputPlugin oPlug: outputPluginsList) {
-            if(oPlug.getId().equals(outputPluginId)) {
+        boolean found = false;
+        for (OutputPlugin oPlug: outputPluginsList) {
+            if (oPlug.getId().equals(outputPluginId)) {
                 oPlug.addOutputExtension(outputExtension);
                 outputExtension.setPluginId(oPlug.getId());
+                found = true;
                 break;
+            }
+        }
+        if (!found) {
+            if(tempExtensionStorage.containsKey(outputPluginId)) {
+                tempExtensionStorage.get(outputPluginId).add(outputExtension);
+            }
+            else {
+                List<OutputExtension> outputExtensionList = new ArrayList<>();
+                outputExtensionList.add(outputExtension);
+                tempExtensionStorage.put(outputPluginId, outputExtensionList);
             }
         }
     }

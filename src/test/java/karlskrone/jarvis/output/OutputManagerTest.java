@@ -81,4 +81,24 @@ public class OutputManagerTest {
         outputManager.passDataToOutputPlugins(list);
         assertTrue(outputManager.getOutputPluginsList().get(0).getOutputExtensionList().size() == 1);
     }
+
+    @Test
+    public void testAddOutputExtensionLater() throws Exception {
+        OutputManager outputManager = new OutputManager();
+        OutputPlugin outputPlugin = new OutputPlugin("1234") {
+            @Override
+            public void renderFinalOutput() {
+
+            }
+        };
+        OutputExtension outputExtension = new OutputExtension("abcd") {
+            @Override
+            public Object call() throws Exception {
+                return null;
+            }
+        };
+        outputManager.addOutputExtension(outputExtension, outputPlugin.getId());
+        outputManager.addOutputPlugin(outputPlugin);
+        assertTrue(outputManager.getOutputPluginsList().get(0).getOutputExtensionList().contains(outputExtension));
+    }
 }
