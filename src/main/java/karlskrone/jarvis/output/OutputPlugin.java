@@ -5,10 +5,7 @@ import karlskrone.jarvis.contentgenerator.ContentData;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 /**
  * The OutputPlugin class gets contentData and then starts threads filled with output-extension tasks to create the final
@@ -28,14 +25,9 @@ public abstract class OutputPlugin<T> implements Runnable{
     private List<OutputExtension<T>> outputExtensionList;
 
     /**
-     * list contains all the content-data objects that will be distributed to outputExtension in distributeContentData
-     */
-    private List<ContentData> contentDataList;
-
-    /**
      * responsible for running output-extensions in different threads
      */
-    private final ExecutorService executor;
+    private ExecutorService executor;
 
     /**
      * list that contains the future objects each output-extension returns
@@ -47,6 +39,11 @@ public abstract class OutputPlugin<T> implements Runnable{
      */
     private List<T> tDoneList;
 
+    /**
+     * BlockingQueue that stores event-requests that are to be executed
+     */
+    private BlockingQueue<List<ContentData>> contentDataBlockingQueue;
+
 
     /**
      * creates a new output-plugin with a new id
@@ -56,10 +53,10 @@ public abstract class OutputPlugin<T> implements Runnable{
     public OutputPlugin(String id) {
         this.id = id;
         outputExtensionList = new ArrayList<>();
-        contentDataList = new ArrayList<>();
-        executor = Executors.newCachedThreadPool();
         futureList = new LinkedList<>();
         tDoneList = new ArrayList<>();
+        executor = null;
+        contentDataBlockingQueue = new LinkedBlockingQueue<>();
     }
 
     /**
@@ -80,13 +77,6 @@ public abstract class OutputPlugin<T> implements Runnable{
     }
 
     /**
-     * get contentDataList from outputPlugin
-     */
-    public List<ContentData> getContentDataList() {
-        return contentDataList;
-    }
-
-    /**
      * gets the futureList of the output-Plugin, which contains the processed data of the output-extensions
      * @return the futureList to be returnt
      */
@@ -95,30 +85,21 @@ public abstract class OutputPlugin<T> implements Runnable{
     }
 
     /**
-     * set contentDataList equal to the contentDataList of the OutputPlugin
-     * @param contentDataList the list to be set equal to the contentDataList pertaining to outputPlugin
+     * adds a content-data list to blockingQueue
+     *
+     * @param contentDataList the content-data list to be added to blockingQueue
+     * @throws IllegalStateException raised if problems adding a content-data list to blockingQueue
      */
-    public void setContentDataList(List<ContentData> contentDataList) {
-        this.contentDataList = contentDataList;
+    public void addContentDataList(List<ContentData> contentDataList) throws IllegalStateException {
+        contentDataBlockingQueue.add(contentDataList);
     }
 
     /**
-     * distributes the content-Data elements in the contentDataList to the output-extensions that will need them
-     *
-     * it uses the id of the contentData which is the same as the id of the outputExtension to identify which output-extension
-     * it should send the content-data to
+     * sets the executor of the eventManager for efficiency reasons
+     * @param executor the executor to be set
      */
-    public void distributeContentData() {
-        for(OutputExtension ext: outputExtensionList) {
-            List<String> contentDataWishList = ext.getContentDataWishList();
-            for(String strWish: contentDataWishList) {
-                for(ContentData cD: contentDataList) {
-                    if (strWish.equals(cD.getId())) {
-                        ext.addContentData(cD);
-                    }
-                }
-            }
-        }
+    public void setExecutor(ExecutorService executor) {
+        this.executor = executor;
     }
 
     /**
@@ -132,12 +113,55 @@ public abstract class OutputPlugin<T> implements Runnable{
     }
 
     /**
+     * gets the blocking-queue that stores contentDataLists sent by events
+     *
+     * @return blocking-queue that stores contentDataLists sent by events
+     */
+    public BlockingQueue<List<ContentData>> getContentDataBlockingQueue() {
+        return contentDataBlockingQueue;
+    }
+
+    /**
+     * checks if the outputPlugin has any output-extensions it can run with the current content-datas
+     *
+     * @return state of whether the outputPlugin has any output-extensions it can run with the current content-datas
+     */
+    public boolean canRun() {
+        boolean canRun = false;
+        for(OutputExtension oE: outputExtensionList) {
+            if(oE.canRun())
+                canRun = true;
+        }
+        return canRun;
+    }
+
+    /**
+     * distributes the content-Data elements in the contentDataList to the output-extensions that will need them
+     *
+     * it uses the id of the contentData which is the same as the id of the outputExtension to identify which output-extension
+     * it should send the content-data to
+     */
+    public void distributeContentData(List<ContentData> contentDataList) {
+        for(OutputExtension ext: outputExtensionList) {
+            List<String> contentDataWishList = ext.getContentDataWishList();
+            for(String strWish: contentDataWishList) {
+                for(ContentData cD: contentDataList) {
+                    if (strWish.equals(cD.getId())) {
+                        ext.addContentData(cD);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * add outputExtension to outputExtensionList
      *
      * @param outputExtension the output-extension to be added to outputExtensionList
      */
     public void addOutputExtension(OutputExtension<T> outputExtension) {
         outputExtensionList.add(outputExtension);
+        outputExtension.setPluginId(this.getId());
     }
 
     /**
@@ -151,6 +175,7 @@ public abstract class OutputPlugin<T> implements Runnable{
     public void removeOutputExtension(String id) {
         for(OutputExtension ext: outputExtensionList) {
             if(ext.getId().equals(id)) {
+                ext.setPluginId(null);
                 outputExtensionList.remove(ext);
                 break;
             }
@@ -159,36 +184,72 @@ public abstract class OutputPlugin<T> implements Runnable{
 
     /**
      * method that uses tDoneList to generate a final output that wil then be rendered
+     * the processed content-data objects are found in tDoneProcessed
      */
     public abstract void renderFinalOutput();
 
     /**
+     * Default implementation waits until a new List<ContentData> has been received and then processes it,
+     *
+     * this method is made to be overwritten as seen fit by the developer
+     * @return the list of content-datas to be processed by the outputPlugin
+     */
+    public List<ContentData> blockingQueueHandling() throws InterruptedException {
+        List<ContentData> contentDataList = contentDataBlockingQueue.take();
+        return contentDataList;
+    }
+
+    /**
      * main method for outputPlugin, runs the data-conversion and output-renderer
+     *
+     * when the outputExtensions are done processing the ContentData objects, they add their finished objects into tDoneList,
+     * from where they will have to be gotten to render them in renderFinalOutput
      */
     @Override
     public void run() {
-        for(OutputExtension<T> ext: outputExtensionList)
-            futureList.add(executor.submit(ext));
-
-        boolean isWorking;
-        do {
-            isWorking = true;
-            for(Future<T> cDF: futureList) {
-                if(cDF.isDone())
-                    isWorking = false;
-            }
-        } while(isWorking);
-
-        for(Future<T> tF: futureList) {
+        while (true) {
+            List<ContentData> contentDataList;
             try {
-                tDoneList.add(tF.get());
+                contentDataList = blockingQueueHandling();  //gets the new contentDataList if one was added to the blockingQueue
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
+                //TODO: implement exception handling
+                break;
+            }
+
+            distributeContentData(contentDataList); //distributes the contentDatas among all outputExtensions
+            if(canRun()) {  //checks if there are any outputExtensions that can run at all
+                for (OutputExtension<T> ext : outputExtensionList) {
+                    if (ext.canRun()) //if the specific outputExtension can run, then it does
+                        futureList.add(executor.submit(ext));
+                }
+
+                //waits until all the outputExtensions have finished processing
+                boolean isWorking;
+                do {
+                    isWorking = true;
+                    for (Future<T> cDF : futureList) {
+                        if (cDF.isDone())
+                            isWorking = false;
+                    }
+                } while (isWorking);
+
+                //copies the finished future objects into a tDoneList
+                for (Future<T> tF : futureList) {
+                    try {
+                        tDoneList.add(tF.get());
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        //TODO: implement exception handling
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
+                        //TODO: implement exception handling
+                    }
+                }
+
+                //render final output
+                renderFinalOutput();
             }
         }
-
-        renderFinalOutput();
     }
 }

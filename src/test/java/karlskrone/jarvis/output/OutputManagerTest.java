@@ -15,7 +15,7 @@ public class OutputManagerTest {
         OutputManager outputManager = new OutputManager();
         OutputPlugin outputPlugin = new OutputPlugin("1234") {
             @Override
-            public void finalOutput() {
+            public void renderFinalOutput() {
 
             }
         };
@@ -35,7 +35,7 @@ public class OutputManagerTest {
         OutputManager outputManager = new OutputManager();
         OutputPlugin outputPlugin = new OutputPlugin("1234") {
             @Override
-            public void finalOutput() {
+            public void renderFinalOutput() {
 
             }
         };
@@ -57,7 +57,7 @@ public class OutputManagerTest {
         OutputManager outputManager = new OutputManager();
         OutputPlugin outputPlugin = new OutputPlugin("1234") {
             @Override
-            public void finalOutput() {
+            public void renderFinalOutput() {
 
             }
         };
@@ -67,8 +67,18 @@ public class OutputManagerTest {
                 return null;
             }
         };
+
+        ContentData cD1 = new ContentData("1");
+        ContentData cD2 = new ContentData("2");
+        ContentData cD3 = new ContentData("3");
+        list.add(cD1);
+        list.add(cD2);
+        list.add(cD3);
+
         outputManager.addOutputPlugin(outputPlugin);
-        outputManager.passDataToOutputPlugin(list, outputPlugin.getId());
-        assertTrue(outputManager.getOutputPluginsList().get(0).getContentDataList() != null);
+        outputManager.addOutputExtension(outputExtension, outputPlugin.getId());
+        outputExtension.addContentDataToWishList("2");
+        outputManager.passDataToOutputPlugins(list);
+        assertTrue(outputManager.getOutputPluginsList().get(0).getOutputExtensionList().size() == 1);
     }
 }

@@ -2,9 +2,12 @@ package karlskrone.jarvis.output;
 
 import karlskrone.jarvis.contentgenerator.ContentData;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * OutputManager manages all output plugins and is the main class anyone outside the output package should talk to.
@@ -18,14 +21,24 @@ public class OutputManager {
      */
     private List<OutputPlugin> outputPluginsList;
 
-    private static OutputManager oMStatic;
+
+    /**
+     * responsible for running output-plugins in different threads
+     */
+    private final ExecutorService executor;
+
+    /**
+     * hashmap that stores the future objects of the output-plugins
+     */
+    private HashMap<String, Future> futureHashMap;
 
     /**
      * Creates a new output-manager with a list of output-plugins
      */
     public OutputManager() {
         outputPluginsList = new ArrayList<>();
-        oMStatic = this;
+        executor = Executors.newCachedThreadPool();
+        futureHashMap = new HashMap<>();
     }
 
     /**
@@ -38,18 +51,20 @@ public class OutputManager {
     }
 
     /**
-     * adds outputPlugin to outputPluginList
+     * adds outputPlugin to outputPluginList, starts a new thread for the outputPlugin, and stores the future object in a hashmap
      */
     public void addOutputPlugin(OutputPlugin outputPlugin) {
-        outputPluginsList.add(outputPlugin);
-    }
+        if (!futureHashMap.containsKey(outputPlugin.getId())) {
+            outputPluginsList.add(outputPlugin);
+            futureHashMap.put(outputPlugin.getId(), executor.submit(outputPlugin));
+        } else {
+            if (futureHashMap.get(outputPlugin.getId()).isDone()) {
+                outputPlugin.setExecutor(executor);
+                futureHashMap.remove(outputPlugin.getId());
+                futureHashMap.put(outputPlugin.getId(), executor.submit(outputPlugin));
+            }
+        }
 
-    /**
-     * method to get outputManager instance anywhere in the project
-     * @return current instance of outputManager
-     */
-    public static OutputManager getoMStatic() {
-        return oMStatic;
     }
 
     public OutputPlugin getOutputPlugin(String id) {
@@ -62,7 +77,7 @@ public class OutputManager {
     }
 
     /**
-     * removes the output-plugin of id: pluginId from outputPluginList
+     * removes the output-plugin of id: pluginId from outputPluginList and ends the thread
      *
      * @param pluginId the id of the output-plugin to remove
      */
@@ -70,6 +85,9 @@ public class OutputManager {
         for(OutputPlugin oPlug: outputPluginsList) {
             if(oPlug.getId().equals(pluginId)) {
                 outputPluginsList.remove(oPlug);
+                oPlug.setExecutor(null);
+                futureHashMap.get(oPlug.getId()).cancel(true);
+                futureHashMap.remove(oPlug.getId());
                 break;
             }
         }
@@ -88,6 +106,7 @@ public class OutputManager {
         for(OutputPlugin oPlug: outputPluginsList) {
             if(oPlug.getId().equals(outputPluginId)) {
                 oPlug.addOutputExtension(outputExtension);
+                outputExtension.setPluginId(oPlug.getId());
                 break;
             }
         }
@@ -116,17 +135,8 @@ public class OutputManager {
      * @param dataList list filled with content-data objects. ContentData holds the output of the DataGenerator Package
      */
     public void passDataToOutputPlugins(List<ContentData> dataList) {
-        /*
-        OutputPlugin outputPlugin = null;
-        for(int i = 0; i < outputPluginsList.size(); i++) {
-            if(outputPluginsList.get(i).getId().equals(outputPluginId)) {
-                outputPlugin = outputPluginsList.get(i);
-                outputPlugin.setContentDataList(dataList);
-                break;
-            }
+        for(OutputPlugin outputPlugin: outputPluginsList) {
+                outputPlugin.addContentDataList(dataList);
         }
-        if(outputPlugin != null)
-            outputPlugin.run();
-            */
     }
 }

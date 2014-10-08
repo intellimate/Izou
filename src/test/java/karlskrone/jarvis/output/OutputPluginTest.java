@@ -28,7 +28,7 @@ public class OutputPluginTest {
 
         OutputPlugin outputPlugin = new OutputPlugin("abcd") {
             @Override
-            public void finalOutput() {
+            public void renderFinalOutput() {
 
             }
         };
@@ -51,8 +51,8 @@ public class OutputPluginTest {
         ext2.addContentDataToWishList(cd2.getId());
         ext2.addContentDataToWishList(cd3.getId());
 
-        outputPlugin.setContentDataList(cdList);
-        outputPlugin.distributeContentData();
+        outputPlugin.addContentDataList(cdList);
+        outputPlugin.distributeContentData(cdList);
 
         assertTrue(ext1.getContentDataList().size() == 1);
         assertTrue(ext2.getContentDataList().size() == 2);
@@ -62,7 +62,7 @@ public class OutputPluginTest {
     public void testAddOutputExtension() throws Exception {
         OutputPlugin outputPlugin = new OutputPlugin("abcd") {
             @Override
-            public void finalOutput() {
+            public void renderFinalOutput() {
 
             }
         };
@@ -87,7 +87,7 @@ public class OutputPluginTest {
     public void testRemoveOutputExtension() throws Exception {
         OutputPlugin outputPlugin = new OutputPlugin("abcd") {
             @Override
-            public void finalOutput() {
+            public void renderFinalOutput() {
 
             }
         };
@@ -110,61 +110,49 @@ public class OutputPluginTest {
     }
 
     @Test
-    public void testRun() throws Exception {
-        boolean[] isWorking = {false, false, false};
+    public void testOutputPluginParameters() {
+        ContentData cd1 = new ContentData("1");
+        ContentData cd2 = new ContentData("2");
+        ContentData cd3 = new ContentData("3");
+
+        List<ContentData> cdList = new ArrayList<>();
+        cdList.add(cd1);
+        cdList.add(cd2);
+        cdList.add(cd3);
+
         OutputPlugin outputPlugin = new OutputPlugin("abcd") {
             @Override
-            public void finalOutput() {
+            public void renderFinalOutput() {
 
             }
         };
-
         OutputExtension ext1 = new OutputExtension("789") {
             @Override
             public Object call() throws Exception {
-                isWorking[0]  = true;
                 return null;
             }
         };
-
         OutputExtension ext2 = new OutputExtension("10") {
             @Override
             public Object call() throws Exception {
-                isWorking[1]  = true;
-                return null;
-            }
-        };
-
-        OutputExtension ext3 = new OutputExtension("140") {
-            @Override
-            public Object call() throws Exception {
-                isWorking[2]  = true;
                 return null;
             }
         };
         outputPlugin.addOutputExtension(ext1);
         outputPlugin.addOutputExtension(ext2);
-        outputPlugin.addOutputExtension(ext3);
 
-        outputPlugin.run();
+        ext1.addContentDataToWishList(cd1.getId());
+        ext2.addContentDataToWishList(cd2.getId());
+        ext2.addContentDataToWishList(cd3.getId());
 
-        synchronized (lock) {
-            boolean finished;
-            do {
-                finished = true;
-                for (int i = 0; i < outputPlugin.getFutureList().size(); i++) {
-                    LinkedList<Future> fList = outputPlugin.getFutureList();
-                    Future f = fList.get(i);
-                    if (!f.isDone())
-                        finished = false;
-                }
-                lock.wait(5);
-            }
-            while (!finished);
-        }
+        outputPlugin.addContentDataList(cdList);
+        outputPlugin.distributeContentData(cdList);
 
-        assertTrue(isWorking[0] && isWorking[1] && isWorking[2]);
+        boolean t1, t2, t3;
+        t1 = ext1.canRun();
+        t2 = ext2.canRun();
+        t3 = outputPlugin.canRun();
 
-
+        assertTrue(t1 && t2 && t3);
     }
 }
