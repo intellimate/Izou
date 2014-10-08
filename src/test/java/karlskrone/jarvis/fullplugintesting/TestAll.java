@@ -13,7 +13,7 @@ import static org.junit.Assert.*;
 /**
  * Created by julianbrendl on 10/7/14.
  */
-public class Main {
+public class TestAll {
 
     public static boolean isWorking = false;
 

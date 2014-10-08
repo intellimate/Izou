@@ -21,6 +21,6 @@ public class TestOP extends OutputPlugin<TestOD> {
         for(TestOD testOD: testODList)
             finalOutput += testOD.getData() + " ";
         System.out.println(finalOutput);
-        Main.isWorking = true;
+        TestAll.isWorking = true;
     }
 }
