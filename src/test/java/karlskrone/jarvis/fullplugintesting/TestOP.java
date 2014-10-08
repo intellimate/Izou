@@ -15,10 +15,12 @@ public class TestOP extends OutputPlugin<TestOD> {
 
     @Override
     public void renderFinalOutput() {
+        System.out.println("4");
         List<TestOD> testODList = this.getTDoneList();
         String finalOutput = "";
         for(TestOD testOD: testODList)
             finalOutput += testOD.getData() + " ";
         System.out.println(finalOutput);
+        Main.isWorking = true;
     }
 }

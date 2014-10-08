@@ -8,10 +8,14 @@ import org.junit.Test;
 
 import java.util.Scanner;
 
+import static org.junit.Assert.*;
+
 /**
  * Created by julianbrendl on 10/7/14.
  */
 public class Main {
+
+    public static boolean isWorking = false;
 
     @Test
     public void testPlugin() throws Exception {
@@ -34,10 +38,17 @@ public class Main {
         outputManager.addOutputPlugin(testOP);
         outputManager.addOutputExtension(testOE,"1");
 
-        Scanner scanner = new Scanner(System.in);
-
-        int input;
         Thread.sleep(10);
         testAct.setStart(true);
+
+        int count = 0;
+        int limit = 150;
+        while(!isWorking && (count < limit)) {
+            Thread.sleep(20);
+            count++;
+        }
+        assertTrue(isWorking);
     }
+
+
 }

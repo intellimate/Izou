@@ -22,6 +22,7 @@ public class TestAct extends Activator {
     public void activatorStarts() throws InterruptedException{
         while (true) {
             if(start) {
+                System.out.println("1");
                 this.registerEvent("1");
                 try {
                     this.fireEvent("1");

@@ -16,6 +16,7 @@ public class TestCG extends ContentGenerator<String> {
 
     @Override
     public ContentData<String> generate(String eventID) throws Exception {
+        System.out.println("2");
         ContentData<String> cd = new ContentData<>("TestGC-id");
         cd.setData("IT WORKS!!!!!!!!!!!");
         return cd;

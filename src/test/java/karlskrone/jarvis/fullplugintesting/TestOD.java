@@ -16,5 +16,6 @@ public class TestOD {
 
     public void setData(String data) {
         this.data = data;
+
     }
 }

@@ -55,6 +55,7 @@ public class OutputManager {
      */
     public void addOutputPlugin(OutputPlugin outputPlugin) {
         if (!futureHashMap.containsKey(outputPlugin.getId())) {
+            outputPlugin.setExecutor(executor);
             outputPluginsList.add(outputPlugin);
             futureHashMap.put(outputPlugin.getId(), executor.submit(outputPlugin));
         } else {

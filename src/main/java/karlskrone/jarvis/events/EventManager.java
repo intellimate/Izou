@@ -209,12 +209,12 @@ public class EventManager implements Runnable{
         do {
             change = false;
             for (Future future : futures) {
-                if(!future.isDone()) change = true;
+                if(future.isDone()) change = true;
             }
-            if(change) Thread.sleep(10);
+            if(!change) Thread.sleep(10);
             count++;
         }
-        while(change && (count < countLimit));
+        while(!change && (count < countLimit));
         List<ContentData> data = new ArrayList<>();
         if(count < countLimit)
         {
