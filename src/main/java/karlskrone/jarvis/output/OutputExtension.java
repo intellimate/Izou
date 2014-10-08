@@ -13,10 +13,17 @@ import java.util.concurrent.Callable;
  * Created by julianbrendl on 9/27/14.
  */
 public abstract class OutputExtension<T> implements Callable<T> {
+
     /**
      * the id of the outputExtension, same as the id of its contentData
      */
     private final String id;
+
+    /**
+     * the id of the outputPlugin the outputExtension belongs to
+     */
+    private String pluginId;
+
     /**
      * the contentDatas which it will convert to the desired Data type
      */
@@ -64,6 +71,15 @@ public abstract class OutputExtension<T> implements Callable<T> {
     }
 
     /**
+     * checks if the outputExtension can execute with the current content-datas
+     *
+     * @return the state of whether the outputExtension can execute with the current content-datas
+     */
+    public boolean canRun() {
+        return !contentDataList.isEmpty();
+    }
+
+    /**
      * removes content-data with id: id from the contentDataList
      *
      * @param id the id of the content-data to be removed
@@ -75,6 +91,11 @@ public abstract class OutputExtension<T> implements Callable<T> {
         }
     }
 
+    /**
+     * adds id of content-datas to the wish list
+     *
+     * @param id the id of the content-data to be added to the wish list
+     */
     public void addContentDataToWishList(String id) {
         contentDataWishList.add(id);
     }
@@ -98,6 +119,22 @@ public abstract class OutputExtension<T> implements Callable<T> {
      */
     public String getId() {
         return id;
+    }
+
+    /**
+     * gets the id of the output-plugin the outputExtension belongs to
+     * @return id of the output-plugin the outputExtension belongs to
+     */
+    public String getPluginId() {
+        return pluginId;
+    }
+
+    /**
+     * sets the id of the output-plugin the outputExtension belongs to
+     * @param pluginId the id of the output-plugin the outputExtension belongs to that is to be set
+     */
+    public void setPluginId(String pluginId) {
+        this.pluginId = pluginId;
     }
 
     @Override
