@@ -21,6 +21,7 @@ public abstract class AddOn implements ExtensionPoint {
     private final Properties properties;
     private final String addOnID;
 
+
     /**
      * the default constructor for AddOns
      * @param addOnID the ID of the Plugin in the form: package.class

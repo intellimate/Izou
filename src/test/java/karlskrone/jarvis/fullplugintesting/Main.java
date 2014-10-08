@@ -33,10 +33,6 @@ public class Main {
         testOE.addContentDataToWishList("TestGC-id");
         outputManager.addOutputPlugin(testOP);
         outputManager.addOutputExtension(testOE,"1");
-
-        Scanner scanner = new Scanner(System.in);
-
-        int input;
         Thread.sleep(10);
         testAct.setStart(true);
     }
