@@ -93,6 +93,8 @@ public class AddOnManager {
         }
     }
 
+
+
     /**
      * retrieves and registers all AddOns.
      */
@@ -112,6 +114,7 @@ public class AddOnManager {
         } catch (IOException e) {
             //TODO: implement Exception handling
             e.printStackTrace();
+
         }
         PluginManager pluginManager = new DefaultPluginManager(libPath.toFile());
         List<AddOn> addOns = pluginManager.getExtensions(AddOn.class);
