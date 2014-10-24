@@ -105,6 +105,15 @@ public class AddOnManager {
     }
 
     /**
+     * registers all AddOns.
+     */
+    public void addAndRegisterAddOns(List<AddOn> addOns) {
+        addOnList.addAll(addOns);
+        prepareAllAddOns();
+        registerAllAddOns();
+    }
+
+    /**
      * This method searches all the "/lib"-directory for AddOns and adds them to the addOnList
      */
     private void addAllAddOns() {

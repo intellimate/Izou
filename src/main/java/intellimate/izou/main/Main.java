@@ -1,10 +1,13 @@
 package intellimate.izou.main;
 
 import intellimate.izou.activator.ActivatorManager;
+import intellimate.izou.addon.AddOn;
 import intellimate.izou.addon.AddOnManager;
 import intellimate.izou.contentgenerator.ContentGeneratorManager;
 import intellimate.izou.events.EventManager;
 import intellimate.izou.output.OutputManager;
+
+import java.util.List;
 
 /**
  * Main Class.
@@ -29,6 +32,22 @@ public class Main {
         activatorManager = new ActivatorManager(eventManager);
         addOnManager = new AddOnManager(outputManager,eventManager,contentGeneratorManager,activatorManager);
         addOnManager.retrieveAndRegisterAddOns();
+    }
+
+    /**
+     * If you want to debug your Plugin, you can get an Main instance with this Method
+     *
+     * @param addOns a List of AddOns to run
+     */
+    public Main(List<AddOn> addOns) {
+        outputManager = new OutputManager();
+        eventManager = new EventManager(outputManager);
+        threadEventManager = new Thread(eventManager);
+        threadEventManager.start();
+        contentGeneratorManager = new ContentGeneratorManager(eventManager);
+        activatorManager = new ActivatorManager(eventManager);
+        addOnManager = new AddOnManager(outputManager,eventManager,contentGeneratorManager,activatorManager);
+        addOnManager.addAndRegisterAddOns(addOns);
     }
 
     public static void main(String[] args) {
