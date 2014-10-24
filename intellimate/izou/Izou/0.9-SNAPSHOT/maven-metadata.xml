@@ -2,23 +2,23 @@
 <metadata modelVersion="1.1.0">
   <groupId>intellimate.izou</groupId>
   <artifactId>Izou</artifactId>
-  <version>0.8-SNAPSHOT</version>
+  <version>0.9-SNAPSHOT</version>
   <versioning>
     <snapshot>
-      <timestamp>20141023.132601</timestamp>
+      <timestamp>20141024.104936</timestamp>
       <buildNumber>1</buildNumber>
     </snapshot>
-    <lastUpdated>20141023132601</lastUpdated>
+    <lastUpdated>20141024104936</lastUpdated>
     <snapshotVersions>
       <snapshotVersion>
         <extension>jar</extension>
-        <value>0.8-20141023.132601-1</value>
-        <updated>20141023132601</updated>
+        <value>0.9-20141024.104936-1</value>
+        <updated>20141024104936</updated>
       </snapshotVersion>
       <snapshotVersion>
         <extension>pom</extension>
-        <value>0.8-20141023.132601-1</value>
-        <updated>20141023132601</updated>
+        <value>0.9-20141024.104936-1</value>
+        <updated>20141024104936</updated>
       </snapshotVersion>
     </snapshotVersions>
   </versioning>
