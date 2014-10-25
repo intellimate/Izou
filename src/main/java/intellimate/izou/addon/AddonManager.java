@@ -39,7 +39,7 @@ public class AddOnManager {
     }
 
     /**
-     * loops all the AddOns an lets them register all their Activators
+     * loops through all AddOns and lets them register all their Activators
      */
     private void registerActivators() {
         for (AddOn addOn : addOnList) {
@@ -50,7 +50,7 @@ public class AddOnManager {
     }
 
     /**
-     * loops all the AddOns an lets them register all their ContentGenerators
+     * loops through all AddOns and lets them register all their ContentGenerators
      */
     private void registerContentGenerators(){
         for (AddOn addOn : addOnList) {
@@ -61,7 +61,7 @@ public class AddOnManager {
     }
 
     /**
-     * loops all the AddOns an lets them register all their EventController
+     * loops through all AddOns and lets them register all their EventController
      */
     private void registerEventControllers(){
         for (AddOn addOn : addOnList) {
@@ -72,7 +72,7 @@ public class AddOnManager {
     }
 
     /**
-     * loops all the AddOns an lets them register all their OutputsPlugins
+     * loops through all AddOns and lets them register all their OutputsPlugins
      */
     private void registerOutputPlugins(){
         for (AddOn addOn : addOnList) {
@@ -83,7 +83,7 @@ public class AddOnManager {
     }
 
     /**
-     * loops all the AddOns an lets them register all their OutputsExtensions
+     * loops through all AddOns and lets them register all their OutputsExtensions
      */
     private void registerOutputExtensions(){
         for (AddOn addOn : addOnList) {
