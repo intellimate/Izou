@@ -7,8 +7,7 @@ import intellimate.izou.output.OutputExtension;
 import intellimate.izou.output.OutputPlugin;
 import ro.fortsoft.pf4j.ExtensionPoint;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Properties;
 
 /**
@@ -30,14 +29,28 @@ public abstract class AddOn implements ExtensionPoint {
         this.addOnID = addOnID;
 
         properties = new Properties();
-        String propFileName = addOnID + ".properties";
 
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
-        try {
-            properties.load(inputStream);
+        File f = new File(System.getProperty("java.class.path"));
+        File dir = f.getAbsoluteFile().getParentFile();
+        File properties = new File(dir.toString() + File.pathSeparator + addOnID + ".properties");
+
+        if(!properties.exists()) try {
+            properties.createNewFile();
         } catch (IOException e) {
-            //TODO: log exception
             e.printStackTrace();
+        }
+
+        InputStream inputStream = null;
+        try {
+            inputStream = new FileInputStream(properties);
+            try {
+                this.properties.load(inputStream);
+            } catch (IOException e) {
+                //TODO: log exception
+                e.printStackTrace();
+            }
+        } catch (FileNotFoundException e) {
+            //TODO: log exception
         }
     }
 
@@ -89,6 +102,15 @@ public abstract class AddOn implements ExtensionPoint {
      */
     public String getProperties(String key) {
         return properties.getProperty(key);
+    }
+
+    /**
+     * Returns an Instance of Properties, if found
+     *
+     * @return an Instance of Properties or null;
+     */
+    public Properties getProperties() {
+        return properties;
     }
 
     /**
