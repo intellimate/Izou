@@ -44,6 +44,7 @@ public class AddOnManager {
     private void registerActivators() {
         for (AddOn addOn : addOnList) {
             for(Activator activator : addOn.registerActivator()) {
+                if(activator == null) continue;
                 activatorManager.addActivator(activator);
             }
         }
@@ -55,6 +56,7 @@ public class AddOnManager {
     private void registerContentGenerators(){
         for (AddOn addOn : addOnList) {
             for(ContentGenerator contentGenerator : addOn.registerContentGenerator()) {
+                if(contentGenerator == null) continue;
                 contentGeneratorManager.addContentGenerator(contentGenerator);
             }
         }
@@ -66,6 +68,7 @@ public class AddOnManager {
     private void registerEventControllers(){
         for (AddOn addOn : addOnList) {
             for (EventController eventController : addOn.registerEventController()) {
+                if(eventController == null) continue;
                 eventManager.addEventController(eventController);
             }
         }
@@ -77,6 +80,7 @@ public class AddOnManager {
     private void registerOutputPlugins(){
         for (AddOn addOn : addOnList) {
             for(OutputPlugin outputPlugin : addOn.registerOutputPlugin()) {
+                if(outputPlugin == null) continue;
                 outputManager.addOutputPlugin(outputPlugin);
             }
         }
@@ -88,6 +92,7 @@ public class AddOnManager {
     private void registerOutputExtensions(){
         for (AddOn addOn : addOnList) {
             for(OutputExtension outputExtension : addOn.registerOutputExtension()) {
+                if(outputExtension == null) continue;
                 outputManager.addOutputExtension(outputExtension, outputExtension.getPluginId());
             }
         }

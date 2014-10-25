@@ -35,6 +35,13 @@ public class EventManager implements Runnable{
      */
     @SuppressWarnings("UnusedDeclaration")
     public static final String MINOR_WELCOME_EVENT = EventManager.class.getCanonicalName() + ".MinorWelcomeEvent";
+    /**
+     * Event for a Welcome with major response.
+     *
+     * Only components that have information of great importance should contribute to this event.
+     */
+    @SuppressWarnings("UnusedDeclaration")
+    public static final String SUSCRIBE_TO_ALL_EVENTS = EventManager.class.getCanonicalName() + ".SubscribeToAllEvents";
 
     //here are all the ContentGenerators-Listeners stored
     private final ConcurrentHashMap<String, ArrayList<ActivatorEventListener>> listeners = new ConcurrentHashMap<>();
@@ -191,11 +198,23 @@ public class EventManager implements Runnable{
     private void fireActivatorEvent (String id) throws InterruptedException {
         checkID(id);
         if(!checkEventControllers(id)) return;
+        //registered to Event
         ArrayList<ActivatorEventListener> contentGeneratorListeners = this.listeners.get(id);
         if (contentGeneratorListeners == null) {
             return;
         }
         List<Future<ContentData>> futures = new ArrayList<>();
+        for (ActivatorEventListener next : contentGeneratorListeners) {
+            Future<ContentData> futureTemp = next.activatorEventFired(id);
+            if (futureTemp != null) {
+                futures.add(futureTemp);
+            }
+        }
+        //registered to all Events
+        contentGeneratorListeners = this.listeners.get(SUSCRIBE_TO_ALL_EVENTS);
+        if (contentGeneratorListeners == null) {
+            return;
+        }
         for (ActivatorEventListener next : contentGeneratorListeners) {
             Future<ContentData> futureTemp = next.activatorEventFired(id);
             if (futureTemp != null) {
