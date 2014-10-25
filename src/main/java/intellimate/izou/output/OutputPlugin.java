@@ -183,8 +183,8 @@ public abstract class OutputPlugin<T> implements Runnable{
     }
 
     /**
-     * method that uses tDoneList to generate a final output that wil then be rendered
-     * the processed content-data objects are found in tDoneProcessed
+     * method that uses tDoneList to generate a final output that will then be rendered.
+     * The processed content-data objects are found in tDoneProcessed
      */
     public abstract void renderFinalOutput();
 
