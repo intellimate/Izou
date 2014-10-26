@@ -140,6 +140,8 @@ public abstract class OutputPlugin<T> implements Runnable{
      *
      * it uses the id of the contentData which is the same as the id of the outputExtension to identify which output-extension
      * it should send the content-data to
+     *
+     * @param contentDataList the Data to distribute
      */
     public void distributeContentData(List<ContentData> contentDataList) {
         for(OutputExtension ext: outputExtensionList) {
@@ -189,9 +191,11 @@ public abstract class OutputPlugin<T> implements Runnable{
     public abstract void renderFinalOutput();
 
     /**
-     * Default implementation waits until a new List<ContentData> has been received and then processes it,
+     * Default implementation waits until a new list of content-datas has been received and then processes it.
      *
-     * this method is made to be overwritten as seen fit by the developer
+     * This method is made to be overwritten as seen fit by the developer
+     *
+     * @throws java.lang.InterruptedException if interrupted while waiting
      * @return the list of content-datas to be processed by the outputPlugin
      */
     public List<ContentData> blockingQueueHandling() throws InterruptedException {

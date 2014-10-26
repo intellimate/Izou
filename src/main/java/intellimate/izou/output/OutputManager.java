@@ -58,7 +58,8 @@ public class OutputManager {
     }
 
     /**
-     * adds outputPlugin to outputPluginList, starts a new thread for the outputPlugin, and stores the future object in a hashmap
+     * adds outputPlugin to outputPluginList, starts a new thread for the outputPlugin, and stores the future object in a HashMap
+     * @param outputPlugin OutputPlugin to add
      */
     public void addOutputPlugin(OutputPlugin outputPlugin) {
         if (!futureHashMap.containsKey(outputPlugin.getId())) {
