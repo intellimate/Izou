@@ -212,13 +212,12 @@ public class EventManager implements Runnable{
         }
         //registered to all Events
         contentGeneratorListeners = this.listeners.get(SUSCRIBE_TO_ALL_EVENTS);
-        if (contentGeneratorListeners == null) {
-            return;
-        }
-        for (ActivatorEventListener next : contentGeneratorListeners) {
-            Future<ContentData> futureTemp = next.activatorEventFired(id);
-            if (futureTemp != null) {
-                futures.add(futureTemp);
+        if (contentGeneratorListeners != null) {
+            for (ActivatorEventListener next : contentGeneratorListeners) {
+                Future<ContentData> futureTemp = next.activatorEventFired(id);
+                if (futureTemp != null) {
+                    futures.add(futureTemp);
+                }
             }
         }
         //workaround -> timeout for ALL futures of a little bit less than 1 sec

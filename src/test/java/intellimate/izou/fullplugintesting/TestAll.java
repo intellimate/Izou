@@ -45,6 +45,12 @@ public class TestAll {
             Thread.sleep(20);
             count++;
         }
+        //should print out:
+        //1
+        //2
+        //3
+        //4
+        //It Works
         assertTrue(isWorking);
     }
 
