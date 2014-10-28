@@ -58,9 +58,6 @@
                         <goals><goal>jar</goal></goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <reportOutputDirectory>internal.repo::default::file://${project.build.directory}/mvn-repo</reportOutputDirectory>
-                </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
