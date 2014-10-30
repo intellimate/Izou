@@ -55,6 +55,10 @@ public abstract class Activator implements Runnable {
         if(exceptionCount < exceptionLimit) {
             if(terminated(e) && activatorManager != null)
             {
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e1) {
+                }
                 activatorManager.addActivator(this);
             }
         }

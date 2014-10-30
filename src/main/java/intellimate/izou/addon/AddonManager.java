@@ -43,7 +43,9 @@ public class AddOnManager {
      */
     private void registerActivators() {
         for (AddOn addOn : addOnList) {
-            for(Activator activator : addOn.registerActivator()) {
+            Activator[] activators = addOn.registerActivator();
+            if(activators == null || activators.length == 0) continue;
+            for(Activator activator : activators) {
                 if(activator == null) continue;
                 activatorManager.addActivator(activator);
             }
@@ -55,7 +57,9 @@ public class AddOnManager {
      */
     private void registerContentGenerators(){
         for (AddOn addOn : addOnList) {
-            for(ContentGenerator contentGenerator : addOn.registerContentGenerator()) {
+            ContentGenerator[] contentGenerators = addOn.registerContentGenerator();
+            if(contentGenerators == null || contentGenerators.length == 0) continue;
+            for(ContentGenerator contentGenerator : contentGenerators) {
                 if(contentGenerator == null) continue;
                 contentGeneratorManager.addContentGenerator(contentGenerator);
             }
@@ -67,6 +71,8 @@ public class AddOnManager {
      */
     private void registerEventControllers(){
         for (AddOn addOn : addOnList) {
+            EventController[] eventControllers = addOn.registerEventController();
+            if(eventControllers == null || eventControllers.length == 0) continue;
             for (EventController eventController : addOn.registerEventController()) {
                 if(eventController == null) continue;
                 eventManager.addEventController(eventController);
@@ -79,6 +85,8 @@ public class AddOnManager {
      */
     private void registerOutputPlugins(){
         for (AddOn addOn : addOnList) {
+            OutputPlugin[] outputPlugins = addOn.registerOutputPlugin();
+            if(outputPlugins == null || outputPlugins.length == 0) continue;
             for(OutputPlugin outputPlugin : addOn.registerOutputPlugin()) {
                 if(outputPlugin == null) continue;
                 outputManager.addOutputPlugin(outputPlugin);
@@ -91,6 +99,8 @@ public class AddOnManager {
      */
     private void registerOutputExtensions(){
         for (AddOn addOn : addOnList) {
+            OutputExtension[] outputExtensions = addOn.registerOutputExtension();
+            if(outputExtensions == null || outputExtensions.length == 0) continue;
             for(OutputExtension outputExtension : addOn.registerOutputExtension()) {
                 if(outputExtension == null) continue;
                 outputManager.addOutputExtension(outputExtension, outputExtension.getPluginId());
@@ -111,6 +121,7 @@ public class AddOnManager {
 
     /**
      * registers all AddOns.
+     * @param addOns a List containing all the AddOns
      */
     public void addAndRegisterAddOns(List<AddOn> addOns) {
         addOnList.addAll(addOns);

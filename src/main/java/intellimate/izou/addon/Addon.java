@@ -8,10 +8,11 @@ import intellimate.izou.output.OutputPlugin;
 import ro.fortsoft.pf4j.ExtensionPoint;
 
 import java.io.*;
+import java.net.URLDecoder;
 import java.util.Properties;
 
 /**
- * A AddOns must extend this Class.
+ * All AddOns must extend this Class.
  *
  * It will be instantiated and its registering-methods will be called by the PluginManager.
  * This class has method for a properties-file named addOnID.properties (AddOnsID in the form: package.class)
@@ -29,28 +30,29 @@ public abstract class AddOn implements ExtensionPoint {
         this.addOnID = addOnID;
 
         properties = new Properties();
-
-        File f = new File(System.getProperty("java.class.path"));
-        File dir = f.getAbsoluteFile().getParentFile();
-        File properties = new File(dir.toString() + File.pathSeparator + addOnID + ".properties");
-
-        if(!properties.exists()) try {
-            properties.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        InputStream inputStream = null;
         try {
-            inputStream = new FileInputStream(properties);
-            try {
-                this.properties.load(inputStream);
+            String path = new File(".").getCanonicalPath();
+            File properties = new File(path + File.separator + addOnID + ".properties");
+            if(!properties.exists()) try {
+                properties.createNewFile();
             } catch (IOException e) {
-                //TODO: log exception
                 e.printStackTrace();
             }
-        } catch (FileNotFoundException e) {
-            //TODO: log exception
+
+            InputStream inputStream = null;
+            try {
+                inputStream = new FileInputStream(properties);
+                try {
+                    this.properties.load(inputStream);
+                } catch (IOException e) {
+                    //TODO: log exception
+                    e.printStackTrace();
+                }
+            } catch (FileNotFoundException e) {
+                //TODO: log exception
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -60,26 +62,31 @@ public abstract class AddOn implements ExtensionPoint {
     public abstract void prepare();
     /**
      * use this method to register (if needed) your Activators.
+     * @return Array containing Instances of Activators
      */
     public abstract Activator[] registerActivator();
 
     /**
      * use this method to register (if needed) your ContentGenerators.
+     * @return Array containing Instances of ContentGenerators
      */
     public abstract ContentGenerator[] registerContentGenerator();
 
     /**
      * use this method to register (if needed) your EventControllers.
+     * @return Array containing Instances of EventControllers
      */
     public abstract EventController[] registerEventController();
 
     /**
      * use this method to register (if needed) your OutputPlugins.
+     * @return Array containing Instances of OutputPlugins
      */
     public abstract OutputPlugin[] registerOutputPlugin();
 
     /**
      * use this method to register (if needed) your Output.
+     * @return Array containing Instances of OutputExtensions
      */
     public abstract OutputExtension[] registerOutputExtension();
 
