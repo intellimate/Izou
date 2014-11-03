@@ -18,7 +18,7 @@ import java.util.Properties;
  * This class has method for a properties-file named addOnID.properties (AddOnsID in the form: package.class)
  */
 public abstract class AddOn implements ExtensionPoint {
-    private final Properties properties;
+    private Properties properties;
     private final String addOnID;
 
 
@@ -131,5 +131,15 @@ public abstract class AddOn implements ExtensionPoint {
      */
     public void setProperties(String key, String value) {
         properties.setProperty(key, value);
+    }
+
+    /**
+     * Sets properties
+     *
+     * @param properties instance of properties, not null
+     */
+    public void setProperties(Properties properties) {
+        if(properties == null) return;
+        this.properties = properties;
     }
 }
