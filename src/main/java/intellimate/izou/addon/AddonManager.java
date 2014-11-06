@@ -133,15 +133,22 @@ public class AddOnManager {
      * This method searches all the "/lib"-directory for AddOns and adds them to the addOnList
      */
     private void addAllAddOns() {
-        Path libPath = Paths.get("/lib");
-        if(!Files.exists(libPath)) try {
-            Files.createDirectories(libPath);
+        File libFile;
+        try {
+            String libPath = new File(".").getCanonicalPath()+ File.separator + "lib";
+            libFile = new File(libPath);
         } catch (IOException e) {
             //TODO: implement Exception handling
             e.printStackTrace();
-
+            return;
         }
-        PluginManager pluginManager = new DefaultPluginManager(libPath.toFile());
+        if(!Files.exists(libFile.toPath())) try {
+            Files.createDirectories(libFile.toPath());
+        } catch (IOException e) {
+            //TODO: implement Exception handling
+            e.printStackTrace();
+        }
+        PluginManager pluginManager = new DefaultPluginManager(libFile);
         List<AddOn> addOns = pluginManager.getExtensions(AddOn.class);
         addOnList.addAll(addOns);
     }
