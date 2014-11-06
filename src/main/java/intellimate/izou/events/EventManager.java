@@ -41,7 +41,7 @@ public class EventManager implements Runnable{
      * Only components that have information of great importance should contribute to this event.
      */
     @SuppressWarnings("UnusedDeclaration")
-    public static final String SUSCRIBE_TO_ALL_EVENTS = EventManager.class.getCanonicalName() + ".SubscribeToAllEvents";
+    public static final String SUBSCRIBE_TO_ALL_EVENTS = EventManager.class.getCanonicalName() + ".SubscribeToAllEvents";
 
     //here are all the ContentGenerators-Listeners stored
     private final ConcurrentHashMap<String, ArrayList<ActivatorEventListener>> listeners = new ConcurrentHashMap<>();
@@ -211,7 +211,7 @@ public class EventManager implements Runnable{
             }
         }
         //registered to all Events
-        contentGeneratorListeners = this.listeners.get(SUSCRIBE_TO_ALL_EVENTS);
+        contentGeneratorListeners = this.listeners.get(SUBSCRIBE_TO_ALL_EVENTS);
         if (contentGeneratorListeners != null) {
             for (ActivatorEventListener next : contentGeneratorListeners) {
                 Future<ContentData> futureTemp = next.activatorEventFired(id);
