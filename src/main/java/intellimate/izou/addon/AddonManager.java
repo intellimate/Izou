@@ -12,6 +12,7 @@ import intellimate.izou.output.OutputPlugin;
 import ro.fortsoft.pf4j.DefaultPluginManager;
 import ro.fortsoft.pf4j.PluginManager;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,6 +29,7 @@ public class AddOnManager {
     private final EventManager eventManager;
     private final ContentGeneratorManager contentGeneratorManager;
     private final ActivatorManager activatorManager;
+    private final PropertiesManager propertiesManager;
 
     public AddOnManager(OutputManager outputManager, EventManager eventManager,
                         ContentGeneratorManager contentGeneratorManager, ActivatorManager activatorManager) {
@@ -36,6 +38,18 @@ public class AddOnManager {
         this.eventManager = eventManager;
         this.contentGeneratorManager = contentGeneratorManager;
         this.activatorManager = activatorManager;
+
+        PropertiesManager propertiesManagerTemp;
+        try {
+            propertiesManagerTemp = new PropertiesManager();
+        } catch(IOException e) {
+            propertiesManagerTemp = null;
+            e.printStackTrace();
+            //TODO: implement error handling
+        }
+        propertiesManager = propertiesManagerTemp;
+        Thread thread = new Thread(propertiesManager);
+        thread.start();
     }
 
     /**
@@ -83,7 +97,7 @@ public class AddOnManager {
     /**
      * loops through all AddOns and lets them register all their OutputsPlugins
      */
-    private void registerOutputPlugins(){
+    private void registerOutputPlugins() {
         for (AddOn addOn : addOnList) {
             OutputPlugin[] outputPlugins = addOn.registerOutputPlugin();
             if(outputPlugins == null || outputPlugins.length == 0) continue;
@@ -97,7 +111,7 @@ public class AddOnManager {
     /**
      * loops through all AddOns and lets them register all their OutputsExtensions
      */
-    private void registerOutputExtensions(){
+    private void registerOutputExtensions() {
         for (AddOn addOn : addOnList) {
             OutputExtension[] outputExtensions = addOn.registerOutputExtension();
             if(outputExtensions == null || outputExtensions.length == 0) continue;
@@ -108,7 +122,15 @@ public class AddOnManager {
         }
     }
 
-
+    /**
+     * registers all property files with the PropertyManager
+     * @throws IOException
+     */
+    private void registerPropertyFiles() throws IOException {
+        for (AddOn addOn : addOnList) {
+            propertiesManager.registerProperty(addOn.registerPropertiesFile());
+        }
+    }
 
     /**
      * retrieves and registers all AddOns.
@@ -171,5 +193,11 @@ public class AddOnManager {
         registerContentGenerators();
         registerEventControllers();
         registerActivators();
+        try {
+            registerPropertyFiles();
+        } catch(IOException e) {
+            e.printStackTrace();
+            //TODO: implement exception handling
+        }
     }
 }

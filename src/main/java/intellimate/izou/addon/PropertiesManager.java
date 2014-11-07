@@ -1,6 +1,8 @@
 package intellimate.izou.addon;
 
 import static java.nio.file.StandardWatchEventKinds.*;
+
+import java.awt.*;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.HashMap;
@@ -23,6 +25,9 @@ public class PropertiesManager implements Runnable {
         keys.put(key, dir);
     }
 
+    public boolean isProperty(WatchEvent event) {
+        return event.context().toString().endsWith("properties");
+    }
 
     @Override
     public void run() {
@@ -44,8 +49,13 @@ public class PropertiesManager implements Runnable {
 
                 if (kind == OVERFLOW) {
                     System.out.println("overflow in file events");
-                } else if (kind == ENTRY_MODIFY) {
+                } else if ((kind == ENTRY_MODIFY) && isProperty(event)) {
                     System.out.println("file was changed");
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
 

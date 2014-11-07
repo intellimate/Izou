@@ -9,6 +9,7 @@ import ro.fortsoft.pf4j.ExtensionPoint;
 
 import java.io.*;
 import java.net.URLDecoder;
+import java.nio.file.Path;
 import java.util.Properties;
 
 /**
@@ -91,6 +92,12 @@ public abstract class AddOn implements ExtensionPoint {
     public abstract OutputExtension[] registerOutputExtension();
 
     /**
+     * use this method to register a property file (if you have one) so that Izou reloads it when you update it manually
+     * @return the path to the properties file
+     */
+    public abstract Path registerPropertiesFile();
+
+    /**
      * The AddOns-Id is usually the following Form: package.class
      * @return a String containing the PluginID
      */
@@ -124,8 +131,8 @@ public abstract class AddOn implements ExtensionPoint {
      * Calls the HashTable method put.
      *
      * Provided for parallelism with the getProperty method. Enforces use of strings for
-     * property keys and values. The value returned is the result of the HashTable call to put.
-     *
+     *     * property keys and values. The value returned is the result of the HashTable call to put.
+
      * @param key the key to be placed into this property list.
      * @param value the value corresponding to key.
      */

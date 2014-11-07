@@ -185,6 +185,13 @@ public abstract class OutputPlugin<T> implements Runnable{
     }
 
     /**
+     * method that can be overwritten in order to "do stuff" before the outputExtensions are started
+     */
+    public void prepareDistribution() {
+
+    }
+
+    /**
      * method that uses tDoneList to generate a final output that will then be rendered.
      * The processed content-data objects are found in tDoneProcessed
      */
@@ -221,6 +228,7 @@ public abstract class OutputPlugin<T> implements Runnable{
                 break;
             }
 
+            prepareDistribution();
             distributeContentData(contentDataList); //distributes the contentDatas among all outputExtensions
             if(canRun()) {  //checks if there are any outputExtensions that can run at all
                 for (OutputExtension<T> ext : outputExtensionList) {
