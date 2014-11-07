@@ -234,7 +234,7 @@ public class EventManager implements Runnable{
         }
         while(!change && (count < countLimit));
         List<ContentData> data = new ArrayList<>();
-        if(count < countLimit)
+        if(count == countLimit)
         {
             for (Future<ContentData> next : futures) {
                 if (!next.isDone()) {

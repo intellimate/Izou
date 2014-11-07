@@ -9,26 +9,61 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by julianbrendl on 11/7/14.
+ * The properties manager listens for events that were caused by modifications made to property files and
+ * then reloads the properties file
  */
 public class PropertiesManager implements Runnable {
+    /**
+     * default java watching service for directories, raises events when changes happen in this directory
+     */
     private WatchService watcher;
+
+    /**
+     * Map that holds watchKeys (ID's) of the directories and paths to the directories themselves
+     */
     private Map<WatchKey,Path> keys;
 
+    /**
+     * Map that holds watchKeys (ID's) of the directories and the addOns using the directories
+     */
+    private Map<WatchKey, AddOn> addOnMap;
+
+    /**
+     * creates a new PropertiesManager with a watcher, keys Map and addOnMap
+     *
+     * @throws IOException exception is thrown by watcher service
+     */
     public PropertiesManager() throws IOException {
         watcher = FileSystems.getDefault().newWatchService();
         keys = new HashMap<>();
+        addOnMap = new HashMap<>();
     }
 
-    public void registerProperty(Path dir) throws IOException {
+    /**
+     * use this method to register a properties file with the watcherService
+     *
+     * @param dir directory of properties file
+     * @param addOn addOn properties file belongs to
+     * @throws IOException exception thrown by watcher service
+     */
+    public void registerProperty(Path dir, AddOn addOn) throws IOException {
         WatchKey key = dir.register(watcher, ENTRY_MODIFY);
         keys.put(key, dir);
+        addOnMap.put(key, addOn);
     }
 
-    public boolean isProperty(WatchEvent event) {
+    /**
+     * checks if an event belongs to a properties file
+     * @param event the event to check
+     * @return the boolean value corresponding to the output
+     */
+    private boolean isProperty(WatchEvent event) {
         return event.context().toString().endsWith("properties");
     }
 
+    /**
+     * main method of propertiesManager, it constantly waits for new events and then processes them
+     */
     @Override
     public void run() {
         while(true) {
@@ -50,7 +85,8 @@ public class PropertiesManager implements Runnable {
                 if (kind == OVERFLOW) {
                     System.out.println("overflow in file events");
                 } else if ((kind == ENTRY_MODIFY) && isProperty(event)) {
-                    System.out.println("file was changed");
+                    AddOn addOn = addOnMap.get(key);
+                    addOn.reloadProperties();
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {

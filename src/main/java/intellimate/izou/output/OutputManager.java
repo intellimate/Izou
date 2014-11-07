@@ -12,8 +12,6 @@ import java.util.concurrent.Future;
 /**
  * OutputManager manages all output plugins and is the main class anyone outside the output package should talk to.
  * It can register/remove new output-plugins and add/delete output-extensions
- *
- * Created by Julian Brendl on 9/27/14.
  */
 public class OutputManager {
 

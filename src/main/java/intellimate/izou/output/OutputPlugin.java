@@ -10,8 +10,6 @@ import java.util.concurrent.*;
 /**
  * The OutputPlugin class gets contentData and then starts threads filled with output-extension tasks to create the final
  * output and then render it on its own medium
- *
- * Created by julianbrendl on 9/27/14.
  */
 public abstract class OutputPlugin<T> implements Runnable{
     /**
@@ -164,6 +162,7 @@ public abstract class OutputPlugin<T> implements Runnable{
     public void addOutputExtension(OutputExtension<T> outputExtension) {
         outputExtensionList.add(outputExtension);
         outputExtension.setPluginId(this.getId());
+        outputExtensionWasAdded();
     }
 
     /**
@@ -185,17 +184,32 @@ public abstract class OutputPlugin<T> implements Runnable{
     }
 
     /**
-     * method that can be overwritten in order to "do stuff" before the outputExtensions are started
+     * event is called when an output-extension is added to this output-plugin
      */
-    public void prepareDistribution() {
+    public void outputExtensionWasAdded() {
 
     }
 
     /**
+     * method that can be overwritten in order to "do stuff" before the outputExtensions are started
+     */
+    public void prepareDistribution() {}
+
+    /**
      * method that uses tDoneList to generate a final output that will then be rendered.
-     * The processed content-data objects are found in tDoneProcessed
+     * The processed content-data objects are found in tDoneList
      */
     public abstract void renderFinalOutput();
+
+    /**
+     * the event raised when an outputData has finished processing and is about to be added to the tDoneList.
+     * It is NOT raised immediately raised after it is done, instead it is raised exactly when it is about to be
+     * added to the tDoneList, by which time all other outputExtensions will also have finished. However it is an
+     * opportunity to work with a finished future object (or get the outputData inside) before it is thrown back
+     * into the heap.
+     * @param tFuture future object that contains the processed outputExtension data
+     */
+    public void outputDataIsDone(Future<T> tFuture) {};
 
     /**
      * Default implementation waits until a new list of content-datas has been received and then processes it.
@@ -241,14 +255,17 @@ public abstract class OutputPlugin<T> implements Runnable{
                 do {
                     isWorking = true;
                     for (Future<T> cDF : futureList) {
-                        if (cDF.isDone())
+                        if(cDF.isDone())
                             isWorking = false;
+                        else
+                            break;
                     }
                 } while (isWorking);
 
                 //copies the finished future objects into a tDoneList
                 for (Future<T> tF : futureList) {
                     try {
+                        outputDataIsDone(tF);
                         tDoneList.add(tF.get());
                     } catch (InterruptedException e) {
                         e.printStackTrace();
