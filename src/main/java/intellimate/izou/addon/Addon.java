@@ -21,6 +21,7 @@ import java.util.Properties;
 public abstract class AddOn implements ExtensionPoint {
     private Properties properties;
     private final String addOnID;
+    private final String propertiesPath;
 
 
     /**
@@ -31,29 +32,33 @@ public abstract class AddOn implements ExtensionPoint {
         this.addOnID = addOnID;
 
         properties = new Properties();
+        String propertiesPathTemp;
         try {
-            String path = new File(".").getCanonicalPath();
-            File properties = new File(path + File.separator + addOnID + ".properties");
-            if(!properties.exists()) try {
-                properties.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            propertiesPathTemp = new File(".").getCanonicalPath() + File.separator + addOnID + ".properties";
+        } catch (IOException e) {
+            propertiesPathTemp = null;
+            e.printStackTrace();
+        }
+        propertiesPath = propertiesPathTemp;
 
-            InputStream inputStream = null;
-            try {
-                inputStream = new FileInputStream(properties);
-                try {
-                    this.properties.load(inputStream);
-                } catch (IOException e) {
-                    //TODO: log exception
-                    e.printStackTrace();
-                }
-            } catch (FileNotFoundException e) {
-                //TODO: log exception
-            }
+        File properties = new File(propertiesPath);
+        if(!properties.exists()) try {
+            properties.createNewFile();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
+        InputStream inputStream = null;
+        try {
+            inputStream = new FileInputStream(properties);
+            try {
+                this.properties.load(inputStream);
+            } catch (IOException e) {
+                //TODO: log exception
+                e.printStackTrace();
+            }
+        } catch (FileNotFoundException e) {
+            //TODO: log exception
         }
     }
 
@@ -61,6 +66,22 @@ public abstract class AddOn implements ExtensionPoint {
      * use this method to build your instances etc.
      */
     public abstract void prepare();
+
+    public void reloadProperties() {
+        Properties temp = new Properties();
+        try {
+            String path = new File(".").getCanonicalPath();
+            File properties = new File(propertiesPath);
+
+            InputStream inputStream = new FileInputStream(properties);
+            temp.load(inputStream);
+        } catch(IOException e) {
+            e.printStackTrace();
+            return;
+        }
+        this.properties = temp;
+    }
+
     /**
      * use this method to register (if needed) your Activators.
      * @return Array containing Instances of Activators

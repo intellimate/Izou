@@ -128,7 +128,7 @@ public class AddOnManager {
      */
     private void registerPropertyFiles() throws IOException {
         for (AddOn addOn : addOnList) {
-            propertiesManager.registerProperty(addOn.registerPropertiesFile());
+            propertiesManager.registerProperty(addOn.registerPropertiesFile(), addOn);
         }
     }
 
