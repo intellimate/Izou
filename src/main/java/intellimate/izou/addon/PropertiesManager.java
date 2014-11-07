@@ -1,5 +1,7 @@
 package intellimate.izou.addon;
 
+import org.w3c.dom.events.EventException;
+
 import static java.nio.file.StandardWatchEventKinds.*;
 
 import java.awt.*;
@@ -83,7 +85,11 @@ public class PropertiesManager implements Runnable {
                 WatchEvent.Kind kind = event.kind();
 
                 if (kind == OVERFLOW) {
-                    System.out.println("overflow in file events");
+                    try {
+                        throw new IncompleteEventException();
+                    } catch (IncompleteEventException e) {
+                        e.printStackTrace();
+                    }
                 } else if ((kind == ENTRY_MODIFY) && isProperty(event)) {
                     AddOn addOn = addOnMap.get(key);
                     addOn.reloadProperties();
@@ -107,4 +113,14 @@ public class PropertiesManager implements Runnable {
             }
         }
     }
+    /**
+    * Exception thrown if there are multiple Events fired at the same time.
+    */
+    @SuppressWarnings("WeakerAccess")
+    public class IncompleteEventException extends Exception {
+        public IncompleteEventException() {
+            super("Fired event has been lost or discarded");
+        }
+    }
 }
+
