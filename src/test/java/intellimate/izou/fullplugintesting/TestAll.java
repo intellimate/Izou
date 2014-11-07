@@ -27,12 +27,12 @@ public class TestAll {
         TestAct testAct = new TestAct();
         activatorManager.addActivator(testAct);
 
-        TestCG testCG = new TestCG("12");
+        TestCG testCG = new TestCG("test_ID");
         contentGeneratorManager.addContentGenerator(testCG);
 
         TestOP testOP = new TestOP("1");
         TestOE testOE = new TestOE("1");
-        testOE.addContentDataToWishList("TestGC-id");
+        testOE.addContentDataToWishList("test_ID");
         outputManager.addOutputPlugin(testOP);
         outputManager.addOutputExtension(testOE,"1");
 
