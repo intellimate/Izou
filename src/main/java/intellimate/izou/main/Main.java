@@ -3,10 +3,12 @@ package intellimate.izou.main;
 import intellimate.izou.activator.ActivatorManager;
 import intellimate.izou.addon.AddOn;
 import intellimate.izou.addon.AddOnManager;
+import intellimate.izou.addon.PropertiesManager;
 import intellimate.izou.contentgenerator.ContentGeneratorManager;
 import intellimate.izou.events.EventManager;
 import intellimate.izou.output.OutputManager;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
