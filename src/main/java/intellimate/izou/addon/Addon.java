@@ -8,7 +8,6 @@ import intellimate.izou.output.OutputPlugin;
 import ro.fortsoft.pf4j.ExtensionPoint;
 
 import java.io.*;
-import java.net.URLDecoder;
 import java.nio.file.Path;
 import java.util.Properties;
 

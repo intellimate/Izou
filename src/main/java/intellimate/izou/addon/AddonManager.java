@@ -171,8 +171,24 @@ public class AddOnManager {
             e.printStackTrace();
         }
         PluginManager pluginManager = new DefaultPluginManager(libFile);
-        List<AddOn> addOns = pluginManager.getExtensions(AddOn.class);
-        addOnList.addAll(addOns);
+        // load the plugins
+        pluginManager.loadPlugins();
+
+        // enable a disabled plugin
+//        pluginManager.enablePlugin("welcome-plugin");
+
+        // start (active/resolved) the plugins
+        try {
+            pluginManager.startPlugins();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            List<AddOn> addOns = pluginManager.getExtensions(AddOn.class);
+            addOnList.addAll(addOns);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
