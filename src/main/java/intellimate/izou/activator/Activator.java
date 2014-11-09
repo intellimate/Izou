@@ -1,5 +1,6 @@
 package intellimate.izou.activator;
 
+import intellimate.izou.addon.PropertiesContainer;
 import intellimate.izou.events.EventManager;
 
 import java.util.HashMap;

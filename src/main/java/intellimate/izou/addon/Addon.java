@@ -18,7 +18,7 @@ import java.util.Properties;
  * This class has method for a properties-file named addOnID.properties (AddOnsID in the form: package.class)
  */
 public abstract class AddOn implements ExtensionPoint {
-    private Properties properties;
+    private PropertiesContainer propertiesContainer;
     private final String addOnID;
     private final String propertiesPath;
 
@@ -29,35 +29,38 @@ public abstract class AddOn implements ExtensionPoint {
      */
     public AddOn(String addOnID) {
         this.addOnID = addOnID;
-
-        properties = new Properties();
+        PropertiesContainer propertiesContainer = new PropertiesContainer();
+        Properties properties = propertiesContainer.getProperties();
         String propertiesPathTemp;
-        try {
-            propertiesPathTemp = new File(".").getCanonicalPath() + File.separator + addOnID + ".properties";
+        try {propertiesPathTemp = new File(".").getCanonicalPath() + File.separator + addOnID + ".properties";
+
         } catch (IOException e) {
             propertiesPathTemp = null;
             e.printStackTrace();
         }
+
         propertiesPath = propertiesPathTemp;
+        synchronized (propertiesPath) {
 
-        File properties = new File(propertiesPath);
-        if(!properties.exists()) try {
-            properties.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        InputStream inputStream = null;
-        try {
-            inputStream = new FileInputStream(properties);
-            try {
-                this.properties.load(inputStream);
+            File propertiesFile = new File(propertiesPath);
+            if (!propertiesFile.exists()) try {
+                propertiesFile.createNewFile();
             } catch (IOException e) {
-                //TODO: log exception
                 e.printStackTrace();
             }
-        } catch (FileNotFoundException e) {
-            //TODO: log exception
+
+            InputStream inputStream;
+            try {
+                inputStream = new FileInputStream(propertiesFile);
+                try {
+                    properties.load(inputStream);
+                } catch (IOException e) {
+                    //TODO: log exception
+                    e.printStackTrace();
+                }
+            } catch (FileNotFoundException e) {
+                //TODO: log exception
+            }
         }
     }
 
@@ -78,7 +81,7 @@ public abstract class AddOn implements ExtensionPoint {
             e.printStackTrace();
             return;
         }
-        this.properties = temp;
+        propertiesContainer.setProperties(temp);
     }
 
     /**
@@ -115,7 +118,9 @@ public abstract class AddOn implements ExtensionPoint {
      * use this method to register a property file (if you have one) so that Izou reloads it when you update it manually
      * @return the path to the properties file
      */
-    public abstract Path registerPropertiesFile();
+    public Path registerPropertiesFile() {
+        return null;
+    }
 
     /**
      * The AddOns-Id is usually the following Form: package.class
@@ -135,7 +140,7 @@ public abstract class AddOn implements ExtensionPoint {
      * @return the value in this property list with the specified key value.
      */
     public String getProperties(String key) {
-        return properties.getProperty(key);
+        return propertiesContainer.getProperties().getProperty(key);
     }
 
     /**
@@ -143,8 +148,8 @@ public abstract class AddOn implements ExtensionPoint {
      *
      * @return an Instance of Properties or null;
      */
-    public Properties getProperties() {
-        return properties;
+    public PropertiesContainer getPropertiesContainer() {
+        return propertiesContainer;
     }
 
     /**
@@ -157,7 +162,7 @@ public abstract class AddOn implements ExtensionPoint {
      * @param value the value corresponding to key.
      */
     public void setProperties(String key, String value) {
-        properties.setProperty(key, value);
+        propertiesContainer.getProperties().setProperty(key, value);
     }
 
     /**
@@ -167,6 +172,15 @@ public abstract class AddOn implements ExtensionPoint {
      */
     public void setProperties(Properties properties) {
         if(properties == null) return;
-        this.properties = properties;
+        this.propertiesContainer.setProperties(properties);
+    }
+
+    /**
+     *
+     * @param propertiesContainer
+     */
+    public void setPropertiesContainer(PropertiesContainer propertiesContainer) {
+        if(propertiesContainer == null) return;
+        this.propertiesContainer = propertiesContainer;
     }
 }

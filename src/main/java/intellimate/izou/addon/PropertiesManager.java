@@ -76,39 +76,42 @@ public class PropertiesManager implements Runnable {
                 return;
             }
 
-            Path dir = keys.get(key);
-            if (dir == null) {
-                //TODO implement error handling
-            }
+            Path dir = null;
+            synchronized (dir) {
+                dir = keys.get(key);
+                if (dir == null) {
+                    //TODO implement error handling
+                }
 
-            for (WatchEvent<?> event : key.pollEvents()) {
-                WatchEvent.Kind kind = event.kind();
+                for (WatchEvent<?> event : key.pollEvents()) {
+                    WatchEvent.Kind kind = event.kind();
 
-                if (kind == OVERFLOW) {
-                    try {
-                        throw new IncompleteEventException();
-                    } catch (IncompleteEventException e) {
-                        e.printStackTrace();
-                    }
-                } else if ((kind == ENTRY_MODIFY) && isProperty(event)) {
-                    AddOn addOn = addOnMap.get(key);
-                    addOn.reloadProperties();
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                    if (kind == OVERFLOW) {
+                        try {
+                            throw new IncompleteEventException();
+                        } catch (IncompleteEventException e) {
+                            e.printStackTrace();
+                        }
+                    } else if ((kind == ENTRY_MODIFY) && isProperty(event)) {
+                        AddOn addOn = addOnMap.get(key);
+                        addOn.reloadProperties();
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
-            }
 
-            // reset key and remove from set if directory no longer accessible
-            boolean valid = key.reset();
-            if (!valid) {
-                keys.remove(key);
+                // reset key and remove from set if directory no longer accessible
+                boolean valid = key.reset();
+                if (!valid) {
+                    keys.remove(key);
 
-                // all directories are inaccessible
-                if (keys.isEmpty()) {
-                    break;
+                    // all directories are inaccessible
+                    if (keys.isEmpty()) {
+                        break;
+                    }
                 }
             }
         }
