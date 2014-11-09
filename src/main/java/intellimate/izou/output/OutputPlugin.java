@@ -209,7 +209,7 @@ public abstract class OutputPlugin<T> implements Runnable{
      * into the heap.
      * @param tFuture future object that contains the processed outputExtension data
      */
-    public void outputDataIsDone(Future<T> tFuture) {};
+    public void outputDataIsDone(Future<T> tFuture) {}
 
     /**
      * Default implementation waits until a new list of content-datas has been received and then processes it.
