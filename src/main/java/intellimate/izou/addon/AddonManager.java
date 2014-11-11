@@ -148,6 +148,7 @@ public class AddOnManager {
      */
     public void addAndRegisterAddOns(List<AddOn> addOns) {
         addOnList.addAll(addOns);
+        initAllAddOns();
         prepareAllAddOns();
         registerAllAddOns();
     }
@@ -198,6 +199,15 @@ public class AddOnManager {
     private void prepareAllAddOns() {
         for (AddOn addOn : addOnList) {
             addOn.prepare();
+        }
+    }
+
+    /**
+     * internal initiation of all addOns
+     */
+    private void initAllAddOns() {
+        for (AddOn addOn : addOnList) {
+            addOn.initAddon();
         }
     }
 

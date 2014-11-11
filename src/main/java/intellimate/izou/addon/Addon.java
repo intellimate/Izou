@@ -9,6 +9,7 @@ import ro.fortsoft.pf4j.ExtensionPoint;
 
 import java.io.*;
 import java.nio.file.Path;
+import java.util.Enumeration;
 import java.util.Properties;
 
 /**
@@ -69,6 +70,58 @@ public abstract class AddOn implements ExtensionPoint {
      */
     public abstract void prepare();
 
+    /**
+     *
+     */
+    public void initAddon() {
+        Enumeration<String> keys = (Enumeration<String>)this.propertiesContainer.getProperties().propertyNames();
+        if (!keys.hasMoreElements()) {
+            BufferedReader bufferedReader = null;
+            BufferedWriter bufferedWriter = null;
+            try {
+                String defaultPropsPath = "." + File.separator + "src" + File.separator +
+                        "main" + File.separator + "resources" + File.separator + "defaultProperties.txt";
+                bufferedReader = new BufferedReader(new FileReader(defaultPropsPath));
+                bufferedWriter = new BufferedWriter(new FileWriter(this.getClass().getCanonicalName()+ ".properties"));
+
+                int c = 0;
+                if(bufferedReader.ready()) {
+                    while (c != -1) {
+                        c = bufferedReader.read();
+                        bufferedWriter.write(c);
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            } finally {
+                try {
+                    bufferedReader.close();
+                    bufferedWriter.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return;
+                }
+            }
+
+            Properties temp = new Properties();
+
+            try {
+                String path = new File(".").getCanonicalPath();
+
+                File properties = new File(path + File.separator + addOnID + ".properties");
+
+                InputStream inputStream = new FileInputStream(properties);
+                temp.load(inputStream);
+            } catch(IOException e) {
+                e.printStackTrace();
+                return;
+            }
+
+            this.propertiesContainer.setProperties(temp);
+        }
+    }
+
     public void reloadProperties() {
         Properties temp = new Properties();
         try {
@@ -116,7 +169,7 @@ public abstract class AddOn implements ExtensionPoint {
 
     /**
      * use this method to register a property file (if you have one) so that Izou reloads it when you update it manually
-     * @return the path to the properties file
+     * @return the path to the DIRECTORY of the properties file (not the properties file itself)
      */
     public Path registerPropertiesFile() {
         return null;
