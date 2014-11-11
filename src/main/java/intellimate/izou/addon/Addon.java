@@ -24,7 +24,7 @@ public abstract class AddOn implements ExtensionPoint {
     private PropertiesContainer propertiesContainer;
     private final String addOnID;
     private final String propertiesPath;
-
+    private String defaultPropertiesPath;
 
     /**
      * the default constructor for AddOns
@@ -43,6 +43,7 @@ public abstract class AddOn implements ExtensionPoint {
         }
 
         propertiesPath = propertiesPathTemp;
+        defaultPropertiesPath = null;
         synchronized (propertiesPath) {
             File propertiesFile = new File(propertiesPath);
             if (!propertiesFile.exists()) try {
@@ -72,96 +73,126 @@ public abstract class AddOn implements ExtensionPoint {
     public abstract void prepare();
 
     /**
-     *
+     * internal initation of addOn
      */
     public void initAddOn() {
+        if(defaultPropertiesPath != null)
+            initProperties();
+    }
+
+    /**
+     * initializes properties in the addOn. Creates new properties file with default properties
+     */
+    private void initProperties() {
         Enumeration<String> keys = (Enumeration<String>)this.propertiesContainer.getProperties().propertyNames();
+
         if (!keys.hasMoreElements()) {
-            BufferedReader bufferedReader = null;
-            BufferedWriter bufferedWriter = null;
             try {
-                String defaultPropsPath = new File(".").getCanonicalPath() + File.separator + "defaultProperties.txt";
-
-                File file = new File(defaultPropsPath);
-                BufferedWriter bufferedWriterInit = null;
-                try {
-                    if (!file.exists()) {
-                        file.createNewFile();
-                        bufferedWriterInit = new BufferedWriter(new FileWriter(defaultPropsPath));
-                        bufferedWriterInit.write("# Add properties in the form of key = value");
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } finally {
-                    if(bufferedWriterInit != null)
-                        bufferedWriterInit.close();
-                }
-
-                bufferedReader = new BufferedReader(new FileReader(defaultPropsPath));
-                bufferedWriter = new BufferedWriter(new FileWriter(this.getClass().getCanonicalName() + ".properties"));
-
-                // c is the character read from bufferedReader and written to bufferedWriter
-                int c = 0;
-                if (bufferedReader.ready()) {
-                    while (c != -1) {
-                        c = bufferedReader.read();
-                        bufferedWriter.write(c);
-                    }
-                }
+                createDefaultPropertyFile(defaultPropertiesPath);
             } catch (IOException e) {
                 e.printStackTrace();
-                return;
-            } finally {
-                if (bufferedReader != null)
-                    try {
-                        bufferedReader.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                if (bufferedWriter != null)
-                    try {
-                        bufferedWriter.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
             }
-
-            Properties temp = new Properties();
-
+            if (!writeToPropertiesFile (defaultPropertiesPath)) return;
             try {
-                String path = new File(".").getCanonicalPath();
-
-                File properties = new File(path + File.separator + addOnID + ".properties");
-
-                InputStream inputStream = new FileInputStream(properties);
-                temp.load(inputStream);
-            } catch(IOException e) {
+                reloadProperties();
+            } catch (IOException e) {
                 e.printStackTrace();
-                return;
             }
-            this.propertiesContainer.setProperties(temp);
         }
     }
 
-    public void reloadProperties() {
+    /**
+     * Writes defaultPropertiesFile.txt to real properties file
+     * This is done so that the final user never has to worry about property file initialization
+     *
+     * @param defaultPropsPath
+     * @return
+     */
+    private boolean writeToPropertiesFile(String defaultPropsPath) {
+        BufferedReader bufferedReader = null;
+        BufferedWriter bufferedWriter = null;
+        try {
+            bufferedReader = new BufferedReader(new FileReader(defaultPropsPath));
+            bufferedWriter = new BufferedWriter(new FileWriter(this.getClass().getCanonicalName() + ".properties"));
+
+            // c is the character read from bufferedReader and written to bufferedWriter
+            int c = 0;
+            if (bufferedReader.ready()) {
+                while (c != -1) {
+                    c = bufferedReader.read();
+                    bufferedWriter.write(c);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return true;
+        } finally {
+            if (bufferedReader != null)
+                try {
+                    bufferedReader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            if (bufferedWriter != null)
+                try {
+                    bufferedWriter.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+        }
+        return true;
+    }
+
+    /**
+     * Creates a defaultPropertyFile.txt in case it does not exist yet. In case it is used by an addOn,
+     * it copies its content into the real properties file every time the addOn is launched.
+     *
+     * It is impossible to get the properties file on default, that way the user should not have to worry about
+     * the property file's initial content.
+     *
+     * @param defaultPropsPath path to defaultPropertyFile.txt (or where it should be created)
+     * @throws IOException is thrown by bufferedWriter
+     */
+    private void createDefaultPropertyFile(String defaultPropsPath) throws IOException {
+        File file = new File(defaultPropsPath);
+        BufferedWriter bufferedWriterInit = null;
+        try {
+            if (!file.exists()) {
+                file.createNewFile();
+                bufferedWriterInit = new BufferedWriter(new FileWriter(defaultPropsPath));
+                bufferedWriterInit.write("# Add properties in the form of key = value");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if(bufferedWriterInit != null)
+                bufferedWriterInit.close();
+        }
+    }
+
+    /**
+     * reloads the propertiesFile into the propertiesContainer
+     *
+     * @throws IOException thrown by inputStream
+     */
+    public void reloadProperties() throws IOException {
         Properties temp = new Properties();
         InputStream inputStream = null;
         try {
-            File properties = new File(propertiesPath);
-            inputStream = new FileInputStream(properties);
+            String path = new File(".").getCanonicalPath();
+
+            File properties = new File(path + File.separator + addOnID + ".properties");
+
+            inputStream= new FileInputStream(properties);
             temp.load(inputStream);
         } catch(IOException e) {
             e.printStackTrace();
             return;
         } finally {
-            try {
-                if (inputStream != null)
-                    inputStream.close();
-            } catch(IOException e) {
-                e.printStackTrace();
-            }
+            if (inputStream != null)
+                inputStream.close();
         }
-        propertiesContainer.setProperties(temp);
+        this.propertiesContainer.setProperties(temp);
     }
 
     /**
@@ -256,11 +287,30 @@ public abstract class AddOn implements ExtensionPoint {
     }
 
     /**
+     * Sets properties-container
      *
-     * @param propertiesContainer
+     * @param propertiesContainer the properties-container
      */
     public void setPropertiesContainer(PropertiesContainer propertiesContainer) {
         if(propertiesContainer == null) return;
         this.propertiesContainer = propertiesContainer;
+    }
+
+    /**
+     * gets the path to default properties file (the file which is copied into the real properties on start)
+     *
+     * @return path to default properties file
+     */
+    public String getDefaultPropertiesPath() {
+        return defaultPropertiesPath;
+    }
+
+    /**
+     * sets the path to default properties file (the file which is copied into the real properties on start)
+     *
+     * @param defaultPropertiesPath path to default properties file
+     */
+    public void setDefaultPropertiesPath(String defaultPropertiesPath) {
+        this.defaultPropertiesPath = defaultPropertiesPath;
     }
 }
