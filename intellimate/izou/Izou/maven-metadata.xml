@@ -4,8 +4,9 @@
   <artifactId>Izou</artifactId>
   <versioning>
     <versions>
-      <version>0.9.3-SNAPSHOT</version>
+      <version>0.9.2-SNAPSHOT</version>
+      <version>0.9.4-SNAPSHOT</version>
     </versions>
-    <lastUpdated>20141111135946</lastUpdated>
+    <lastUpdated>20141111153420</lastUpdated>
   </versioning>
 </metadata>

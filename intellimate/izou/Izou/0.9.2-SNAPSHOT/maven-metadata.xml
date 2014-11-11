@@ -2,35 +2,35 @@
 <metadata modelVersion="1.1.0">
   <groupId>intellimate.izou</groupId>
   <artifactId>Izou</artifactId>
-  <version>0.9.3-SNAPSHOT</version>
+  <version>0.9.2-SNAPSHOT</version>
   <versioning>
     <snapshot>
-      <timestamp>20141111.135946</timestamp>
-      <buildNumber>2</buildNumber>
+      <timestamp>20141111.153314</timestamp>
+      <buildNumber>4</buildNumber>
     </snapshot>
-    <lastUpdated>20141111135946</lastUpdated>
+    <lastUpdated>20141111153314</lastUpdated>
     <snapshotVersions>
       <snapshotVersion>
         <extension>jar</extension>
-        <value>0.9.3-20141111.135941-1</value>
-        <updated>20141111135946</updated>
+        <value>0.9.2-20141111.153302-2</value>
+        <updated>20141111153314</updated>
       </snapshotVersion>
       <snapshotVersion>
         <extension>pom</extension>
-        <value>0.9.3-20141111.135941-1</value>
-        <updated>20141111135946</updated>
+        <value>0.9.2-20141111.153302-2</value>
+        <updated>20141111153314</updated>
       </snapshotVersion>
       <snapshotVersion>
         <classifier>sources</classifier>
         <extension>jar</extension>
-        <value>0.9.3-20141111.135941-1</value>
-        <updated>20141111135946</updated>
+        <value>0.9.2-20141111.153302-2</value>
+        <updated>20141111153314</updated>
       </snapshotVersion>
       <snapshotVersion>
         <classifier>javadoc</classifier>
         <extension>jar</extension>
-        <value>0.9.3-20141111.135941-1</value>
-        <updated>20141111135946</updated>
+        <value>0.9.2-20141111.153302-2</value>
+        <updated>20141111153314</updated>
       </snapshotVersion>
     </snapshotVersions>
   </versioning>
