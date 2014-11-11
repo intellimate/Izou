@@ -74,6 +74,7 @@ public class PropertiesManagerTest extends TestCase {
             try {
                 this.setDefaultPropertiesPath(new File(".").getCanonicalPath() + File.separator + "defaultProperties.txt");
                 pathString = new File(".").getCanonicalPath() + File.separator;
+                //this.setDefaultPropertiesPath(AddOnManager.ADDON_DATA_PATH + "about.txt");
             } catch (IOException e) {
                 e.printStackTrace();
             }
