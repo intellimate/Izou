@@ -30,11 +30,11 @@ public abstract class AddOn implements ExtensionPoint {
      */
     public AddOn(String addOnID) {
         this.addOnID = addOnID;
-        PropertiesContainer propertiesContainer = new PropertiesContainer();
+        this.propertiesContainer = new PropertiesContainer();
         Properties properties = propertiesContainer.getProperties();
         String propertiesPathTemp;
-        try {propertiesPathTemp = new File(".").getCanonicalPath() + File.separator + addOnID + ".properties";
-
+        try {
+            propertiesPathTemp = new File(".").getCanonicalPath() + File.separator + addOnID + ".properties";
         } catch (IOException e) {
             propertiesPathTemp = null;
             e.printStackTrace();
@@ -42,7 +42,6 @@ public abstract class AddOn implements ExtensionPoint {
 
         propertiesPath = propertiesPathTemp;
         synchronized (propertiesPath) {
-
             File propertiesFile = new File(propertiesPath);
             if (!propertiesFile.exists()) try {
                 propertiesFile.createNewFile();
@@ -79,8 +78,9 @@ public abstract class AddOn implements ExtensionPoint {
             BufferedReader bufferedReader = null;
             BufferedWriter bufferedWriter = null;
             try {
-                String defaultPropsPath = "." + File.separator + "src" + File.separator +
-                        "main" + File.separator + "resources" + File.separator + "defaultProperties.txt";
+                //String defaultPropsPath = "." + File.separator + "src" + File.separator +
+                //        "main" + File.separator + "resources" + File.separator + "defaultProperties.txt";
+                String defaultPropsPath = new File(".").getCanonicalPath() + File.separator + "defaultProperties.txt";
                 bufferedReader = new BufferedReader(new FileReader(defaultPropsPath));
                 bufferedWriter = new BufferedWriter(new FileWriter(this.getClass().getCanonicalName()+ ".properties"));
 
