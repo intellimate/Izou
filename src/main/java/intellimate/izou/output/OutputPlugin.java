@@ -162,7 +162,7 @@ public abstract class OutputPlugin<T> implements Runnable{
     public void addOutputExtension(OutputExtension<T> outputExtension) {
         outputExtensionList.add(outputExtension);
         outputExtension.setPluginId(this.getId());
-        outputExtensionWasAdded();
+        outputExtensionWasAdded(outputExtension);
     }
 
     /**
@@ -185,15 +185,19 @@ public abstract class OutputPlugin<T> implements Runnable{
 
     /**
      * event is called when an output-extension is added to this output-plugin
+     *
+     * @param outputExtension the outputExtension that was added to the outputPlugin
      */
-    public void outputExtensionWasAdded() {
+    public void outputExtensionWasAdded(OutputExtension<T> outputExtension) {
 
     }
 
     /**
-     * method that can be overwritten in order to "do stuff" before the outputExtensions are started
+     * method that can be overwritten in order to "do stuff" before an outputExtension is started
+     *
+     * @param outputExtension the outputExtension which is about to be started
      */
-    public void prepareDistribution() {}
+    public void prepareDistribution(OutputExtension<T> outputExtension) {}
 
     /**
      * method that uses tDoneList to generate a final output that will then be rendered.
@@ -207,6 +211,7 @@ public abstract class OutputPlugin<T> implements Runnable{
      * added to the tDoneList, by which time all other outputExtensions will also have finished. However it is an
      * opportunity to work with a finished future object (or get the outputData inside) before it is thrown back
      * into the heap.
+     *
      * @param tFuture future object that contains the processed outputExtension data
      */
     public void outputDataIsDone(Future<T> tFuture) {}
@@ -242,10 +247,10 @@ public abstract class OutputPlugin<T> implements Runnable{
                 break;
             }
 
-            prepareDistribution();
             distributeContentData(contentDataList); //distributes the contentDatas among all outputExtensions
             if(canRun()) {  //checks if there are any outputExtensions that can run at all
                 for (OutputExtension<T> ext : outputExtensionList) {
+                    prepareDistribution(ext);
                     if (ext.canRun()) //if the specific outputExtension can run, then it does
                         futureList.add(executor.submit(ext));
                 }

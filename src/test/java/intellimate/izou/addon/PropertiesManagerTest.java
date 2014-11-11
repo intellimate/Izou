@@ -72,7 +72,8 @@ public class PropertiesManagerTest extends TestCase {
         public Path registerPropertiesFile() {
             String pathString = null;
             try {
-                pathString = new File(".").getCanonicalPath() + File.separator;// + "TestID.properties";
+                this.setDefaultPropertiesPath(new File(".").getCanonicalPath() + File.separator + "defaultProperties.txt");
+                pathString = new File(".").getCanonicalPath() + File.separator;
             } catch (IOException e) {
                 e.printStackTrace();
             }

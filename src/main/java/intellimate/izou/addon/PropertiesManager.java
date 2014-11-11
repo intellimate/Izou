@@ -93,7 +93,11 @@ public class PropertiesManager implements Runnable {
                         }
                     } else if ((kind == ENTRY_MODIFY) && isProperty(event)) {
                         AddOn addOn = addOnMap.get(key);
-                        addOn.reloadProperties();
+                        try {
+                            addOn.reloadProperties();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                         try {
                             Thread.sleep(1000);
                         } catch (InterruptedException e) {
