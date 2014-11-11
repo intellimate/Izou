@@ -8,6 +8,8 @@ import intellimate.izou.output.OutputPlugin;
 import ro.fortsoft.pf4j.ExtensionPoint;
 
 import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -72,20 +74,35 @@ public abstract class AddOn implements ExtensionPoint {
     /**
      *
      */
-    public void initAddon() {
+    public void initAddOn() {
         Enumeration<String> keys = (Enumeration<String>)this.propertiesContainer.getProperties().propertyNames();
         if (!keys.hasMoreElements()) {
             BufferedReader bufferedReader = null;
             BufferedWriter bufferedWriter = null;
             try {
-                //String defaultPropsPath = "." + File.separator + "src" + File.separator +
-                //        "main" + File.separator + "resources" + File.separator + "defaultProperties.txt";
                 String defaultPropsPath = new File(".").getCanonicalPath() + File.separator + "defaultProperties.txt";
-                bufferedReader = new BufferedReader(new FileReader(defaultPropsPath));
-                bufferedWriter = new BufferedWriter(new FileWriter(this.getClass().getCanonicalName()+ ".properties"));
 
+                File file = new File(defaultPropsPath);
+                BufferedWriter bufferedWriterInit = null;
+                try {
+                    if (!file.exists()) {
+                        file.createNewFile();
+                        bufferedWriterInit = new BufferedWriter(new FileWriter(defaultPropsPath));
+                        bufferedWriterInit.write("# Add properties in the form of key = value");
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    if(bufferedWriterInit != null)
+                        bufferedWriterInit.close();
+                }
+
+                bufferedReader = new BufferedReader(new FileReader(defaultPropsPath));
+                bufferedWriter = new BufferedWriter(new FileWriter(this.getClass().getCanonicalName() + ".properties"));
+
+                // c is the character read from bufferedReader and written to bufferedWriter
                 int c = 0;
-                if(bufferedReader.ready()) {
+                if (bufferedReader.ready()) {
                     while (c != -1) {
                         c = bufferedReader.read();
                         bufferedWriter.write(c);
@@ -95,13 +112,18 @@ public abstract class AddOn implements ExtensionPoint {
                 e.printStackTrace();
                 return;
             } finally {
-                try {
-                    bufferedReader.close();
-                    bufferedWriter.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return;
-                }
+                if (bufferedReader != null)
+                    try {
+                        bufferedReader.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                if (bufferedWriter != null)
+                    try {
+                        bufferedWriter.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
             }
 
             Properties temp = new Properties();
@@ -117,22 +139,27 @@ public abstract class AddOn implements ExtensionPoint {
                 e.printStackTrace();
                 return;
             }
-
             this.propertiesContainer.setProperties(temp);
         }
     }
 
     public void reloadProperties() {
         Properties temp = new Properties();
+        InputStream inputStream = null;
         try {
-            String path = new File(".").getCanonicalPath();
             File properties = new File(propertiesPath);
-
-            InputStream inputStream = new FileInputStream(properties);
+            inputStream = new FileInputStream(properties);
             temp.load(inputStream);
         } catch(IOException e) {
             e.printStackTrace();
             return;
+        } finally {
+            try {
+                if (inputStream != null)
+                    inputStream.close();
+            } catch(IOException e) {
+                e.printStackTrace();
+            }
         }
         propertiesContainer.setProperties(temp);
     }

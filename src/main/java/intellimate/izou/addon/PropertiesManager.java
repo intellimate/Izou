@@ -76,9 +76,8 @@ public class PropertiesManager implements Runnable {
                 return;
             }
 
-            Path dir = null;
+            Path dir = keys.get(key);
             synchronized (dir) {
-                dir = keys.get(key);
                 if (dir == null) {
                     //TODO implement error handling
                 }

@@ -15,8 +15,6 @@ import ro.fortsoft.pf4j.PluginManager;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -207,7 +205,7 @@ public class AddOnManager {
      */
     private void initAllAddOns() {
         for (AddOn addOn : addOnList) {
-            addOn.initAddon();
+            addOn.initAddOn();
         }
     }
 
