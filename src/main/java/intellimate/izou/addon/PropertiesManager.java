@@ -87,8 +87,8 @@ public class PropertiesManager implements Runnable {
 
                     if (kind == OVERFLOW) {
                         try {
-                            throw new IncompleteEventException();
-                        } catch (IncompleteEventException e) {
+                            throw new IncompletePropertyEventException();
+                        } catch (IncompletePropertyEventException e) {
                             e.printStackTrace();
                         }
                     } else if ((kind == ENTRY_MODIFY) && isProperty(event)) {
@@ -119,13 +119,14 @@ public class PropertiesManager implements Runnable {
             }
         }
     }
+
     /**
     * Exception thrown if there are multiple Events fired at the same time.
     */
     @SuppressWarnings("WeakerAccess")
-    public class IncompleteEventException extends Exception {
-        public IncompleteEventException() {
-            super("Fired event has been lost or discarded");
+    public class IncompletePropertyEventException extends Exception {
+        public IncompletePropertyEventException() {
+            super("Fired property event has been lost or discarded");
         }
     }
 }
