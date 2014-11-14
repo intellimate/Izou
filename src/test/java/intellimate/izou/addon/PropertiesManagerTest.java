@@ -68,17 +68,5 @@ public class PropertiesManagerTest extends TestCase {
         public OutputExtension[] registerOutputExtension() {
             return new OutputExtension[0];
         }
-
-        @Override
-        public Path registerPropertiesFile() {
-            String pathString = null;
-            try {
-                this.setDefaultPropertiesPath("test");
-                pathString = new File(".").getCanonicalPath() + File.separator + "properties" + File.separator;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return Paths.get(pathString);
-        }
     }
 }
