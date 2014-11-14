@@ -36,7 +36,7 @@ public abstract class AddOn implements ExtensionPoint {
         Properties properties = propertiesContainer.getProperties();
         String propertiesPathTemp;
         try {
-            propertiesPathTemp = new File(".").getCanonicalPath() + File.separator + addOnID + ".properties";
+            propertiesPathTemp = new File(".").getCanonicalPath() + File.separator + "properties" + File.separator + addOnID + ".properties";
         } catch (IOException e) {
             propertiesPathTemp = null;
             e.printStackTrace();
@@ -81,7 +81,7 @@ public abstract class AddOn implements ExtensionPoint {
     }
 
     /**
-     * initializes properties in the addOn. Creates new properties file with default properties
+     * Initializes properties in the addOn. Creates new properties file with default properties.
      */
     private void initProperties() {
         Enumeration<String> keys = (Enumeration<String>)this.propertiesContainer.getProperties().propertyNames();
@@ -226,7 +226,12 @@ public abstract class AddOn implements ExtensionPoint {
     public abstract OutputExtension[] registerOutputExtension();
 
     /**
-     * use this method to register a property file (if you have one) so that Izou reloads it when you update it manually
+     * Use this method to register a property file (if you have one) so that Izou reloads it when you update it manually
+     * You also NEED to call "setDefaultPropertiesPath(String addOnName)"
+     *
+     * In 99.9% of all cases your returned directory should be "new File(".").getCanonicalPath() + "properties" + File.separator;".
+     * All properties are generated in the properties file in Izou, that is why there is properties at the end.
+     *
      * @return the path to the DIRECTORY of the properties file (not the properties file itself)
      */
     public Path registerPropertiesFile() {
@@ -306,11 +311,22 @@ public abstract class AddOn implements ExtensionPoint {
     }
 
     /**
-     * sets the path to default properties file (the file which is copied into the real properties on start)
+     * sets the path to default properties file (the file which is copied into the real properties on start),
+     * all you need to do is provide the artifact name and version concatenated together. We strongly recommend
+     * you look at the addOnName parameter for more info. It is also VERY IMPORTANT that your "defaultProperties.txt"
+     * file is created in the resource folder of your addOn.
      *
-     * @param defaultPropertiesPath path to default properties file
+     * @param addOnName The artifact name and version concatenated together.
+     *                  (Ex: "artifactname-versionnumber", "testaddon-0.1", etc.)
+     *
+     * @throws java.lang.NullPointerException the given addOnName is not the correct artifact name and version number
      */
-    public void setDefaultPropertiesPath(String defaultPropertiesPath) {
-        this.defaultPropertiesPath = defaultPropertiesPath;
+    public void setDefaultPropertiesPath(String addOnName) throws NullPointerException {
+        String tempPath = "." + File.separator + "lib" + File.separator + addOnName + File.separator +
+                "classes" + File.separator + "defaultProperties.txt";
+        if(new File(tempPath).exists())
+            this.defaultPropertiesPath = tempPath;
+        else
+            throw new NullPointerException("File path does not exist");
     }
 }
