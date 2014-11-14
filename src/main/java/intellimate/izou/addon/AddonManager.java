@@ -28,7 +28,7 @@ public class AddOnManager {
     private final ContentGeneratorManager contentGeneratorManager;
     private final ActivatorManager activatorManager;
     private final PropertiesManager propertiesManager;
-    public final String ADDON_DATA_PATH;
+    public static final String ADDON_DATA_PATH = "." + File.separator + "resources" + File.separator;
 
     public AddOnManager(OutputManager outputManager, EventManager eventManager,
                         ContentGeneratorManager contentGeneratorManager, ActivatorManager activatorManager) {
@@ -46,14 +46,6 @@ public class AddOnManager {
             e.printStackTrace();
             //TODO: implement error handling
         }
-        String addOnDataPathTemp = null;
-        try {
-            addOnDataPathTemp = new File(".").getCanonicalPath()+ File.separator + "lib" + File.separator + "addOnData";
-        } catch (IOException e) {
-            addOnDataPathTemp = null;
-            e.printStackTrace();
-        }
-        ADDON_DATA_PATH = addOnDataPathTemp;
 
         propertiesManager = propertiesManagerTemp;
         Thread thread = new Thread(propertiesManager);
