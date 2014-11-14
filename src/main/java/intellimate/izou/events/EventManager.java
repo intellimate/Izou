@@ -200,9 +200,7 @@ public class EventManager implements Runnable{
         if(!checkEventControllers(id)) return;
         //registered to Event
         ArrayList<ActivatorEventListener> contentGeneratorListeners = this.listeners.get(id);
-        if (contentGeneratorListeners == null) {
-            return;
-        }
+        if(contentGeneratorListeners == null) contentGeneratorListeners = new ArrayList<>();
         List<Future<ContentData>> futures = new ArrayList<>();
         for (ActivatorEventListener next : contentGeneratorListeners) {
             Future<ContentData> futureTemp = next.activatorEventFired(id);
@@ -212,13 +210,15 @@ public class EventManager implements Runnable{
         }
         //registered to all Events
         contentGeneratorListeners = this.listeners.get(SUBSCRIBE_TO_ALL_EVENTS);
-        if (contentGeneratorListeners != null) {
-            for (ActivatorEventListener next : contentGeneratorListeners) {
-                Future<ContentData> futureTemp = next.activatorEventFired(id);
-                if (futureTemp != null) {
-                    futures.add(futureTemp);
-                }
+        if(contentGeneratorListeners == null) contentGeneratorListeners = new ArrayList<>();
+        for (ActivatorEventListener next : contentGeneratorListeners) {
+            Future<ContentData> futureTemp = next.activatorEventFired(id);
+            if (futureTemp != null) {
+                futures.add(futureTemp);
             }
+        }
+        if (futures.isEmpty()) {
+            return;
         }
         //workaround -> timeout for ALL futures of a little bit less than 1 sec
         boolean change;
