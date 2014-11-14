@@ -8,8 +8,6 @@ import intellimate.izou.output.OutputPlugin;
 import ro.fortsoft.pf4j.ExtensionPoint;
 
 import java.io.*;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Enumeration;
 import java.util.Properties;
