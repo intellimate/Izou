@@ -21,6 +21,7 @@ public class PropertiesManagerTest extends TestCase {
         TestAddOn testAddOn = new TestAddOn("TestID");
         addOns.add(testAddOn);
         Main main = new Main(addOns);
+        for(;;){}
     }
 
     public void testRun() throws Exception {
@@ -72,9 +73,8 @@ public class PropertiesManagerTest extends TestCase {
         public Path registerPropertiesFile() {
             String pathString = null;
             try {
-                //this.setDefaultPropertiesPath("test");
-                pathString = new File(".").getCanonicalPath() + File.separator;
-                //this.setDefaultPropertiesPath(AddOnManager.ADDON_DATA_PATH + "about.txt");
+                this.setDefaultPropertiesPath("test");
+                pathString = new File(".").getCanonicalPath() + File.separator + "properties" + File.separator;
             } catch (IOException e) {
                 e.printStackTrace();
             }

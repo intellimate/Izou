@@ -95,6 +95,7 @@ public class PropertiesManager implements Runnable {
                         AddOn addOn = addOnMap.get(key);
                         try {
                             addOn.reloadProperties();
+                            System.out.println("reloaded");
                         } catch (Exception e) {
                             e.printStackTrace();
                         }

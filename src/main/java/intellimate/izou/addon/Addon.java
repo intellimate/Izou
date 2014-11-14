@@ -9,6 +9,7 @@ import ro.fortsoft.pf4j.ExtensionPoint;
 
 import java.io.*;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.Properties;
 
@@ -103,15 +104,17 @@ public abstract class AddOn implements ExtensionPoint {
      * Writes defaultPropertiesFile.txt to real properties file
      * This is done so that the final user never has to worry about property file initialization
      *
-     * @param defaultPropsPath
-     * @return
+     * @param defaultPropsPath path to defaultPropertyFile.txt (or where it should be created)
+     * @return true if operation has succeeded, else false
      */
     private boolean writeToPropertiesFile(String defaultPropsPath) {
+        boolean outcome = true;
+
         BufferedReader bufferedReader = null;
         BufferedWriter bufferedWriter = null;
         try {
             bufferedReader = new BufferedReader(new FileReader(defaultPropsPath));
-            bufferedWriter = new BufferedWriter(new FileWriter(this.getClass().getCanonicalName() + ".properties"));
+            bufferedWriter = new BufferedWriter(new FileWriter(propertiesPath));
 
             // c is the character read from bufferedReader and written to bufferedWriter
             int c = 0;
@@ -123,7 +126,7 @@ public abstract class AddOn implements ExtensionPoint {
             }
         } catch (IOException e) {
             e.printStackTrace();
-            return true;
+            outcome =  false;
         } finally {
             if (bufferedReader != null)
                 try {
@@ -138,7 +141,7 @@ public abstract class AddOn implements ExtensionPoint {
                     e.printStackTrace();
                 }
         }
-        return true;
+        return outcome;
     }
 
     /**
@@ -158,6 +161,7 @@ public abstract class AddOn implements ExtensionPoint {
             if (!file.exists()) {
                 file.createNewFile();
                 bufferedWriterInit = new BufferedWriter(new FileWriter(defaultPropsPath));
+                System.out.println(defaultPropsPath);
                 bufferedWriterInit.write("# Add properties in the form of key = value");
             }
         } catch (IOException e) {
@@ -177,11 +181,9 @@ public abstract class AddOn implements ExtensionPoint {
         Properties temp = new Properties();
         InputStream inputStream = null;
         try {
-            String path = new File(".").getCanonicalPath();
+            File properties = new File(propertiesPath);
 
-            File properties = new File(path + File.separator + addOnID + ".properties");
-
-            inputStream= new FileInputStream(properties);
+            inputStream = new FileInputStream(properties);
             temp.load(inputStream);
         } catch(IOException e) {
             e.printStackTrace();
@@ -222,19 +224,6 @@ public abstract class AddOn implements ExtensionPoint {
      * @return Array containing Instances of OutputExtensions
      */
     public abstract OutputExtension[] registerOutputExtension();
-
-    /**
-     * Use this method to register a property file (if you have one) so that Izou reloads it when you update it manually
-     * You also NEED to call "setDefaultPropertiesPath(String addOnName)"
-     *
-     * In 99.9% of all cases your returned directory should be "new File(".").getCanonicalPath() + "properties" + File.separator;".
-     * All properties are generated in the properties file in Izou, that is why there is properties at the end.
-     *
-     * @return the path to the DIRECTORY of the properties file (not the properties file itself)
-     */
-    public Path registerPropertiesFile() {
-        return null;
-    }
 
     /**
      * The AddOns-Id is usually the following Form: package.class
@@ -309,6 +298,8 @@ public abstract class AddOn implements ExtensionPoint {
     }
 
     /**
+     * *** YOU SHOULD NOT HAVE TO USE THIS METHOD ***
+     *
      * sets the path to default properties file (the file which is copied into the real properties on start),
      * all you need to do is provide the artifact name and version concatenated together. We strongly recommend
      * you look at the addOnName parameter for more info. It is also VERY IMPORTANT that your "defaultProperties.txt"
@@ -321,9 +312,9 @@ public abstract class AddOn implements ExtensionPoint {
      */
     public void setDefaultPropertiesPath(String addOnName) throws NullPointerException {
         String tempPath = "." + File.separator + "lib" + File.separator + addOnName + File.separator +
-                "classes" + File.separator + "defaultProperties.txt";
+                "classes" + File.separator;
         if(new File(tempPath).exists())
-            this.defaultPropertiesPath = tempPath;
+            this.defaultPropertiesPath = tempPath + "defaultProperties.txt";
         else
             throw new NullPointerException("File path does not exist");
     }
