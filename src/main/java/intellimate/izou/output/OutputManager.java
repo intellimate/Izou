@@ -74,7 +74,13 @@ public class OutputManager {
 
         if (tempExtensionStorage.containsKey(outputPlugin.getId())) {
             for(OutputExtension oE: tempExtensionStorage.get(outputPlugin.getId())) {
-                outputPlugin.addOutputExtension(oE);
+                try {
+                    outputPlugin.addOutputExtension(oE);
+                }
+                catch (ClassCastException e) {
+                    //TODO: handle exception
+                    e.printStackTrace();
+                }
             }
             tempExtensionStorage.remove(outputPlugin.getId());
         }

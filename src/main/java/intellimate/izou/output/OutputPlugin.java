@@ -11,6 +11,7 @@ import java.util.concurrent.*;
  * The OutputPlugin class gets contentData and then starts threads filled with output-extension tasks to create the final
  * output and then render it on its own medium
  */
+@SuppressWarnings("UnusedDeclaration")
 public abstract class OutputPlugin<T> implements Runnable{
     /**
      * id of the of OutputPlugin, it is primarily used by OutputManager to communicate with specific output plugins
@@ -76,7 +77,7 @@ public abstract class OutputPlugin<T> implements Runnable{
 
     /**
      * gets the futureList of the output-Plugin, which contains the processed data of the output-extensions
-     * @return the futureList to be returnt
+     * @return the futureList to be return
      */
     public LinkedList<Future<T>> getFutureList() {
         return futureList;
