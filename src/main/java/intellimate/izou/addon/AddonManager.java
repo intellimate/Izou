@@ -41,7 +41,7 @@ public class AddOnManager {
         PropertiesManager propertiesManagerTemp;
         try {
             propertiesManagerTemp = new PropertiesManager();
-        } catch(IOException e) {
+        } catch (IOException e) {
             propertiesManagerTemp = null;
             e.printStackTrace();
             //TODO: implement error handling
@@ -58,10 +58,14 @@ public class AddOnManager {
     private void registerActivators() {
         for (AddOn addOn : addOnList) {
             Activator[] activators = addOn.registerActivator();
-            if(activators == null || activators.length == 0) continue;
-            for(Activator activator : activators) {
-                if(activator == null) continue;
-                activatorManager.addActivator(activator);
+            if (activators == null || activators.length == 0) continue;
+            for (Activator activator : activators) {
+                if (activator == null) continue;
+                try {
+                    activatorManager.addActivator(activator);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -69,13 +73,17 @@ public class AddOnManager {
     /**
      * loops through all AddOns and lets them register all their ContentGenerators
      */
-    private void registerContentGenerators(){
+    private void registerContentGenerators() {
         for (AddOn addOn : addOnList) {
             ContentGenerator[] contentGenerators = addOn.registerContentGenerator();
-            if(contentGenerators == null || contentGenerators.length == 0) continue;
-            for(ContentGenerator contentGenerator : contentGenerators) {
-                if(contentGenerator == null) continue;
-                contentGeneratorManager.addContentGenerator(contentGenerator);
+            if (contentGenerators == null || contentGenerators.length == 0) continue;
+            for (ContentGenerator contentGenerator : contentGenerators) {
+                if (contentGenerator == null) continue;
+                try {
+                    contentGeneratorManager.addContentGenerator(contentGenerator);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -83,13 +91,17 @@ public class AddOnManager {
     /**
      * loops through all AddOns and lets them register all their EventController
      */
-    private void registerEventControllers(){
+    private void registerEventControllers() {
         for (AddOn addOn : addOnList) {
             EventController[] eventControllers = addOn.registerEventController();
-            if(eventControllers == null || eventControllers.length == 0) continue;
+            if (eventControllers == null || eventControllers.length == 0) continue;
             for (EventController eventController : addOn.registerEventController()) {
-                if(eventController == null) continue;
-                eventManager.addEventController(eventController);
+                if (eventController == null) continue;
+                try {
+                    eventManager.addEventController(eventController);
+                } catch (IllegalArgumentException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -100,10 +112,14 @@ public class AddOnManager {
     private void registerOutputPlugins() {
         for (AddOn addOn : addOnList) {
             OutputPlugin[] outputPlugins = addOn.registerOutputPlugin();
-            if(outputPlugins == null || outputPlugins.length == 0) continue;
-            for(OutputPlugin outputPlugin : addOn.registerOutputPlugin()) {
-                if(outputPlugin == null) continue;
-                outputManager.addOutputPlugin(outputPlugin);
+            if (outputPlugins == null || outputPlugins.length == 0) continue;
+            for (OutputPlugin outputPlugin : addOn.registerOutputPlugin()) {
+                if (outputPlugin == null) continue;
+                try {
+                    outputManager.addOutputPlugin(outputPlugin);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -114,22 +130,31 @@ public class AddOnManager {
     private void registerOutputExtensions() {
         for (AddOn addOn : addOnList) {
             OutputExtension[] outputExtensions = addOn.registerOutputExtension();
-            if(outputExtensions == null || outputExtensions.length == 0) continue;
-            for(OutputExtension outputExtension : addOn.registerOutputExtension()) {
-                if(outputExtension == null) continue;
-                outputManager.addOutputExtension(outputExtension, outputExtension.getPluginId());
+            if (outputExtensions == null || outputExtensions.length == 0) continue;
+            for (OutputExtension outputExtension : addOn.registerOutputExtension()) {
+                if (outputExtension == null) continue;
+                try {
+                    outputManager.addOutputExtension(outputExtension, outputExtension.getPluginId());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
 
     /**
      * registers all property files with the PropertyManager
+     *
      * @throws IOException
      */
     private void registerPropertyFiles() throws IOException {
         for (AddOn addOn : addOnList) {
-            if(addOn.registerPropertiesFile() != null)
-                propertiesManager.registerProperty(addOn.registerPropertiesFile(), addOn);
+            if (addOn.registerPropertiesFile() != null)
+                try {
+                    propertiesManager.registerProperty(addOn.registerPropertiesFile(), addOn);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
         }
     }
 
@@ -144,6 +169,7 @@ public class AddOnManager {
 
     /**
      * registers all AddOns.
+     *
      * @param addOns a List containing all the AddOns
      */
     public void addAndRegisterAddOns(List<AddOn> addOns) {
@@ -160,14 +186,14 @@ public class AddOnManager {
     private void addAllAddOns() {
         File libFile;
         try {
-            String libPath = new File(".").getCanonicalPath()+ File.separator + "lib";
+            String libPath = new File(".").getCanonicalPath() + File.separator + "lib";
             libFile = new File(libPath);
         } catch (IOException e) {
             //TODO: implement Exception handling
             e.printStackTrace();
             return;
         }
-        if(!Files.exists(libFile.toPath())) try {
+        if (!Files.exists(libFile.toPath())) try {
             Files.createDirectories(libFile.toPath());
         } catch (IOException e) {
             //TODO: implement Exception handling
@@ -220,12 +246,12 @@ public class AddOnManager {
         registerOutputExtensions();
         registerContentGenerators();
         registerEventControllers();
-        registerActivators();
         try {
             registerPropertyFiles();
-        } catch(IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             //TODO: implement exception handling
         }
+        registerActivators();
     }
 }
