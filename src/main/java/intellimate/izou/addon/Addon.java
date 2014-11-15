@@ -43,26 +43,24 @@ public abstract class AddOn implements ExtensionPoint {
 
         propertiesPath = propertiesPathTemp;
         defaultPropertiesPath = null;
-        synchronized (propertiesPath) {
-            File propertiesFile = new File(propertiesPath);
-            if (!propertiesFile.exists()) try {
-                propertiesFile.createNewFile();
+        File propertiesFile = new File(propertiesPath);
+        if (!propertiesFile.exists()) try {
+            propertiesFile.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        InputStream inputStream;
+        try {
+            inputStream = new FileInputStream(propertiesFile);
+            try {
+                properties.load(inputStream);
             } catch (IOException e) {
+                //TODO: log exception
                 e.printStackTrace();
             }
-
-            InputStream inputStream;
-            try {
-                inputStream = new FileInputStream(propertiesFile);
-                try {
-                    properties.load(inputStream);
-                } catch (IOException e) {
-                    //TODO: log exception
-                    e.printStackTrace();
-                }
-            } catch (FileNotFoundException e) {
-                //TODO: log exception
-            }
+        } catch (FileNotFoundException e) {
+            //TODO: log exception
         }
     }
 
