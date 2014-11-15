@@ -29,7 +29,6 @@ public class AddOnManager {
     private final ContentGeneratorManager contentGeneratorManager;
     private final ActivatorManager activatorManager;
     private final PropertiesManager propertiesManager;
-    public static final String ADDON_DATA_PATH = "." + File.separator + "resources" + File.separator;
 
     public AddOnManager(OutputManager outputManager, EventManager eventManager,
                         ContentGeneratorManager contentGeneratorManager, ActivatorManager activatorManager) {
