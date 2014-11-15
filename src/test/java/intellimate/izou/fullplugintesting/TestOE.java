@@ -6,6 +6,7 @@ import intellimate.izou.output.OutputExtension;
 /**
  * Created by julianbrendl on 10/7/14.
  */
+@SuppressWarnings("SameParameterValue")
 public class TestOE extends OutputExtension<TestOD> {
 
     public TestOE(String id) {

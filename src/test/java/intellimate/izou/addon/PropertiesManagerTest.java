@@ -21,13 +21,15 @@ public class PropertiesManagerTest extends TestCase {
         TestAddOn testAddOn = new TestAddOn("TestID");
         addOns.add(testAddOn);
         Main main = new Main(addOns);
-        for(;;){}
+        //for(;;){}
+        //TODO: @Julian the for loop never ends
     }
 
     public void testRun() throws Exception {
 
     }
 
+    @SuppressWarnings("SameParameterValue")
     private class TestAddOn extends AddOn{
 
         /**

@@ -7,6 +7,7 @@ import java.util.List;
 /**
  * Created by julianbrendl on 10/7/14.
  */
+@SuppressWarnings("SameParameterValue")
 public class TestOP extends OutputPlugin<TestOD> {
 
     public TestOP(String id) {

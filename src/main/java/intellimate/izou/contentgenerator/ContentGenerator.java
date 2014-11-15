@@ -13,6 +13,7 @@ import java.util.concurrent.Future;
  * When an Event this ContentGenerator subscribed to was fired, the ContentGeneratorManager will run the instance of it
  * in a ThreadPool and generate(String eventID) will be called.
  */
+@SuppressWarnings("SameParameterValue")
 public abstract class ContentGenerator<T> implements Callable<ContentData<T>>, EventManager.ActivatorEventListener{
     private ContentGeneratorManager contentGeneratorManager;
     //stores the ID of the ContentGenerator
@@ -127,7 +128,7 @@ public abstract class ContentGenerator<T> implements Callable<ContentData<T>>, E
     }
 
     /**
-     * Unregisters an Event.
+     * Unregister an Event.
      *
      * @param eventID the ID of the Event, format: package.class.name
      * But the events will only be registered when added to the System (registered at the ContentGeneratorManagers).
@@ -146,22 +147,19 @@ public abstract class ContentGenerator<T> implements Callable<ContentData<T>>, E
     }
 
     /**
-     * Unregisters all events.
+     * Unregister all events.
      *
      * But the events will only be registered when added to the System (registered at the ContentGeneratorManagers).
      * If there is a problem with the events, the exception will be thrown later (handleError()).
      */
     public void unregisterAllEvents() throws IllegalArgumentException{
-        for (String id : registeredEvents)
-        {
-            if(eventManager != null) {
-                try {
-                    eventManager.deleteActivatorEventListener(id, this);
-                } catch (IllegalArgumentException e) {
-                    handleError(e);
-                }
+        registeredEvents.stream().filter(id -> eventManager != null).forEach(id -> {
+            try {
+                eventManager.deleteActivatorEventListener(id, this);
+            } catch (IllegalArgumentException e) {
+                handleError(e);
             }
-        }
+        });
         registeredEvents.clear();
     }
 

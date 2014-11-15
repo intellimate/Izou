@@ -85,7 +85,7 @@ public class EventManager implements Runnable{
     }
 
     /**
-     * Unregisters with the EventManager.
+     * Unregister with the EventManager.
      *
      * Method is thread-safe.
      *
@@ -322,6 +322,7 @@ public class EventManager implements Runnable{
      * To fire events a class must register with registerActivatorCaller, then this class will be returned.
      * Use fire() to fire the event;
      */
+    @SuppressWarnings("SameParameterValue")
     public final class ActivatorEventCaller {
         private String id;
         //private, so that this class can only constructed by EventManager

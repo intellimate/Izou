@@ -6,6 +6,7 @@ import intellimate.izou.contentgenerator.ContentGenerator;
 /**
  * Created by julianbrendl on 10/7/14.
  */
+@SuppressWarnings("SameParameterValue")
 public class TestCG extends ContentGenerator<String> {
 
     public TestCG(String contentGeneratorID) {

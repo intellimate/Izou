@@ -26,7 +26,7 @@ public class OutputManager {
     private final ExecutorService executor;
 
     /**
-     * hashmap that stores the future objects of the output-plugins
+     * HashMap that stores the future objects of the output-plugins
      */
     private HashMap<String, Future> futureHashMap;
 
@@ -75,6 +75,7 @@ public class OutputManager {
         if (tempExtensionStorage.containsKey(outputPlugin.getId())) {
             for(OutputExtension oE: tempExtensionStorage.get(outputPlugin.getId())) {
                 try {
+                    //noinspection unchecked
                     outputPlugin.addOutputExtension(oE);
                 }
                 catch (ClassCastException e) {
@@ -125,7 +126,12 @@ public class OutputManager {
         boolean found = false;
         for (OutputPlugin oPlug: outputPluginsList) {
             if (oPlug.getId().equals(outputPluginId)) {
-                oPlug.addOutputExtension(outputExtension);
+                try {
+                    //noinspection unchecked
+                    oPlug.addOutputExtension(outputExtension);
+                } catch (ClassCastException e) {
+                    e.printStackTrace();
+                }
                 outputExtension.setPluginId(oPlug.getId());
                 found = true;
                 break;
@@ -159,7 +165,7 @@ public class OutputManager {
     }
 
     /**
-     * gets a list of ContentData's and sends it to the right outputPlugin for further processsing
+     * gets a list of ContentData's and sends it to the right outputPlugin for further processing
      *
      * passDataToOutputPlugins is the main method of OutputManger. It is called whenever the output process has to be started
      *
