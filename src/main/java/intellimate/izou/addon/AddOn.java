@@ -19,6 +19,7 @@ import java.util.Properties;
  * It will be instantiated and its registering-methods will be called by the PluginManager.
  * This class has method for a properties-file named addOnID.properties (AddOnsID in the form: package.class)
  */
+@SuppressWarnings("UnusedDeclaration")
 public abstract class AddOn implements ExtensionPoint {
     private PropertiesContainer propertiesContainer;
     private final String addOnID;
