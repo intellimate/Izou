@@ -21,6 +21,7 @@ public class PropertiesManagerTest extends TestCase {
         TestAddOn testAddOn = new TestAddOn("TestID");
         addOns.add(testAddOn);
         Main main = new Main(addOns);
+        for(;;){}
     }
 
     public void testRun() throws Exception {
@@ -66,19 +67,6 @@ public class PropertiesManagerTest extends TestCase {
         @Override
         public OutputExtension[] registerOutputExtension() {
             return new OutputExtension[0];
-        }
-
-        @Override
-        public Path registerPropertiesFile() {
-            String pathString = null;
-            try {
-                this.setDefaultPropertiesPath(new File(".").getCanonicalPath() + File.separator + "defaultProperties.txt");
-                pathString = new File(".").getCanonicalPath() + File.separator;
-                //this.setDefaultPropertiesPath(AddOnManager.ADDON_DATA_PATH + "about.txt");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return Paths.get(pathString);
         }
     }
 }

@@ -15,6 +15,7 @@ import ro.fortsoft.pf4j.PluginManager;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -148,13 +149,11 @@ public class AddOnManager {
      * @throws IOException
      */
     private void registerPropertyFiles() throws IOException {
+        String dir = "." + File.separator + "properties";
         for (AddOn addOn : addOnList) {
-            if (addOn.registerPropertiesFile() != null)
-                try {
-                    propertiesManager.registerProperty(addOn.registerPropertiesFile(), addOn);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                propertiesManager.registerProperty(Paths.get(dir), addOn);
+                addOn.setDefaultPropertiesPath(addOn.getClass().getPackage().getImplementationTitle()
+                        + "-" + addOn.getClass().getPackage().getImplementationVersion());
         }
     }
 
@@ -164,6 +163,14 @@ public class AddOnManager {
     public void retrieveAndRegisterAddOns() {
         addAllAddOns();
         prepareAllAddOns();
+        try {
+            registerPropertyFiles();
+        } catch(IOException e) {
+            e.printStackTrace();
+            //TODO: implement exception handling
+        }
+        //has to be last because of properties that require file paths from prepare and register
+        initAllAddOns();
         registerAllAddOns();
     }
 
@@ -175,9 +182,15 @@ public class AddOnManager {
     public void addAndRegisterAddOns(List<AddOn> addOns) {
         addOnList.addAll(addOns);
         prepareAllAddOns();
-        registerAllAddOns();
+        try {
+            registerPropertyFiles();
+        } catch(IOException e) {
+            e.printStackTrace();
+            //TODO: implement exception handling
+        }
         //has to be last because of properties that require file paths from prepare and register
         initAllAddOns();
+        registerAllAddOns();
     }
 
     /**
@@ -246,12 +259,6 @@ public class AddOnManager {
         registerOutputExtensions();
         registerContentGenerators();
         registerEventControllers();
-        try {
-            registerPropertyFiles();
-        } catch (IOException e) {
-            e.printStackTrace();
-            //TODO: implement exception handling
-        }
         registerActivators();
     }
 }

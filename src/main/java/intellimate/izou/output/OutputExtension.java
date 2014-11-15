@@ -1,6 +1,7 @@
 package intellimate.izou.output;
 
 import intellimate.izou.contentgenerator.ContentData;
+import intellimate.izou.events.EventController;
 
 import java.util.ArrayList;
 import java.util.List;
