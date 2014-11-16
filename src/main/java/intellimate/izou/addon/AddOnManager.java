@@ -30,6 +30,8 @@ public class AddOnManager {
     private final ContentGeneratorManager contentGeneratorManager;
     private final ActivatorManager activatorManager;
     private final PropertiesManager propertiesManager;
+    public static final String ADDON_DATA_PATH = "." + File.separator + "resources" + File.separator;
+
 
     public AddOnManager(OutputManager outputManager, EventManager eventManager,
                         ContentGeneratorManager contentGeneratorManager, ActivatorManager activatorManager) {
@@ -218,6 +220,25 @@ public class AddOnManager {
     }
 
     /**
+     * creates the Izou file system with all necessary folders
+     *
+     * @throws IOException java io exception
+     */
+    private void createIzouFileSystem() throws IOException {
+        String libPath = new File(".").getCanonicalPath() + File.separator + "lib";
+        File libFile = new File(libPath);
+        Files.createDirectories(libFile.toPath());
+
+        String resourcePath = new File(".").getCanonicalPath() + File.separator + "resources";
+        File resourceFile = new File(resourcePath);
+        Files.createDirectories(resourceFile.toPath());
+
+        String propertiesPath = new File(".").getCanonicalPath() + File.separator + "properties";
+        File propertiesDir = new File(propertiesPath);
+        Files.createDirectories(propertiesDir.toPath());
+    }
+
+    /**
      * This method searches all the "/lib"-directory for AddOns and adds them to the addOnList
      */
     private void addAllAddOns() {
@@ -231,7 +252,7 @@ public class AddOnManager {
             return;
         }
         if (!Files.exists(libFile.toPath())) try {
-            Files.createDirectories(libFile.toPath());
+            createIzouFileSystem();
         } catch (IOException e) {
             //TODO: implement Exception handling
             e.printStackTrace();
