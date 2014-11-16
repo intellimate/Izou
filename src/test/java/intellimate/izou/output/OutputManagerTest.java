@@ -26,7 +26,7 @@ public class OutputManagerTest {
             }
         };
         outputManager.addOutputPlugin(outputPlugin);
-        outputManager.addOutputExtension(outputExtension, outputPlugin.getId());
+        outputManager.addOutputExtension(outputExtension, outputPlugin.getID());
         assertTrue(outputManager.getOutputPluginsList().get(0).getOutputExtensionList().contains(outputExtension));
     }
 
@@ -46,8 +46,8 @@ public class OutputManagerTest {
             }
         };
         outputManager.addOutputPlugin(outputPlugin);
-        outputManager.addOutputExtension(outputExtension, outputPlugin.getId());
-        outputManager.removeOutputExtension(outputPlugin.getId(), outputExtension.getId());
+        outputManager.addOutputExtension(outputExtension, outputPlugin.getID());
+        outputManager.removeOutputExtension(outputPlugin.getID(), outputExtension.getID());
         assertTrue(outputManager.getOutputPluginsList().get(0).getOutputExtensionList().isEmpty());
     }
 
@@ -76,7 +76,7 @@ public class OutputManagerTest {
         list.add(cD3);
 
         outputManager.addOutputPlugin(outputPlugin);
-        outputManager.addOutputExtension(outputExtension, outputPlugin.getId());
+        outputManager.addOutputExtension(outputExtension, outputPlugin.getID());
         outputExtension.addContentDataToWishList("2");
         outputManager.passDataToOutputPlugins(list);
         assertTrue(outputManager.getOutputPluginsList().get(0).getOutputExtensionList().size() == 1);
@@ -97,7 +97,7 @@ public class OutputManagerTest {
                 return null;
             }
         };
-        outputManager.addOutputExtension(outputExtension, outputPlugin.getId());
+        outputManager.addOutputExtension(outputExtension, outputPlugin.getID());
         outputManager.addOutputPlugin(outputPlugin);
         assertTrue(outputManager.getOutputPluginsList().get(0).getOutputExtensionList().contains(outputExtension));
     }

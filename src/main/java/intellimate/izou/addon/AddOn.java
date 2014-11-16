@@ -5,6 +5,7 @@ import intellimate.izou.contentgenerator.ContentGenerator;
 import intellimate.izou.events.EventController;
 import intellimate.izou.output.OutputExtension;
 import intellimate.izou.output.OutputPlugin;
+import intellimate.izou.system.Identifiable;
 import ro.fortsoft.pf4j.ExtensionPoint;
 
 import java.io.*;
@@ -20,7 +21,7 @@ import java.util.Properties;
  * This class has method for a properties-file named addOnID.properties (AddOnsID in the form: package.class)
  */
 @SuppressWarnings("UnusedDeclaration")
-public abstract class AddOn implements ExtensionPoint {
+public abstract class AddOn implements ExtensionPoint, Identifiable {
     private PropertiesContainer propertiesContainer;
     private final String addOnID;
     private final String propertiesPath;
@@ -224,14 +225,6 @@ public abstract class AddOn implements ExtensionPoint {
      * @return Array containing Instances of OutputExtensions
      */
     public abstract OutputExtension[] registerOutputExtension();
-
-    /**
-     * The AddOns-Id is usually the following Form: package.class
-     * @return a String containing the PluginID
-     */
-    public String getAddOnID() {
-        return addOnID;
-    }
 
     /**
      * You should probably use getPropertiesContainer() unless you have a very good reason not to.

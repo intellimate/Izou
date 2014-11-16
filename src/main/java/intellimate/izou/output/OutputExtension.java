@@ -1,6 +1,7 @@
 package intellimate.izou.output;
 
 import intellimate.izou.contentgenerator.ContentData;
+import intellimate.izou.system.Identifiable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.concurrent.Callable;
  * OutputExtension's purpose is to take contentData and convert it into another data format so that it can be rendered correctly
  * by the output-plugin. These objects are represented in the form of future objects that are stored in tDoneList
  */
-public abstract class OutputExtension<T> implements Callable<T> {
+public abstract class OutputExtension<T> implements Callable<T>, Identifiable{
 
     /**
      * the id of the outputExtension, same as the id of its contentData
@@ -115,7 +116,8 @@ public abstract class OutputExtension<T> implements Callable<T> {
      *
      * @return id of outputExtension to be returned
      */
-    public String getId() {
+    @Override
+    public String getID() {
         return id;
     }
 

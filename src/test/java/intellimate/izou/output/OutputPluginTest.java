@@ -103,7 +103,7 @@ public class OutputPluginTest {
         };
         outputPlugin.addOutputExtension(ext1);
         outputPlugin.addOutputExtension(ext2);
-        outputPlugin.removeOutputExtension(ext1.getId());
+        outputPlugin.removeOutputExtension(ext1.getID());
         assertTrue(outputPlugin.getOutputExtensionList().size() == 1 && outputPlugin.getOutputExtensionList().get(0).equals(ext2));
     }
 

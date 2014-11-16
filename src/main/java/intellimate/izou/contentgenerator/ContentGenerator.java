@@ -1,6 +1,7 @@
 package intellimate.izou.contentgenerator;
 
 import intellimate.izou.events.EventManager;
+import intellimate.izou.system.Identifiable;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.concurrent.Future;
  * in a ThreadPool and generate(String eventID) will be called.
  */
 @SuppressWarnings("SameParameterValue")
-public abstract class ContentGenerator<T> implements Callable<ContentData<T>>, EventManager.ActivatorEventListener{
+public abstract class ContentGenerator<T> implements Callable<ContentData<T>>, EventManager.ActivatorEventListener, Identifiable{
     private ContentGeneratorManager contentGeneratorManager;
     //stores the ID of the ContentGenerator
     private final String contentGeneratorID;
@@ -199,7 +200,8 @@ public abstract class ContentGenerator<T> implements Callable<ContentData<T>>, E
      * gets the ContentGeneratorID
      * @return a String
      */
-    public String getContentGeneratorID() {
+    @Override
+    public String getID() {
         return contentGeneratorID;
     }
 }

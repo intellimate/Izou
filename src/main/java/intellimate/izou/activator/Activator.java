@@ -1,6 +1,7 @@
 package intellimate.izou.activator;
 
 import intellimate.izou.events.EventManager;
+import intellimate.izou.system.Identifiable;
 
 import java.util.HashMap;
 
@@ -10,7 +11,7 @@ import java.util.HashMap;
  * The Activator always runs in the Background, just overwrite activatorStarts(). To use Activator simply extend from it
  * and hand an instance over to the ActivatorManager.
  */
-public abstract class Activator implements Runnable {
+public abstract class Activator implements Runnable, Identifiable{
 
     private HashMap<String, EventManager.ActivatorEventCaller> callers = null;
     private EventManager eventManager;

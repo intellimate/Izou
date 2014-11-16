@@ -1,6 +1,7 @@
 package intellimate.izou.output;
 
 import intellimate.izou.contentgenerator.ContentData;
+import intellimate.izou.system.Identifiable;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -12,7 +13,7 @@ import java.util.concurrent.*;
  * output and then render it on its own medium
  */
 @SuppressWarnings("UnusedDeclaration")
-public abstract class OutputPlugin<T> implements Runnable{
+public abstract class OutputPlugin<T> implements Runnable, Identifiable{
     /**
      * id of the of OutputPlugin, it is primarily used by OutputManager to communicate with specific output plugins
      */
@@ -106,7 +107,8 @@ public abstract class OutputPlugin<T> implements Runnable{
      *
      * @return id of the outputPlugin
      */
-    public String getId() {
+    @Override
+    public String getID() {
         return this.id;
 
     }
@@ -162,7 +164,7 @@ public abstract class OutputPlugin<T> implements Runnable{
      */
     public void addOutputExtension(OutputExtension<T> outputExtension) {
         outputExtensionList.add(outputExtension);
-        outputExtension.setPluginId(this.getId());
+        outputExtension.setPluginId(this.getID());
         outputExtensionWasAdded(outputExtension);
     }
 
@@ -176,7 +178,7 @@ public abstract class OutputPlugin<T> implements Runnable{
      */
     public void removeOutputExtension(String id) {
         for(OutputExtension ext: outputExtensionList) {
-            if(ext.getId().equals(id)) {
+            if(ext.getID().equals(id)) {
                 ext.setPluginId(null);
                 outputExtensionList.remove(ext);
                 break;

@@ -60,20 +60,20 @@ public class OutputManager {
      * @param outputPlugin OutputPlugin to add
      */
     public void addOutputPlugin(OutputPlugin outputPlugin) {
-        if (!futureHashMap.containsKey(outputPlugin.getId())) {
+        if (!futureHashMap.containsKey(outputPlugin.getID())) {
             outputPlugin.setExecutor(executor);
             outputPluginsList.add(outputPlugin);
-            futureHashMap.put(outputPlugin.getId(), executor.submit(outputPlugin));
+            futureHashMap.put(outputPlugin.getID(), executor.submit(outputPlugin));
         } else {
-            if (futureHashMap.get(outputPlugin.getId()).isDone()) {
+            if (futureHashMap.get(outputPlugin.getID()).isDone()) {
                 outputPlugin.setExecutor(executor);
-                futureHashMap.remove(outputPlugin.getId());
-                futureHashMap.put(outputPlugin.getId(), executor.submit(outputPlugin));
+                futureHashMap.remove(outputPlugin.getID());
+                futureHashMap.put(outputPlugin.getID(), executor.submit(outputPlugin));
             }
         }
 
-        if (tempExtensionStorage.containsKey(outputPlugin.getId())) {
-            for(OutputExtension oE: tempExtensionStorage.get(outputPlugin.getId())) {
+        if (tempExtensionStorage.containsKey(outputPlugin.getID())) {
+            for(OutputExtension oE: tempExtensionStorage.get(outputPlugin.getID())) {
                 try {
                     //noinspection unchecked
                     outputPlugin.addOutputExtension(oE);
@@ -83,13 +83,13 @@ public class OutputManager {
                     e.printStackTrace();
                 }
             }
-            tempExtensionStorage.remove(outputPlugin.getId());
+            tempExtensionStorage.remove(outputPlugin.getID());
         }
     }
 
     public OutputPlugin getOutputPlugin(String id) {
         for (OutputPlugin oP: outputPluginsList) {
-            if (oP.getId().equals(id)) {
+            if (oP.getID().equals(id)) {
                 return oP;
             }
         }
@@ -103,11 +103,11 @@ public class OutputManager {
      */
     public void removeOutputPlugin(String pluginId) {
         for(OutputPlugin oPlug: outputPluginsList) {
-            if(oPlug.getId().equals(pluginId)) {
+            if(oPlug.getID().equals(pluginId)) {
                 outputPluginsList.remove(oPlug);
                 oPlug.setExecutor(null);
-                futureHashMap.get(oPlug.getId()).cancel(true);
-                futureHashMap.remove(oPlug.getId());
+                futureHashMap.get(oPlug.getID()).cancel(true);
+                futureHashMap.remove(oPlug.getID());
                 break;
             }
         }
@@ -125,14 +125,14 @@ public class OutputManager {
     public void addOutputExtension(OutputExtension outputExtension, String outputPluginId) {
         boolean found = false;
         for (OutputPlugin oPlug: outputPluginsList) {
-            if (oPlug.getId().equals(outputPluginId)) {
+            if (oPlug.getID().equals(outputPluginId)) {
                 try {
                     //noinspection unchecked
                     oPlug.addOutputExtension(outputExtension);
                 } catch (ClassCastException e) {
                     e.printStackTrace();
                 }
-                outputExtension.setPluginId(oPlug.getId());
+                outputExtension.setPluginId(oPlug.getID());
                 found = true;
                 break;
             }
@@ -157,7 +157,7 @@ public class OutputManager {
      */
     public void removeOutputExtension(String pluginId, String extensionId) {
         for(OutputPlugin oPlug: outputPluginsList) {
-            if(oPlug.getId().equals(pluginId)) {
+            if(oPlug.getID().equals(pluginId)) {
                 oPlug.removeOutputExtension(extensionId);
                 break;
             }
