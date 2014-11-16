@@ -5,6 +5,7 @@ import java.util.List;
 /**
  * This interface is used to provide resources to other parts of the application.
  */
+@SuppressWarnings("UnusedDeclaration")
 public interface ResourceProvider {
     /**
      * this method is called to register what resources the object provides.
