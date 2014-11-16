@@ -55,7 +55,7 @@ public class ContentGeneratorManager {
     }
 
     /**
-     * Removes an ContentGenerator and unregisters all his listeners
+     * Removes an ContentGenerator and unregister all his listeners
      *
      * @param contentGenerator an instance of the ContentGenerator
      */

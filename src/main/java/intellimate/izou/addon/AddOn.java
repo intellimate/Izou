@@ -19,6 +19,7 @@ import java.util.Properties;
  * It will be instantiated and its registering-methods will be called by the PluginManager.
  * This class has method for a properties-file named addOnID.properties (AddOnsID in the form: package.class)
  */
+@SuppressWarnings("UnusedDeclaration")
 public abstract class AddOn implements ExtensionPoint {
     private PropertiesContainer propertiesContainer;
     private final String addOnID;
@@ -43,26 +44,24 @@ public abstract class AddOn implements ExtensionPoint {
 
         propertiesPath = propertiesPathTemp;
         defaultPropertiesPath = null;
-        synchronized (propertiesPath) {
-            File propertiesFile = new File(propertiesPath);
-            if (!propertiesFile.exists()) try {
-                propertiesFile.createNewFile();
+        File propertiesFile = new File(propertiesPath);
+        if (!propertiesFile.exists()) try {
+            propertiesFile.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        InputStream inputStream;
+        try {
+            inputStream = new FileInputStream(propertiesFile);
+            try {
+                properties.load(inputStream);
             } catch (IOException e) {
+                //TODO: log exception
                 e.printStackTrace();
             }
-
-            InputStream inputStream;
-            try {
-                inputStream = new FileInputStream(propertiesFile);
-                try {
-                    properties.load(inputStream);
-                } catch (IOException e) {
-                    //TODO: log exception
-                    e.printStackTrace();
-                }
-            } catch (FileNotFoundException e) {
-                //TODO: log exception
-            }
+        } catch (FileNotFoundException e) {
+            //TODO: log exception
         }
     }
 
@@ -72,7 +71,7 @@ public abstract class AddOn implements ExtensionPoint {
     public abstract void prepare();
 
     /**
-     * internal initation of addOn
+     * internal initiation of addOn
      */
     public void initAddOn() {
         if(defaultPropertiesPath != null)
@@ -83,6 +82,7 @@ public abstract class AddOn implements ExtensionPoint {
      * Initializes properties in the addOn. Creates new properties file with default properties.
      */
     private void initProperties() {
+        @SuppressWarnings("unchecked")
         Enumeration<String> keys = (Enumeration<String>)this.propertiesContainer.getProperties().propertyNames();
 
         if (!keys.hasMoreElements()) {
@@ -308,7 +308,7 @@ public abstract class AddOn implements ExtensionPoint {
      * file is created in the resource folder of your addOn.
      *
      * @param addOnName The artifact name and version concatenated together.
-     *                  (Ex: "artifactname-versionnumber", "testaddon-0.1", etc.)
+     *                  (Ex: "artifactName-versionNumber", "testaddon-0.1", etc.)
      *
      * @throws java.lang.NullPointerException the given addOnName is not the correct artifact name and version number
      */

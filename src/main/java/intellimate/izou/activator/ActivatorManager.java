@@ -53,6 +53,7 @@ public class ActivatorManager {
                             activator.exceptionThrown(e);
                         } catch (NoSuchFieldException | IllegalAccessException | ClassCastException ecp ) {
                             //TODO: real Exception handling is not implemented jet
+
                             e.printStackTrace();
                         }
                     }

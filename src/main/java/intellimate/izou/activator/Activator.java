@@ -1,6 +1,5 @@
 package intellimate.izou.activator;
 
-import intellimate.izou.addon.PropertiesContainer;
 import intellimate.izou.events.EventManager;
 
 import java.util.HashMap;
@@ -59,6 +58,7 @@ public abstract class Activator implements Runnable {
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException e1) {
+                    e.printStackTrace();
                 }
                 activatorManager.addActivator(this);
             }
@@ -97,7 +97,7 @@ public abstract class Activator implements Runnable {
     }
 
     /**
-     * unregisters an Event at EventManager.
+     * unregister an Event at EventManager.
      * <p>
      * If you don't need an event anymore, you can unregister it .
      *
@@ -109,7 +109,7 @@ public abstract class Activator implements Runnable {
         if (callers == null) {
             throw new IllegalStateException("This method got called outside activatorStarts()");
         }
-        EventManager.ActivatorEventCaller caller = null;
+        EventManager.ActivatorEventCaller caller;
         caller = callers.get(id);
         if (caller == null) {
             throw new IllegalArgumentException();
@@ -119,7 +119,7 @@ public abstract class Activator implements Runnable {
     }
 
     /**
-     * unregisters all Event at EventManager.
+     * unregister all Event at EventManager.
      * <p>
      * If you don't need this class anymore, you should unregister all events to avoid memory leaks.
      * @throws IllegalArgumentException thrown if the ID is null or empty

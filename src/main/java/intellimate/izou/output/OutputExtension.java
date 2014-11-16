@@ -1,7 +1,6 @@
 package intellimate.izou.output;
 
 import intellimate.izou.contentgenerator.ContentData;
-import intellimate.izou.events.EventController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,9 +69,9 @@ public abstract class OutputExtension<T> implements Callable<T> {
     }
 
     /**
-     * checks if the outputExtension can execute with the current content-datas
+     * checks if the outputExtension can execute with the current content-Datas
      *
-     * @return the state of whether the outputExtension can execute with the current content-datas
+     * @return the state of whether the outputExtension can execute with the current content-Datas
      */
     public boolean canRun() {
         return !contentDataList.isEmpty();
@@ -91,7 +90,7 @@ public abstract class OutputExtension<T> implements Callable<T> {
     }
 
     /**
-     * adds id of content-datas to the wish list
+     * adds id of content-Datas to the wish list
      *
      * @param id the id of the content-data to be added to the wish list
      */

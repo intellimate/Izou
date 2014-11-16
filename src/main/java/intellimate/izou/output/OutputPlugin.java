@@ -121,9 +121,9 @@ public abstract class OutputPlugin<T> implements Runnable{
     }
 
     /**
-     * checks if the outputPlugin has any output-extensions it can run with the current content-datas
+     * checks if the outputPlugin has any output-extensions it can run with the current content-Datas
      *
-     * @return state of whether the outputPlugin has any output-extensions it can run with the current content-datas
+     * @return state of whether the outputPlugin has any output-extensions it can run with the current content-Datas
      */
     public boolean canRun() {
         boolean canRun = false;
@@ -144,7 +144,7 @@ public abstract class OutputPlugin<T> implements Runnable{
      */
     public void distributeContentData(List<ContentData> contentDataList) {
         for(OutputExtension ext: outputExtensionList) {
-            List<String> contentDataWishList = ext.getContentDataWishList();
+            @SuppressWarnings("unchecked") List<String> contentDataWishList = ext.getContentDataWishList();
             for(String strWish: contentDataWishList) {
                 for(ContentData cD: contentDataList) {
                     if (strWish.equals(cD.getId())) {
@@ -218,16 +218,15 @@ public abstract class OutputPlugin<T> implements Runnable{
     public void outputDataIsDone(Future<T> tFuture) {}
 
     /**
-     * Default implementation waits until a new list of content-datas has been received and then processes it.
+     * Default implementation waits until a new list of content-Datas has been received and then processes it.
      *
      * This method is made to be overwritten as seen fit by the developer
      *
      * @throws java.lang.InterruptedException if interrupted while waiting
-     * @return the list of content-datas to be processed by the outputPlugin
+     * @return the list of content-Datas to be processed by the outputPlugin
      */
     public List<ContentData> blockingQueueHandling() throws InterruptedException {
-        List<ContentData> contentDataList = contentDataBlockingQueue.take();
-        return contentDataList;
+        return contentDataBlockingQueue.take();
     }
 
     /**

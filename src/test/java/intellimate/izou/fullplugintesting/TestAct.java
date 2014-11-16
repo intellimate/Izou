@@ -6,6 +6,7 @@ import intellimate.izou.events.EventManager;
 /**
  * Created by julianbrendl on 10/7/14.
  */
+@SuppressWarnings("SameParameterValue")
 public class TestAct extends Activator {
     private boolean start;
 
@@ -19,12 +20,14 @@ public class TestAct extends Activator {
 
     @Override
     public void activatorStarts() throws InterruptedException{
-        while (true) {
+        boolean firedEvent = false;
+        while (!firedEvent) {
             if(start) {
                 System.out.println("1");
                 this.registerEvent("1");
                 try {
                     this.fireEvent("1");
+                    firedEvent = true;
                 } catch (EventManager.MultipleEventsException e) {
                     e.printStackTrace();
                 }
