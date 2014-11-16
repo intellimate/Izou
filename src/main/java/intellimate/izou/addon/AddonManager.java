@@ -13,6 +13,7 @@ import ro.fortsoft.pf4j.DefaultPluginManager;
 import ro.fortsoft.pf4j.PluginManager;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -130,10 +131,30 @@ public class AddOnManager {
     private void registerPropertyFiles() throws IOException {
         String dir = "." + File.separator + "properties";
         for (AddOn addOn : addOnList) {
-                propertiesManager.registerProperty(Paths.get(dir), addOn);
-                addOn.setDefaultPropertiesPath(addOn.getClass().getPackage().getImplementationTitle()
-                        + "-" + addOn.getClass().getPackage().getImplementationVersion());
+
+            propertiesManager.registerProperty(Paths.get(dir), addOn);
+            addOn.setDefaultPropertiesPath(getFolder(addOn));
         }
+    }
+
+    /**
+     * gets folder of addOn
+     *
+     * @param addOn the addOn for which to get the folder
+     * @return the folder as a String or null if it was not found
+     */
+    private String getFolder(AddOn addOn) {
+        String addOnName = addOn.getClass().getPackage().getName();
+        String[] nameParts = addOnName.split("\\.");
+
+        File file = new File("." + File.separator + "lib");
+        String[] directories = file.list((current, name) -> new File(current, name).isDirectory());
+
+        for(String fileName : directories) {
+            if(nameParts.length - 1 >= 0 && fileName.contains(nameParts[nameParts.length - 1]))
+                return fileName;
+        }
+        return null;
     }
 
     /**

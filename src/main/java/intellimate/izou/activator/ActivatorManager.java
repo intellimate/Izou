@@ -34,8 +34,6 @@ public class ActivatorManager {
         return executor.submit(activator);
     }
 
-
-
     /**
      * used to catch Exception in threads
      */

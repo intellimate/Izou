@@ -234,6 +234,8 @@ public abstract class AddOn implements ExtensionPoint {
     }
 
     /**
+     * You should probably use getPropertiesContainer() unless you have a very good reason not to.
+     *
      * Searches for the property with the specified key in this property list.
      *
      * If the key is not found in this property list, the default property list, and its defaults, recursively, are

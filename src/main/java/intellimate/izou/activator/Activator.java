@@ -180,6 +180,7 @@ public abstract class Activator implements Runnable {
         setEventManager(eventManager);
         setActivatorManager(activatorManager);
     }
+
     private void setEventManager(EventManager eventManager) {
         this.eventManager = eventManager;
 
