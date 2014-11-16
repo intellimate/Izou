@@ -152,9 +152,12 @@ public class AddOnManager {
     private void registerPropertyFiles() throws IOException {
         String dir = "." + File.separator + "properties";
         for (AddOn addOn : addOnList) {
-
-            propertiesManager.registerProperty(Paths.get(dir), addOn);
-            addOn.setDefaultPropertiesPath(getFolder(addOn));
+            if(!(getFolder(addOn) == null)) {
+                propertiesManager.registerProperty(Paths.get(dir), addOn);
+                addOn.setDefaultPropertiesPath(getFolder(addOn));
+            } else {
+                //TODO implement log that says no property file was found
+            }
         }
     }
 
