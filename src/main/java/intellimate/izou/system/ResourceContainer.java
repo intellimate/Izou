@@ -10,7 +10,7 @@ public interface ResourceContainer {
 
     /**
      * checks whether it can provide the resource
-     * beware that the implementation may vary.
+     * beware that the implementation may vary. It can time out etc.
      * @param resource the resource to provide
      * @return true if the container can provide the resource
      */
@@ -18,7 +18,7 @@ public interface ResourceContainer {
 
     /**
      * checks whether there are any resources registered from the source
-     * beware that the implementation may vary.
+     * beware that the implementation may vary. It can time out etc.
      * @param sourceID the ID of the source
      * @return true if the container has resources from the source
      */
@@ -26,7 +26,7 @@ public interface ResourceContainer {
 
     /**
      * checks whether the ResourceContainer can provide at least ONE resource
-     * beware that the implementation may vary.
+     * beware that the implementation may vary. It can time out etc.
      * @param resourcesID a list containing sources
      * @return true if the ResourceContainer can provide at least one resource
      */
@@ -35,7 +35,7 @@ public interface ResourceContainer {
     /**
      * returns all EXISTING resources for the ID.
      * If there are no resources for the ID the ID will get skipped
-     * beware that the implementation may vary.
+     * beware that the implementation may vary. It can time out etc.
      * @param resourceIDs an Array containing the resources
      * @return a list of resources found
      */
@@ -43,9 +43,9 @@ public interface ResourceContainer {
 
     /**
      * returns the resource (if existing)
-     * beware that the implementation may vary.
+     * beware that the implementation may vary. It can time out etc.
      * @param resourceID the ID of the resource
-     * @return
+     * @return a list of resources found
      */
     abstract Resource provideResource(String resourceID);
 }

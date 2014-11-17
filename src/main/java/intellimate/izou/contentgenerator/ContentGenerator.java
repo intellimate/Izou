@@ -1,5 +1,6 @@
 package intellimate.izou.contentgenerator;
 
+import intellimate.izou.events.EventListener;
 import intellimate.izou.events.EventManager;
 import intellimate.izou.system.Identifiable;
 
@@ -15,7 +16,7 @@ import java.util.concurrent.Future;
  * in a ThreadPool and generate(String eventID) will be called.
  */
 @SuppressWarnings("SameParameterValue")
-public abstract class ContentGenerator<T> implements Callable<ContentData<T>>, EventManager.ActivatorEventListener, Identifiable{
+public abstract class ContentGenerator<T> implements Callable<ContentData<T>>, EventListener, Identifiable{
     private ContentGeneratorManager contentGeneratorManager;
     //stores the ID of the ContentGenerator
     private final String contentGeneratorID;
@@ -79,7 +80,7 @@ public abstract class ContentGenerator<T> implements Callable<ContentData<T>>, E
      * @return a Future representing pending completion of the task.
      */
     @Override
-    public Future<ContentData> activatorEventFired(String id) {
+    public Future<ContentData> eventFired(String id) {
         if(contentGeneratorManager == null)
         {
             throw new NullPointerException("You have not set the ContentGeneratorManager");

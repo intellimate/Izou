@@ -56,7 +56,7 @@ public class ListResourceContainer implements ResourceContainer{
      * returns the resource (if existing)
      *
      * @param resourceID the ID of the resource
-     * @return
+     * @return a list of resources found
      */
     @Override
     public Resource provideResource(String resourceID) {

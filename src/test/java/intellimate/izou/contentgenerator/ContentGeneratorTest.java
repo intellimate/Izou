@@ -50,7 +50,7 @@ public class ContentGeneratorTest {
             }
         };
         cg.registerAllNeededDependencies(contentGeneratorManager, eventManagerTestSetup.getManager());
-        Future future = cg.activatorEventFired("1");
+        Future future = cg.eventFired("1");
         synchronized (lock) {
             while (!future.isDone())
             {
@@ -62,7 +62,7 @@ public class ContentGeneratorTest {
 
     @Test
     public void testActivatorEventFired() throws Exception {
-        Future<ContentData> future = contentGenerator.activatorEventFired("2");
+        Future<ContentData> future = contentGenerator.eventFired("2");
         assertTrue((Boolean)future.get().getData());
     }
 
@@ -85,7 +85,7 @@ public class ContentGeneratorTest {
             }
         };
         cg.registerAllNeededDependencies(contentGeneratorManager, eventManagerTestSetup.getManager());
-        Future future = cg.activatorEventFired("3");
+        Future future = cg.eventFired("3");
         synchronized (lock) {
             while (!future.isDone())
             {

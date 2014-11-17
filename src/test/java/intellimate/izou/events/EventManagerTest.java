@@ -86,7 +86,7 @@ public class EventManagerTest {
     public void testDeleteActivatorEventListener() throws Exception {
         EventManager.ActivatorEventCaller caller = manager.registerActivatorCaller("4");
         final boolean[] isWorking = {false};
-        EventManager.ActivatorEventListener listener1;
+        EventListener listener1;
         manager.addActivatorEventListener("4", listener1 = id -> {
             isWorking[0] = true;
             return null;

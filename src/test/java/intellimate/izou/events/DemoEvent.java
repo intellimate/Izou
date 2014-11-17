@@ -7,14 +7,14 @@ import java.util.concurrent.Future;
 /**
  * Demo Event Reciever to explain the Event-Listening.
  *
- * This class implements EventManager.ActivatorEventListener, the Function activatorEventFired will be called when
+ * This class implements EventManager.ActivatorEventListener, the Function eventFired will be called when
  * an event was fired.
  */
-public class DemoEvent implements EventManager.ActivatorEventListener{
+public class DemoEvent implements EventListener {
     EventManager manager;
 
     @Override
-    public Future activatorEventFired(String id) {
+    public Future eventFired(String id) {
        //code here will be executed whe an event was fired
        System.out.println("Hello!");
         return null;

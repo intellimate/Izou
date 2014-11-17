@@ -44,7 +44,7 @@ public class EventManager implements Runnable{
     public static final String SUBSCRIBE_TO_ALL_EVENTS = EventManager.class.getCanonicalName() + ".SubscribeToAllEvents";
 
     //here are all the ContentGenerators-Listeners stored
-    private final ConcurrentHashMap<String, ArrayList<ActivatorEventListener>> listeners = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, ArrayList<EventListener>> listeners = new ConcurrentHashMap<>();
     //here are all the Instances to fire events stored
     private final ConcurrentHashMap<String, ArrayList<ActivatorEventCaller>> callers = new ConcurrentHashMap<>();
     //here are all the Instances to to control the Event-dispatching stored
@@ -111,22 +111,22 @@ public class EventManager implements Runnable{
      * Method is thread-safe.
      *
      * @param id the ID of the Event, format: package.class.name
-     * @param activatorEventListener the ActivatorEventListener-interface for receiving activator events
+     * @param eventListener the ActivatorEventListener-interface for receiving activator events
      * @throws IllegalArgumentException if Listener is already listening to the Event or the id is not allowed
      */
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    public void addActivatorEventListener (String id, ActivatorEventListener activatorEventListener) throws IllegalArgumentException{
+    public void addActivatorEventListener (String id, EventListener eventListener) throws IllegalArgumentException{
         checkID(id);
-        ArrayList<ActivatorEventListener> listenersList = listeners.get(id);
+        ArrayList<EventListener> listenersList = listeners.get(id);
         if (listenersList == null) {
             listeners.put(id, new ArrayList<>());
             listenersList = listeners.get(id);
         }
-        if(listenersList.contains(activatorEventListener)) {
+        if(listenersList.contains(eventListener)) {
             throw new IllegalArgumentException("Listener already listening to this event");
         }
         synchronized (listenersList) {
-            listenersList.add(activatorEventListener);
+            listenersList.add(eventListener);
         }
     }
 
@@ -136,18 +136,18 @@ public class EventManager implements Runnable{
      * Method is thread-safe.
      *
      * @param id the ID of the Event, format: package.class.name
-     * @param activatorEventListener the ActivatorEventListener used to listen for events
+     * @param eventListener the ActivatorEventListener used to listen for events
      * @throws IllegalArgumentException if Listener is already listening to the Event or the id is not allowed
      */
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    public void deleteActivatorEventListener (String id, ActivatorEventListener activatorEventListener) throws IllegalArgumentException{
+    public void deleteActivatorEventListener (String id, EventListener eventListener) throws IllegalArgumentException{
         checkID(id);
-        ArrayList<ActivatorEventListener> listenersList = listeners.get(id);
+        ArrayList<EventListener> listenersList = listeners.get(id);
         if (listenersList == null) {
             return;
         }
         synchronized (listenersList) {
-            listenersList.remove(activatorEventListener);
+            listenersList.remove(eventListener);
         }
     }
 
@@ -199,11 +199,11 @@ public class EventManager implements Runnable{
         checkID(id);
         if(!checkEventControllers(id)) return;
         //registered to Event
-        ArrayList<ActivatorEventListener> contentGeneratorListeners = this.listeners.get(id);
+        ArrayList<EventListener> contentGeneratorListeners = this.listeners.get(id);
         if(contentGeneratorListeners == null) contentGeneratorListeners = new ArrayList<>();
         List<Future<ContentData>> futures = new ArrayList<>();
-        for (ActivatorEventListener next : contentGeneratorListeners) {
-            Future<ContentData> futureTemp = next.activatorEventFired(id);
+        for (EventListener next : contentGeneratorListeners) {
+            Future<ContentData> futureTemp = next.eventFired(id);
             if (futureTemp != null) {
                 futures.add(futureTemp);
             }
@@ -211,8 +211,8 @@ public class EventManager implements Runnable{
         //registered to all Events
         contentGeneratorListeners = this.listeners.get(SUBSCRIBE_TO_ALL_EVENTS);
         if(contentGeneratorListeners == null) contentGeneratorListeners = new ArrayList<>();
-        for (ActivatorEventListener next : contentGeneratorListeners) {
-            Future<ContentData> futureTemp = next.activatorEventFired(id);
+        for (EventListener next : contentGeneratorListeners) {
+            Future<ContentData> futureTemp = next.eventFired(id);
             if (futureTemp != null) {
                 futures.add(futureTemp);
             }
@@ -297,23 +297,6 @@ public class EventManager implements Runnable{
     @SuppressWarnings("UnusedDeclaration")
     public void stop() {
         stop = true;
-    }
-
-    /**
-     * Interface for listening to events.
-     *
-     * To receive events a class must implements this interface and register with the addActivatorEventListener-method.
-     * When the activator event occurs, that object's activatorEventFired method is invoked.
-     */
-    public interface ActivatorEventListener {
-
-        /**
-         * Invoked when an activator-event occurs.
-         *
-         * @param id the ID of the Event, format: package.class.name
-         * @return a Future representing pending completion of the task
-         */
-        public Future<ContentData> activatorEventFired(String id);
     }
 
     /**
