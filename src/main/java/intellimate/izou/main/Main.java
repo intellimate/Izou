@@ -3,10 +3,11 @@ package intellimate.izou.main;
 import intellimate.izou.activator.ActivatorManager;
 import intellimate.izou.addon.AddOn;
 import intellimate.izou.addon.AddOnManager;
-import intellimate.izou.addon.PropertiesManager;
 import intellimate.izou.contentgenerator.ContentGeneratorManager;
 import intellimate.izou.events.EventManager;
 import intellimate.izou.output.OutputManager;
+import intellimate.izou.system.FileManager;
+import intellimate.izou.system.FileSystemManager;
 
 import java.io.IOException;
 import java.util.List;
@@ -24,8 +25,16 @@ public class Main {
     private final ActivatorManager activatorManager;
     private final AddOnManager addOnManager;
     private final Thread threadEventManager;
+    private final FileManager fileManager;
 
     private Main() {
+        FileSystemManager fileSystemManager = new FileSystemManager();
+        try {
+            fileSystemManager.createIzouFileSystem();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         outputManager = new OutputManager();
         eventManager = new EventManager(outputManager);
         threadEventManager = new Thread(eventManager);
@@ -34,6 +43,16 @@ public class Main {
         activatorManager = new ActivatorManager(eventManager);
         addOnManager = new AddOnManager(outputManager,eventManager,contentGeneratorManager,activatorManager);
         addOnManager.retrieveAndRegisterAddOns();
+
+        FileManager fileManagerTemp;
+        try {
+            fileManagerTemp = new FileManager();
+        } catch (IOException e) {
+            fileManagerTemp = null;
+            e.printStackTrace();
+            //TODO: implement error handling
+        }
+        fileManager = fileManagerTemp;
     }
 
     /**
@@ -42,6 +61,13 @@ public class Main {
      * @param addOns a List of AddOns to run
      */
     public Main(List<AddOn> addOns) {
+        FileSystemManager fileSystemManager = new FileSystemManager();
+        try {
+            fileSystemManager.createIzouFileSystem();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         outputManager = new OutputManager();
         eventManager = new EventManager(outputManager);
         threadEventManager = new Thread(eventManager);
@@ -50,6 +76,16 @@ public class Main {
         activatorManager = new ActivatorManager(eventManager);
         addOnManager = new AddOnManager(outputManager,eventManager,contentGeneratorManager,activatorManager);
         addOnManager.addAndRegisterAddOns(addOns);
+
+        FileManager fileManagerTemp;
+        try {
+            fileManagerTemp = new FileManager();
+        } catch (IOException e) {
+            fileManagerTemp = null;
+            e.printStackTrace();
+            //TODO: implement error handling
+        }
+        fileManager = fileManagerTemp;
     }
 
     public static void main(String[] args) {

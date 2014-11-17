@@ -9,13 +9,12 @@ import intellimate.izou.events.EventManager;
 import intellimate.izou.output.OutputExtension;
 import intellimate.izou.output.OutputManager;
 import intellimate.izou.output.OutputPlugin;
+import intellimate.izou.system.FileManager;
 import ro.fortsoft.pf4j.DefaultPluginManager;
 import ro.fortsoft.pf4j.PluginManager;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,7 +28,6 @@ public class AddOnManager {
     private final EventManager eventManager;
     private final ContentGeneratorManager contentGeneratorManager;
     private final ActivatorManager activatorManager;
-    private final PropertiesManager propertiesManager;
     public static final String ADDON_DATA_PATH = "." + File.separator + "resources" + File.separator;
 
 
@@ -40,19 +38,6 @@ public class AddOnManager {
         this.eventManager = eventManager;
         this.contentGeneratorManager = contentGeneratorManager;
         this.activatorManager = activatorManager;
-
-        PropertiesManager propertiesManagerTemp;
-        try {
-            propertiesManagerTemp = new PropertiesManager();
-        } catch (IOException e) {
-            propertiesManagerTemp = null;
-            e.printStackTrace();
-            //TODO: implement error handling
-        }
-
-        propertiesManager = propertiesManagerTemp;
-        Thread thread = new Thread(propertiesManager);
-        thread.start();
     }
 
     /**
@@ -151,11 +136,11 @@ public class AddOnManager {
      *
      * @throws IOException
      */
-    private void registerPropertyFiles() throws IOException {
+    private void registerFiles() throws IOException {
         String dir = "." + File.separator + "properties";
         for (AddOn addOn : addOnList) {
             if(!(getFolder(addOn) == null)) {
-                propertiesManager.registerProperty(Paths.get(dir), addOn);
+                fileManager.registerFileDir(Paths.get(dir), "properties", addOn);
                 addOn.setDefaultPropertiesPath(getFolder(addOn));
             } else {
                 //TODO implement log that says no property file was found
@@ -190,7 +175,7 @@ public class AddOnManager {
         addAllAddOns();
         prepareAllAddOns();
         try {
-            registerPropertyFiles();
+            registerFiles();
         } catch(IOException e) {
             e.printStackTrace();
             //TODO: implement exception handling
@@ -209,7 +194,7 @@ public class AddOnManager {
         addOnList.addAll(addOns);
         prepareAllAddOns();
         try {
-            registerPropertyFiles();
+            registerFiles();
         } catch(IOException e) {
             e.printStackTrace();
             //TODO: implement exception handling
@@ -217,25 +202,6 @@ public class AddOnManager {
         //has to be last because of properties that require file paths from prepare and register
         initAllAddOns();
         registerAllAddOns();
-    }
-
-    /**
-     * creates the Izou file system with all necessary folders
-     *
-     * @throws IOException java io exception
-     */
-    private void createIzouFileSystem() throws IOException {
-        String libPath = new File(".").getCanonicalPath() + File.separator + "lib";
-        File libFile = new File(libPath);
-        Files.createDirectories(libFile.toPath());
-
-        String resourcePath = new File(".").getCanonicalPath() + File.separator + "resources";
-        File resourceFile = new File(resourcePath);
-        Files.createDirectories(resourceFile.toPath());
-
-        String propertiesPath = new File(".").getCanonicalPath() + File.separator + "properties";
-        File propertiesDir = new File(propertiesPath);
-        Files.createDirectories(propertiesDir.toPath());
     }
 
     /**
@@ -251,12 +217,7 @@ public class AddOnManager {
             e.printStackTrace();
             return;
         }
-        if (!Files.exists(libFile.toPath())) try {
-            createIzouFileSystem();
-        } catch (IOException e) {
-            //TODO: implement Exception handling
-            e.printStackTrace();
-        }
+
         PluginManager pluginManager = new DefaultPluginManager(libFile);
         // load the plugins
         pluginManager.loadPlugins();

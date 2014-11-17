@@ -8,8 +8,6 @@ import intellimate.izou.output.OutputPlugin;
 import ro.fortsoft.pf4j.ExtensionPoint;
 
 import java.io.*;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.Properties;
 
@@ -93,7 +91,7 @@ public abstract class AddOn implements ExtensionPoint {
             }
             if (!writeToPropertiesFile (defaultPropertiesPath)) return;
             try {
-                reloadProperties();
+                reloadFiles();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -121,7 +119,9 @@ public abstract class AddOn implements ExtensionPoint {
             if (bufferedReader.ready()) {
                 while (c != -1) {
                     c = bufferedReader.read();
-                    bufferedWriter.write(c);
+                    if (!(c == (byte)'\uFFFF')) {
+                        bufferedWriter.write(c);
+                    }
                 }
             }
         } catch (IOException e) {
@@ -161,7 +161,6 @@ public abstract class AddOn implements ExtensionPoint {
             if (!file.exists()) {
                 file.createNewFile();
                 bufferedWriterInit = new BufferedWriter(new FileWriter(defaultPropsPath));
-                System.out.println(defaultPropsPath);
                 bufferedWriterInit.write("# Add properties in the form of key = value");
             }
         } catch (IOException e) {
@@ -177,7 +176,7 @@ public abstract class AddOn implements ExtensionPoint {
      *
      * @throws IOException thrown by inputStream
      */
-    public void reloadProperties() throws IOException {
+    public void reloadFiles() throws IOException {
         Properties temp = new Properties();
         InputStream inputStream = null;
         try {
