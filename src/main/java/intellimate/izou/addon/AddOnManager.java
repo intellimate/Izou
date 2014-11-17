@@ -140,7 +140,7 @@ public class AddOnManager {
         String dir = "." + File.separator + "properties";
         for (AddOn addOn : addOnList) {
             if(!(getFolder(addOn) == null)) {
-                fileManager.registerFileDir(Paths.get(dir), "properties", addOn);
+                //fileManager.registerFileDir(Paths.get(dir), "properties", addOn);
                 addOn.setDefaultPropertiesPath(getFolder(addOn));
             } else {
                 //TODO implement log that says no property file was found
