@@ -223,7 +223,7 @@ public class AddOnManager {
         pluginManager.loadPlugins();
 
         // enable a disabled plugin
-//        pluginManager.enablePlugin("welcome-plugin");
+        //pluginManager.enablePlugin("welcome-plugin");
 
         // start (active/resolved) the plugins
         try {

@@ -115,7 +115,7 @@ public class FileManager implements Runnable {
                     try {
                         fileInfo.getAddOn().reloadFiles();
                         if(fileInfo.getReloadableFiles() != null)
-                            fileInfo.getReloadableFiles().reloadFile();
+                            fileInfo.getReloadableFiles().reloadFile(kind.toString());
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
