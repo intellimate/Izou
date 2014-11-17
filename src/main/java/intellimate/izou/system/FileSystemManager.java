@@ -23,6 +23,7 @@ public class FileSystemManager {
         createResourceFolder();
         createPropertiesFolder();
         createLogsFolder();
+        createLogFiles();
     }
 
     /**
@@ -72,12 +73,21 @@ public class FileSystemManager {
         File logFile2 = new File(logPath2);
         if(!Files.exists(logFile2.toPath()))
             Files.createDirectories(logFile2.toPath());
+    }
 
-        String logPropertiesPath = logPath + File.separator + "IzouLoggingProperties.properties";
+    /**
+     *
+     * @throws IOException
+     */
+    private void createLogFiles() throws IOException {
+        String logPropertiesPath = LOG_PATH + File.separator + "IzouLoggingProperties.properties";
         File logPropFile = new File(logPropertiesPath);
         if(!logPropFile.exists())
             logPropFile.createNewFile();
+
+        String logDefaultPropertiesPath = LOG_PATH + File.separator + "defaultLoggingConfig.txt";
+        File logDefaultPropFile = new File(logDefaultPropertiesPath);
+        if(!logDefaultPropFile.exists())
+            logDefaultPropFile.createNewFile();
     }
-
-
 }
