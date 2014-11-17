@@ -80,12 +80,13 @@ public class FileSystemManager {
      * @throws IOException
      */
     private void createLogFiles() throws IOException {
-        String logPropertiesPath = LOG_PATH + File.separator + "IzouLoggingProperties.properties";
+        String logPropertiesPath = LOG_PATH + File.separator + "log4jIzouConfig.properties";
         File logPropFile = new File(logPropertiesPath);
         if(!logPropFile.exists())
             logPropFile.createNewFile();
 
-        String logDefaultPropertiesPath = LOG_PATH + File.separator + "defaultLoggingConfig.txt";
+        String logDefaultPropertiesPath = "." + File.separator + "src" + File.separator + "main"
+                + File.separator + "resources" + File.separator + "defaultlog4jIzouConfig.txt";
         File logDefaultPropFile = new File(logDefaultPropertiesPath);
         if(!logDefaultPropFile.exists())
             logDefaultPropFile.createNewFile();

@@ -11,6 +11,9 @@ import java.io.*;
 import java.util.Enumeration;
 import java.util.Properties;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * All AddOns must extend this Class.
  *
@@ -23,6 +26,7 @@ public abstract class AddOn implements ExtensionPoint {
     private final String addOnID;
     private final String propertiesPath;
     private String defaultPropertiesPath;
+    private static final Logger logger = LogManager.getLogger(AddOn.class);
 
     /**
      * the default constructor for AddOns
