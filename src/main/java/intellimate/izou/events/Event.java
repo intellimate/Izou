@@ -1,6 +1,7 @@
 package intellimate.izou.events;
 
 import intellimate.izou.system.Identifiable;
+import intellimate.izou.system.Identification;
 import intellimate.izou.system.ListResourceContainer;
 
 import java.util.LinkedList;
@@ -19,7 +20,7 @@ public class Event implements Identifiable{
      */
     public static final String NOTIFICATION = Event.class.getCanonicalName() + "Notification";
     private final String type;
-    private final Identifiable source;
+    private final Identification source;
     private LinkedList<String> descriptors = new LinkedList<>();
     private ListResourceContainer listResourceContainer = new ListResourceContainer();
 
@@ -27,9 +28,8 @@ public class Event implements Identifiable{
      * Creates a new Event Object
      * @param type the Type of the Event, try to use the predefined Event types
      * @param source the source of the Event, most likely a this reference.
-     *               Beware! Others can Access the Object!
      */
-    public Event(String type, Identifiable source) {
+    Event(String type, Identification source) {
         this.type = type;
         this.source = source;
     }
@@ -48,11 +48,50 @@ public class Event implements Identifiable{
      * returns the Source of the Event, e.g. the object who fired it.
      * @return an identifiable
      */
-    public Identifiable getSource() {
+    public Identification getSource() {
         return source;
     }
 
+    /**
+     * returns all the Resources the Event currently has
+     * @return an instance of ListResourceContainer
+     */
     public ListResourceContainer getListResourceContainer() {
         return listResourceContainer;
+    }
+
+    /**
+     * returns a List containing all the Descriptors.
+     * The event-type is also included in the Descriptors.
+     * @return a List containing the Descriptors
+     */
+    public LinkedList<String> getDescriptors() {
+        return descriptors;
+    }
+
+    /**
+     * sets the Descriptors (but not the Event-Type).
+     * @param descriptors a List containing all the Descriptors
+     */
+    public void setDescriptors(LinkedList<String> descriptors) {
+        this.descriptors = descriptors;
+    }
+
+    /**
+     * sets the Descriptors (but not the Event-Type).
+     * @param descriptor a String describing the Event
+     */
+    public void addDescriptor(String descriptor) {
+        descriptors.add(descriptor);
+    }
+
+    /**
+     * returns whether the event contains the specific descriptor.
+     * this method also checks whether it matches the type.
+     * @param descriptor a String with the ID of the Descriptor
+     * @return boolean when the Event contains the descriptor, false when not.
+     */
+    public boolean containsDescriptor(String descriptor) {
+        return descriptors.contains(descriptor) || type.equals(descriptor);
     }
 }

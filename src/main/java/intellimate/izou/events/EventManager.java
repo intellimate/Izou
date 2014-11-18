@@ -48,7 +48,7 @@ public class EventManager implements Runnable{
     //here are all the Instances to fire events stored
     private final ConcurrentHashMap<String, ArrayList<ActivatorEventCaller>> callers = new ConcurrentHashMap<>();
     //here are all the Instances to to control the Event-dispatching stored
-    private final ConcurrentLinkedQueue<EventController> eventControllers = new ConcurrentLinkedQueue<>();
+    private final ConcurrentLinkedQueue<EventsController> eventsControllers = new ConcurrentLinkedQueue<>();
     //the queue where all the Events are stored (if there are more than one,
     private final BlockingQueue<String> events = new LinkedBlockingQueue<>(1);
     //if false, run() will stop
@@ -159,8 +159,8 @@ public class EventManager implements Runnable{
      *
      * @param controller the EventController Interface to control event-dispatching
      */
-    public void addEventController (EventController controller) throws IllegalArgumentException{
-        eventControllers.add(controller);
+    public void addEventController (EventsController controller) throws IllegalArgumentException{
+        eventsControllers.add(controller);
     }
 
     /**
@@ -170,8 +170,8 @@ public class EventManager implements Runnable{
      *
      * @param controller the EventController Interface to remove
      */
-    public void removeEventController (EventController controller) throws IllegalArgumentException{
-        eventControllers.remove(controller);
+    public void removeEventController (EventsController controller) throws IllegalArgumentException{
+        eventsControllers.remove(controller);
     }
 
     /**
@@ -182,7 +182,7 @@ public class EventManager implements Runnable{
      */
     private boolean checkEventControllers(String id) {
         boolean shouldExecute = true;
-        for (EventController controller : eventControllers) {
+        for (EventsController controller : eventsControllers) {
             if (!controller.controlEventDispatcher(id)) {
                 shouldExecute = false;
             }

@@ -112,11 +112,11 @@ public class EventManagerTest {
             isWorking[0] = true;
             return null;
         });
-        EventController eventController = eventID -> {
+        EventsController eventsController = eventID -> {
             isWorking[1] = false;
             return false;
         };
-        manager.addEventController(eventController);
+        manager.addEventController(eventsController);
         caller.fire();
 
         synchronized (lock) {
@@ -125,7 +125,7 @@ public class EventManagerTest {
                 lock.wait(2);
             }
         }
-        manager.removeEventController(eventController);
+        manager.removeEventController(eventsController);
         assertFalse(isWorking[0] && isWorking[1]);
     }
 
@@ -137,12 +137,12 @@ public class EventManagerTest {
             isWorking[0] = true;
             return null;
         });
-        EventController eventController = eventID -> {
+        EventsController eventsController = eventID -> {
             isWorking[1] = false;
             return false;
         };
-        manager.addEventController(eventController);
-        manager.removeEventController(eventController);
+        manager.addEventController(eventsController);
+        manager.removeEventController(eventsController);
         caller.fire();
 
         synchronized (lock) {

@@ -6,8 +6,13 @@ package intellimate.izou.system;
  */
 public class Identification {
     private Identifiable identifiable;
-    Identification(Identifiable identifiable) {
+    private Identification(Identifiable identifiable) {
         this.identifiable = identifiable;
+    }
+
+    static Identification createIdentification(Identifiable identifiable) {
+        if(identifiable == null) return null;
+        return new Identification(identifiable);
     }
 
     /**

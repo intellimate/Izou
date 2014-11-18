@@ -39,7 +39,7 @@ public interface ResourceContainer {
      * @param resourceIDs an Array containing the resources
      * @return a list of resources found
      */
-    abstract LinkedList<Resource> provideResource(String[] resourceIDs);
+    abstract List<Resource> provideResource(String[] resourceIDs);
 
     /**
      * returns the resource (if existing)

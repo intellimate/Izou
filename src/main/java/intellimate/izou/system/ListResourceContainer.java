@@ -1,12 +1,16 @@
 package intellimate.izou.system;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * A ResourceContainer which holds all the Resources in an List internally
  */
 public class ListResourceContainer implements ResourceContainer{
+    LinkedList<Resource> resources = new LinkedList<>();
     /**
      * checks whether it can provide the resource
      *
@@ -15,7 +19,11 @@ public class ListResourceContainer implements ResourceContainer{
      */
     @Override
     public boolean providesResource(Resource resource) {
-        return false;
+        Long found = resources.stream()
+                .filter(resource1 -> resource1.getResourceID().equals(resource.getResourceID()))
+                .limit(1)
+                .count();
+        return found > 0;
     }
 
     /**
@@ -26,18 +34,26 @@ public class ListResourceContainer implements ResourceContainer{
      */
     @Override
     public boolean containsResourcesFromSource(String sourceID) {
-        return false;
+        long found = resources.stream()
+                .filter(resource -> resource.getProvider().getID().equals(sourceID))
+                .limit(1)
+                .count();
+        return found > 0;
     }
 
     /**
      * checks whether the ResourceContainer can provide at least ONE resource
      *
-     * @param resourcesID a list containing sources
+     * @param resourcesIDs a list containing sources
      * @return true if the ResourceContainer can provide at least one resource
      */
     @Override
-    public boolean providesResource(List<String> resourcesID) {
-        return false;
+    public boolean providesResource(List<String> resourcesIDs) {
+        long found = resources.stream()
+                .filter(resource -> resourcesIDs.contains(resource.getResourceID()))
+                .limit(1)
+                .count();
+        return found > 0;
     }
 
     /**
@@ -48,19 +64,25 @@ public class ListResourceContainer implements ResourceContainer{
      * @return a list of resources found
      */
     @Override
-    public LinkedList<Resource> provideResource(String[] resourceIDs) {
-        return null;
+    public List<Resource> provideResource(String[] resourceIDs) {
+        return resources.stream()
+                .filter(resource -> Arrays.stream(resourceIDs)
+                        .anyMatch(resourceID -> resourceID.equals(resource.getResourceID())))
+                .collect(Collectors.toList());
     }
 
     /**
-     * returns the resource (if existing)
+     * returns the FIRST resource (if existing)
      *
      * @param resourceID the ID of the resource
      * @return a list of resources found
      */
     @Override
     public Resource provideResource(String resourceID) {
-        return null;
+        return resources.stream()
+                .filter(resource -> resource.getResourceID().equals(resourceID))
+                .findFirst()
+                .get();
     }
 
     /**
@@ -69,7 +91,9 @@ public class ListResourceContainer implements ResourceContainer{
      * @param sourceID the ID of the source
      * @return a list containing all the found resources
      */
-    public LinkedList<Resource> provideResourceFromSource(String sourceID) {
-        return null;
+    public List<Resource> provideResourceFromSource(String sourceID) {
+        return resources.stream()
+                .filter(resource -> resource.getProvider().getID().equals(sourceID))
+                .collect(Collectors.toList());
     }
 }

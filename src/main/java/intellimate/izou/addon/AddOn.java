@@ -2,15 +2,13 @@ package intellimate.izou.addon;
 
 import intellimate.izou.activator.Activator;
 import intellimate.izou.contentgenerator.ContentGenerator;
-import intellimate.izou.events.EventController;
+import intellimate.izou.events.EventsController;
 import intellimate.izou.output.OutputExtension;
 import intellimate.izou.output.OutputPlugin;
 import intellimate.izou.system.Identifiable;
 import ro.fortsoft.pf4j.ExtensionPoint;
 
 import java.io.*;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.Properties;
 
@@ -212,7 +210,7 @@ public abstract class AddOn implements ExtensionPoint, Identifiable {
      * use this method to register (if needed) your EventControllers.
      * @return Array containing Instances of EventControllers
      */
-    public abstract EventController[] registerEventController();
+    public abstract EventsController[] registerEventController();
 
     /**
      * use this method to register (if needed) your OutputPlugins.

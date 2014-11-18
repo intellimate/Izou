@@ -4,7 +4,7 @@ import intellimate.izou.activator.Activator;
 import intellimate.izou.activator.ActivatorManager;
 import intellimate.izou.contentgenerator.ContentGenerator;
 import intellimate.izou.contentgenerator.ContentGeneratorManager;
-import intellimate.izou.events.EventController;
+import intellimate.izou.events.EventsController;
 import intellimate.izou.events.EventManager;
 import intellimate.izou.output.OutputExtension;
 import intellimate.izou.output.OutputManager;
@@ -13,7 +13,6 @@ import ro.fortsoft.pf4j.DefaultPluginManager;
 import ro.fortsoft.pf4j.PluginManager;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -95,12 +94,12 @@ public class AddOnManager {
      */
     private void registerEventControllers() {
         for (AddOn addOn : addOnList) {
-            EventController[] eventControllers = addOn.registerEventController();
-            if (eventControllers == null || eventControllers.length == 0) continue;
-            for (EventController eventController : addOn.registerEventController()) {
-                if (eventController == null) continue;
+            EventsController[] eventsControllers = addOn.registerEventController();
+            if (eventsControllers == null || eventsControllers.length == 0) continue;
+            for (EventsController eventsController : addOn.registerEventController()) {
+                if (eventsController == null) continue;
                 try {
-                    eventManager.addEventController(eventController);
+                    eventManager.addEventController(eventsController);
                 } catch (IllegalArgumentException e) {
                     e.printStackTrace();
                 }

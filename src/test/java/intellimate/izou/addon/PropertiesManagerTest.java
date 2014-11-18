@@ -2,16 +2,12 @@ package intellimate.izou.addon;
 
 import intellimate.izou.activator.Activator;
 import intellimate.izou.contentgenerator.ContentGenerator;
-import intellimate.izou.events.EventController;
+import intellimate.izou.events.EventsController;
 import intellimate.izou.main.Main;
 import intellimate.izou.output.OutputExtension;
 import intellimate.izou.output.OutputPlugin;
 import junit.framework.TestCase;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.LinkedList;
 
 public class PropertiesManagerTest extends TestCase {
@@ -57,8 +53,8 @@ public class PropertiesManagerTest extends TestCase {
         }
 
         @Override
-        public EventController[] registerEventController() {
-            return new EventController[0];
+        public EventsController[] registerEventController() {
+            return new EventsController[0];
         }
 
         @Override

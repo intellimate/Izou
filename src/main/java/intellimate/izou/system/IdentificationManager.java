@@ -24,7 +24,7 @@ public class IdentificationManager {
      */
     public Identification getIdentification(Identifiable identifiable) {
         if(identifiables.contains(identifiable)) {
-            return new Identification(identifiable);
+            return Identification.createIdentification(identifiable);
         }
         return null;
     }
@@ -36,12 +36,11 @@ public class IdentificationManager {
      * @return an Identification Instance or null if not registered
      */
     public Identification getIdentification(String id) {
-        for(Identifiable identifiable : identifiables) {
-            if(identifiable.getID().equals(id)) {
-                return new Identification(identifiable);
-            }
-        }
-        return null;
+        Identifiable identifiable= identifiables.stream()
+                .filter(identifiable1 -> identifiable1.getID().equals(id))
+                .findFirst()
+                .get();
+        return Identification.createIdentification(identifiable);
     }
 
     /**
@@ -50,12 +49,9 @@ public class IdentificationManager {
      */
     public boolean registerIdentification(Identifiable identifiable) {
         if(identifiable == null) return false;
-        if(identifiables.contains(identifiable)) return true;
-        for(Identifiable identifiable1 : identifiables) {
-            if(identifiable1.getID().equals(identifiable.getID())) {
-                return false;
-            }
-        }
+        if(identifiables.contains(identifiable)  || identifiables.stream()
+                .anyMatch(identifiableS -> identifiableS.getID().equals(identifiable.getID())))
+            return true;
         identifiables.add(identifiable);
         return true;
     }
