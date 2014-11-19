@@ -10,14 +10,13 @@ import intellimate.izou.main.Main;
 import intellimate.izou.output.OutputExtension;
 import intellimate.izou.output.OutputManager;
 import intellimate.izou.output.OutputPlugin;
+import intellimate.izou.system.FileManager;
 import intellimate.izou.system.Context;
 import ro.fortsoft.pf4j.DefaultPluginManager;
 import ro.fortsoft.pf4j.PluginManager;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,6 +32,8 @@ public class AddOnManager {
     private final ActivatorManager activatorManager;
     private final PropertiesManager propertiesManager;
     private final Main main;
+    public static final String ADDON_DATA_PATH = "." + File.separator + "resources" + File.separator;
+
 
     public AddOnManager(OutputManager outputManager, EventManager eventManager,
                         ContentGeneratorManager contentGeneratorManager, ActivatorManager activatorManager, Main main) {
@@ -153,12 +154,15 @@ public class AddOnManager {
      *
      * @throws IOException
      */
-    private void registerPropertyFiles() throws IOException {
+    private void registerFiles() throws IOException {
         String dir = "." + File.separator + "properties";
         for (AddOn addOn : addOnList) {
-
-            propertiesManager.registerProperty(Paths.get(dir), addOn);
-            addOn.setDefaultPropertiesPath(getFolder(addOn));
+            if(!(getFolder(addOn) == null)) {
+                //fileManager.registerFileDir(Paths.get(dir), "properties", addOn);
+                addOn.setDefaultPropertiesPath(getFolder(addOn));
+            } else {
+                //TODO implement log that says no property file was found
+            }
         }
     }
 
@@ -189,7 +193,7 @@ public class AddOnManager {
         addAllAddOns();
         prepareAllAddOns();
         try {
-            registerPropertyFiles();
+            registerFiles();
         } catch(IOException e) {
             e.printStackTrace();
             //TODO: implement exception handling
@@ -208,7 +212,7 @@ public class AddOnManager {
         addOnList.addAll(addOns);
         prepareAllAddOns();
         try {
-            registerPropertyFiles();
+            registerFiles();
         } catch(IOException e) {
             e.printStackTrace();
             //TODO: implement exception handling
@@ -231,18 +235,13 @@ public class AddOnManager {
             e.printStackTrace();
             return;
         }
-        if (!Files.exists(libFile.toPath())) try {
-            Files.createDirectories(libFile.toPath());
-        } catch (IOException e) {
-            //TODO: implement Exception handling
-            e.printStackTrace();
-        }
+
         PluginManager pluginManager = new DefaultPluginManager(libFile);
         // load the plugins
         pluginManager.loadPlugins();
 
         // enable a disabled plugin
-//        pluginManager.enablePlugin("welcome-plugin");
+        //pluginManager.enablePlugin("welcome-plugin");
 
         // start (active/resolved) the plugins
         try {
