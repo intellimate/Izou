@@ -44,8 +44,9 @@ public class LogController {
             config.addAppender(consoleAppender);
 
             //
-            AppenderRef ref = AppenderRef.createAppenderRef("File", null, null);
-            AppenderRef[] refs = new AppenderRef[]{ref};
+            AppenderRef fileRef = AppenderRef.createAppenderRef("File", null, null);
+            AppenderRef consoleRef = AppenderRef.createAppenderRef("console", null, null);
+            AppenderRef[] refs = new AppenderRef[]{fileRef, consoleRef};
 
             //
             LoggerConfig loggerConfig = LoggerConfig.createLogger("false", Level.toLevel(level), "org.apache.logging.log4j",
@@ -64,42 +65,49 @@ public class LogController {
         }
     }
 
-    public static synchronized ExtendedLogger createIzouFileLogger(String level) {
-        LoggerContext ctx = LogManager.getContext(false);
-        Configuration config = ((org.apache.logging.log4j.core.LoggerContext) ctx).getConfiguration();
+    public static ExtendedLogger createIzouFileLogger(String level) {
+        try {
+            LoggerContext ctx = LogManager.getContext(false);
+            Configuration config = ((org.apache.logging.log4j.core.LoggerContext) ctx).getConfiguration();
 
-        //
-        Layout layout = PatternLayout.createLayout("%d %-5p [%t] %C{10} (%F:%L) - %m%n", config, null, null, true,
-                false, null, null);
+            //
+            Layout layout = PatternLayout.createLayout("%d %-5p [%t] %C{10} (%F:%L) - %m%n", config, null, null, true,
+                    false, null, null);
 
-        //
-        Appender appender = FileAppender.createAppender("logs" + File.separator + "izou.log", "true", "false", "File", "true",
-                "false", "false", "4000", layout, null, "false", null, config);
-        appender.start();
-        config.addAppender(appender);
+            //
+            Appender fileAppender = FileAppender.createAppender("logs" + File.separator + "izou.log", "true", "false", "File", "true",
+                    "false", "false", "4000", layout, null, "false", null, config);
+            fileAppender.start();
+            config.addAppender(fileAppender);
 
-        //
-        Appender consoleAppender = ConsoleAppender.createAppender(layout, null, "SYSTEM_OUT", "console", null, null);
-        consoleAppender.start();
-        config.addAppender(consoleAppender);
+            //
+            Appender consoleAppender = ConsoleAppender.createAppender(layout, null, "SYSTEM_OUT", "console", null, null);
+            consoleAppender.start();
+            config.addAppender(consoleAppender);
 
-        //
-        AppenderRef ref = AppenderRef.createAppenderRef("File", null, null);
-        AppenderRef[] refs = new AppenderRef[] {ref};
+            //
+            AppenderRef fileRef = AppenderRef.createAppenderRef("File", null, null);
+            AppenderRef consoleRef = AppenderRef.createAppenderRef("console", null, null);
+            AppenderRef[] refs = new AppenderRef[]{fileRef, consoleRef};
 
-        //
-        LoggerConfig loggerConfig = LoggerConfig.createLogger("false", Level.toLevel(level), "org.apache.logging.log4j",
-                "true", refs, null, config, null );
-        loggerConfig.addAppender(appender, null, null);
+            //
+            LoggerConfig loggerConfig = LoggerConfig.createLogger("false", Level.toLevel(level), "org.apache.logging.log4j",
+                    "true", refs, null, config, null);
+            loggerConfig.addAppender(fileAppender, null, null);
+            loggerConfig.addAppender(consoleAppender, null, null);
 
-        //
-        config.addLogger("org.apache.logging.log4j", loggerConfig);
-        ((org.apache.logging.log4j.core.LoggerContext) ctx).updateLoggers();
-        ExtendedLogger logger = ctx.getLogger("org.apache.logging.log4j");
-        return logger;
+            //
+            config.addLogger("org.apache.logging.log4j", loggerConfig);
+            ((org.apache.logging.log4j.core.LoggerContext) ctx).updateLoggers();
+            ExtendedLogger logger = ctx.getLogger("org.apache.logging.log4j");
+            return logger;
+        } catch(Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
-    public synchronized static void logToConsole(String info, String level) {
+    public static void logToConsole(String info, String level) {
         switch (level.toLowerCase()) {
             case "trace":
                 rootLogger.trace(info);
