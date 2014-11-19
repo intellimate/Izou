@@ -2,7 +2,8 @@ package intellimate.izou.events;
 
 import intellimate.izou.system.Identifiable;
 import intellimate.izou.system.Identification;
-import intellimate.izou.system.ListResourceContainer;
+import intellimate.izou.system.ListResourceProvider;
+import intellimate.izou.system.Resource;
 
 import java.util.LinkedList;
 
@@ -22,7 +23,7 @@ public class Event implements Identifiable{
     private final String type;
     private final Identification source;
     private LinkedList<String> descriptors = new LinkedList<>();
-    private ListResourceContainer listResourceContainer = new ListResourceContainer();
+    private ListResourceProvider listResourceContainer = new ListResourceProvider();
 
     /**
      * Creates a new Event Object
@@ -56,8 +57,16 @@ public class Event implements Identifiable{
      * returns all the Resources the Event currently has
      * @return an instance of ListResourceContainer
      */
-    public ListResourceContainer getListResourceContainer() {
+    public ListResourceProvider getListResourceContainer() {
         return listResourceContainer;
+    }
+
+    /**
+     * adds a Resource to the Container
+     * @param resource an instance of the resource to add
+     */
+    public void addResource(Resource resource) {
+        listResourceContainer.addResource(resource);
     }
 
     /**

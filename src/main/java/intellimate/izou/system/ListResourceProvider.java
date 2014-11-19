@@ -3,14 +3,21 @@ package intellimate.izou.system;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
  * A ResourceContainer which holds all the Resources in an List internally
  */
-public class ListResourceContainer implements ResourceContainer{
+public class ListResourceProvider implements ResourceProvider {
     LinkedList<Resource> resources = new LinkedList<>();
+
+    /**
+     * adds a Resource to the Container
+     * @param resource an instance of the resource to add
+     */
+    public void addResource(Resource resource) {
+        resources.add(resource);
+    }
     /**
      * checks whether it can provide the resource
      *
@@ -19,11 +26,9 @@ public class ListResourceContainer implements ResourceContainer{
      */
     @Override
     public boolean providesResource(Resource resource) {
-        Long found = resources.stream()
-                .filter(resource1 -> resource1.getResourceID().equals(resource.getResourceID()))
-                .limit(1)
-                .count();
-        return found > 0;
+        return resources.stream()
+                .map(Resource::getResourceID)
+                .anyMatch(resourceS -> resourceS.equals(resource.getResourceID()));
     }
 
     /**
@@ -34,11 +39,9 @@ public class ListResourceContainer implements ResourceContainer{
      */
     @Override
     public boolean containsResourcesFromSource(String sourceID) {
-        long found = resources.stream()
-                .filter(resource -> resource.getProvider().getID().equals(sourceID))
-                .limit(1)
-                .count();
-        return found > 0;
+        return resources.stream()
+                .map(Resource::getResourceID)
+                .anyMatch(source -> source.equals(sourceID));
     }
 
     /**
@@ -49,11 +52,9 @@ public class ListResourceContainer implements ResourceContainer{
      */
     @Override
     public boolean providesResource(List<String> resourcesIDs) {
-        long found = resources.stream()
-                .filter(resource -> resourcesIDs.contains(resource.getResourceID()))
-                .limit(1)
-                .count();
-        return found > 0;
+        return resources.stream()
+                .map(Resource::getResourceID)
+                .anyMatch(resourcesIDs::contains);
     }
 
     /**

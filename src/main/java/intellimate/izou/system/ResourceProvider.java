@@ -1,24 +1,51 @@
 package intellimate.izou.system;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
- * This interface is used to provide resources to other parts of the application.
+ * This interface is used to provide resources
  */
-@SuppressWarnings("UnusedDeclaration")
 public interface ResourceProvider {
-    /**
-     * this method is called to register what resources the object provides.
-     * just pass a List of Resources without Data in it.
-     * @return a List containing the resources the object provides
-     */
-    abstract List<Resource> announceResources();
 
     /**
-     * this method is called when an object wants to get a Resource.
-     * it has as an argument resource instances without data, which just need to get populated.
-     * @param resources a list of resources without data
-     * @return a list of resources with data
+     * checks whether it can provide the resource
+     * beware that the implementation may vary. It can time out etc.
+     * @param resource the resource to provide
+     * @return true if the container can provide the resource
      */
-    abstract List<Resource> provideResource(List<Resource> resources);
+    abstract boolean providesResource(Resource resource);
+
+    /**
+     * checks whether there are any resources registered from the source
+     * beware that the implementation may vary. It can time out etc.
+     * @param sourceID the ID of the source
+     * @return true if the container has resources from the source
+     */
+    abstract boolean containsResourcesFromSource(String sourceID);
+
+    /**
+     * checks whether the ResourceContainer can provide at least ONE resource
+     * beware that the implementation may vary. It can time out etc.
+     * @param resourcesID a list containing sources
+     * @return true if the ResourceContainer can provide at least one resource
+     */
+    abstract boolean providesResource(List<String> resourcesID);
+
+    /**
+     * returns all EXISTING resources for the ID.
+     * If there are no resources for the ID the ID will get skipped
+     * beware that the implementation may vary. It can time out etc.
+     * @param resourceIDs an Array containing the resources
+     * @return a list of resources found
+     */
+    abstract List<Resource> provideResource(String[] resourceIDs);
+
+    /**
+     * returns the resource (if existing)
+     * beware that the implementation may vary. It can time out etc.
+     * @param resourceID the ID of the resource
+     * @return a list of resources found
+     */
+    abstract Resource provideResource(String resourceID);
 }
