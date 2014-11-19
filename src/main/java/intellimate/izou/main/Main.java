@@ -55,4 +55,28 @@ public class Main {
     public static void main(String[] args) {
         @SuppressWarnings("UnusedAssignment") Main main = new Main();
     }
+
+    public OutputManager getOutputManager() {
+        return outputManager;
+    }
+
+    public EventManager getEventManager() {
+        return eventManager;
+    }
+
+    public ContentGeneratorManager getContentGeneratorManager() {
+        return contentGeneratorManager;
+    }
+
+    public ActivatorManager getActivatorManager() {
+        return activatorManager;
+    }
+
+    public AddOnManager getAddOnManager() {
+        return addOnManager;
+    }
+
+    public Thread getThreadEventManager() {
+        return threadEventManager;
+    }
 }
