@@ -6,9 +6,11 @@ import intellimate.izou.contentgenerator.ContentGenerator;
 import intellimate.izou.contentgenerator.ContentGeneratorManager;
 import intellimate.izou.events.EventController;
 import intellimate.izou.events.EventManager;
+import intellimate.izou.main.Main;
 import intellimate.izou.output.OutputExtension;
 import intellimate.izou.output.OutputManager;
 import intellimate.izou.output.OutputPlugin;
+import intellimate.izou.system.Context;
 import ro.fortsoft.pf4j.DefaultPluginManager;
 import ro.fortsoft.pf4j.PluginManager;
 
@@ -30,14 +32,16 @@ public class AddOnManager {
     private final ContentGeneratorManager contentGeneratorManager;
     private final ActivatorManager activatorManager;
     private final PropertiesManager propertiesManager;
+    private final Main main;
 
     public AddOnManager(OutputManager outputManager, EventManager eventManager,
-                        ContentGeneratorManager contentGeneratorManager, ActivatorManager activatorManager) {
+                        ContentGeneratorManager contentGeneratorManager, ActivatorManager activatorManager, Main main) {
         addOnList = new LinkedList<>();
         this.outputManager = outputManager;
         this.eventManager = eventManager;
         this.contentGeneratorManager = contentGeneratorManager;
         this.activatorManager = activatorManager;
+        this.main = main;
 
         PropertiesManager propertiesManagerTemp;
         try {
@@ -268,7 +272,7 @@ public class AddOnManager {
      */
     private void initAllAddOns() {
         for (AddOn addOn : addOnList) {
-            addOn.initAddOn();
+            addOn.initAddOn(new Context(addOn, main));
         }
     }
 

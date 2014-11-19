@@ -5,11 +5,10 @@ import intellimate.izou.contentgenerator.ContentGenerator;
 import intellimate.izou.events.EventController;
 import intellimate.izou.output.OutputExtension;
 import intellimate.izou.output.OutputPlugin;
+import intellimate.izou.system.Context;
 import ro.fortsoft.pf4j.ExtensionPoint;
 
 import java.io.*;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.Properties;
 
@@ -25,6 +24,7 @@ public abstract class AddOn implements ExtensionPoint {
     private final String addOnID;
     private final String propertiesPath;
     private String defaultPropertiesPath;
+    private Context context;
 
     /**
      * the default constructor for AddOns
@@ -73,9 +73,10 @@ public abstract class AddOn implements ExtensionPoint {
     /**
      * internal initiation of addOn
      */
-    public void initAddOn() {
+    protected void initAddOn(Context context) {
         if(defaultPropertiesPath != null)
             initProperties();
+        this.context = context;
     }
 
     /**
@@ -226,14 +227,6 @@ public abstract class AddOn implements ExtensionPoint {
     public abstract OutputExtension[] registerOutputExtension();
 
     /**
-     * The AddOns-Id is usually the following Form: package.class
-     * @return a String containing the PluginID
-     */
-    public String getAddOnID() {
-        return addOnID;
-    }
-
-    /**
      * You should probably use getPropertiesContainer() unless you have a very good reason not to.
      *
      * Searches for the property with the specified key in this property list.
@@ -246,6 +239,15 @@ public abstract class AddOn implements ExtensionPoint {
      */
     public String getProperties(String key) {
         return propertiesContainer.getProperties().getProperty(key);
+    }
+
+    /**
+     * returns the Context of the AddOn.
+     * Context provides some general Communications.
+     * @return an instance of Context.
+     */
+    public Context getContext() {
+        return context;
     }
 
     /**
