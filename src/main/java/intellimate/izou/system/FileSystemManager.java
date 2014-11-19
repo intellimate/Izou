@@ -68,11 +68,6 @@ public class FileSystemManager {
         File logFile = new File(logPath);
         if(!Files.exists(logFile.toPath()))
             Files.createDirectories(logFile.toPath());
-
-        String logPath2 = new File(".").getCanonicalPath() + File.separator + "logs" + File.separator + "logs";
-        File logFile2 = new File(logPath2);
-        if(!Files.exists(logFile2.toPath()))
-            Files.createDirectories(logFile2.toPath());
     }
 
     /**
@@ -80,13 +75,15 @@ public class FileSystemManager {
      * @throws IOException
      */
     private void createLogFiles() throws IOException {
-        String logPropertiesPath = LOG_PATH + File.separator + "log4jIzouConfig.properties";
+        /*
+        String logPropertiesPath = LOG_PATH + File.separator + "log4j2.xml";
         File logPropFile = new File(logPropertiesPath);
         if(!logPropFile.exists())
             logPropFile.createNewFile();
+        */
 
         String logDefaultPropertiesPath = "." + File.separator + "src" + File.separator + "main"
-                + File.separator + "resources" + File.separator + "defaultlog4jIzouConfig.txt";
+                + File.separator + "resources" + File.separator + "log4j2.xml";
         File logDefaultPropFile = new File(logDefaultPropertiesPath);
         if(!logDefaultPropFile.exists())
             logDefaultPropFile.createNewFile();

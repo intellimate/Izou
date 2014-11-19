@@ -29,12 +29,15 @@ public abstract class AddOn implements ExtensionPoint {
     private String defaultPropertiesPath;
     private static final Logger logger = LogManager.getLogger(AddOn.class);
     private Context context;
+    private final Logger logger = LogManager.getLogger(this.getClass());
 
     /**
      * the default constructor for AddOns
      * @param addOnID the ID of the Plugin in the form: package.class
      */
     public AddOn(String addOnID) {
+        //logger.info("This is an trace1 message.");
+        //logger.debug("This is an trace2 message.");
         this.addOnID = addOnID;
         this.propertiesContainer = new PropertiesContainer();
         Properties properties = propertiesContainer.getProperties();

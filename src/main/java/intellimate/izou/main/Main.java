@@ -8,6 +8,8 @@ import intellimate.izou.events.EventManager;
 import intellimate.izou.output.OutputManager;
 import intellimate.izou.system.FileManager;
 import intellimate.izou.system.FileSystemManager;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.util.List;
@@ -26,8 +28,11 @@ public class Main {
     private final AddOnManager addOnManager;
     private final Thread threadEventManager;
     private final FileManager fileManager;
+    private final Logger logger = LogManager.getLogger(this.getClass());
 
     private Main() {
+        logger.info("This is an trace1 message.");
+        logger.warn("This is an trace2 message.");
         FileSystemManager fileSystemManager = new FileSystemManager();
         try {
             fileSystemManager.createIzouFileSystem();
