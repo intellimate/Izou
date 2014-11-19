@@ -1,6 +1,8 @@
 package intellimate.izou.system;
 
 import intellimate.izou.addon.AddOn;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import static java.nio.file.StandardWatchEventKinds.*;
 
@@ -23,6 +25,8 @@ public class FileManager implements Runnable {
      * Map that holds watchKeys (ID's) of the directories and the addOns using the directories
      */
     private Map<WatchKey, FileInfo> addOnMap;
+
+    private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     /**
      * creates a new FileManager with a watcher and addOnMap

@@ -1,6 +1,8 @@
 package intellimate.izou.activator;
 
 import intellimate.izou.events.EventManager;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Field;
 import java.util.concurrent.ExecutorService;
@@ -14,6 +16,7 @@ import java.util.concurrent.ThreadFactory;
 public class ActivatorManager {
     private final ExecutorService executor = Executors.newCachedThreadPool(new CustomThreadFactory());
     private final EventManager eventManager;
+    private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     public ActivatorManager(EventManager eventManager) {
         this.eventManager = eventManager;

@@ -1,6 +1,8 @@
 package intellimate.izou.output;
 
 import intellimate.izou.contentgenerator.ContentData;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,6 +37,9 @@ public class OutputManager {
      * this HashMap gets checked every time a new output-plugin is added for relevant output-extensions
      */
     private HashMap<String, List<OutputExtension>> tempExtensionStorage;
+
+    private final Logger fileLogger = LogManager.getLogger(this.getClass());
+
 
     /**
      * Creates a new output-manager with a list of output-plugins

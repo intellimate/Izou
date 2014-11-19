@@ -1,6 +1,8 @@
 package intellimate.izou.contentgenerator;
 
 import intellimate.izou.events.EventManager;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +19,7 @@ public class ContentGeneratorManager {
      //holds the contentGenerators
     private final List<ContentGenerator> contentGeneratorList = new ArrayList<>();
     private final EventManager eventManager;
+    private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     public ContentGeneratorManager(EventManager eventManager) {
         this.eventManager = eventManager;

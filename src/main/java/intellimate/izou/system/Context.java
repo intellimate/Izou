@@ -2,6 +2,8 @@ package intellimate.izou.system;
 
 import intellimate.izou.addon.AddOn;
 import intellimate.izou.main.Main;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.spi.ExtendedLogger;
 
 /**
@@ -10,6 +12,8 @@ import org.apache.logging.log4j.spi.ExtendedLogger;
 public class Context {
     private AddOn addOn;
     private Main main;
+    private final Logger fileLogger = LogManager.getLogger(this.getClass());
+
 
     /**
      *

@@ -30,6 +30,7 @@ public class Main {
     private final Thread threadEventManager;
     private final FileManager fileManager;
     private final IzouLogger izouLogger;
+    private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     private Main() {
         FileSystemManager fileSystemManager = new FileSystemManager();

@@ -2,6 +2,8 @@ package intellimate.izou.events;
 
 import intellimate.izou.contentgenerator.ContentData;
 import intellimate.izou.output.OutputManager;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +56,7 @@ public class EventManager implements Runnable{
     //if false, run() will stop
     private boolean stop = false;
     private final OutputManager outputManager;
+    private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     public EventManager(OutputManager outputManager) {
         this.outputManager = outputManager;

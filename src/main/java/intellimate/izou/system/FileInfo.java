@@ -1,6 +1,8 @@
 package intellimate.izou.system;
 
 import intellimate.izou.addon.AddOn;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.nio.file.Path;
 import java.nio.file.WatchKey;
@@ -13,6 +15,8 @@ public class FileInfo {
     private String fileType;
     private AddOn addOn;
     private ReloadableFiles reloadableFiles;
+    private final Logger fileLogger = LogManager.getLogger(this.getClass());
+
 
     /**
      *
