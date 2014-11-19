@@ -7,8 +7,8 @@ import intellimate.izou.main.Main;
  * This class provides much of the general Communication with Izou.
  */
 public class Context {
-    AddOn addOn;
-    Main main;
+    private AddOn addOn;
+    private Main main;
     public Context(AddOn addOn, Main main) {
         this.addOn = addOn;
         this.main = main;

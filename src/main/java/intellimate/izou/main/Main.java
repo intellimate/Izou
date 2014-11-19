@@ -32,7 +32,7 @@ public class Main {
         threadEventManager.start();
         contentGeneratorManager = new ContentGeneratorManager(eventManager);
         activatorManager = new ActivatorManager(eventManager);
-        addOnManager = new AddOnManager(outputManager,eventManager,contentGeneratorManager,activatorManager);
+        addOnManager = new AddOnManager(outputManager,eventManager,contentGeneratorManager,activatorManager, this);
         addOnManager.retrieveAndRegisterAddOns();
     }
 
@@ -48,7 +48,7 @@ public class Main {
         threadEventManager.start();
         contentGeneratorManager = new ContentGeneratorManager(eventManager);
         activatorManager = new ActivatorManager(eventManager);
-        addOnManager = new AddOnManager(outputManager,eventManager,contentGeneratorManager,activatorManager);
+        addOnManager = new AddOnManager(outputManager,eventManager,contentGeneratorManager,activatorManager, this);
         addOnManager.addAndRegisterAddOns(addOns);
     }
 
