@@ -1,6 +1,7 @@
 package intellimate.izou.contentgenerator;
 
 import intellimate.izou.events.EventManager;
+import intellimate.izou.system.Context;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -23,13 +24,15 @@ public abstract class ContentGenerator<T> implements Callable<ContentData<T>>, E
     private String eventID = null;
     //stores all registered events
     private final List<String> registeredEvents = new LinkedList<>();
+    private final Context context;
 
     /**
      * Creates an Instance of ContentGenerator
      * @param contentGeneratorID the ID of the ContentGenerator in the form: package.class
      */
-    public ContentGenerator(String contentGeneratorID) {
+    public ContentGenerator(String contentGeneratorID, Context context) {
         this.contentGeneratorID = contentGeneratorID;
+        this.context = context;
     }
 
     /**

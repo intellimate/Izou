@@ -12,6 +12,8 @@ import intellimate.izou.output.OutputManager;
 import intellimate.izou.output.OutputPlugin;
 import intellimate.izou.system.FileManager;
 import intellimate.izou.system.Context;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import ro.fortsoft.pf4j.DefaultPluginManager;
 import ro.fortsoft.pf4j.PluginManager;
 
@@ -30,10 +32,9 @@ public class AddOnManager {
     private final EventManager eventManager;
     private final ContentGeneratorManager contentGeneratorManager;
     private final ActivatorManager activatorManager;
-    private final PropertiesManager propertiesManager;
     private final Main main;
     public static final String ADDON_DATA_PATH = "." + File.separator + "resources" + File.separator;
-
+    private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     public AddOnManager(OutputManager outputManager, EventManager eventManager,
                         ContentGeneratorManager contentGeneratorManager, ActivatorManager activatorManager, Main main) {
@@ -43,19 +44,6 @@ public class AddOnManager {
         this.contentGeneratorManager = contentGeneratorManager;
         this.activatorManager = activatorManager;
         this.main = main;
-
-        PropertiesManager propertiesManagerTemp;
-        try {
-            propertiesManagerTemp = new PropertiesManager();
-        } catch (IOException e) {
-            propertiesManagerTemp = null;
-            e.printStackTrace();
-            //TODO: implement error handling
-        }
-
-        propertiesManager = propertiesManagerTemp;
-        Thread thread = new Thread(propertiesManager);
-        thread.start();
     }
 
     /**

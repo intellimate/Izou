@@ -6,6 +6,7 @@ import intellimate.izou.events.EventController;
 import intellimate.izou.output.OutputExtension;
 import intellimate.izou.output.OutputPlugin;
 import intellimate.izou.system.Context;
+import org.apache.logging.log4j.spi.ExtendedLogger;
 import ro.fortsoft.pf4j.ExtensionPoint;
 
 import java.io.*;
@@ -27,17 +28,14 @@ public abstract class AddOn implements ExtensionPoint {
     private final String addOnID;
     private final String propertiesPath;
     private String defaultPropertiesPath;
-    private static final Logger logger = LogManager.getLogger(AddOn.class);
     private Context context;
-    private final Logger logger = LogManager.getLogger(this.getClass());
+    private ExtendedLogger logger;
 
     /**
      * the default constructor for AddOns
      * @param addOnID the ID of the Plugin in the form: package.class
      */
     public AddOn(String addOnID) {
-        //logger.info("This is an trace1 message.");
-        //logger.debug("This is an trace2 message.");
         this.addOnID = addOnID;
         this.propertiesContainer = new PropertiesContainer();
         Properties properties = propertiesContainer.getProperties();
@@ -84,6 +82,7 @@ public abstract class AddOn implements ExtensionPoint {
         if(defaultPropertiesPath != null)
             initProperties();
         this.context = context;
+        logger = context.getFileLogger(addOnID, "warn");
     }
 
     /**
