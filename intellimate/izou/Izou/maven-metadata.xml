@@ -6,6 +6,10 @@
     <versions>
       <version>0.9.5-SNAPSHOT</version>
     </versions>
+<<<<<<< HEAD
     <lastUpdated>20141120164013</lastUpdated>
+=======
+    <lastUpdated>20141115215606</lastUpdated>
+>>>>>>> FETCH_HEAD
   </versioning>
 </metadata>
