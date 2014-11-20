@@ -6,11 +6,15 @@ import intellimate.izou.events.EventController;
 import intellimate.izou.output.OutputExtension;
 import intellimate.izou.output.OutputPlugin;
 import intellimate.izou.system.Context;
+import org.apache.logging.log4j.spi.ExtendedLogger;
 import ro.fortsoft.pf4j.ExtensionPoint;
 
 import java.io.*;
 import java.util.Enumeration;
 import java.util.Properties;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * All AddOns must extend this Class.
@@ -109,42 +113,7 @@ public abstract class AddOn implements ExtensionPoint {
      * @return true if operation has succeeded, else false
      */
     private boolean writeToPropertiesFile(String defaultPropsPath) {
-        boolean outcome = true;
-
-        BufferedReader bufferedReader = null;
-        BufferedWriter bufferedWriter = null;
-        try {
-            bufferedReader = new BufferedReader(new FileReader(defaultPropsPath));
-            bufferedWriter = new BufferedWriter(new FileWriter(propertiesPath));
-
-            // c is the character read from bufferedReader and written to bufferedWriter
-            int c = 0;
-            if (bufferedReader.ready()) {
-                while (c != -1) {
-                    c = bufferedReader.read();
-                    if (!(c == (byte)'\uFFFF')) {
-                        bufferedWriter.write(c);
-                    }
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            outcome =  false;
-        } finally {
-            if (bufferedReader != null)
-                try {
-                    bufferedReader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            if (bufferedWriter != null)
-                try {
-                    bufferedWriter.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-        }
-        return outcome;
+        return context.getMain().getFileManager().writeToFile(defaultPropsPath, propertiesPath);
     }
 
     /**
@@ -158,20 +127,8 @@ public abstract class AddOn implements ExtensionPoint {
      * @throws IOException is thrown by bufferedWriter
      */
     private void createDefaultPropertyFile(String defaultPropsPath) throws IOException {
-        File file = new File(defaultPropsPath);
-        BufferedWriter bufferedWriterInit = null;
-        try {
-            if (!file.exists()) {
-                file.createNewFile();
-                bufferedWriterInit = new BufferedWriter(new FileWriter(defaultPropsPath));
-                bufferedWriterInit.write("# Add properties in the form of key = value");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if(bufferedWriterInit != null)
-                bufferedWriterInit.close();
-        }
+        context.getMain().getFileManager().createDefaultFile(defaultPropsPath, "# Properties should always be in the " +
+                "form of: \"key = value\"");
     }
 
     /**
@@ -226,6 +183,14 @@ public abstract class AddOn implements ExtensionPoint {
      * @return Array containing Instances of OutputExtensions
      */
     public abstract OutputExtension[] registerOutputExtension();
+
+    /**
+     * The AddOns-Id is usually the following Form: package.class
+     * @return a String containing the PluginID
+     */
+    public String getAddOnID() {
+        return addOnID;
+    }
 
     /**
      * You should probably use getPropertiesContainer() unless you have a very good reason not to.

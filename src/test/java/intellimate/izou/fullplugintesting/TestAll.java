@@ -1,10 +1,21 @@
 package intellimate.izou.fullplugintesting;
 
+import intellimate.izou.activator.Activator;
 import intellimate.izou.activator.ActivatorManager;
+import intellimate.izou.addon.AddOn;
+import intellimate.izou.contentgenerator.ContentGenerator;
 import intellimate.izou.contentgenerator.ContentGeneratorManager;
+import intellimate.izou.events.EventController;
 import intellimate.izou.events.EventManager;
+import intellimate.izou.main.Main;
+import intellimate.izou.output.OutputExtension;
 import intellimate.izou.output.OutputManager;
+import intellimate.izou.output.OutputPlugin;
+import intellimate.izou.system.Context;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -12,37 +23,19 @@ import static org.junit.Assert.*;
  * Created by julianbrendl on 10/7/14.
  */
 public class TestAll {
-
     public static boolean isWorking = false;
 
     @Test
     public void testPlugin() throws Exception {
-        OutputManager outputManager = new OutputManager();
-        EventManager eventManager = new EventManager(outputManager);
-        ActivatorManager activatorManager = new ActivatorManager(eventManager);
-
-        ContentGeneratorManager contentGeneratorManager = new ContentGeneratorManager(eventManager);
-        Thread thread = new Thread(eventManager);
-        thread.start();
-        TestAct testAct = new TestAct();
-        activatorManager.addActivator(testAct);
-
-        TestCG testCG = new TestCG("test_ID");
-        contentGeneratorManager.addContentGenerator(testCG);
-
-        TestOP testOP = new TestOP("1");
-        TestOE testOE = new TestOE("1");
-        testOE.addContentDataToWishList("test_ID");
-        outputManager.addOutputPlugin(testOP);
-        outputManager.addOutputExtension(testOE,"1");
-
-        Thread.sleep(10);
-        testAct.setStart(true);
+        TestAddOn testAddOn = new TestAddOn("test-AddOn");
+        List<AddOn> addOnList = new ArrayList<>();
+        addOnList.add(testAddOn);
+        Main main = new Main(addOnList);
 
         int count = 0;
         int limit = 150;
         while(!isWorking && (count < limit)) {
-            Thread.sleep(20);
+            Thread.sleep(50);
             count++;
         }
         //should print out:
@@ -53,6 +46,4 @@ public class TestAll {
         //It Works
         assertTrue(isWorking);
     }
-
-
 }

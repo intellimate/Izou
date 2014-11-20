@@ -1,6 +1,7 @@
 package intellimate.izou.output;
 
 import intellimate.izou.contentgenerator.ContentData;
+import intellimate.izou.system.Context;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,13 +33,18 @@ public abstract class OutputExtension<T> implements Callable<T> {
      */
     private List<String> contentDataWishList;
 
+    /**
+     * the context of the addOn - where "global" methods are stored
+     */
+    private Context context;
 
     /**
      * creates a new outputExtension with a new id
      * @param id the id to be set to the id of outputExtension
      */
-    public OutputExtension(String id) {
+    public OutputExtension(String id, Context context) {
         this.id = id;
+        this.context = context;
         contentDataList = new ArrayList<>();
         contentDataWishList = new ArrayList<>();
     }

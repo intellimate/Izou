@@ -1,6 +1,7 @@
 package intellimate.izou.activator;
 
 import intellimate.izou.events.EventManager;
+import intellimate.izou.system.Context;
 
 import java.util.HashMap;
 
@@ -20,7 +21,17 @@ public abstract class Activator implements Runnable {
     //limit of the exceptionCount
     @SuppressWarnings("FieldCanBeLocal")
     private final int exceptionLimit = 100;
+    private Context context;
 
+    /**
+     * creates a new activator with a context
+     *
+     * @param context the context of the addOn (where all "global" or necessary, addOn-wide functionalities are stored)
+     *                (Ex: logging)
+     */
+    public Activator(Context context) {
+        this.context = context;
+    }
 
     /**
      * This method implements runnable and should only be called by a Thread.

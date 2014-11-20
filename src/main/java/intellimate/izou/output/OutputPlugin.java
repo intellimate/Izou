@@ -1,6 +1,7 @@
 package intellimate.izou.output;
 
 import intellimate.izou.contentgenerator.ContentData;
+import intellimate.izou.system.Context;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -43,14 +44,19 @@ public abstract class OutputPlugin<T> implements Runnable{
      */
     private BlockingQueue<List<ContentData>> contentDataBlockingQueue;
 
+    /**
+     * the context of the addOn
+     */
+    private Context context;
 
     /**
      * creates a new output-plugin with a new id
      *
      * @param id the id of the new output-plugin
      */
-    public OutputPlugin(String id) {
+    public OutputPlugin(String id, Context context) {
         this.id = id;
+        this.context = context;
         outputExtensionList = new ArrayList<>();
         futureList = new LinkedList<>();
         tDoneList = new ArrayList<>();

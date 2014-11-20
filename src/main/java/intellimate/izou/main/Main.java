@@ -8,6 +8,9 @@ import intellimate.izou.events.EventManager;
 import intellimate.izou.output.OutputManager;
 import intellimate.izou.system.FileManager;
 import intellimate.izou.system.FileSystemManager;
+import intellimate.izou.system.IzouLogger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.util.List;
@@ -26,6 +29,8 @@ public class Main {
     private final AddOnManager addOnManager;
     private final Thread threadEventManager;
     private final FileManager fileManager;
+    private final IzouLogger izouLogger;
+    private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     private Main() {
         FileSystemManager fileSystemManager = new FileSystemManager();
@@ -35,6 +40,7 @@ public class Main {
             e.printStackTrace();
         }
 
+        izouLogger = new IzouLogger();
         outputManager = new OutputManager();
         eventManager = new EventManager(outputManager);
         threadEventManager = new Thread(eventManager);
@@ -68,6 +74,7 @@ public class Main {
             e.printStackTrace();
         }
 
+        izouLogger = new IzouLogger();
         outputManager = new OutputManager();
         eventManager = new EventManager(outputManager);
         threadEventManager = new Thread(eventManager);
@@ -92,27 +99,35 @@ public class Main {
         @SuppressWarnings("UnusedAssignment") Main main = new Main();
     }
 
-    public OutputManager getOutputManager() {
+    public synchronized OutputManager getOutputManager() {
         return outputManager;
     }
 
-    public EventManager getEventManager() {
+    public synchronized EventManager getEventManager() {
         return eventManager;
     }
 
-    public ContentGeneratorManager getContentGeneratorManager() {
+    public synchronized ContentGeneratorManager getContentGeneratorManager() {
         return contentGeneratorManager;
     }
 
-    public ActivatorManager getActivatorManager() {
+    public synchronized ActivatorManager getActivatorManager() {
         return activatorManager;
     }
 
-    public AddOnManager getAddOnManager() {
+    public synchronized AddOnManager getAddOnManager() {
         return addOnManager;
     }
 
-    public Thread getThreadEventManager() {
+    public synchronized Thread getThreadEventManager() {
         return threadEventManager;
+    }
+
+    public synchronized FileManager getFileManager() {
+        return fileManager;
+    }
+
+    public synchronized IzouLogger getIzouLogger() {
+        return izouLogger;
     }
 }

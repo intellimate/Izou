@@ -1,7 +1,14 @@
 package intellimate.izou.activator;
 
+import intellimate.izou.addon.AddOn;
 import intellimate.izou.events.EventManagerTestSetup;
+import intellimate.izou.fullplugintesting.TestAddOn;
+import intellimate.izou.main.Main;
+import intellimate.izou.system.Context;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -11,8 +18,14 @@ public class ActivatorTest {
     static ActivatorManager activatorManager;
 
     public ActivatorTest() {
+        TestAddOn testAddOn = new TestAddOn("test-AddOn");
+        List<AddOn> addOnList = new ArrayList<>();
+        addOnList.add(testAddOn);
+        Main main = new Main(addOnList);
+        Context context = new Context(testAddOn, main, "1", "debug");
+
         eventManagerTestSetup = new EventManagerTestSetup();
-        activator = new Activator() {
+        activator = new Activator(context) {
             @Override
             public void activatorStarts() throws InterruptedException {}
 
