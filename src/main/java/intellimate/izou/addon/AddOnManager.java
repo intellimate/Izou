@@ -58,8 +58,7 @@ public class AddOnManager {
                 try {
                     activatorManager.addActivator(activator);
                 } catch (Exception e) {
-                    //TODO: implement error handling
-                    e.printStackTrace();
+                    fileLogger.error(e.getMessage());
                 }
             }
         }

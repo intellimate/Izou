@@ -84,8 +84,7 @@ public class OutputManager {
                     outputPlugin.addOutputExtension(oE);
                 }
                 catch (ClassCastException e) {
-                    //TODO: handle exception
-                    e.printStackTrace();
+                    fileLogger.warn(e.getMessage());
                 }
             }
             tempExtensionStorage.remove(outputPlugin.getId());

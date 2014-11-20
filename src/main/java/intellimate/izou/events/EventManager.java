@@ -246,8 +246,7 @@ public class EventManager implements Runnable{
                     try {
                         data.add(next.get(10, TimeUnit.MILLISECONDS));
                     } catch (Exception e) {
-                        //TODO: implement Error logging
-                        e.printStackTrace();
+                        fileLogger.warn(e.getMessage());
                     }
                 }
             }

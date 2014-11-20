@@ -65,7 +65,7 @@ public class IzouLogger {
             ExtendedLogger logger = ctx.getLogger("org.apache.logging.log4j");
             return logger;
         } catch(Exception e) {
-            e.printStackTrace();
+            fileLogger.error(e.getMessage());
             return null;
         }
     }

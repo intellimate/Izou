@@ -248,8 +248,7 @@ public abstract class OutputPlugin<T> implements Runnable{
             try {
                 contentDataList = blockingQueueHandling();  //gets the new contentDataList if one was added to the blockingQueue
             } catch (InterruptedException e) {
-                e.printStackTrace();
-                //TODO: implement exception handling
+                context.getLogger().error(e.getMessage());
                 break;
             }
 
@@ -279,11 +278,9 @@ public abstract class OutputPlugin<T> implements Runnable{
                         outputDataIsDone(tF);
                         tDoneList.add(tF.get());
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
-                        //TODO: implement exception handling
+                        context.getLogger().warn(e.getMessage());
                     } catch (ExecutionException e) {
-                        e.printStackTrace();
-                        //TODO: implement exception handling
+                        context.getLogger().warn(e.getMessage());
                     }
                 }
 

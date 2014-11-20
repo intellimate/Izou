@@ -6,15 +6,11 @@ import intellimate.izou.events.EventController;
 import intellimate.izou.output.OutputExtension;
 import intellimate.izou.output.OutputPlugin;
 import intellimate.izou.system.Context;
-import org.apache.logging.log4j.spi.ExtendedLogger;
 import ro.fortsoft.pf4j.ExtensionPoint;
 
 import java.io.*;
 import java.util.Enumeration;
 import java.util.Properties;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * All AddOns must extend this Class.
@@ -61,11 +57,10 @@ public abstract class AddOn implements ExtensionPoint {
             try {
                 properties.load(inputStream);
             } catch (IOException e) {
-                //TODO: log exception
-                e.printStackTrace();
+                context.getLogger().error(e.getMessage());
             }
         } catch (FileNotFoundException e) {
-            //TODO: log exception
+            context.getLogger().error(e.getMessage());
         }
     }
 

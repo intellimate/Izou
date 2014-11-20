@@ -55,8 +55,7 @@ public class Main {
             fileManagerTemp = new FileManager();
         } catch (IOException e) {
             fileManagerTemp = null;
-            e.printStackTrace();
-            //TODO: implement error handling
+            fileLogger.error(e.getMessage());
         }
         fileManager = fileManagerTemp;
     }
@@ -89,8 +88,7 @@ public class Main {
             fileManagerTemp = new FileManager();
         } catch (IOException e) {
             fileManagerTemp = null;
-            e.printStackTrace();
-            //TODO: implement error handling
+            fileLogger.error(e.getMessage());
         }
         fileManager = fileManagerTemp;
     }

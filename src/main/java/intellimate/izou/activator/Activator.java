@@ -69,7 +69,7 @@ public abstract class Activator implements Runnable {
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException e1) {
-                    e.printStackTrace();
+                    context.getLogger().warn(e.getMessage());
                 }
                 activatorManager.addActivator(this);
             }

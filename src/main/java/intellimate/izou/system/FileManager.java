@@ -125,20 +125,19 @@ public class FileManager implements Runnable {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            fileLogger.error(e.getMessage());
             outcome =  false;
         } finally {
             if (bufferedReader != null)
                 try {
                     bufferedReader.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                    fileLogger.error(e.getMessage());                }
             if (bufferedWriter != null)
                 try {
                     bufferedWriter.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    fileLogger.error(e.getMessage());
                 }
         }
         return outcome;
@@ -162,7 +161,7 @@ public class FileManager implements Runnable {
                 bufferedWriterInit.write(initMessage);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            fileLogger.error(e.getMessage());
         } finally {
             if(bufferedWriterInit != null)
                 bufferedWriterInit.close();
@@ -179,12 +178,13 @@ public class FileManager implements Runnable {
             try {
                 key = watcher.take();
             } catch (InterruptedException e) {
+                fileLogger.error(e.getMessage());
                 return;
             }
 
             FileInfo fileInfo = addOnMap.get(key);
             if (fileInfo.getPath() == null) {
-                //TODO implement error handling
+                throw new NullPointerException("FileInfo has to be filled out and valid");
             }
 
             for (WatchEvent<?> event : key.pollEvents()) {
@@ -194,7 +194,7 @@ public class FileManager implements Runnable {
                     try {
                         throw new IncompletePropertyEventException();
                     } catch (IncompletePropertyEventException e) {
-                        e.printStackTrace();
+                        fileLogger.warn(e.getMessage());
                     }
                 } else if ((kind == ENTRY_CREATE || kind == ENTRY_MODIFY || kind == ENTRY_DELETE)
                         && isFileType(event, fileInfo.getFileType())) {
@@ -203,12 +203,12 @@ public class FileManager implements Runnable {
                         if(fileInfo.getReloadableFiles() != null)
                             fileInfo.getReloadableFiles().reloadFile(kind.toString());
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        fileLogger.warn(e.getMessage());
                     }
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        fileLogger.warn(e.getMessage());
                     }
                 }
 
