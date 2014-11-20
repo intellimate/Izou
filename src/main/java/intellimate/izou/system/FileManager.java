@@ -8,14 +8,12 @@ import static java.nio.file.StandardWatchEventKinds.*;
 
 import java.io.*;
 import java.nio.file.*;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * The file manager listens for events that were caused by modifications made to property files and
- * then reloads the properties file
+ * then reloads the file
  */
 public class FileManager implements Runnable {
     /**
@@ -46,8 +44,10 @@ public class FileManager implements Runnable {
     /**
      * use this method to register a file with the watcherService
      *
-     * @param dir directory of properties file
-     * @param addOn addOn properties file belongs to
+     * @param dir directory of the file
+     * @param fileType the name/extension of the file
+     *                 IMPORTANT: Please try to always enter the full name with extension of the file (Ex: "test.txt")
+     * @param addOn addOn the file belongs to
      * @throws IOException exception thrown by watcher service
      */
     public void registerFileDir(Path dir, String fileType, AddOn addOn) throws IOException {
@@ -56,13 +56,14 @@ public class FileManager implements Runnable {
     }
 
     /**
+     * use this method to register a file with the watcherService
      *
-     *
-     * @param dir
-     * @param fileType
-     * @param addOn
-     * @param reloadableFiles
-     * @throws IOException
+     * @param dir directory of file
+     * @param fileType the name/extension of the file
+     *                 IMPORTANT: Please try to always enter the full name with extension of the file (Ex: "test.txt")
+     * @param addOn addOn that file belongs to
+     * @param reloadableFiles object of interface that file belongs to
+     * @throws IOException exception thrown by watcher service
      */
     public void registerFileDir(Path dir, String fileType, AddOn addOn, ReloadableFiles reloadableFiles) throws IOException {
         WatchKey key = dir.register(watcher, ENTRY_MODIFY);
@@ -70,11 +71,13 @@ public class FileManager implements Runnable {
     }
 
     /**
+     * use this method to register a file with the watcherService
      *
-     * @param dir
-     * @param fileType
-     * @param reloadableFiles
-     * @throws IOException
+     * @param dir directory of file
+     * @param fileType the name/extension of the file
+     *                 IMPORTANT: Please try to always enter the full name with extension of the file (Ex: "test.txt")
+     * @param reloadableFiles object of interface that file belongs to
+     * @throws IOException exception thrown by watcher service
      */
     public void registerFileDir(Path dir, String fileType, ReloadableFiles reloadableFiles) throws IOException {
         WatchKey key = dir.register(watcher, ENTRY_MODIFY);
@@ -82,7 +85,7 @@ public class FileManager implements Runnable {
     }
 
     /**
-     * checks if an event belongs to a properties file
+     * checks if an event belongs to the desired file type
      * @param event the event to check
      * @return the boolean value corresponding to the output
      */
