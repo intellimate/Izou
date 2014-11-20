@@ -1,6 +1,10 @@
 package intellimate.izou.output;
 
+import intellimate.izou.addon.AddOn;
 import intellimate.izou.contentgenerator.ContentData;
+import intellimate.izou.fullplugintesting.TestAddOn;
+import intellimate.izou.main.Main;
+import intellimate.izou.system.Context;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -15,6 +19,12 @@ public class OutputPluginTest {
 
     @Test
     public void testDistributeContentData() throws Exception {
+        TestAddOn testAddOn = new TestAddOn("test-AddOn");
+        List<AddOn> addOnList = new ArrayList<>();
+        addOnList.add(testAddOn);
+        Main main = new Main(addOnList);
+        Context context = new Context(testAddOn, main, "1", "debug");
+
         ContentData cd1 = new ContentData("1");
         ContentData cd2 = new ContentData("2");
         ContentData cd3 = new ContentData("3");
@@ -24,19 +34,19 @@ public class OutputPluginTest {
         cdList.add(cd2);
         cdList.add(cd3);
 
-        OutputPlugin outputPlugin = new OutputPlugin("abcd") {
+        OutputPlugin outputPlugin = new OutputPlugin("abcd", context) {
             @Override
             public void renderFinalOutput() {
 
             }
         };
-        OutputExtension ext1 = new OutputExtension("789") {
+        OutputExtension ext1 = new OutputExtension("789", context) {
             @Override
             public Object call() throws Exception {
                 return null;
             }
         };
-        OutputExtension ext2 = new OutputExtension("10") {
+        OutputExtension ext2 = new OutputExtension("10", context) {
             @Override
             public Object call() throws Exception {
                 return null;
@@ -58,19 +68,25 @@ public class OutputPluginTest {
 
     @Test
     public void testAddOutputExtension() throws Exception {
-        OutputPlugin outputPlugin = new OutputPlugin("abcd") {
+        TestAddOn testAddOn = new TestAddOn("test-AddOn");
+        List<AddOn> addOnList = new ArrayList<>();
+        addOnList.add(testAddOn);
+        Main main = new Main(addOnList);
+        Context context = new Context(testAddOn, main, "1", "debug");
+
+        OutputPlugin outputPlugin = new OutputPlugin("abcd", context) {
             @Override
             public void renderFinalOutput() {
 
             }
         };
-        OutputExtension ext1 = new OutputExtension("789") {
+        OutputExtension ext1 = new OutputExtension("789", context) {
             @Override
             public Object call() throws Exception {
                 return null;
             }
         };
-        OutputExtension ext2 = new OutputExtension("10") {
+        OutputExtension ext2 = new OutputExtension("10", context) {
             @Override
             public Object call() throws Exception {
                 return null;
@@ -83,19 +99,25 @@ public class OutputPluginTest {
 
     @Test
     public void testRemoveOutputExtension() throws Exception {
-        OutputPlugin outputPlugin = new OutputPlugin("abcd") {
+        TestAddOn testAddOn = new TestAddOn("test-AddOn");
+        List<AddOn> addOnList = new ArrayList<>();
+        addOnList.add(testAddOn);
+        Main main = new Main(addOnList);
+        Context context = new Context(testAddOn, main, "1", "debug");
+
+        OutputPlugin outputPlugin = new OutputPlugin("abcd", context) {
             @Override
             public void renderFinalOutput() {
 
             }
         };
-        OutputExtension ext1 = new OutputExtension("789") {
+        OutputExtension ext1 = new OutputExtension("789", context) {
             @Override
             public Object call() throws Exception {
                 return null;
             }
         };
-        OutputExtension ext2 = new OutputExtension("10") {
+        OutputExtension ext2 = new OutputExtension("10", context) {
             @Override
             public Object call() throws Exception {
                 return null;
@@ -109,6 +131,12 @@ public class OutputPluginTest {
 
     @Test
     public void testOutputPluginParameters() {
+        TestAddOn testAddOn = new TestAddOn("test-AddOn");
+        List<AddOn> addOnList = new ArrayList<>();
+        addOnList.add(testAddOn);
+        Main main = new Main(addOnList);
+        Context context = new Context(testAddOn, main, "1", "debug");
+
         ContentData cd1 = new ContentData("1");
         ContentData cd2 = new ContentData("2");
         ContentData cd3 = new ContentData("3");
@@ -118,19 +146,19 @@ public class OutputPluginTest {
         cdList.add(cd2);
         cdList.add(cd3);
 
-        OutputPlugin outputPlugin = new OutputPlugin("abcd") {
+        OutputPlugin outputPlugin = new OutputPlugin("abcd", context) {
             @Override
             public void renderFinalOutput() {
 
             }
         };
-        OutputExtension ext1 = new OutputExtension("789") {
+        OutputExtension ext1 = new OutputExtension("789", context) {
             @Override
             public Object call() throws Exception {
                 return null;
             }
         };
-        OutputExtension ext2 = new OutputExtension("10") {
+        OutputExtension ext2 = new OutputExtension("10", context) {
             @Override
             public Object call() throws Exception {
                 return null;

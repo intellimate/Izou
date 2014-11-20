@@ -1,8 +1,13 @@
 package intellimate.izou.contentgenerator;
 
+import intellimate.izou.addon.AddOn;
 import intellimate.izou.events.EventManagerTestSetup;
+import intellimate.izou.fullplugintesting.TestAddOn;
+import intellimate.izou.main.Main;
+import intellimate.izou.system.Context;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Future;
 
@@ -16,9 +21,15 @@ public class ContentGeneratorTest {
     private final Object lock = new Lock();
 
     public ContentGeneratorTest() {
+        TestAddOn testAddOn = new TestAddOn("test-AddOn");
+        List<AddOn> addOnList = new ArrayList<>();
+        addOnList.add(testAddOn);
+        Main main = new Main(addOnList);
+        Context context = new Context(testAddOn, main, "1", "debug");
+
         eventManagerTestSetup = new EventManagerTestSetup();
         contentGeneratorManager = new ContentGeneratorManager(eventManagerTestSetup.getManager());
-        contentGenerator = new ContentGenerator<Boolean>("1") {
+        contentGenerator = new ContentGenerator<Boolean>("1", context) {
             @Override
             public ContentData<Boolean> generate(String eventID) throws Exception {
                ContentData<Boolean> cd = new ContentData<>("1");
@@ -36,8 +47,14 @@ public class ContentGeneratorTest {
 
     @Test
     public void testSetContentGeneratorManager() throws Exception {
+        TestAddOn testAddOn = new TestAddOn("test-AddOn");
+        List<AddOn> addOnList = new ArrayList<>();
+        addOnList.add(testAddOn);
+        Main main = new Main(addOnList);
+        Context context = new Context(testAddOn, main, "1", "debug");
+
         final boolean[] isWorking = {false};
-        ContentGenerator cg = new ContentGenerator("2") {
+        ContentGenerator cg = new ContentGenerator("2", context) {
             @Override
             public ContentData generate(String eventID) throws Exception {
                 isWorking[0] = true;
@@ -68,8 +85,14 @@ public class ContentGeneratorTest {
 
     @Test
     public void testCall() throws Exception {
+        TestAddOn testAddOn = new TestAddOn("test-AddOn");
+        List<AddOn> addOnList = new ArrayList<>();
+        addOnList.add(testAddOn);
+        Main main = new Main(addOnList);
+        Context context = new Context(testAddOn, main, "1", "debug");
+
         final boolean[] isWorking = {false, false};
-        ContentGenerator cg = new ContentGenerator("3") {
+        ContentGenerator cg = new ContentGenerator("3", context) {
             @Override
             public ContentData generate(String eventID) throws Exception {
                 if(eventID.equals("3"))
@@ -97,8 +120,14 @@ public class ContentGeneratorTest {
 
     @Test
     public void testRegisterEvent() throws Exception {
+        TestAddOn testAddOn = new TestAddOn("test-AddOn");
+        List<AddOn> addOnList = new ArrayList<>();
+        addOnList.add(testAddOn);
+        Main main = new Main(addOnList);
+        Context context = new Context(testAddOn, main, "1", "debug");
+
         final boolean[] isWorking = {false};
-        ContentGenerator cg = new ContentGenerator("4") {
+        ContentGenerator cg = new ContentGenerator("4", context) {
             @Override
             public ContentData generate(String eventID) throws Exception {
                 if(eventID.equals("5")) isWorking[0] = true;
@@ -117,8 +146,14 @@ public class ContentGeneratorTest {
 
     @Test
     public void testUnregisterEvent() throws Exception {
+        TestAddOn testAddOn = new TestAddOn("test-AddOn");
+        List<AddOn> addOnList = new ArrayList<>();
+        addOnList.add(testAddOn);
+        Main main = new Main(addOnList);
+        Context context = new Context(testAddOn, main, "1", "debug");
+
         final boolean[] isWorking = {false};
-        ContentGenerator cg = new ContentGenerator("5") {
+        ContentGenerator cg = new ContentGenerator("5", context) {
             @Override
             public ContentData generate(String eventID) throws Exception {
                 isWorking[0] = true;
@@ -138,8 +173,14 @@ public class ContentGeneratorTest {
 
     @Test
     public void testUnregisterAllEvents() throws Exception {
+        TestAddOn testAddOn = new TestAddOn("test-AddOn");
+        List<AddOn> addOnList = new ArrayList<>();
+        addOnList.add(testAddOn);
+        Main main = new Main(addOnList);
+        Context context = new Context(testAddOn, main, "1", "debug");
+
         final boolean[] isWorking = {false};
-        ContentGenerator cg = new ContentGenerator("6") {
+        ContentGenerator cg = new ContentGenerator("6", context) {
             @Override
             public ContentData generate(String eventID) throws Exception {
                 isWorking[0] = true;

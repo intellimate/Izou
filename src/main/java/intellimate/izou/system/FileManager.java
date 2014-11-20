@@ -6,10 +6,12 @@ import org.apache.logging.log4j.Logger;
 
 import static java.nio.file.StandardWatchEventKinds.*;
 
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.*;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * The file manager listens for events that were caused by modifications made to property files and
@@ -86,6 +88,82 @@ public class FileManager implements Runnable {
      */
     private boolean isFileType(WatchEvent event, String fileType) {
         return event.context().toString().endsWith(fileType);
+    }
+
+    /**
+     * Writes default file to real file
+     * The default file would be a file that can be packaged along with the code, from which a real file (say a
+     * properties file for example) can be loaded. This is useful because there are files (like property files0 that
+     * cannot be shipped with the package and have to be created at runtime. To still be able to fill these files, you
+     * can create a default file (usually txt) from which the content, as mentioned above, can then be loaded into the
+     * real file.
+     *
+     * @param defaultFilePath path to default file (or where it should be created)
+     * @param realFilePath path to real file (that should be filled with content of default file)
+     * @return true if operation has succeeded, else false
+     */
+    public boolean writeToFile(String defaultFilePath, String realFilePath) {
+        boolean outcome = true;
+
+        BufferedReader bufferedReader = null;
+        BufferedWriter bufferedWriter = null;
+        try {
+            bufferedReader = new BufferedReader(new FileReader(defaultFilePath));
+            bufferedWriter = new BufferedWriter(new FileWriter(realFilePath));
+
+            // c is the character read from bufferedReader and written to bufferedWriter
+            int c = 0;
+            if (bufferedReader.ready()) {
+                while (c != -1) {
+                    c = bufferedReader.read();
+                    if (!(c == (byte)'\uFFFF')) {
+                        bufferedWriter.write(c);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            outcome =  false;
+        } finally {
+            if (bufferedReader != null)
+                try {
+                    bufferedReader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            if (bufferedWriter != null)
+                try {
+                    bufferedWriter.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+        }
+        return outcome;
+    }
+
+    /**
+     * Creates a default File in case it does not exist yet. Default files can be used to load other files that are
+     * created at runtime (like properties file)
+     *
+     * @param defaultFilePath path to default file.txt (or where it should be created)
+     * @param initMessage the string to write in default file
+     * @throws IOException is thrown by bufferedWriter
+     */
+    public void createDefaultFile(String defaultFilePath, String initMessage) throws IOException {
+        File file = new File(defaultFilePath);
+        BufferedWriter bufferedWriterInit = null;
+        try {
+            if (!file.exists()) {
+                file.createNewFile();
+                bufferedWriterInit = new BufferedWriter(new FileWriter(defaultFilePath));
+                bufferedWriterInit.write(initMessage);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if(bufferedWriterInit != null)
+                bufferedWriterInit.close();
+        }
     }
 
     /**

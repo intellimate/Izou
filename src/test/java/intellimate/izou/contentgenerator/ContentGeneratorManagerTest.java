@@ -1,8 +1,13 @@
 package intellimate.izou.contentgenerator;
 
+import intellimate.izou.addon.AddOn;
 import intellimate.izou.events.EventManagerTestSetup;
+import intellimate.izou.fullplugintesting.TestAddOn;
+import intellimate.izou.main.Main;
+import intellimate.izou.system.Context;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -15,9 +20,15 @@ public class ContentGeneratorManagerTest {
     private final Object lock = new Lock();
 
     public ContentGeneratorManagerTest() {
+        TestAddOn testAddOn = new TestAddOn("test-AddOn");
+        List<AddOn> addOnList = new ArrayList<>();
+        addOnList.add(testAddOn);
+        Main main = new Main(addOnList);
+        Context context = new Context(testAddOn, main, "1", "debug");
+
         eventManagerTestSetup = new EventManagerTestSetup();
         contentGeneratorManager = new ContentGeneratorManager(eventManagerTestSetup.getManager());
-        contentGenerator = new ContentGenerator<Boolean>("1") {
+        contentGenerator = new ContentGenerator<Boolean>("1", context) {
             @Override
             public ContentData<Boolean> generate(String eventID) throws Exception {
                 ContentData<Boolean> cd = new ContentData<>("1");

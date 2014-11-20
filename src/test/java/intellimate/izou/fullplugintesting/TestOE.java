@@ -2,6 +2,7 @@ package intellimate.izou.fullplugintesting;
 
 import intellimate.izou.contentgenerator.ContentData;
 import intellimate.izou.output.OutputExtension;
+import intellimate.izou.system.Context;
 
 /**
  * Created by julianbrendl on 10/7/14.
@@ -9,8 +10,10 @@ import intellimate.izou.output.OutputExtension;
 @SuppressWarnings("SameParameterValue")
 public class TestOE extends OutputExtension<TestOD> {
 
-    public TestOE(String id) {
-        super(id);
+    public TestOE(String id, Context context) {
+        super(id, context);
+        addContentDataToWishList("Test-CG");
+        setPluginId("test-OP");
     }
 
     @Override

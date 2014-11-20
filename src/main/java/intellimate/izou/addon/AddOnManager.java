@@ -259,7 +259,7 @@ public class AddOnManager {
      */
     private void initAllAddOns() {
         for (AddOn addOn : addOnList) {
-            addOn.initAddOn(new Context(addOn, main));
+            addOn.initAddOn(new Context(addOn, main, addOn.getAddOnID(), "warn"));
         }
     }
 

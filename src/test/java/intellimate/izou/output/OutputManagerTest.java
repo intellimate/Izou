@@ -1,6 +1,10 @@
 package intellimate.izou.output;
 
+import intellimate.izou.addon.AddOn;
 import intellimate.izou.contentgenerator.ContentData;
+import intellimate.izou.fullplugintesting.TestAddOn;
+import intellimate.izou.main.Main;
+import intellimate.izou.system.Context;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -12,14 +16,20 @@ public class OutputManagerTest {
 
     @Test
     public void testAddOutputExtension() throws Exception {
+        TestAddOn testAddOn = new TestAddOn("test-AddOn");
+        List<AddOn> addOnList = new ArrayList<>();
+        addOnList.add(testAddOn);
+        Main main = new Main(addOnList);
+        Context context = new Context(testAddOn, main, "1", "debug");
+
         OutputManager outputManager = new OutputManager();
-        OutputPlugin outputPlugin = new OutputPlugin("1234") {
+        OutputPlugin outputPlugin = new OutputPlugin("1234", context) {
             @Override
             public void renderFinalOutput() {
 
             }
         };
-        OutputExtension outputExtension = new OutputExtension("abcd") {
+        OutputExtension outputExtension = new OutputExtension("abcd", context) {
             @Override
             public Object call() throws Exception {
                 return null;
@@ -32,14 +42,20 @@ public class OutputManagerTest {
 
     @Test
     public void testRemoveOutputExtension() throws Exception {
+        TestAddOn testAddOn = new TestAddOn("test-AddOn");
+        List<AddOn> addOnList = new ArrayList<>();
+        addOnList.add(testAddOn);
+        Main main = new Main(addOnList);
+        Context context = new Context(testAddOn, main, "1", "debug");
+
         OutputManager outputManager = new OutputManager();
-        OutputPlugin outputPlugin = new OutputPlugin("1234") {
+        OutputPlugin outputPlugin = new OutputPlugin("1234", context) {
             @Override
             public void renderFinalOutput() {
 
             }
         };
-        OutputExtension outputExtension = new OutputExtension("abcd") {
+        OutputExtension outputExtension = new OutputExtension("abcd", context) {
             @Override
             public Object call() throws Exception {
                 return null;
@@ -53,15 +69,21 @@ public class OutputManagerTest {
 
     @Test
     public void testPassDataToOutputPlugin() throws Exception {
+        TestAddOn testAddOn = new TestAddOn("test-AddOn");
+        List<AddOn> addOnList = new ArrayList<>();
+        addOnList.add(testAddOn);
+        Main main = new Main(addOnList);
+        Context context = new Context(testAddOn, main, "1", "debug");
+
         List<ContentData> list = new ArrayList<>();
         OutputManager outputManager = new OutputManager();
-        OutputPlugin outputPlugin = new OutputPlugin("1234") {
+        OutputPlugin outputPlugin = new OutputPlugin("1234", context) {
             @Override
             public void renderFinalOutput() {
 
             }
         };
-        OutputExtension outputExtension = new OutputExtension("abcd") {
+        OutputExtension outputExtension = new OutputExtension("abcd", context) {
             @Override
             public Object call() throws Exception {
                 return null;
@@ -84,14 +106,20 @@ public class OutputManagerTest {
 
     @Test
     public void testAddOutputExtensionLater() throws Exception {
+        TestAddOn testAddOn = new TestAddOn("test-AddOn");
+        List<AddOn> addOnList = new ArrayList<>();
+        addOnList.add(testAddOn);
+        Main main = new Main(addOnList);
+        Context context = new Context(testAddOn, main, "1", "debug");
+
         OutputManager outputManager = new OutputManager();
-        OutputPlugin outputPlugin = new OutputPlugin("1234") {
+        OutputPlugin outputPlugin = new OutputPlugin("1234", context) {
             @Override
             public void renderFinalOutput() {
 
             }
         };
-        OutputExtension outputExtension = new OutputExtension("abcd") {
+        OutputExtension outputExtension = new OutputExtension("abcd", context) {
             @Override
             public Object call() throws Exception {
                 return null;
