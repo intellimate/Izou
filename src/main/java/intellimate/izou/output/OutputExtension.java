@@ -27,7 +27,7 @@ public abstract class OutputExtension<T> implements Callable<T>, Identifiable{
     /**
      * the current Event
      */
-    private List<Event> events = new LinkedList<>();
+    private LinkedList<Event> events = new LinkedList<>();
 
     /**
      * a list of all the resource's which the outputExtension would like to receive theoretically to work with
@@ -130,11 +130,15 @@ public abstract class OutputExtension<T> implements Callable<T>, Identifiable{
         this.pluginId = pluginId;
     }
 
+    @Override
+    public final T call() throws Exception {
+        return generate(events.pop());
+    }
+
     /**
      * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
      * to the outputPlugin
      */
-    @Override
-    public abstract T call() throws Exception;
+    public abstract T generate(Event event);
 }
 

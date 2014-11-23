@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.concurrent.*;
 
 /**
- * The OutputPlugin class gets contentData and then starts threads filled with output-extension tasks to create the final
+ * The OutputPlugin class gets Event and then starts threads filled with output-extension tasks to create the final
  * output and then render it on its own medium
  */
 @SuppressWarnings("UnusedDeclaration")
@@ -137,10 +137,10 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable{
     }
 
     /**
-     * distributes the Event in the eventDataList to the output-extensions that will need them
+     * distributes the Event in the eventDataList to the output-extensions that will need them.
      *
-     * it uses the id of the contentData which is the same as the id of the outputExtension to identify which output-extension
-     * it should send the content-data to
+     * all OutputExtensions have a wishList, where Ids of resources are stored. This method compares the wishList with
+     * resources in provided from the event.
      *
      * @param event the Event to distribute
      */
@@ -209,7 +209,7 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable{
 
     /**
      * method that uses tDoneList to generate a final output that will then be rendered.
-     * The processed content-data objects are found in tDoneList
+     * The processed data is found in tDoneList
      */
     public abstract void renderFinalOutput();
 
@@ -225,12 +225,12 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable{
     public void outputDataIsDone(Future<T> tFuture) {}
 
     /**
-     * Default implementation waits until a new list of content-Datas has been received and then processes it.
+     * Default implementation waits until a new Event has been received and then processes it.
      *
      * This method is made to be overwritten as seen fit by the developer
      *
      * @throws java.lang.InterruptedException if interrupted while waiting
-     * @return the list of content-Datas to be processed by the outputPlugin
+     * @return the recently added Event-instance to be processed by the outputPlugin
      */
     public Event blockingQueueHandling() throws InterruptedException {
         return eventBlockingQueue.take();
@@ -239,22 +239,22 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable{
     /**
      * main method for outputPlugin, runs the data-conversion and output-renderer
      *
-     * when the outputExtensions are done processing the ContentData objects, they add their finished objects into tDoneList,
+     * when the outputExtensions are done processing the Event object, they add their finished objects into tDoneList,
      * from where they will have to be gotten to render them in renderFinalOutput
      */
     @Override
     public void run() {
         while (true) {
-            List<ContentData> contentDataList;
+            Event event;
             try {
-                contentDataList = blockingQueueHandling();  //gets the new contentDataList if one was added to the blockingQueue
+                event = blockingQueueHandling();  //gets the new Event if one was added to the blockingQueue
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 //TODO: implement exception handling
                 break;
             }
 
-            distributeEvent(contentDataList); //distributes the contentDatas among all outputExtensions
+            distributeEvent(event); //distributes the Event among all outputExtensions
             if(canRun()) {  //checks if there are any outputExtensions that can run at all
                 for (OutputExtension<T> ext : outputExtensionList) {
                     prepareDistribution(ext);
@@ -279,10 +279,7 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable{
                     try {
                         outputDataIsDone(tF);
                         tDoneList.add(tF.get());
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                        //TODO: implement exception handling
-                    } catch (ExecutionException e) {
+                    } catch (InterruptedException | ExecutionException e) {
                         e.printStackTrace();
                         //TODO: implement exception handling
                     }
