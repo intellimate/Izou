@@ -32,7 +32,7 @@ public class TestAll {
 
         TestOP testOP = new TestOP("1");
         TestOE testOE = new TestOE("1");
-        testOE.addContentDataToWishList("test_ID");
+        testOE.addResourceIdToWishList("test_ID");
         outputManager.addOutputPlugin(testOP);
         outputManager.addOutputExtension(testOE,"1");
 

@@ -5,7 +5,9 @@ import intellimate.izou.system.Identification;
 import intellimate.izou.resource.ListResourceProvider;
 import intellimate.izou.resource.Resource;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -23,7 +25,7 @@ public class Event implements Identifiable{
     public static final String NOTIFICATION = Event.class.getCanonicalName() + "Notification";
     private final String type;
     private final Identification source;
-    private LinkedList<String> descriptors = new LinkedList<>();
+    private List<String> descriptors = new ArrayList<>();
     private ListResourceProvider listResourceContainer = new ListResourceProvider();
 
     /**
@@ -78,8 +80,16 @@ public class Event implements Identifiable{
      * adds a Resource to the Container
      * @param resource an instance of the resource to add
      */
-    public void addResource(Resource resource) {
+    void addResource(Resource resource) {
         listResourceContainer.addResource(resource);
+    }
+
+    /**
+     * adds a List of Resources to the Container
+     * @param resources a list containing all the resources
+     */
+    void addResources(List<Resource> resources) {
+        listResourceContainer.addResource(resources);
     }
 
     /**
@@ -87,7 +97,7 @@ public class Event implements Identifiable{
      * The event-type is also included in the Descriptors.
      * @return a List containing the Descriptors
      */
-    public LinkedList<String> getDescriptors() {
+    public List<String> getDescriptors() {
         return descriptors;
     }
 

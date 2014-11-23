@@ -17,7 +17,7 @@ public class TestOE extends OutputExtension<TestOD> {
     public TestOD call() throws Exception {
         System.out.println("3");
         String finalOutput = "";
-        for(ContentData cD: this.getContentDataList())
+        for(ContentData cD: this.getEvent())
             finalOutput += cD.getData();
         return new TestOD(finalOutput);
     }

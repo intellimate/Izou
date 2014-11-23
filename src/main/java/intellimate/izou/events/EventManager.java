@@ -1,12 +1,13 @@
 package intellimate.izou.events;
 
 import intellimate.izou.output.OutputManager;
+import intellimate.izou.resource.Resource;
+import intellimate.izou.resource.ResourceManager;
 import intellimate.izou.system.Identification;
 
-import java.util.ArrayList;
-import java.util.Optional;
-import java.util.WeakHashMap;
+import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 /**
  * This class is used to manage events.
@@ -54,10 +55,14 @@ public class EventManager implements Runnable{
     private final BlockingQueue<Event> events = new LinkedBlockingQueue<>(1);
     //if false, run() will stop
     private boolean stop = false;
+    //ThreadPool where all the Listeners are stored
+    private final ExecutorService executor = Executors.newCachedThreadPool();
     private final OutputManager outputManager;
+    private final ResourceManager resourceManager;
 
-    public EventManager(OutputManager outputManager) {
+    public EventManager(OutputManager outputManager, ResourceManager resourceManager) {
         this.outputManager = outputManager;
+        this.resourceManager = resourceManager;
     }
 
     /**
@@ -184,63 +189,58 @@ public class EventManager implements Runnable{
     /**
      * this method actually used to fire an event.
      *
-     * @param id the ID of the Event, format: package.class.name
+     * @param event the fired Event
      */
     private void fireEvent(Event event) throws InterruptedException {
-        checkID(id);
-        if(!checkEventsControllers(id)) return;
-        //registered to Event
-        ArrayList<EventListener> contentGeneratorListeners = this.listeners.get(id);
-        if(contentGeneratorListeners == null) contentGeneratorListeners = new ArrayList<>();
-        List<Future<ContentData>> futures = new ArrayList<>();
-        for (EventListener next : contentGeneratorListeners) {
-            Future<ContentData> futureTemp = next.eventFired(id);
-            if (futureTemp != null) {
-                futures.add(futureTemp);
+        if(!checkEventsControllers(event)) return;
+
+        List<EventListener> listenersTemp = event.getDescriptors().parallelStream()
+                .map(listeners::get)
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream)
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<CompletableFuture> futures = listenersTemp.stream()
+                .map(eventListener -> CompletableFuture.runAsync(() -> eventListener.eventFired(event), executor))
+                .collect(Collectors.toList());
+
+        timeOut(futures);
+
+        List<Resource> resources = resourceManager.generateResources(event);
+        event.addResources(resources);
+
+        outputManager.passDataToOutputPlugins(event);
+    }
+
+    /**
+     * creates a 1 sec. timeout for the resource-generation
+     * @param futures a List of futures running
+     * @return list with all elements removed, who aren't finished after 1 sec
+     */
+    public List<CompletableFuture> timeOut(List<CompletableFuture> futures) {
+        //Timeout
+        int start = 0;
+        boolean notFinished = true;
+        while ( (start < 100) && notFinished) {
+            notFinished = futures.stream()
+                    .anyMatch(future -> !future.isDone());
+            start++;
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                //TODO: log
             }
         }
-        //registered to all Events
-        contentGeneratorListeners = this.listeners.get(SUBSCRIBE_TO_ALL_EVENTS);
-        if(contentGeneratorListeners == null) contentGeneratorListeners = new ArrayList<>();
-        for (EventListener next : contentGeneratorListeners) {
-            Future<ContentData> futureTemp = next.eventFired(id);
-            if (futureTemp != null) {
-                futures.add(futureTemp);
-            }
+        //cancel all running tasks
+        if(notFinished) {
+            futures.stream()
+                    .filter(future -> !future.isDone())
+                    .forEach(future -> future.cancel(true));
         }
-        if (futures.isEmpty()) {
-            return;
-        }
-        //workaround -> timeout for ALL futures of a little bit less than 1 sec
-        boolean change;
-        int countLimit = 80;
-        int count = 0;
-        do {
-            change = false;
-            for (Future future : futures) {
-                if(future.isDone()) change = true;
-            }
-            if(!change) Thread.sleep(10);
-            count++;
-        }
-        while(!change && (count < countLimit));
-        List<ContentData> data = new ArrayList<>();
-        if(count <= countLimit)
-        {
-            for (Future<ContentData> next : futures) {
-                if (!next.isDone()) {
-                    next.cancel(true);
-                } else {
-                    try {
-                        data.add(next.get(10, TimeUnit.MILLISECONDS));
-                    } catch (Exception e) {
-                        //TODO: implement Error logging
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-        outputManager.passDataToOutputPlugins(data);
+        return futures.stream()
+                .filter(Future::isDone)
+                .collect(Collectors.toList());
     }
 
     @Override

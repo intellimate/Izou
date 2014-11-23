@@ -15,9 +15,18 @@ public class ListResourceProvider implements ResourceProvider {
      * adds a Resource to the Container
      * @param resource an instance of the resource to add
      */
-    public void addResource(Resource resource) {
+    void addResource(Resource resource) {
         resources.add(resource);
     }
+
+    /**
+     * adds a List of Resources to the Container
+     * @param resources a List of resources to add
+     */
+    void addResource(List<Resource> resources) {
+        resources.addAll(resources);
+    }
+
     /**
      * checks whether it can provide the resource
      *

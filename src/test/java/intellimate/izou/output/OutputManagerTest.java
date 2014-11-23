@@ -77,7 +77,7 @@ public class OutputManagerTest {
 
         outputManager.addOutputPlugin(outputPlugin);
         outputManager.addOutputExtension(outputExtension, outputPlugin.getID());
-        outputExtension.addContentDataToWishList("2");
+        outputExtension.addResourceIdToWishList("2");
         outputManager.passDataToOutputPlugins(list);
         assertTrue(outputManager.getOutputPluginsList().get(0).getOutputExtensionList().size() == 1);
     }

@@ -1,6 +1,6 @@
 package intellimate.izou.output;
 
-import intellimate.izou.contentgenerator.ContentData;
+import intellimate.izou.events.Event;
 import intellimate.izou.system.Identifiable;
 
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable{
     /**
      * BlockingQueue that stores event-requests that are to be executed
      */
-    private BlockingQueue<List<ContentData>> contentDataBlockingQueue;
+    private BlockingQueue<Event> eventBlockingQueue;
 
 
     /**
@@ -56,7 +56,7 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable{
         futureList = new LinkedList<>();
         tDoneList = new ArrayList<>();
         executor = null;
-        contentDataBlockingQueue = new LinkedBlockingQueue<>();
+        eventBlockingQueue = new LinkedBlockingQueue<>();
     }
 
     /**
@@ -85,17 +85,17 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable{
     }
 
     /**
-     * adds a content-data list to blockingQueue
+     * adds an event to blockingQueue
      *
-     * @param contentDataList the content-data list to be added to blockingQueue
-     * @throws IllegalStateException raised if problems adding a content-data list to blockingQueue
+     * @param event the event to add
+     * @throws IllegalStateException raised if problems adding an event to blockingQueue
      */
-    public void addContentDataList(List<ContentData> contentDataList) throws IllegalStateException {
-        contentDataBlockingQueue.add(contentDataList);
+    public void addToEventList(Event event) throws IllegalStateException{
+        eventBlockingQueue.add(event);
     }
 
     /**
-     * sets the executor of the eventManager for efficiency reasons
+     * sets the executor of the OutputManager for efficiency reasons
      * @param executor the executor to be set
      */
     public void setExecutor(ExecutorService executor) {
@@ -114,18 +114,18 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable{
     }
 
     /**
-     * gets the blocking-queue that stores contentDataLists sent by events
+     * gets the blocking-queue that stores the backlog of Events
      *
-     * @return blocking-queue that stores contentDataLists sent by events
+     * @return blocking-queue that stores Events
      */
-    public BlockingQueue<List<ContentData>> getContentDataBlockingQueue() {
-        return contentDataBlockingQueue;
+    public BlockingQueue<Event> getEventBlockingQueue() {
+        return eventBlockingQueue;
     }
 
     /**
-     * checks if the outputPlugin has any output-extensions it can run with the current content-Datas
+     * checks if the outputPlugin has any output-extensions it can run with the current Event
      *
-     * @return state of whether the outputPlugin has any output-extensions it can run with the current content-Datas
+     * @return state of whether the outputPlugin has any output-extensions it can run with the current Event
      */
     public boolean canRun() {
         boolean canRun = false;
@@ -137,16 +137,16 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable{
     }
 
     /**
-     * distributes the content-Data elements in the contentDataList to the output-extensions that will need them
+     * distributes the Event in the eventDataList to the output-extensions that will need them
      *
      * it uses the id of the contentData which is the same as the id of the outputExtension to identify which output-extension
      * it should send the content-data to
      *
-     * @param contentDataList the Data to distribute
+     * @param event the Event to distribute
      */
-    public void distributeContentData(List<ContentData> contentDataList) {
+    public void distributeEvent(Event event) {
         for(OutputExtension ext: outputExtensionList) {
-            @SuppressWarnings("unchecked") List<String> contentDataWishList = ext.getContentDataWishList();
+            @SuppressWarnings("unchecked") List<String> contentDataWishList = ext.getResourceIdWishList();
             for(String strWish: contentDataWishList) {
                 for(ContentData cD: contentDataList) {
                     if (strWish.equals(cD.getId())) {
@@ -228,7 +228,7 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable{
      * @return the list of content-Datas to be processed by the outputPlugin
      */
     public List<ContentData> blockingQueueHandling() throws InterruptedException {
-        return contentDataBlockingQueue.take();
+        return eventBlockingQueue.take();
     }
 
     /**
@@ -249,7 +249,7 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable{
                 break;
             }
 
-            distributeContentData(contentDataList); //distributes the contentDatas among all outputExtensions
+            distributeEvent(contentDataList); //distributes the contentDatas among all outputExtensions
             if(canRun()) {  //checks if there are any outputExtensions that can run at all
                 for (OutputExtension<T> ext : outputExtensionList) {
                     prepareDistribution(ext);

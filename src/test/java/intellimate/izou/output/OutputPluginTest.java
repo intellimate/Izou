@@ -45,15 +45,15 @@ public class OutputPluginTest {
         outputPlugin.addOutputExtension(ext1);
         outputPlugin.addOutputExtension(ext2);
 
-        ext1.addContentDataToWishList(cd1.getId());
-        ext2.addContentDataToWishList(cd2.getId());
-        ext2.addContentDataToWishList(cd3.getId());
+        ext1.addResourceIdToWishList(cd1.getId());
+        ext2.addResourceIdToWishList(cd2.getId());
+        ext2.addResourceIdToWishList(cd3.getId());
 
         outputPlugin.addContentDataList(cdList);
-        outputPlugin.distributeContentData(cdList);
+        outputPlugin.distributeEvent(cdList);
 
-        assertTrue(ext1.getContentDataList().size() == 1);
-        assertTrue(ext2.getContentDataList().size() == 2);
+        assertTrue(ext1.getEvent().size() == 1);
+        assertTrue(ext2.getEvent().size() == 2);
     }
 
     @Test
@@ -139,12 +139,12 @@ public class OutputPluginTest {
         outputPlugin.addOutputExtension(ext1);
         outputPlugin.addOutputExtension(ext2);
 
-        ext1.addContentDataToWishList(cd1.getId());
-        ext2.addContentDataToWishList(cd2.getId());
-        ext2.addContentDataToWishList(cd3.getId());
+        ext1.addResourceIdToWishList(cd1.getId());
+        ext2.addResourceIdToWishList(cd2.getId());
+        ext2.addResourceIdToWishList(cd3.getId());
 
         outputPlugin.addContentDataList(cdList);
-        outputPlugin.distributeContentData(cdList);
+        outputPlugin.distributeEvent(cdList);
 
         boolean t1, t2, t3;
         t1 = ext1.canRun();

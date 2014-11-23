@@ -1,6 +1,6 @@
 package intellimate.izou.output;
 
-import intellimate.izou.contentgenerator.ContentData;
+import intellimate.izou.events.Event;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -165,15 +165,15 @@ public class OutputManager {
     }
 
     /**
-     * gets a list of ContentData's and sends it to the right outputPlugin for further processing
+     * gets the Event and sends it to the right outputPlugin for further processing
      *
      * passDataToOutputPlugins is the main method of OutputManger. It is called whenever the output process has to be started
      *
-     * @param dataList list filled with content-data objects. ContentData holds the output of the DataGenerator Package
+     * @param event an Instance of Event
      */
-    public void passDataToOutputPlugins(List<ContentData> dataList) {
+    public void passDataToOutputPlugins(Event event) {
         for(OutputPlugin outputPlugin: outputPluginsList) {
-                outputPlugin.addContentDataList(dataList);
+                outputPlugin.addToEventList(event);
         }
     }
 }
