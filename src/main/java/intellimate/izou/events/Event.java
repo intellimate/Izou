@@ -2,10 +2,11 @@ package intellimate.izou.events;
 
 import intellimate.izou.system.Identifiable;
 import intellimate.izou.system.Identification;
-import intellimate.izou.system.ListResourceProvider;
-import intellimate.izou.system.Resource;
+import intellimate.izou.resource.ListResourceProvider;
+import intellimate.izou.resource.Resource;
 
 import java.util.LinkedList;
+import java.util.Optional;
 
 /**
  * This class represents an Event.
@@ -30,9 +31,21 @@ public class Event implements Identifiable{
      * @param type the Type of the Event, try to use the predefined Event types
      * @param source the source of the Event, most likely a this reference.
      */
-    Event(String type, Identification source) {
+    private Event(String type, Identification source) {
         this.type = type;
         this.source = source;
+    }
+
+    /**
+     * Creates a new Event Object
+     * @param type the Type of the Event, try to use the predefined Event types
+     * @param source the source of the Event, most likely a this reference.
+     * @return an Optional, that may be empty if type is null or empty or source is null
+     */
+    static Optional<Event> createEvent(String type, Identification source) {
+        if(type == null || type.isEmpty()) return Optional.empty();
+        if(source == null) return Optional.empty();
+        return Optional.of(new Event(type, source));
     }
 
     /**

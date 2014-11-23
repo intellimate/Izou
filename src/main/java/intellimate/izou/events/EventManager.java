@@ -1,10 +1,11 @@
 package intellimate.izou.events;
 
-import intellimate.izou.contentgenerator.ContentData;
 import intellimate.izou.output.OutputManager;
+import intellimate.izou.system.Identification;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
+import java.util.WeakHashMap;
 import java.util.concurrent.*;
 
 /**
@@ -43,14 +44,14 @@ public class EventManager implements Runnable{
     @SuppressWarnings("UnusedDeclaration")
     public static final String SUBSCRIBE_TO_ALL_EVENTS = EventManager.class.getCanonicalName() + ".SubscribeToAllEvents";
 
-    //here are all the ContentGenerators-Listeners stored
+    //here are all the Listeners stored
     private final ConcurrentHashMap<String, ArrayList<EventListener>> listeners = new ConcurrentHashMap<>();
-    //here are all the Instances to fire events stored
-    private final ConcurrentHashMap<String, ArrayList<ActivatorEventCaller>> callers = new ConcurrentHashMap<>();
+    //here are all the Instances which fire events stored
+    private final ConcurrentHashMap<Identification, EventCaller> callers = new ConcurrentHashMap<>();
     //here are all the Instances to to control the Event-dispatching stored
     private final ConcurrentLinkedQueue<EventsController> eventsControllers = new ConcurrentLinkedQueue<>();
-    //the queue where all the Events are stored (if there are more than one,
-    private final BlockingQueue<String> events = new LinkedBlockingQueue<>(1);
+    //the queue where all the Events are stored
+    private final BlockingQueue<Event> events = new LinkedBlockingQueue<>(1);
     //if false, run() will stop
     private boolean stop = false;
     private final OutputManager outputManager;
@@ -62,26 +63,19 @@ public class EventManager implements Runnable{
     /**
      * Registers with the EventManager to fire an event.
      *
-     * Multiple activators can register the same event and fire the same event.
+     * Note: the same Event can be fired from multiple sources.
      * Method is thread-safe.
      *
-     * @param id the ID of the Event, format: package.class.name
-     * @throws IllegalArgumentException when id is null or empty, or the
-     * @return returns an instance of ActivatorEventCaller, ActivatorEventCaller.fire() will fire an event
+     * @param identification the Identification of the the instance
+     * @return an Optional, empty if already registered
      */
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    public ActivatorEventCaller registerActivatorCaller(String id) throws IllegalArgumentException{
-        checkID(id);
-        ActivatorEventCaller activatorEventCaller = new ActivatorEventCaller(id);
-        ArrayList<ActivatorEventCaller> callers = this.callers.get(id);
-        if (callers == null) {
-            this.callers.put(id, new ArrayList<>());
-            callers = this.callers.get(id);
-        }
-        synchronized (callers) {
-            callers.add(activatorEventCaller);
-        }
-        return activatorEventCaller;
+    public Optional<EventCaller> registerCaller(Identification identification) throws IllegalArgumentException{
+        if(identification == null ||
+            callers.containsKey(identification)) return Optional.empty();
+        EventCaller eventCaller = new EventCaller();
+        callers.put(identification, eventCaller);
+        return Optional.of(eventCaller);
     }
 
     /**
@@ -89,65 +83,61 @@ public class EventManager implements Runnable{
      *
      * Method is thread-safe.
      *
-     * @param id the ID of the Event, format: package.class.name
-     * @param call the ActivatorEventCaller-instance which was used by the class to fire the event
+     * @param identification the Identification of the the instance
      */
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    public void unregisterActivatorCaller(String id, ActivatorEventCaller call) {
-        checkID(id);
-        call.setId("-1");
-        ArrayList<ActivatorEventCaller> callers = this.callers.get(id);
-        if (callers == null) {
-            return;
-        }
-        synchronized (callers) {
-            callers.remove(call);
-        }
+    public void unregisterCaller(Identification identification) {
+        if(!callers.containsKey(identification)) return;
+        callers.remove(identification);
     }
 
     /**
-     * Adds an listener for events from the activators.
+     * Adds an listener for events.
      *
+     * It will register for all Descriptors individually!
+     * It will also ignore if this listener is already listening to an Event.
      * Method is thread-safe.
      *
-     * @param id the ID of the Event, format: package.class.name
+     * @param event the Event to listen to
      * @param eventListener the ActivatorEventListener-interface for receiving activator events
-     * @throws IllegalArgumentException if Listener is already listening to the Event or the id is not allowed
      */
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    public void addActivatorEventListener (String id, EventListener eventListener) throws IllegalArgumentException{
-        checkID(id);
-        ArrayList<EventListener> listenersList = listeners.get(id);
-        if (listenersList == null) {
-            listeners.put(id, new ArrayList<>());
-            listenersList = listeners.get(id);
-        }
-        if(listenersList.contains(eventListener)) {
-            throw new IllegalArgumentException("Listener already listening to this event");
-        }
-        synchronized (listenersList) {
-            listenersList.add(eventListener);
+    public void registerEventListener(Event event, EventListener eventListener) {
+        for(String id : event.getDescriptors()) {
+            ArrayList<EventListener> listenersList = listeners.get(id);
+            if (listenersList == null) {
+                listeners.put(id, new ArrayList<>());
+                listenersList = listeners.get(id);
+            }
+            if (!listenersList.contains(eventListener)) {
+                synchronized (listenersList) {
+                    listenersList.add(eventListener);
+                }
+            }
         }
     }
 
     /**
-     * Removes an listener for events from the activators
+     * unregister an EventListener
      *
+     * It will unregister for all Descriptors individually!
+     * It will also ignore if this listener is not listening to an Event.
      * Method is thread-safe.
      *
-     * @param id the ID of the Event, format: package.class.name
+     * @param event the Event to stop listen to
      * @param eventListener the ActivatorEventListener used to listen for events
      * @throws IllegalArgumentException if Listener is already listening to the Event or the id is not allowed
      */
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    public void deleteActivatorEventListener (String id, EventListener eventListener) throws IllegalArgumentException{
-        checkID(id);
-        ArrayList<EventListener> listenersList = listeners.get(id);
-        if (listenersList == null) {
-            return;
-        }
-        synchronized (listenersList) {
-            listenersList.remove(eventListener);
+    public void unregisterEventListener(Event event, EventListener eventListener) throws IllegalArgumentException{
+        for (String id : event.getDescriptors()) {
+            ArrayList<EventListener> listenersList = listeners.get(id);
+            if (listenersList == null) {
+                return;
+            }
+            synchronized (listenersList) {
+                listenersList.remove(eventListener);
+            }
         }
     }
 
@@ -159,7 +149,7 @@ public class EventManager implements Runnable{
      *
      * @param controller the EventController Interface to control event-dispatching
      */
-    public void addEventController (EventsController controller) throws IllegalArgumentException{
+    public void addEventsController(EventsController controller) throws IllegalArgumentException{
         eventsControllers.add(controller);
     }
 
@@ -170,21 +160,22 @@ public class EventManager implements Runnable{
      *
      * @param controller the EventController Interface to remove
      */
-    public void removeEventController (EventsController controller) throws IllegalArgumentException{
+    public void removeEventsController(EventsController controller) throws IllegalArgumentException{
         eventsControllers.remove(controller);
     }
 
     /**
      * Checks whether to dispatch an event
      *
-     * @param id the ID of the Event, format: package.class.name
+     * @param event the fired Event
      * @return true if the event should be fired
      */
-    private boolean checkEventControllers(String id) {
+    private boolean checkEventsControllers(Event event) {
         boolean shouldExecute = true;
         for (EventsController controller : eventsControllers) {
-            if (!controller.controlEventDispatcher(id)) {
+            if (!controller.controlEventDispatcher(event)) {
                 shouldExecute = false;
+                break;
             }
         }
         return shouldExecute;
@@ -195,9 +186,9 @@ public class EventManager implements Runnable{
      *
      * @param id the ID of the Event, format: package.class.name
      */
-    private void fireActivatorEvent (String id) throws InterruptedException {
+    private void fireEvent(Event event) throws InterruptedException {
         checkID(id);
-        if(!checkEventControllers(id)) return;
+        if(!checkEventsControllers(id)) return;
         //registered to Event
         ArrayList<EventListener> contentGeneratorListeners = this.listeners.get(id);
         if(contentGeneratorListeners == null) contentGeneratorListeners = new ArrayList<>();
@@ -252,26 +243,12 @@ public class EventManager implements Runnable{
         outputManager.passDataToOutputPlugins(data);
     }
 
-    /**
-     * Checks whether a ID is valid.
-     *
-     * Currently only throws error if id is null or empty.
-     *
-     * @param id the ID to check
-     * @throws IllegalArgumentException if the id is null or empty
-     */
-    private void checkID(String id) throws IllegalArgumentException{
-        if (id == null || id.isEmpty()) {
-            throw new IllegalArgumentException("Event-ID not Allowed");
-        }
-    }
-
     @Override
     public void run() {
         stop = false;
         while (!stop) {
             try {
-                fireActivatorEvent(events.take());
+                fireEvent(events.take());
             } catch (InterruptedException e) {
                 break;
             }
@@ -283,7 +260,7 @@ public class EventManager implements Runnable{
      *
      * @return an instance of BlockingQueue
      */
-    public BlockingQueue<String> getEvents() {
+    public BlockingQueue<Event> getEvents() {
         return events;
     }
 
@@ -302,30 +279,22 @@ public class EventManager implements Runnable{
     /**
      * Class used to fire events.
      *
-     * To fire events a class must register with registerActivatorCaller, then this class will be returned.
+     * To fire events a class must register with registerCaller, then this class will be returned.
      * Use fire() to fire the event;
      */
     @SuppressWarnings("SameParameterValue")
-    public final class ActivatorEventCaller {
-        private String id;
+    public final class EventCaller {
         //private, so that this class can only constructed by EventManager
-        private ActivatorEventCaller(String id) {
-            this.id = id;
-        }
-
-        //private, so that this class can only called by EventManager
-        private void setId (String id) {
-            this.id = id;
-        }
+        private EventCaller() {}
 
         /**
          * This method is used to fire the event.
          *
          * @throws MultipleEventsException an Exception will be thrown if there are currently other events fired
          */
-        public void fire() throws MultipleEventsException {
+        public void fire(Event event) throws MultipleEventsException {
             if(events.isEmpty()) {
-                events.add(id);
+                events.add(event);
             }
             else
             {

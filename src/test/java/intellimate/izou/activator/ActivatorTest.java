@@ -27,7 +27,7 @@ public class ActivatorTest {
     public void testRegisterEvent() throws Exception {
         activator.registerEvent("1");
         final boolean[] isWorking = {false};
-        eventManagerTestSetup.getManager().addActivatorEventListener("1", id -> {
+        eventManagerTestSetup.getManager().registerEventListener("1", id -> {
             isWorking[0] = true;
             return null;
         });
@@ -91,7 +91,7 @@ public class ActivatorTest {
     public void testFireEvent() throws Exception {
         activator.registerEvent("4");
         final boolean[] isWorking = {false};
-        eventManagerTestSetup.getManager().addActivatorEventListener("4", id -> {
+        eventManagerTestSetup.getManager().registerEventListener("4", id -> {
             isWorking[0] = true;
             return null;
         });

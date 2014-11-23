@@ -1,4 +1,4 @@
-package intellimate.izou.system;
+package intellimate.izou.resource;
 
 import java.util.Arrays;
 import java.util.LinkedList;

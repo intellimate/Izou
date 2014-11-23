@@ -1,8 +1,9 @@
 package intellimate.izou.contentgenerator;
 
-import intellimate.izou.events.EventListener;
 import intellimate.izou.events.EventManager;
 import intellimate.izou.system.Identifiable;
+import intellimate.izou.resource.Resource;
+import intellimate.izou.resource.ResourceBuilder;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.concurrent.Future;
  * in a ThreadPool and generate(String eventID) will be called.
  */
 @SuppressWarnings("SameParameterValue")
-public abstract class ContentGenerator<T> implements Callable<ContentData<T>>, EventListener, Identifiable{
+public abstract class ContentGenerator<T> implements Callable<List<Resource<T>>>, ResourceBuilder, Identifiable{
     private ContentGeneratorManager contentGeneratorManager;
     //stores the ID of the ContentGenerator
     private final String contentGeneratorID;
@@ -43,14 +44,15 @@ public abstract class ContentGenerator<T> implements Callable<ContentData<T>>, E
         setContentGeneratorManager(contentGeneratorManager);
         setEventManager(eventManager);
     }
-        /**
-         * Sets the ContentGenerator.
-         *
-         * The ContentGeneratorManager will usually be set when you add the ContentGenerator to the ContentGeneratorManager.
-         * via ContentGeneratorManager.addContentGenerator();
-         *
-         * @param contentGeneratorManager the contentGeneratorManager
-         */
+
+    /**
+     * Sets the ContentGenerator.
+     *
+     * The ContentGeneratorManager will usually be set when you add the ContentGenerator to the ContentGeneratorManager.
+     * via ContentGeneratorManager.addContentGenerator();
+     *
+     * @param contentGeneratorManager the contentGeneratorManager
+     */
     private void setContentGeneratorManager(ContentGeneratorManager contentGeneratorManager) {
         this.contentGeneratorManager = contentGeneratorManager;
     }
@@ -66,7 +68,7 @@ public abstract class ContentGenerator<T> implements Callable<ContentData<T>>, E
         this.eventManager = eventManager;
         for (String eventID : registeredEvents) {
             try {
-                eventManager.addActivatorEventListener(eventID, this);
+                eventManager.registerEventListener(eventID, this);
             } catch (IllegalArgumentException e) {
                 handleError(e);
             }
@@ -80,7 +82,7 @@ public abstract class ContentGenerator<T> implements Callable<ContentData<T>>, E
      * @return a Future representing pending completion of the task.
      */
     @Override
-    public Future<ContentData> eventFired(String id) {
+    public Future<List<Resource>> eventFired(String id) {
         if(contentGeneratorManager == null)
         {
             throw new NullPointerException("You have not set the ContentGeneratorManager");
@@ -95,9 +97,9 @@ public abstract class ContentGenerator<T> implements Callable<ContentData<T>>, E
      * @return The Data computed as a ContentDataObject
      */
     @Override
-    public  ContentData<T> call() throws Exception{
+    public  List<Resource<T>> call() throws Exception{
         try {
-            ContentData<T> contentData = generate(eventID);
+            List<Resource<T>> contentData = generate(eventID);
             eventID = null;
             return contentData;
         } catch (InterruptedException inter) {
@@ -121,7 +123,7 @@ public abstract class ContentGenerator<T> implements Callable<ContentData<T>>, E
     public void registerEvent(String eventID){
         if(eventManager != null) {
             try {
-                eventManager.addActivatorEventListener(eventID, this);
+                eventManager.registerEventListener(eventID, this);
             } catch (IllegalArgumentException e) {
                 handleError(e);
             }
@@ -139,7 +141,7 @@ public abstract class ContentGenerator<T> implements Callable<ContentData<T>>, E
     public void unregisterEvent(String eventID){
         if(eventManager != null) {
             try {
-               eventManager.deleteActivatorEventListener(eventID, this);
+               eventManager.unregisterEventListener(eventID, this);
             }
             catch (IllegalStateException e) {
                 handleError(e);
@@ -157,7 +159,7 @@ public abstract class ContentGenerator<T> implements Callable<ContentData<T>>, E
     public void unregisterAllEvents() throws IllegalArgumentException{
         registeredEvents.stream().filter(id -> eventManager != null).forEach(id -> {
             try {
-                eventManager.deleteActivatorEventListener(id, this);
+                eventManager.unregisterEventListener(id, this);
             } catch (IllegalArgumentException e) {
                 handleError(e);
             }
@@ -183,7 +185,7 @@ public abstract class ContentGenerator<T> implements Callable<ContentData<T>>, E
      * @return ContentData the Data computed
      * @throws Exception any exceptions thrown in the process, including interruptions.
      */
-    public abstract ContentData<T> generate(String eventID) throws Exception;
+    public abstract List<Resource<T>> generate(String eventID) throws Exception;
 
     /**
      * Handles the Errors during Computation and registering Events.

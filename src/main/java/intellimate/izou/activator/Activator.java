@@ -13,7 +13,7 @@ import java.util.HashMap;
  */
 public abstract class Activator implements Runnable, Identifiable{
 
-    private HashMap<String, EventManager.ActivatorEventCaller> callers = null;
+    private HashMap<String, EventManager.EventCaller> callers = null;
     private EventManager eventManager;
     private ActivatorManager activatorManager;
     //counts the exception
@@ -92,7 +92,7 @@ public abstract class Activator implements Runnable, Identifiable{
             throw new IllegalStateException("This method got called outside activatorStarts()");
         }
         else {
-            EventManager.ActivatorEventCaller caller = eventManager.registerActivatorCaller(id);
+            EventManager.EventCaller caller = eventManager.registerCaller(id);
             callers.put(id, caller);
         }
     }
@@ -110,12 +110,12 @@ public abstract class Activator implements Runnable, Identifiable{
         if (callers == null) {
             throw new IllegalStateException("This method got called outside activatorStarts()");
         }
-        EventManager.ActivatorEventCaller caller;
+        EventManager.EventCaller caller;
         caller = callers.get(id);
         if (caller == null) {
             throw new IllegalArgumentException();
         }
-        eventManager.unregisterActivatorCaller(id, caller);
+        eventManager.unregisterCaller(id, caller);
         callers.remove(id);
     }
 
@@ -131,11 +131,11 @@ public abstract class Activator implements Runnable, Identifiable{
             throw new IllegalStateException("This method got called outside activatorStarts()");
         }
         for (String key : callers.keySet()) {
-            EventManager.ActivatorEventCaller caller = callers.get(key);
+            EventManager.EventCaller caller = callers.get(key);
             if (caller == null) {
                 throw new IllegalArgumentException();
             }
-            eventManager.unregisterActivatorCaller(key, caller);
+            eventManager.unregisterCaller(key, caller);
         }
         callers.clear();
     }
@@ -164,7 +164,7 @@ public abstract class Activator implements Runnable, Identifiable{
      * @throws EventManager.MultipleEventsException thrown if there are other events fired
      */
     public void fireEvent(String id) throws IllegalArgumentException, EventManager.MultipleEventsException {
-        EventManager.ActivatorEventCaller caller = callers.get(id);
+        EventManager.EventCaller caller = callers.get(id);
         if (caller == null) {
             throw new IllegalArgumentException();
         }

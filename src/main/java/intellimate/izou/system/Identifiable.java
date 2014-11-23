@@ -13,4 +13,13 @@ public interface Identifiable
      * @return A String containing an ID
      */
     abstract String getID();
+
+    /**
+     * checks whether this instance is the owner of this Identification
+     * @param identification the identification to check
+     * @return true if the same, false if not
+     */
+    default boolean isOwner(Identification identification) {
+        return getID().equals(identification.getID());
+    }
 }

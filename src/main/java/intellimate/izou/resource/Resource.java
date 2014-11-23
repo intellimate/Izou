@@ -1,4 +1,6 @@
-package intellimate.izou.system;
+package intellimate.izou.resource;
+
+import intellimate.izou.system.Identification;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -79,6 +81,14 @@ public class Resource <T> {
         } finally {
             providerLock.unlock();
         }
+    }
+
+    /**
+     * returns whether a provider is set
+     * @return true if this resource has an provider, false if not
+     */
+    public boolean hasProvider() {
+        return provider != null;
     }
 
     /**

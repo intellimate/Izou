@@ -1,7 +1,9 @@
 package intellimate.izou.events;
 
 import intellimate.izou.output.OutputManager;
+import intellimate.izou.resource.Resource;
 
+import java.util.List;
 import java.util.concurrent.Future;
 
 /**
@@ -14,7 +16,7 @@ public class DemoEvent implements EventListener {
     EventManager manager;
 
     @Override
-    public Future eventFired(String id) {
+    public Future<List<Resource>> eventFired(String id) {
        //code here will be executed whe an event was fired
        System.out.println("Hello!");
         return null;
@@ -25,11 +27,11 @@ public class DemoEvent implements EventListener {
         manager = new EventManager(new OutputManager());
 
         //this function lets this class listen to the event "1"
-        manager.addActivatorEventListener("1", this);
+        manager.registerEventListener("1", this);
 
 
-        //to fire an event you have to retrieve an ActivatorEventCaller through the registerActivatorCaller method
-        EventManager.ActivatorEventCaller caller1 = manager.registerActivatorCaller("1");
+        //to fire an event you have to retrieve an ActivatorEventCaller through the registerCaller method
+        EventManager.EventCaller caller1 = manager.registerCaller("1");
         try {
             //the method fire fires the event
             caller1.fire();

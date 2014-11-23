@@ -21,13 +21,13 @@ public class EventManagerTest {
 
     @Test
     public void testRegisterActivatorEvent() throws Exception {
-        EventManager.ActivatorEventCaller caller = manager.registerActivatorCaller("1");
+        EventManager.EventCaller caller = manager.registerCaller("1");
         final boolean[] isWorking = {false};
-        manager.addActivatorEventListener("1", id -> {
+        manager.registerEventListener("1", id -> {
             isWorking[0] = true;
             return null;
         });
-        manager.addActivatorEventListener("1", id -> {
+        manager.registerEventListener("1", id -> {
             isWorking[0] = true;
             return null;
         });
@@ -44,10 +44,10 @@ public class EventManagerTest {
 
     @Test
     public void testUnregisterActivatorEvent() throws Exception {
-        EventManager.ActivatorEventCaller caller = manager.registerActivatorCaller("2");
+        EventManager.EventCaller caller = manager.registerCaller("2");
         final boolean[] isWorking = {false};
-        manager.unregisterActivatorCaller("2", caller);
-        manager.addActivatorEventListener("2", id -> {
+        manager.unregisterCaller("2", caller);
+        manager.registerEventListener("2", id -> {
             isWorking[0] = true;
             return null;
         });
@@ -65,9 +65,9 @@ public class EventManagerTest {
 
     @Test
     public void testAddActivatorEventListener() throws Exception {
-        EventManager.ActivatorEventCaller caller = manager.registerActivatorCaller("3");
+        EventManager.EventCaller caller = manager.registerCaller("3");
         final boolean[] isWorking = {false};
-        manager.addActivatorEventListener("3", id -> {
+        manager.registerEventListener("3", id -> {
             isWorking[0] = true;
             return null;
         });
@@ -84,14 +84,14 @@ public class EventManagerTest {
 
     @Test
     public void testDeleteActivatorEventListener() throws Exception {
-        EventManager.ActivatorEventCaller caller = manager.registerActivatorCaller("4");
+        EventManager.EventCaller caller = manager.registerCaller("4");
         final boolean[] isWorking = {false};
         EventListener listener1;
-        manager.addActivatorEventListener("4", listener1 = id -> {
+        manager.registerEventListener("4", listener1 = id -> {
             isWorking[0] = true;
             return null;
         });
-        manager.deleteActivatorEventListener("4", listener1);
+        manager.unregisterEventListener("4", listener1);
         caller.fire();
 
 
@@ -107,8 +107,8 @@ public class EventManagerTest {
     @Test
     public void testAddEventController() throws Exception {
         boolean[] isWorking = {false, true};
-        EventManager.ActivatorEventCaller caller = manager.registerActivatorCaller("5");
-        manager.addActivatorEventListener("5", id -> {
+        EventManager.EventCaller caller = manager.registerCaller("5");
+        manager.registerEventListener("5", id -> {
             isWorking[0] = true;
             return null;
         });
@@ -116,7 +116,7 @@ public class EventManagerTest {
             isWorking[1] = false;
             return false;
         };
-        manager.addEventController(eventsController);
+        manager.addEventsController(eventsController);
         caller.fire();
 
         synchronized (lock) {
@@ -125,15 +125,15 @@ public class EventManagerTest {
                 lock.wait(2);
             }
         }
-        manager.removeEventController(eventsController);
+        manager.removeEventsController(eventsController);
         assertFalse(isWorking[0] && isWorking[1]);
     }
 
     @Test
     public void testRemoveEventController() throws Exception {
         boolean[] isWorking = {false, true};
-        EventManager.ActivatorEventCaller caller = manager.registerActivatorCaller("5");
-        manager.addActivatorEventListener("5", id -> {
+        EventManager.EventCaller caller = manager.registerCaller("5");
+        manager.registerEventListener("5", id -> {
             isWorking[0] = true;
             return null;
         });
@@ -141,8 +141,8 @@ public class EventManagerTest {
             isWorking[1] = false;
             return false;
         };
-        manager.addEventController(eventsController);
-        manager.removeEventController(eventsController);
+        manager.addEventsController(eventsController);
+        manager.removeEventsController(eventsController);
         caller.fire();
 
         synchronized (lock) {

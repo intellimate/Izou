@@ -12,7 +12,7 @@ public class EventsControllerTest {
             isWorking[1] = false;
             return false;
         };
-        eventManagerTestSetup.getManager().addEventController(eventsController);
+        eventManagerTestSetup.getManager().addEventsController(eventsController);
         try {
             eventManagerTestSetup.testListenerFalse(isWorking, "1");
         } catch (InterruptedException e) {

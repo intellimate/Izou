@@ -103,7 +103,7 @@ public class AddOnManager {
             for (EventsController eventsController : addOn.registerEventController()) {
                 if (eventsController == null) continue;
                 try {
-                    eventManager.addEventController(eventsController);
+                    eventManager.addEventsController(eventsController);
                 } catch (IllegalArgumentException e) {
                     e.printStackTrace();
                 }

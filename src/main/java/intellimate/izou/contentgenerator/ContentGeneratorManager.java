@@ -1,6 +1,7 @@
 package intellimate.izou.contentgenerator;
 
 import intellimate.izou.events.EventManager;
+import intellimate.izou.resource.Resource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +72,7 @@ public class ContentGeneratorManager {
      * @return a Future representing pending completion of the task.
      */
     @SuppressWarnings("unchecked")
-    public Future<ContentData> runContentGenerator (ContentGenerator contentGenerator) {
+    public Future<List<Resource>> runContentGenerator (ContentGenerator contentGenerator) {
         return executor.submit(contentGenerator);
     }
 }

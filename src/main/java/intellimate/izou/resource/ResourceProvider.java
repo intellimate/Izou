@@ -1,6 +1,5 @@
-package intellimate.izou.system;
+package intellimate.izou.resource;
 
-import java.util.LinkedList;
 import java.util.List;
 
 /**

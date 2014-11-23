@@ -30,12 +30,12 @@ public class EventManagerTestSetup {
      * checks if is working is set everywhere to false, [0] should be reserved for the test here
      */
     public void testListenerTrue(final boolean[] isWorking, String eventId) throws InterruptedException {
-        manager.addActivatorEventListener(eventId, id -> {
+        manager.registerEventListener(eventId, id -> {
             isWorking[0] = true;
             return null;
         });
         try {
-            manager.registerActivatorCaller(eventId).fire();
+            manager.registerCaller(eventId).fire();
         } catch (EventManager.MultipleEventsException e) {
             fail();
         }
@@ -57,12 +57,12 @@ public class EventManagerTestSetup {
      * checks if is working is set everywhere to false, [0] should be reserved for the test here
      */
     public void testListenerFalse(final boolean[] isWorking, String eventId) throws InterruptedException {
-        manager.addActivatorEventListener(eventId, id -> {
+        manager.registerEventListener(eventId, id -> {
             isWorking[0] = true;
             return null;
         });
         try {
-            manager.registerActivatorCaller(eventId).fire();
+            manager.registerCaller(eventId).fire();
         } catch (EventManager.MultipleEventsException e) {
             fail();
         }
@@ -83,7 +83,7 @@ public class EventManagerTestSetup {
 
     public void testFireEvent(String id) {
         try {
-            manager.registerActivatorCaller(id).fire();
+            manager.registerCaller(id).fire();
         } catch (EventManager.MultipleEventsException e) {
             fail();
         }

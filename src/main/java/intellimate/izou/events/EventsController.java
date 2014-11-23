@@ -13,8 +13,8 @@ public interface EventsController extends Identifiable {
      *
      * This method should execute quickly
      *
-     * @param eventID the ID of the event
+     * @param event the ID of the event
      * @return true if events should be dispatched
      */
-    public boolean controlEventDispatcher(String eventID);
+    public boolean controlEventDispatcher(Event event);
 }

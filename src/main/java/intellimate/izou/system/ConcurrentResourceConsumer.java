@@ -1,5 +1,7 @@
 package intellimate.izou.system;
 
+import intellimate.izou.resource.Resource;
+
 import java.util.List;
 
 /**

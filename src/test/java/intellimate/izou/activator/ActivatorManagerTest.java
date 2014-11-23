@@ -40,7 +40,7 @@ public class ActivatorManagerTest {
             public boolean terminated(Exception e) {return false;}
         };
 
-        eventMangrSetup.getManager().addActivatorEventListener("1", id -> {
+        eventMangrSetup.getManager().registerEventListener("1", id -> {
             isWorking[0] = true;
             return null;
         });
