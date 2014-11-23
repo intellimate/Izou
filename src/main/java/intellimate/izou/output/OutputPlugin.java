@@ -145,6 +145,11 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable{
      * @param event the Event to distribute
      */
     public void distributeEvent(Event event) {
+        outputExtensionList.parallelStream()
+                .filter(ext -> event.getListResourceContainer().providesResource(ext.getResourceIdWishList()))
+                .forEach(ext -> ext.setEvent(event));
+        //old code
+        /*
         for(OutputExtension ext: outputExtensionList) {
             @SuppressWarnings("unchecked") List<String> contentDataWishList = ext.getResourceIdWishList();
             for(String strWish: contentDataWishList) {
@@ -154,7 +159,7 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable{
                     }
                 }
             }
-        }
+        }*/
     }
 
     /**
@@ -227,7 +232,7 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable{
      * @throws java.lang.InterruptedException if interrupted while waiting
      * @return the list of content-Datas to be processed by the outputPlugin
      */
-    public List<ContentData> blockingQueueHandling() throws InterruptedException {
+    public Event blockingQueueHandling() throws InterruptedException {
         return eventBlockingQueue.take();
     }
 

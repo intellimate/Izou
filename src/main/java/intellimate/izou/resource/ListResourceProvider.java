@@ -1,5 +1,6 @@
 package intellimate.izou.resource;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.stream.Collectors;
  * A ResourceContainer which holds all the Resources in an List internally
  */
 public class ListResourceProvider implements ResourceProvider {
-    LinkedList<Resource> resources = new LinkedList<>();
+    List<Resource> resources = new ArrayList<>();
 
     /**
      * adds a Resource to the Container
