@@ -1,6 +1,7 @@
 package intellimate.izou.system;
 
 import java.util.LinkedList;
+import java.util.Optional;
 
 /**
  * You can register an Object with the IdentificationManager and receive an Identification Objects.
@@ -22,11 +23,12 @@ public class IdentificationManager {
      * @param identifiable the registered Identifiable
      * @return an Identification Instance or null if not registered
      */
-    public Identification getIdentification(Identifiable identifiable) {
-        if(identifiables.contains(identifiable)) {
-            return Identification.createIdentification(identifiable);
+    public Optional<Identification> getIdentification(Identifiable identifiable) {
+        if(identifiables.stream()
+                .anyMatch(listIdentifiable -> listIdentifiable == identifiable)) {
+            return Optional.of(Identification.createIdentification(identifiable, true));
         }
-        return null;
+        return Optional.empty();
     }
 
     /**
@@ -35,12 +37,16 @@ public class IdentificationManager {
      * @param id the ID of the registered Identifiable
      * @return an Identification Instance or null if not registered
      */
-    public Identification getIdentification(String id) {
-        Identifiable identifiable= identifiables.stream()
+    public Optional<Identification> getIdentification(String id) {
+        Optional<Identifiable> result = identifiables.stream()
                 .filter(identifiable1 -> identifiable1.getID().equals(id))
-                .findFirst()
-                .get();
-        return Identification.createIdentification(identifiable);
+                .findFirst();
+
+        if(!result.isPresent()) {
+            return Optional.empty();
+        } else {
+            return Optional.of(Identification.createIdentification(result.get()));
+        }
     }
 
     /**

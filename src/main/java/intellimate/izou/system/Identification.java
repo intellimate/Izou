@@ -4,15 +4,22 @@ package intellimate.izou.system;
  * Used to provide identification.
  * You can obtain an Instance through IdentificationManager
  */
-public class Identification {
+public final class Identification {
     private Identifiable identifiable;
-    private Identification(Identifiable identifiable) {
+    private boolean createdFromInstance;
+    private Identification(Identifiable identifiable, boolean createdFromInstance) {
         this.identifiable = identifiable;
+        this.createdFromInstance = createdFromInstance;
     }
 
-    static Identification createIdentification(Identifiable identifiable) {
+    protected static Identification createIdentification(Identifiable identifiable) {
         if(identifiable == null) return null;
-        return new Identification(identifiable);
+        return new Identification(identifiable, false);
+    }
+
+    protected static Identification createIdentification(Identifiable identifiable, boolean createdFromInstance) {
+        if(identifiable == null) return null;
+        return new Identification(identifiable, createdFromInstance);
     }
 
     /**
@@ -29,6 +36,14 @@ public class Identification {
      */
     Identifiable getIdentifiable() {
         return identifiable;
+    }
+
+    /**
+     * this method returns whether this Identification Object was created by the owner
+     * @return true if created by the owner, false if not
+     */
+    public boolean isCreatedFromInstance() {
+        return createdFromInstance;
     }
 
     /**

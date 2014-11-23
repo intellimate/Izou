@@ -1,9 +1,13 @@
 package intellimate.izou.activator;
 
+import intellimate.izou.events.Event;
 import intellimate.izou.events.EventManager;
 import intellimate.izou.system.Identifiable;
+import intellimate.izou.system.Identification;
+import intellimate.izou.system.IdentificationManager;
 
 import java.util.HashMap;
+import java.util.Optional;
 
 /**
  * The Task of an Activator is to listen for whatever you choose to implement and fires events to notify a change.
@@ -13,14 +17,32 @@ import java.util.HashMap;
  */
 public abstract class Activator implements Runnable, Identifiable{
 
-    private HashMap<String, EventManager.EventCaller> callers = null;
+    private EventManager.EventCaller caller;
     private EventManager eventManager;
     private ActivatorManager activatorManager;
+    private IdentificationManager identificationManager = IdentificationManager.getInstance();
     //counts the exception
     private int exceptionCount = 0;
     //limit of the exceptionCount
     @SuppressWarnings("FieldCanBeLocal")
     private final int exceptionLimit = 100;
+
+    public Activator() {
+        if(!identificationManager.registerIdentification(this)) {
+            //TODO: log fatal
+            return;
+        }
+        Optional<Identification> identification = identificationManager.getIdentification(this);
+        if(!identification.isPresent()) {
+            //TODO:log fatal
+            return;
+        }
+        Optional<EventManager.EventCaller> result = eventManager.registerCaller(identification.get());
+        //noinspection StatementWithEmptyBody
+        if(!result.isPresent()) {
+            //TODO: log fatal
+        }
+    }
 
 
     /**
@@ -78,79 +100,13 @@ public abstract class Activator implements Runnable, Identifiable{
     public abstract boolean terminated(Exception e);
 
     /**
-     * registers an Event.
+     * unregister the Caller at the EventManager.
      * <p>
-     * To fire an event you first have to register it. After that you can call the fireEvent() method.
-     * Only use this method inside activatorStarts();
-     *
-     * @param id the ID for the Event, format: package.class.name
-     * @throws IllegalArgumentException thrown if the ID is null or empty
-     * @throws java.lang.IllegalStateException thrown if not called inside activatorStarts();
+     * If you don't need this class anymore, you should unregister the caller to avoid memory leaks.
      */
-    public void registerEvent(String id) throws IllegalArgumentException, IllegalStateException {
-        if (callers == null) {
-            throw new IllegalStateException("This method got called outside activatorStarts()");
-        }
-        else {
-            EventManager.EventCaller caller = eventManager.registerCaller(id);
-            callers.put(id, caller);
-        }
-    }
-
-    /**
-     * unregister an Event at EventManager.
-     * <p>
-     * If you don't need an event anymore, you can unregister it .
-     *
-     * @param id the ID for the Event, format: package.class.name
-     * @throws IllegalArgumentException thrown if the ID is null or empty
-     * @throws java.lang.IllegalStateException thrown if not called inside activatorStarts();
-     */
-    public void unregisterEvent(String id) throws IllegalArgumentException, IllegalStateException {
-        if (callers == null) {
-            throw new IllegalStateException("This method got called outside activatorStarts()");
-        }
-        EventManager.EventCaller caller;
-        caller = callers.get(id);
-        if (caller == null) {
-            throw new IllegalArgumentException();
-        }
-        eventManager.unregisterCaller(id, caller);
-        callers.remove(id);
-    }
-
-    /**
-     * unregister all Event at EventManager.
-     * <p>
-     * If you don't need this class anymore, you should unregister all events to avoid memory leaks.
-     * @throws IllegalArgumentException thrown if the ID is null or empty
-     * java.lang.IllegalStateException thrown if not called inside activatorStarts();
-     */
-    public void unregisterAllEvents() throws IllegalArgumentException, IllegalStateException {
-        if (callers == null) {
-            throw new IllegalStateException("This method got called outside activatorStarts()");
-        }
-        for (String key : callers.keySet()) {
-            EventManager.EventCaller caller = callers.get(key);
-            if (caller == null) {
-                throw new IllegalArgumentException();
-            }
-            eventManager.unregisterCaller(key, caller);
-        }
-        callers.clear();
-    }
-
-    /**
-     * returns all the registered Events
-     *
-     * @return an array containing all the registered Events
-     */
-    public String[] getAllRegisteredEvents() {
-        String[] temp = new String[0];
-        if (callers == null) {
-            return null;
-        }
-        return callers.keySet().toArray(temp);
+    public void unregisterCaller() {
+        if (caller == null) return;
+        eventManager.unregisterCaller(identificationManager.getIdentification(this).get());
     }
 
     /**
@@ -159,16 +115,14 @@ public abstract class Activator implements Runnable, Identifiable{
      * This triggers all the ContentGenerator instances, that have subscribed to the event.
      * Note that if multiple events get fired simultaneously, a MultipleEventsException gets thrown.
      *
-     * @param id the ID for the Event, format: package.class.name
-     * @throws IllegalArgumentException             thrown if the ID is null or empty
-     * @throws EventManager.MultipleEventsException thrown if there are other events fired
+     * @param event the event to fire
+     * @throws IllegalArgumentException             thrown if the event is null or empty
      */
-    public void fireEvent(String id) throws IllegalArgumentException, EventManager.MultipleEventsException {
-        EventManager.EventCaller caller = callers.get(id);
-        if (caller == null) {
+    public void fireEvent(Event event) throws IllegalArgumentException, EventManager.MultipleEventsException {
+        if (event == null) {
             throw new IllegalArgumentException();
         }
-        caller.fire();
+        caller.fire(event);
     }
 
     /**
@@ -177,7 +131,6 @@ public abstract class Activator implements Runnable, Identifiable{
      * @param activatorManager an instance of activatorManager
      */
     void registerAllNeededDependencies(EventManager eventManager, ActivatorManager activatorManager) {
-        callers = new HashMap<>();
         setEventManager(eventManager);
         setActivatorManager(activatorManager);
     }

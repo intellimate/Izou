@@ -1,7 +1,7 @@
 package intellimate.izou.addon;
 
 import intellimate.izou.activator.Activator;
-import intellimate.izou.contentgenerator.ContentGenerator;
+import intellimate.izou.contentgenerator.ContentGeneratorOld;
 import intellimate.izou.events.EventsController;
 import intellimate.izou.main.Main;
 import intellimate.izou.output.OutputExtension;
@@ -48,8 +48,8 @@ public class PropertiesManagerTest extends TestCase {
         }
 
         @Override
-        public ContentGenerator[] registerContentGenerator() {
-            return new ContentGenerator[0];
+        public ContentGeneratorOld[] registerContentGenerator() {
+            return new ContentGeneratorOld[0];
         }
 
         @Override

@@ -9,7 +9,7 @@ import java.util.concurrent.Future;
 import static org.junit.Assert.*;
 
 public class ContentGeneratorTest {
-    public static ContentGenerator<Boolean> contentGenerator;
+    public static ContentGeneratorOld<Boolean> contentGenerator;
     public static EventManagerTestSetup eventManagerTestSetup;
     public static ContentGeneratorManager contentGeneratorManager;
     private static final class Lock { }
@@ -18,7 +18,7 @@ public class ContentGeneratorTest {
     public ContentGeneratorTest() {
         eventManagerTestSetup = new EventManagerTestSetup();
         contentGeneratorManager = new ContentGeneratorManager(eventManagerTestSetup.getManager());
-        contentGenerator = new ContentGenerator<Boolean>("1") {
+        contentGenerator = new ContentGeneratorOld<Boolean>("1") {
             @Override
             public ContentData<Boolean> generate(String eventID) throws Exception {
                ContentData<Boolean> cd = new ContentData<>("1");
@@ -37,7 +37,7 @@ public class ContentGeneratorTest {
     @Test
     public void testSetContentGeneratorManager() throws Exception {
         final boolean[] isWorking = {false};
-        ContentGenerator cg = new ContentGenerator("2") {
+        ContentGeneratorOld cg = new ContentGeneratorOld("2") {
             @Override
             public ContentData generate(String eventID) throws Exception {
                 isWorking[0] = true;
@@ -69,7 +69,7 @@ public class ContentGeneratorTest {
     @Test
     public void testCall() throws Exception {
         final boolean[] isWorking = {false, false};
-        ContentGenerator cg = new ContentGenerator("3") {
+        ContentGeneratorOld cg = new ContentGeneratorOld("3") {
             @Override
             public ContentData generate(String eventID) throws Exception {
                 if(eventID.equals("3"))
@@ -98,7 +98,7 @@ public class ContentGeneratorTest {
     @Test
     public void testRegisterEvent() throws Exception {
         final boolean[] isWorking = {false};
-        ContentGenerator cg = new ContentGenerator("4") {
+        ContentGeneratorOld cg = new ContentGeneratorOld("4") {
             @Override
             public ContentData generate(String eventID) throws Exception {
                 if(eventID.equals("5")) isWorking[0] = true;
@@ -118,7 +118,7 @@ public class ContentGeneratorTest {
     @Test
     public void testUnregisterEvent() throws Exception {
         final boolean[] isWorking = {false};
-        ContentGenerator cg = new ContentGenerator("5") {
+        ContentGeneratorOld cg = new ContentGeneratorOld("5") {
             @Override
             public ContentData generate(String eventID) throws Exception {
                 isWorking[0] = true;
@@ -139,7 +139,7 @@ public class ContentGeneratorTest {
     @Test
     public void testUnregisterAllEvents() throws Exception {
         final boolean[] isWorking = {false};
-        ContentGenerator cg = new ContentGenerator("6") {
+        ContentGeneratorOld cg = new ContentGeneratorOld("6") {
             @Override
             public ContentData generate(String eventID) throws Exception {
                 isWorking[0] = true;

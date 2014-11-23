@@ -1,13 +1,13 @@
 package intellimate.izou.fullplugintesting;
 
 import intellimate.izou.contentgenerator.ContentData;
-import intellimate.izou.contentgenerator.ContentGenerator;
+import intellimate.izou.contentgenerator.ContentGeneratorOld;
 
 /**
  * Created by julianbrendl on 10/7/14.
  */
 @SuppressWarnings("SameParameterValue")
-public class TestCG extends ContentGenerator<String> {
+public class TestCG extends ContentGeneratorOld<String> {
 
     public TestCG(String contentGeneratorID) {
         super(contentGeneratorID);

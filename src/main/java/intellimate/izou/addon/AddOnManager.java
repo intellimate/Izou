@@ -3,13 +3,13 @@ package intellimate.izou.addon;
 import intellimate.izou.activator.Activator;
 import intellimate.izou.activator.ActivatorManager;
 import intellimate.izou.contentgenerator.ContentGenerator;
-import intellimate.izou.contentgenerator.ContentGeneratorManager;
 import intellimate.izou.events.EventsController;
 import intellimate.izou.events.EventManager;
 import intellimate.izou.main.Main;
 import intellimate.izou.output.OutputExtension;
 import intellimate.izou.output.OutputManager;
 import intellimate.izou.output.OutputPlugin;
+import intellimate.izou.resource.ResourceManager;
 import intellimate.izou.system.Context;
 import ro.fortsoft.pf4j.DefaultPluginManager;
 import ro.fortsoft.pf4j.PluginManager;
@@ -28,17 +28,17 @@ public class AddOnManager {
     private List<AddOn> addOnList;
     private final OutputManager outputManager;
     private final EventManager eventManager;
-    private final ContentGeneratorManager contentGeneratorManager;
+    private final ResourceManager resourceManager;
     private final ActivatorManager activatorManager;
     private final PropertiesManager propertiesManager;
     private final Main main;
 
     public AddOnManager(OutputManager outputManager, EventManager eventManager,
-                        ContentGeneratorManager contentGeneratorManager, ActivatorManager activatorManager, Main main) {
+                        ResourceManager resourceManager, ActivatorManager activatorManager, Main main) {
         addOnList = new LinkedList<>();
         this.outputManager = outputManager;
         this.eventManager = eventManager;
-        this.contentGeneratorManager = contentGeneratorManager;
+        this.resourceManager = resourceManager;
         this.activatorManager = activatorManager;
         this.main = main;
 
@@ -85,7 +85,7 @@ public class AddOnManager {
             for (ContentGenerator contentGenerator : contentGenerators) {
                 if (contentGenerator == null) continue;
                 try {
-                    contentGeneratorManager.addContentGenerator(contentGenerator);
+                    resourceManager.registerResourceBuilder(contentGenerator);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
