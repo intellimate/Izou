@@ -103,7 +103,7 @@ public class EventManager implements Runnable{
      * It will also ignore if this listener is already listening to an Event.
      * Method is thread-safe.
      *
-     * @param event the Event to listen to
+     * @param event the Event to listen to (it will listen to all descriptors individually!)
      * @param eventListener the ActivatorEventListener-interface for receiving activator events
      */
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
