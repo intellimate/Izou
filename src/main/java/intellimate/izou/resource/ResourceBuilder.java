@@ -21,7 +21,7 @@ public interface ResourceBuilder extends Identifiable{
      * this method is called to register for what Events it wants to provide Resources.
      * @return a List containing ID's for the Events
      */
-    abstract List<String> subscribeToEvents();
+    abstract List<String> announceEvents();
     /**
      * this method is called when an object wants to get a Resource.
      * it has as an argument resource instances without data, which just need to get populated.

@@ -22,6 +22,7 @@ import java.util.Properties;
 @SuppressWarnings("UnusedDeclaration")
 public abstract class AddOn implements ExtensionPoint, Identifiable {
     private PropertiesContainer propertiesContainer;
+    @SuppressWarnings("FieldCanBeLocal")
     private final String addOnID;
     private final String propertiesPath;
     private String defaultPropertiesPath;

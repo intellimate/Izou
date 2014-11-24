@@ -189,7 +189,7 @@ public class ResourceManager {
      * @param resourceBuilder an instance of ResourceBuilder
      */
     private void registerEventsForResourceBuilder(ResourceBuilder resourceBuilder) {
-        List<String> events = resourceBuilder.subscribeToEvents();
+        List<String> events = resourceBuilder.announceEvents();
         for(String event : events) {
             if(!eventSubscribers.containsKey(event)) {
                 eventSubscribers.get(event).add(resourceBuilder);
@@ -199,6 +199,38 @@ public class ResourceManager {
                 eventSubscribers.put(event, tempList);
             }
         }
+    }
+
+    /**
+     * unregister a ResourceBuilder.
+     * <p>
+     * this method unregisters all the events, resourcesID etc.
+     * @param resourceBuilder an instance of the ResourceBuilder
+     */
+    public void unregisterResourceBuilder(ResourceBuilder resourceBuilder) {
+        unregisterResourceIDForResourceBuilder(resourceBuilder);
+    }
+
+    /**
+     * unregisters all ResourceIDs for the ResourceBuilders
+     * @param resourceBuilder an instance of ResourceBuilder
+     */
+    private void unregisterResourceIDForResourceBuilder(ResourceBuilder resourceBuilder) {
+        List<Resource> resources = resourceBuilder.announceResources();
+        resources.stream().map(resource -> resourceIDs.get(resource.getResourceID()))
+                .filter(Objects::nonNull)
+                .forEach(list -> list.remove(resourceBuilder));
+    }
+
+    /**
+     * unregisters the events for the ResourceBuilder
+     * @param resourceBuilder an instance of ResourceBuilder
+     */
+    private void unregisterEventsForResourceBuilder(ResourceBuilder resourceBuilder) {
+        resourceBuilder.announceEvents().stream()
+                .map(eventSubscribers::get)
+                .filter(Objects::nonNull)
+                .forEach(list -> list.remove(resourceBuilder));
     }
 
     private class ResourceBuilderCallableWrapper implements Callable<List<Resource>> {

@@ -1,11 +1,9 @@
 package intellimate.izou.contentgenerator;
 
 import intellimate.izou.events.Event;
-import intellimate.izou.events.EventManager;
 import intellimate.izou.resource.Resource;
 import intellimate.izou.resource.ResourceBuilder;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,7 +35,7 @@ public abstract class ContentGenerator implements ResourceBuilder{
      * @return a List containing ID's for the Events
      */
     @Override
-    public abstract List<String> subscribeToEvents();
+    public abstract List<String> announceEvents();
 
     /**
      * this method is called when an object wants to get a Resource.
