@@ -22,6 +22,7 @@ public class Context {
     private Main main;
     public Events events = new Events();
     public Resources resources = new Resources();
+
     public Context(AddOn addOn, Main main) {
         this.addOn = addOn;
         this.main = main;
