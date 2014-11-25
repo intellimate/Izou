@@ -1,6 +1,6 @@
 package intellimate.izou.activator;
 
-import intellimate.izou.events.EventManager;
+import intellimate.izou.events.LocalEventManager;
 import intellimate.izou.events.EventManagerTestSetup;
 import org.junit.Test;
 
@@ -31,7 +31,7 @@ public class ActivatorManagerTest {
                 registerEvent("1");
                 try {
                     fireEvent("1");
-                } catch (EventManager.MultipleEventsException e) {
+                } catch (LocalEventManager.MultipleEventsException e) {
                     e.printStackTrace();
                 }
             }

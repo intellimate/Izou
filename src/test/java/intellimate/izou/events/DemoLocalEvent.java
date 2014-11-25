@@ -12,8 +12,8 @@ import java.util.concurrent.Future;
  * This class implements EventManager.ActivatorEventListener, the Function eventFired will be called when
  * an event was fired.
  */
-public class DemoEvent implements EventListener {
-    EventManager manager;
+public class DemoLocalEvent implements LocalEventListener {
+    LocalEventManager manager;
 
     @Override
     public Future<List<Resource>> eventFired(String id) {
@@ -22,16 +22,16 @@ public class DemoEvent implements EventListener {
         return null;
     }
 
-    public DemoEvent() {
+    public DemoLocalEvent() {
         //first you have create an EventManager instance
-        manager = new EventManager(new OutputManager());
+        manager = new LocalEventManager(new OutputManager());
 
         //this function lets this class listen to the event "1"
         manager.registerEventListener("1", this);
 
 
         //to fire an event you have to retrieve an ActivatorEventCaller through the registerCaller method
-        EventManager.EventCaller caller1 = manager.registerCaller("1");
+        LocalEventManager.EventCaller caller1 = manager.registerCaller("1");
         try {
             //the method fire fires the event
             caller1.fire();

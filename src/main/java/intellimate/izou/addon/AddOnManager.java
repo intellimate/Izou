@@ -4,7 +4,7 @@ import intellimate.izou.activator.Activator;
 import intellimate.izou.activator.ActivatorManager;
 import intellimate.izou.contentgenerator.ContentGenerator;
 import intellimate.izou.events.EventsController;
-import intellimate.izou.events.EventManager;
+import intellimate.izou.events.LocalEventManager;
 import intellimate.izou.main.Main;
 import intellimate.izou.output.OutputExtension;
 import intellimate.izou.output.OutputManager;
@@ -27,17 +27,17 @@ import java.util.List;
 public class AddOnManager {
     private List<AddOn> addOnList;
     private final OutputManager outputManager;
-    private final EventManager eventManager;
+    private final LocalEventManager localEventManager;
     private final ResourceManager resourceManager;
     private final ActivatorManager activatorManager;
     private final PropertiesManager propertiesManager;
     private final Main main;
 
-    public AddOnManager(OutputManager outputManager, EventManager eventManager,
+    public AddOnManager(OutputManager outputManager, LocalEventManager localEventManager,
                         ResourceManager resourceManager, ActivatorManager activatorManager, Main main) {
         addOnList = new LinkedList<>();
         this.outputManager = outputManager;
-        this.eventManager = eventManager;
+        this.localEventManager = localEventManager;
         this.resourceManager = resourceManager;
         this.activatorManager = activatorManager;
         this.main = main;
@@ -103,7 +103,7 @@ public class AddOnManager {
             for (EventsController eventsController : addOn.registerEventController()) {
                 if (eventsController == null) continue;
                 try {
-                    eventManager.addEventsController(eventsController);
+                    localEventManager.addEventsController(eventsController);
                 } catch (IllegalArgumentException e) {
                     e.printStackTrace();
                 }

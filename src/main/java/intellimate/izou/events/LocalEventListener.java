@@ -6,7 +6,7 @@ package intellimate.izou.events;
  * To receive events a class must implements this interface and register with the registerEventListener-method.
  * When the activator event occurs, that object's eventFired method is invoked.
  */
-public interface EventListener {
+public interface LocalEventListener {
 
     /**
      * Invoked when an activator-event occurs.

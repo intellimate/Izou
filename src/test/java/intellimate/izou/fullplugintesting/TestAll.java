@@ -2,7 +2,7 @@ package intellimate.izou.fullplugintesting;
 
 import intellimate.izou.activator.ActivatorManager;
 import intellimate.izou.contentgenerator.ContentGeneratorManager;
-import intellimate.izou.events.EventManager;
+import intellimate.izou.events.LocalEventManager;
 import intellimate.izou.output.OutputManager;
 import org.junit.Test;
 
@@ -18,11 +18,11 @@ public class TestAll {
     @Test
     public void testPlugin() throws Exception {
         OutputManager outputManager = new OutputManager();
-        EventManager eventManager = new EventManager(outputManager);
-        ActivatorManager activatorManager = new ActivatorManager(eventManager);
+        LocalEventManager localEventManager = new LocalEventManager(outputManager);
+        ActivatorManager activatorManager = new ActivatorManager(localEventManager);
 
-        ContentGeneratorManager contentGeneratorManager = new ContentGeneratorManager(eventManager);
-        Thread thread = new Thread(eventManager);
+        ContentGeneratorManager contentGeneratorManager = new ContentGeneratorManager(localEventManager);
+        Thread thread = new Thread(localEventManager);
         thread.start();
         TestAct testAct = new TestAct();
         activatorManager.addActivator(testAct);

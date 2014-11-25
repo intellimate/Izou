@@ -1,68 +1,65 @@
 package intellimate.izou.events;
 
-import intellimate.izou.output.OutputManager;
-import intellimate.izou.resource.Resource;
-import intellimate.izou.resource.ResourceManager;
+import intellimate.izou.system.Identifiable;
 import intellimate.izou.system.Identification;
+import intellimate.izou.system.IdentificationManager;
 
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 /**
- * This class is used to manage events.
- * Activators can register with an id to fire events und ContentGenerators can subscribe to them.
- *
- * Event-IDs are used in the following form: package.class.name
+ * This class is used to manage local events.
  */
-public class EventManager implements Runnable{
+public class LocalEventManager implements Runnable, Identifiable{
     //common Events:
     /**
      * Event for a Welcome with maximum response.
      *
      * Every component that can contribute should contribute to this Event.
      */
-    public static final String FULL_WELCOME_EVENT = EventManager.class.getCanonicalName() + ".FullWelcomeEvent";
+    public static final String FULL_WELCOME_EVENT = LocalEventManager.class.getCanonicalName() + ".FullWelcomeEvent";
     /**
      * Event for a Welcome with major response.
      *
      * Every component that is import should contribute to this Event.
      */
     @SuppressWarnings("UnusedDeclaration")
-    public static final String MAJOR_WELCOME_EVENT = EventManager.class.getCanonicalName() + ".MajorWelcomeEvent";
+    public static final String MAJOR_WELCOME_EVENT = LocalEventManager.class.getCanonicalName() + ".MajorWelcomeEvent";
     /**
      * Event for a Welcome with major response.
      *
      * Only components that have information of great importance should contribute to this event.
      */
     @SuppressWarnings("UnusedDeclaration")
-    public static final String MINOR_WELCOME_EVENT = EventManager.class.getCanonicalName() + ".MinorWelcomeEvent";
+    public static final String MINOR_WELCOME_EVENT = LocalEventManager.class.getCanonicalName() + ".MinorWelcomeEvent";
     /**
      * Event for a Welcome with major response.
      *
      * Only components that have information of great importance should contribute to this event.
      */
     @SuppressWarnings("UnusedDeclaration")
-    public static final String SUBSCRIBE_TO_ALL_EVENTS = EventManager.class.getCanonicalName() + ".SubscribeToAllEvents";
+    public static final String SUBSCRIBE_TO_ALL_EVENTS = LocalEventManager.class.getCanonicalName() + ".SubscribeToAllEvents";
 
     //here are all the Listeners stored
-    private final ConcurrentHashMap<String, ArrayList<EventListener>> listeners = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, ArrayList<LocalEventListener>> listeners = new ConcurrentHashMap<>();
     //here are all the Instances which fire events stored
     private final ConcurrentHashMap<Identification, EventCaller> callers = new ConcurrentHashMap<>();
-    //here are all the Instances to to control the Event-dispatching stored
-    private final ConcurrentLinkedQueue<EventsController> eventsControllers = new ConcurrentLinkedQueue<>();
     //the queue where all the Events are stored
     private final BlockingQueue<Event> events = new LinkedBlockingQueue<>(1);
     //if false, run() will stop
     private boolean stop = false;
     //ThreadPool where all the Listeners are stored
     private final ExecutorService executor = Executors.newCachedThreadPool();
-    private final OutputManager outputManager;
-    private final ResourceManager resourceManager;
+    private Optional<EventPublisher> eventPublisher;
 
-    public EventManager(OutputManager outputManager, ResourceManager resourceManager) {
-        this.outputManager = outputManager;
-        this.resourceManager = resourceManager;
+    public LocalEventManager(EventDistributor eventDistributor) {
+        Optional<Identification> id = IdentificationManager.getInstance().getIdentification(this);
+        if(!id.isPresent()) {
+            //TODO: log fatal
+        } else {
+            eventPublisher = eventDistributor.registerEventPublisher(id.get());
+        }
     }
 
     /**
@@ -104,19 +101,19 @@ public class EventManager implements Runnable{
      * Method is thread-safe.
      *
      * @param event the Event to listen to (it will listen to all descriptors individually!)
-     * @param eventListener the ActivatorEventListener-interface for receiving activator events
+     * @param localEventListener the ActivatorEventListener-interface for receiving activator events
      */
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    public void registerEventListener(Event event, EventListener eventListener) {
+    public void registerEventListener(Event event, LocalEventListener localEventListener) {
         for(String id : event.getDescriptors()) {
-            ArrayList<EventListener> listenersList = listeners.get(id);
+            ArrayList<LocalEventListener> listenersList = listeners.get(id);
             if (listenersList == null) {
                 listeners.put(id, new ArrayList<>());
                 listenersList = listeners.get(id);
             }
-            if (!listenersList.contains(eventListener)) {
+            if (!listenersList.contains(localEventListener)) {
                 synchronized (listenersList) {
-                    listenersList.add(eventListener);
+                    listenersList.add(localEventListener);
                 }
             }
         }
@@ -130,60 +127,20 @@ public class EventManager implements Runnable{
      * Method is thread-safe.
      *
      * @param event the Event to stop listen to
-     * @param eventListener the ActivatorEventListener used to listen for events
+     * @param localEventListener the ActivatorEventListener used to listen for events
      * @throws IllegalArgumentException if Listener is already listening to the Event or the id is not allowed
      */
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    public void unregisterEventListener(Event event, EventListener eventListener) throws IllegalArgumentException{
+    public void unregisterEventListener(Event event, LocalEventListener localEventListener) throws IllegalArgumentException{
         for (String id : event.getDescriptors()) {
-            ArrayList<EventListener> listenersList = listeners.get(id);
+            ArrayList<LocalEventListener> listenersList = listeners.get(id);
             if (listenersList == null) {
                 return;
             }
             synchronized (listenersList) {
-                listenersList.remove(eventListener);
+                listenersList.remove(localEventListener);
             }
         }
-    }
-
-    /**
-     * Adds an EventController to control EventDispatching-Behaviour
-     *
-     * Method is thread-safe.
-     * It is expected that this method executes quickly.
-     *
-     * @param controller the EventController Interface to control event-dispatching
-     */
-    public void addEventsController(EventsController controller) throws IllegalArgumentException{
-        eventsControllers.add(controller);
-    }
-
-    /**
-     * Removes an EventController
-     *
-     * Method is thread-safe.
-     *
-     * @param controller the EventController Interface to remove
-     */
-    public void removeEventsController(EventsController controller) throws IllegalArgumentException{
-        eventsControllers.remove(controller);
-    }
-
-    /**
-     * Checks whether to dispatch an event
-     *
-     * @param event the fired Event
-     * @return true if the event should be fired
-     */
-    private boolean checkEventsControllers(Event event) {
-        boolean shouldExecute = true;
-        for (EventsController controller : eventsControllers) {
-            if (!controller.controlEventDispatcher(event)) {
-                shouldExecute = false;
-                break;
-            }
-        }
-        return shouldExecute;
     }
 
     /**
@@ -192,9 +149,7 @@ public class EventManager implements Runnable{
      * @param event the fired Event
      */
     private void fireEvent(Event event) throws InterruptedException {
-        if(!checkEventsControllers(event)) return;
-
-        List<EventListener> listenersTemp = event.getDescriptors().parallelStream()
+        List<LocalEventListener> listenersTemp = event.getDescriptors().parallelStream()
                 .map(listeners::get)
                 .filter(Objects::nonNull)
                 .flatMap(Collection::stream)
@@ -206,11 +161,7 @@ public class EventManager implements Runnable{
                 .collect(Collectors.toList());
 
         timeOut(futures);
-
-        List<Resource> resources = resourceManager.generateResources(event);
-        event.addResources(resources);
-
-        outputManager.passDataToOutputPlugins(event);
+        if(eventPublisher.isPresent()) eventPublisher.get().fireEvent(event);
     }
 
     /**
@@ -274,6 +225,19 @@ public class EventManager implements Runnable{
     @SuppressWarnings("UnusedDeclaration")
     public void stop() {
         stop = true;
+    }
+
+    /**
+     * An ID must always be unique.
+     * A Class like Activator or OutputPlugin can just provide their .class.getCanonicalName()
+     * If you have to implement this interface multiple times, just concatenate unique Strings to
+     * .class.getCanonicalName()
+     *
+     * @return A String containing an ID
+     */
+    @Override
+    public String getID() {
+        return LocalEventManager.class.getCanonicalName();
     }
 
     /**

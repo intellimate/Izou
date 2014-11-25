@@ -1,12 +1,11 @@
 package intellimate.izou.activator;
 
 import intellimate.izou.events.Event;
-import intellimate.izou.events.EventManager;
+import intellimate.izou.events.LocalEventManager;
 import intellimate.izou.system.Identifiable;
 import intellimate.izou.system.Identification;
 import intellimate.izou.system.IdentificationManager;
 
-import java.util.HashMap;
 import java.util.Optional;
 
 /**
@@ -17,8 +16,8 @@ import java.util.Optional;
  */
 public abstract class Activator implements Runnable, Identifiable{
 
-    private EventManager.EventCaller caller;
-    private EventManager eventManager;
+    private LocalEventManager.EventCaller caller;
+    private LocalEventManager localEventManager;
     private ActivatorManager activatorManager;
     private IdentificationManager identificationManager = IdentificationManager.getInstance();
     //counts the exception
@@ -37,7 +36,7 @@ public abstract class Activator implements Runnable, Identifiable{
             //TODO:log fatal
             return;
         }
-        Optional<EventManager.EventCaller> result = eventManager.registerCaller(identification.get());
+        Optional<LocalEventManager.EventCaller> result = localEventManager.registerCaller(identification.get());
         //noinspection StatementWithEmptyBody
         if(!result.isPresent()) {
             //TODO: log fatal
@@ -106,7 +105,7 @@ public abstract class Activator implements Runnable, Identifiable{
      */
     public void unregisterCaller() {
         if (caller == null) return;
-        eventManager.unregisterCaller(identificationManager.getIdentification(this).get());
+        localEventManager.unregisterCaller(identificationManager.getIdentification(this).get());
     }
 
     /**
@@ -118,7 +117,7 @@ public abstract class Activator implements Runnable, Identifiable{
      * @param event the event to fire
      * @throws IllegalArgumentException             thrown if the event is null or empty
      */
-    public void fireEvent(Event event) throws IllegalArgumentException, EventManager.MultipleEventsException {
+    public void fireEvent(Event event) throws IllegalArgumentException, LocalEventManager.MultipleEventsException {
         if (event == null) {
             throw new IllegalArgumentException();
         }
@@ -127,16 +126,16 @@ public abstract class Activator implements Runnable, Identifiable{
 
     /**
      * registers all needed Dependencies to function
-     * @param eventManager an instance of EventManager
+     * @param localEventManager an instance of EventManager
      * @param activatorManager an instance of activatorManager
      */
-    void registerAllNeededDependencies(EventManager eventManager, ActivatorManager activatorManager) {
-        setEventManager(eventManager);
+    void registerAllNeededDependencies(LocalEventManager localEventManager, ActivatorManager activatorManager) {
+        setLocalEventManager(localEventManager);
         setActivatorManager(activatorManager);
     }
 
-    private void setEventManager(EventManager eventManager) {
-        this.eventManager = eventManager;
+    private void setLocalEventManager(LocalEventManager localEventManager) {
+        this.localEventManager = localEventManager;
 
     }
 

@@ -1,7 +1,7 @@
 package intellimate.izou.fullplugintesting;
 
 import intellimate.izou.activator.Activator;
-import intellimate.izou.events.EventManager;
+import intellimate.izou.events.LocalEventManager;
 
 /**
  * Created by julianbrendl on 10/7/14.
@@ -28,7 +28,7 @@ public class TestAct extends Activator {
                 try {
                     this.fireEvent("1");
                     firedEvent = true;
-                } catch (EventManager.MultipleEventsException e) {
+                } catch (LocalEventManager.MultipleEventsException e) {
                     e.printStackTrace();
                 }
                 start = false;

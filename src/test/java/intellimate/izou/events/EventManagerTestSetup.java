@@ -9,11 +9,11 @@ import static org.junit.Assert.fail;
 @SuppressWarnings("SameParameterValue")
 public class EventManagerTestSetup {
 
-    public EventManager getManager() {
+    public LocalEventManager getManager() {
         return manager;
     }
 
-    private static EventManager manager;
+    private static LocalEventManager manager;
     Thread thread;
     private OutputManager outputManager;
     private static final class Lock { }
@@ -22,7 +22,7 @@ public class EventManagerTestSetup {
 
     public EventManagerTestSetup() {
         outputManager = new OutputManager();
-        manager = new EventManager(outputManager);
+        manager = new LocalEventManager(outputManager);
         thread = new Thread(manager);
         thread.start();
     }
@@ -36,7 +36,7 @@ public class EventManagerTestSetup {
         });
         try {
             manager.registerCaller(eventId).fire();
-        } catch (EventManager.MultipleEventsException e) {
+        } catch (LocalEventManager.MultipleEventsException e) {
             fail();
         }
         synchronized (lock) {
@@ -63,7 +63,7 @@ public class EventManagerTestSetup {
         });
         try {
             manager.registerCaller(eventId).fire();
-        } catch (EventManager.MultipleEventsException e) {
+        } catch (LocalEventManager.MultipleEventsException e) {
             fail();
         }
 
@@ -84,7 +84,7 @@ public class EventManagerTestSetup {
     public void testFireEvent(String id) {
         try {
             manager.registerCaller(id).fire();
-        } catch (EventManager.MultipleEventsException e) {
+        } catch (LocalEventManager.MultipleEventsException e) {
             fail();
         }
     }

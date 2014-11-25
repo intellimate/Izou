@@ -3,7 +3,8 @@ package intellimate.izou.main;
 import intellimate.izou.activator.ActivatorManager;
 import intellimate.izou.addon.AddOn;
 import intellimate.izou.addon.AddOnManager;
-import intellimate.izou.events.EventManager;
+import intellimate.izou.events.EventDistributor;
+import intellimate.izou.events.LocalEventManager;
 import intellimate.izou.output.OutputManager;
 import intellimate.izou.resource.ResourceManager;
 
@@ -17,20 +18,22 @@ import java.util.List;
 @SuppressWarnings("FieldCanBeLocal")
 public class Main {
     private final OutputManager outputManager;
-    private final EventManager eventManager;
     private final ResourceManager resourceManager;
+    private final EventDistributor eventDistributor;
+    private final LocalEventManager localEventManager;
+    private final Thread threadEventManager;
     private final ActivatorManager activatorManager;
     private final AddOnManager addOnManager;
-    private final Thread threadEventManager;
 
     private Main() {
         outputManager = new OutputManager();
         resourceManager = new ResourceManager();
-        eventManager = new EventManager(outputManager, resourceManager);
-        threadEventManager = new Thread(eventManager);
+        eventDistributor = new EventDistributor(resourceManager, outputManager);
+        localEventManager = new LocalEventManager(outputManager, resourceManager);
+        threadEventManager = new Thread(localEventManager);
         threadEventManager.start();
-        activatorManager = new ActivatorManager(eventManager);
-        addOnManager = new AddOnManager(outputManager,eventManager,resourceManager,activatorManager, this);
+        activatorManager = new ActivatorManager(localEventManager);
+        addOnManager = new AddOnManager(outputManager, localEventManager,resourceManager,activatorManager, this);
         addOnManager.retrieveAndRegisterAddOns();
     }
 
@@ -40,13 +43,7 @@ public class Main {
      * @param addOns a List of AddOns to run
      */
     public Main(List<AddOn> addOns) {
-        outputManager = new OutputManager();
-        resourceManager = new ResourceManager();
-        eventManager = new EventManager(outputManager, resourceManager);
-        threadEventManager = new Thread(eventManager);
-        threadEventManager.start();
-        activatorManager = new ActivatorManager(eventManager);
-        addOnManager = new AddOnManager(outputManager,eventManager,resourceManager,activatorManager, this);
+        this();
         addOnManager.addAndRegisterAddOns(addOns);
     }
 
@@ -58,8 +55,8 @@ public class Main {
         return outputManager;
     }
 
-    public EventManager getEventManager() {
-        return eventManager;
+    public LocalEventManager getLocalEventManager() {
+        return localEventManager;
     }
 
     public ActivatorManager getActivatorManager() {
@@ -76,5 +73,9 @@ public class Main {
 
     public ResourceManager getResourceManager() {
         return resourceManager;
+    }
+
+    public EventDistributor getEventDistributor() {
+        return eventDistributor;
     }
 }

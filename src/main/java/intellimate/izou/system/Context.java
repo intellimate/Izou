@@ -1,9 +1,7 @@
 package intellimate.izou.system;
 
 import intellimate.izou.addon.AddOn;
-import intellimate.izou.events.Event;
-import intellimate.izou.events.EventListener;
-import intellimate.izou.events.EventManager;
+import intellimate.izou.events.*;
 import intellimate.izou.main.Main;
 import intellimate.izou.resource.Resource;
 import intellimate.izou.resource.ResourceBuilder;
@@ -29,16 +27,17 @@ public class Context {
     }
 
     private class Events {
+        public Distributor distributor = new Distributor();
         /**
-         * Adds an listener for events.
+         * Adds an listener for local Events.
          * <p>
          * It will register for all Descriptors individually!
          * It will also ignore if this listener is already listening to an Event. Method is thread-safe.
          * @param event the Event to listen to (it will listen to all descriptors individually!)
-         * @param eventListener the ActivatorEventListener-interface for receiving activator events
+         * @param localEventListener the ActivatorEventListener-interface for receiving activator events
          */
-        public void registerEventListener(Event event, EventListener eventListener) {
-            main.getEventManager().registerEventListener(event, eventListener);
+        public void registerEventListener(Event event, LocalEventListener localEventListener) {
+            main.getLocalEventManager().registerEventListener(event, localEventListener);
         }
 
         /**
@@ -48,32 +47,80 @@ public class Context {
          *  It will also ignore if this listener is not listening to an Event.
          *  Method is thread-safe.
          * @param event the Event to stop listen to
-         * @param eventListener the ActivatorEventListener used to listen for events
+         * @param localEventListener the ActivatorEventListener used to listen for events
          */
-        public void unregisterEventListener(Event event, EventListener eventListener) {
-            main.getEventManager().unregisterEventListener(event, eventListener);
+        public void unregisterEventListener(Event event, LocalEventListener localEventListener) {
+            main.getLocalEventManager().unregisterEventListener(event, localEventListener);
         }
 
         /**
-         * Registers with the EventManager to fire an event.
+         * Registers with the LocalEventManager to fire an event.
          * <p>
          * Note: the same Event can be fired from multiple sources.
          * Method is thread-safe.
          * @param identification the Identification of the the instance
          * @return an Optional, empty if already registered
          */
-        public Optional<EventManager.EventCaller> registerEventCaller(Identification identification) {
-            return main.getEventManager().registerCaller(identification);
+        public Optional<LocalEventManager.EventCaller> registerEventCaller(Identification identification) {
+            return main.getLocalEventManager().registerCaller(identification);
         }
 
         /**
-         * Unregister with the EventManager.
+         * Unregister with the LocalEventManager.
          * <p>
          * Method is thread-safe.
          * @param identification the Identification of the the instance
          */
         public void unregisterEventCaller(Identification identification) {
-            main.getEventManager().unregisterCaller(identification);
+            main.getLocalEventManager().unregisterCaller(identification);
+        }
+
+        private class Distributor {
+            /**
+             * with this method you can register EventPublisher add a Source of Events to the System.
+             * <p>
+             * This method represents a higher level of abstraction! Use the EventManager to fire Events!
+             * This method is intended for use cases where you have an entire new source of events (e.g. network)
+             * @param identification the Identification of the Source
+             * @return An Optional Object which may or may not contains an EventPublisher
+             */
+            public Optional<EventPublisher> registerEventPublisher(Identification identification) {
+                return main.getEventDistributor().registerEventPublisher(identification);
+            }
+
+            /**
+             * with this method you can unregister EventPublisher add a Source of Events to the System.
+             * <p>
+             * This method represents a higher level of abstraction! Use the EventManager to fire Events!
+             * This method is intended for use cases where you have an entire new source of events (e.g. network)
+             * @param identification the Identification of the Source
+             */
+            public void unregisterEventPublisher(Identification identification) {
+                main.getEventDistributor().unregisterEventPublisher(identification);
+            }
+
+            /**
+             * Registers an EventController to control EventDispatching-Behaviour
+             * <p>
+             * Method is thread-safe.
+             * It is expected that this method executes quickly.
+             *
+             * @param eventsController the EventController Interface to control event-dispatching
+             */
+            public void registerEventsController(EventsController eventsController) {
+                main.getEventDistributor().registerEventsController(eventsController);
+            }
+
+            /**
+             * Unregisters an EventController
+             * <p>
+             * Method is thread-safe.
+             *
+             * @param eventsController the EventController Interface to remove
+             */
+            public void unregisterEventsController(EventsController eventsController) {
+                main.getEventDistributor().unregisterEventsController(eventsController);
+            }
         }
     }
 
