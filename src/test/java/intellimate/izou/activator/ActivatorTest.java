@@ -27,7 +27,7 @@ public class ActivatorTest {
     public void testRegisterEvent() throws Exception {
         activator.registerEvent("1");
         final boolean[] isWorking = {false};
-        eventManagerTestSetup.getManager().registerEventListener("1", id -> {
+        eventManagerTestSetup.getManager().registerEventListener("1", event -> {
             isWorking[0] = true;
             return null;
         });

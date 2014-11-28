@@ -45,7 +45,7 @@ public class Event implements Identifiable{
      * @param source the source of the Event, most likely a this reference.
      * @return an Optional, that may be empty if type is null or empty or source is null
      */
-    static Optional<Event> createEvent(String type, Identification source) {
+    public static Optional<Event> createEvent(String type, Identification source) {
         if(type == null || type.isEmpty()) return Optional.empty();
         if(source == null) return Optional.empty();
         return Optional.of(new Event(type, source));

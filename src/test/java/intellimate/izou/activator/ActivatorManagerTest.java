@@ -1,9 +1,13 @@
 package intellimate.izou.activator;
 
+import intellimate.izou.events.Event;
 import intellimate.izou.events.LocalEventManager;
 import intellimate.izou.events.EventManagerTestSetup;
+import intellimate.izou.system.Identification;
+import intellimate.izou.system.IdentificationManager;
 import org.junit.Test;
 
+import java.util.Optional;
 import java.util.concurrent.Future;
 
 import static org.junit.Assert.*;
@@ -24,13 +28,27 @@ public class ActivatorManagerTest {
     @Test
     public void testAddActivator() throws Exception {
         final boolean[] isWorking = {false};
-
+        Optional<Event> event = Optional.empty();
         Activator activator = new Activator() {
+            /**
+             * An ID must always be unique.
+             * A Class like Activator or OutputPlugin can just provide their .class.getCanonicalName()
+             * If you have to implement this interface multiple times, just concatenate unique Strings to
+             * .class.getCanonicalName()
+             *
+             * @return A String containing an ID
+             */
+            @Override
+            public String getID() {
+                return "TEST";
+            }
+
             @Override
             public void activatorStarts() throws InterruptedException {
-                registerEvent("1");
                 try {
-                    fireEvent("1");
+                    Identification identification= IdentificationManager.getInstance().getIdentification(this).get();
+                    Optional<Event> event = Event.createEvent("1", identification);
+                    fireEvent(event.get());
                 } catch (LocalEventManager.MultipleEventsException e) {
                     e.printStackTrace();
                 }
@@ -40,10 +58,7 @@ public class ActivatorManagerTest {
             public boolean terminated(Exception e) {return false;}
         };
 
-        eventMangrSetup.getManager().registerEventListener("1", id -> {
-            isWorking[0] = true;
-            return null;
-        });
+        eventMangrSetup.getManager().registerEventListener(event.get(), id -> isWorking[0] = true);
 
         Future<?> future = activatorManager.addActivator(activator);
 

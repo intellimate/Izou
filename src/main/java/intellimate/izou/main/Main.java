@@ -29,7 +29,7 @@ public class Main {
         outputManager = new OutputManager();
         resourceManager = new ResourceManager();
         eventDistributor = new EventDistributor(resourceManager, outputManager);
-        localEventManager = new LocalEventManager(outputManager, resourceManager);
+        localEventManager = new LocalEventManager(eventDistributor);
         threadEventManager = new Thread(localEventManager);
         threadEventManager.start();
         activatorManager = new ActivatorManager(localEventManager);
