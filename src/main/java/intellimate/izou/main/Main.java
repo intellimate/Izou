@@ -33,7 +33,7 @@ public class Main {
         threadEventManager = new Thread(localEventManager);
         threadEventManager.start();
         activatorManager = new ActivatorManager(localEventManager);
-        addOnManager = new AddOnManager(outputManager, localEventManager,resourceManager,activatorManager, this);
+        addOnManager = new AddOnManager(outputManager,resourceManager,activatorManager, this);
         addOnManager.retrieveAndRegisterAddOns();
     }
 
