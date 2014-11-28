@@ -14,7 +14,7 @@ public class EventBehaviourController {
     public static final int LeastPriority = 1;
     private final Event event;
     private Function<List<Identification>, HashMap<Integer, Identification>> outputPluginBehaviour;
-    public EventBehaviourController(Event event) {
+    protected EventBehaviourController(Event event) {
         this.event = event;
     }
 

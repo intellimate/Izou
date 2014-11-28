@@ -27,7 +27,7 @@ public class Event implements Identifiable{
     private final Identification source;
     private List<String> descriptors = new ArrayList<>();
     private ListResourceProvider listResourceContainer = new ListResourceProvider();
-    private EventBehaviourController eventBehaviourController;
+    private final EventBehaviourController eventBehaviourController = new EventBehaviourController(this);
 
     /**
      * Creates a new Event Object
@@ -134,13 +134,5 @@ public class Event implements Identifiable{
      */
     public EventBehaviourController getEventBehaviourController() {
         return eventBehaviourController;
-    }
-
-    /**
-     * sets the associated EventBehaviourController
-     * @param eventBehaviourController an instance of EventBehaviourController
-     */
-    public void setEventBehaviourController(EventBehaviourController eventBehaviourController) {
-        this.eventBehaviourController = eventBehaviourController;
     }
 }
