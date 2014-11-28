@@ -27,17 +27,15 @@ import java.util.List;
 public class AddOnManager {
     private List<AddOn> addOnList;
     private final OutputManager outputManager;
-    private final LocalEventManager localEventManager;
     private final ResourceManager resourceManager;
     private final ActivatorManager activatorManager;
     private final PropertiesManager propertiesManager;
     private final Main main;
 
-    public AddOnManager(OutputManager outputManager, LocalEventManager localEventManager,
+    public AddOnManager(OutputManager outputManager,
                         ResourceManager resourceManager, ActivatorManager activatorManager, Main main) {
         addOnList = new LinkedList<>();
         this.outputManager = outputManager;
-        this.localEventManager = localEventManager;
         this.resourceManager = resourceManager;
         this.activatorManager = activatorManager;
         this.main = main;
@@ -103,7 +101,7 @@ public class AddOnManager {
             for (EventsController eventsController : addOn.registerEventController()) {
                 if (eventsController == null) continue;
                 try {
-                    localEventManager.addEventsController(eventsController);
+                    main.getEventDistributor().registerEventsController(eventsController);
                 } catch (IllegalArgumentException e) {
                     e.printStackTrace();
                 }
