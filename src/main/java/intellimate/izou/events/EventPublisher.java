@@ -12,7 +12,12 @@ public class EventPublisher {
         this.events = events;
     }
 
+    /**
+     * use this method to fire Events.
+     * @param event the Event to fire
+     */
     public void fireEvent(Event event) {
+        if(event == null) return;
         events.add(event);
     }
 }
