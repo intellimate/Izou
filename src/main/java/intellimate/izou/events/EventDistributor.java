@@ -5,12 +5,9 @@ import intellimate.izou.resource.Resource;
 import intellimate.izou.resource.ResourceManager;
 import intellimate.izou.system.Identification;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 /**
  * This class gets all the Events from all registered EventPublisher, generates Resources and passes them to the
@@ -23,10 +20,15 @@ public class EventDistributor implements Runnable{
     private final OutputManager outputManager;
     //here are all the Instances to to control the Event-dispatching stored
     private final ConcurrentLinkedQueue<EventsController> eventsControllers = new ConcurrentLinkedQueue<>();
+    //here are all the Listeners stored
+    private final ConcurrentHashMap<String, ArrayList<EventListener>> listeners = new ConcurrentHashMap<>();
+    //ThreadPool where all the Listeners are executed
+    private final ExecutorService executor = Executors.newCachedThreadPool();
 
     public EventDistributor(ResourceManager resourceManager, OutputManager outputManager) {
         this.resourceManager = resourceManager;
         this.outputManager = outputManager;
+        executor.submit(this);
     }
 
     /**
@@ -38,7 +40,7 @@ public class EventDistributor implements Runnable{
      * @return An Optional Object which may or may not contains an EventPublisher
      */
     public Optional<EventPublisher> registerEventPublisher(Identification identification) {
-        if(!registered.containsKey(identification)) return Optional.empty();
+        if(registered.containsKey(identification)) return Optional.empty();
         EventPublisher eventPublisher = new EventPublisher(events);
         registered.put(identification, eventPublisher);
         return Optional.of(eventPublisher);
@@ -75,8 +77,87 @@ public class EventDistributor implements Runnable{
      *
      * @param controller the EventController Interface to remove
      */
-    public void unregisterEventsController(EventsController controller) throws IllegalArgumentException{
+    public void unregisterEventsController(EventsController controller) {
         eventsControllers.remove(controller);
+    }
+
+
+    /**
+     * Adds an listener for events.
+     * <p>
+     * Be careful with this method, it will register the listener for ALL the informations found in the Event. If your
+     * event-type is a common event type, it will fire EACH time!.
+     * It will also register for all Descriptors individually!
+     * It will also ignore if this listener is already listening to an Event.
+     * Method is thread-safe.
+     * </p>
+     * @param event the Event to listen to (it will listen to all descriptors individually!)
+     * @param eventListener the ActivatorEventListener-interface for receiving activator events
+     */
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+    public void registerEventListener(Event event, EventListener eventListener) {
+        for(String id : event.getAllIformations()) {
+            ArrayList<EventListener> listenersList = listeners.get(id);
+            if (listenersList == null) {
+                listeners.put(id, new ArrayList<>());
+                listenersList = listeners.get(id);
+            }
+            if (!listenersList.contains(eventListener)) {
+                synchronized (listenersList) {
+                    listenersList.add(eventListener);
+                }
+            }
+        }
+    }
+
+    /**
+     * Adds an listener for events.
+     * <p>
+     * It will register for all ids individually!
+     * This method will ignore if this listener is already listening to an Event.
+     * Method is thread-safe.
+     * </p>
+     * @param ids this can be type, or descriptors etc.
+     * @param eventListener the ActivatorEventListener-interface for receiving activator events
+     */
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+    public void registerEventListener(List<String> ids, EventListener eventListener) {
+        for(String id : ids) {
+            ArrayList<EventListener> listenersList = listeners.get(id);
+            if (listenersList == null) {
+                listeners.put(id, new ArrayList<>());
+                listenersList = listeners.get(id);
+            }
+            if (!listenersList.contains(eventListener)) {
+                synchronized (listenersList) {
+                    listenersList.add(eventListener);
+                }
+            }
+        }
+    }
+
+    /**
+     * unregister an EventListener
+     *
+     * It will unregister for all Descriptors individually!
+     * It will also ignore if this listener is not listening to an Event.
+     * Method is thread-safe.
+     *
+     * @param event the Event to stop listen to
+     * @param eventListener the ActivatorEventListener used to listen for events
+     * @throws IllegalArgumentException if Listener is already listening to the Event or the id is not allowed
+     */
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+    public void unregisterEventListener(Event event, EventListener eventListener) throws IllegalArgumentException{
+        for (String id : event.getAllIformations()) {
+            ArrayList<EventListener> listenersList = listeners.get(id);
+            if (listenersList == null) {
+                return;
+            }
+            synchronized (listenersList) {
+                listenersList.remove(eventListener);
+            }
+        }
     }
 
     /**
@@ -94,6 +175,10 @@ public class EventDistributor implements Runnable{
             }
         }
         return shouldExecute;
+    }
+
+    public BlockingQueue<Event> getEvents() {
+        return events;
     }
 
     /**
@@ -117,6 +202,19 @@ public class EventDistributor implements Runnable{
                 if (checkEventsControllers(event)) {
                     List<Resource> resourceList = resourceManager.generateResources(event);
                     event.addResources(resourceList);
+                    List<EventListener> listenersTemp = event.getAllIformations().parallelStream()
+                            .map(listeners::get)
+                            .filter(Objects::nonNull)
+                            .flatMap(Collection::stream)
+                            .distinct()
+                            .collect(Collectors.toList());
+
+                    List<CompletableFuture> futures = listenersTemp.stream()
+                            .map(eventListener -> CompletableFuture.runAsync(() -> eventListener.eventFired(event)
+                                    , executor))
+                            .collect(Collectors.toList());
+
+                    timeOut(futures);
                     outputManager.passDataToOutputPlugins(event);
                 }
             } catch (InterruptedException e) {
@@ -124,5 +222,35 @@ public class EventDistributor implements Runnable{
                 e.printStackTrace();
             }
         }
+    }
+
+    /**
+     * creates a 1 sec. timeout for the resource-generation
+     * @param futures a List of futures running
+     * @return list with all elements removed, who aren't finished after 1 sec
+     */
+    public List<CompletableFuture> timeOut(List<CompletableFuture> futures) {
+        //Timeout
+        int start = 0;
+        boolean notFinished = true;
+        while ( (start < 100) && notFinished) {
+            notFinished = futures.stream()
+                    .anyMatch(future -> !future.isDone());
+            start++;
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                //TODO: log
+            }
+        }
+        //cancel all running tasks
+        if(notFinished) {
+            futures.stream()
+                    .filter(future -> !future.isDone())
+                    .forEach(future -> future.cancel(true));
+        }
+        return futures.stream()
+                .filter(Future::isDone)
+                .collect(Collectors.toList());
     }
 }

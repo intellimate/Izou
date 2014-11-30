@@ -1,24 +1,36 @@
 package intellimate.izou.fullplugintesting;
 
-import intellimate.izou.contentgenerator.ContentData;
+import intellimate.izou.events.Event;
 import intellimate.izou.output.OutputExtension;
+import intellimate.izou.resource.Resource;
+
+import java.util.stream.Collectors;
 
 /**
  * Created by julianbrendl on 10/7/14.
  */
 @SuppressWarnings("SameParameterValue")
-public class TestOE extends OutputExtension<TestOD> {
+public class TestOE extends OutputExtension<TestOD>{
 
     public TestOE(String id) {
         super(id);
     }
 
+    /**
+     * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
+     * to the outputPlugin
+     *
+     * @param event
+     */
     @Override
-    public TestOD call() throws Exception {
+    public TestOD generate(Event event) {
         System.out.println("3");
         String finalOutput = "";
-        for(ContentData cD: this.getEvent())
-            finalOutput += cD.getData();
+        finalOutput = event.getListResourceContainer().provideResource("test_ID").stream()
+                .map(Resource::getResource)
+                .filter(object -> object instanceof String)
+                .map(object -> (String) object)
+                .collect(Collectors.joining());
         return new TestOD(finalOutput);
     }
 }

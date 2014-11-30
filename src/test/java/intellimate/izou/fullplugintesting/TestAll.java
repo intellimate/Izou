@@ -1,12 +1,9 @@
 package intellimate.izou.fullplugintesting;
 
-import intellimate.izou.activator.ActivatorManager;
-import intellimate.izou.contentgenerator.ContentGeneratorManager;
-import intellimate.izou.events.LocalEventManager;
-import intellimate.izou.output.OutputManager;
+import intellimate.izou.main.Main;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by julianbrendl on 10/7/14.
@@ -17,24 +14,19 @@ public class TestAll {
 
     @Test
     public void testPlugin() throws Exception {
-        OutputManager outputManager = new OutputManager();
-        LocalEventManager localEventManager = new LocalEventManager(outputManager);
-        ActivatorManager activatorManager = new ActivatorManager(localEventManager);
+        Main main = new Main(null, true);
 
-        ContentGeneratorManager contentGeneratorManager = new ContentGeneratorManager(localEventManager);
-        Thread thread = new Thread(localEventManager);
-        thread.start();
         TestAct testAct = new TestAct();
-        activatorManager.addActivator(testAct);
+        main.getActivatorManager().addActivator(testAct);
 
         TestCG testCG = new TestCG("test_ID");
-        contentGeneratorManager.addContentGenerator(testCG);
+        main.getResourceManager().registerResourceBuilder(testCG);
 
         TestOP testOP = new TestOP("1");
         TestOE testOE = new TestOE("1");
         testOE.addResourceIdToWishList("test_ID");
-        outputManager.addOutputPlugin(testOP);
-        outputManager.addOutputExtension(testOE,"1");
+        main.getOutputManager().addOutputPlugin(testOP);
+        main.getOutputManager().addOutputExtension(testOE,"1");
 
         Thread.sleep(10);
         testAct.setStart(true);

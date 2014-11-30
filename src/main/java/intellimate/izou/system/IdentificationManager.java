@@ -25,7 +25,7 @@ public class IdentificationManager {
      */
     public Optional<Identification> getIdentification(Identifiable identifiable) {
         if(identifiables.stream()
-                .anyMatch(listIdentifiable -> listIdentifiable == identifiable)) {
+                .anyMatch(listIdentifiable -> listIdentifiable.getID().equals(identifiable.getID()))) {
             return Optional.of(Identification.createIdentification(identifiable, true));
         }
         return Optional.empty();
@@ -51,13 +51,13 @@ public class IdentificationManager {
 
     /**
      * Registers an Identifiable, ID has to be unique.
-     * @return true if registered/already registered of false if the ID is already existing
+     * @return true if registered/already registered or false if the ID is already existing
      */
     public boolean registerIdentification(Identifiable identifiable) {
         if(identifiable == null) return false;
         if(identifiables.contains(identifiable)  || identifiables.stream()
                 .anyMatch(identifiableS -> identifiableS.getID().equals(identifiable.getID())))
-            return true;
+            return false;
         identifiables.add(identifiable);
         return true;
     }

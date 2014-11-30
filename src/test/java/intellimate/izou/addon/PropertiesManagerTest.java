@@ -1,7 +1,7 @@
 package intellimate.izou.addon;
 
 import intellimate.izou.activator.Activator;
-import intellimate.izou.contentgenerator.ContentGeneratorOld;
+import intellimate.izou.contentgenerator.ContentGenerator;
 import intellimate.izou.events.EventsController;
 import intellimate.izou.main.Main;
 import intellimate.izou.output.OutputExtension;
@@ -16,8 +16,8 @@ public class PropertiesManagerTest extends TestCase {
         LinkedList<AddOn> addOns = new LinkedList<>();
         TestAddOn testAddOn = new TestAddOn("TestID");
         addOns.add(testAddOn);
-        Main main = new Main(addOns);
-        for(;;){}
+        Main main = new Main(addOns, true);
+        //for(;;){}
         //TODO: @Julian the for loop never ends
     }
 
@@ -48,8 +48,8 @@ public class PropertiesManagerTest extends TestCase {
         }
 
         @Override
-        public ContentGeneratorOld[] registerContentGenerator() {
-            return new ContentGeneratorOld[0];
+        public ContentGenerator[] registerContentGenerator() {
+            return new ContentGenerator[0];
         }
 
         @Override
@@ -65,6 +65,19 @@ public class PropertiesManagerTest extends TestCase {
         @Override
         public OutputExtension[] registerOutputExtension() {
             return new OutputExtension[0];
+        }
+
+        /**
+         * An ID must always be unique.
+         * A Class like Activator or OutputPlugin can just provide their .class.getCanonicalName()
+         * If you have to implement this interface multiple times, just concatenate unique Strings to
+         * .class.getCanonicalName()
+         *
+         * @return A String containing an ID
+         */
+        @Override
+        public String getID() {
+            return "POJAO";
         }
     }
 }

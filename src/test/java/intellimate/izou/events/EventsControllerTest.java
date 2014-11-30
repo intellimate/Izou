@@ -1,20 +1,36 @@
 package intellimate.izou.events;
 
+import intellimate.izou.system.Identification;
+import intellimate.izou.system.IdentificationManager;
+import intellimate.izou.testHelper.IzouTest;
 import org.junit.Test;
 
-public class EventsControllerTest {
-    static EventManagerTestSetup eventManagerTestSetup = new EventManagerTestSetup();
+public class EventsControllerTest extends IzouTest{
+
+    public EventsControllerTest() {
+        super(true, EventsControllerTest.class.getCanonicalName());
+    }
 
     @Test
     public void testControlEventDispatcher () {
         boolean[] isWorking = {false, true};
-        EventsController eventsController = eventID -> {
-            isWorking[1] = false;
-            return false;
+        EventsController eventsController = new EventsController() {
+            @Override
+            public boolean controlEventDispatcher(Event event) {
+                isWorking[1] = false;
+                return false;
+            }
+            @Override
+            public String getID() {
+                return EventsControllerTest.class.getCanonicalName()+1;
+            }
         };
-        eventManagerTestSetup.getManager().addEventsController(eventsController);
+        main.getEventDistributor().registerEventsController(eventsController);
         try {
-            eventManagerTestSetup.testListenerFalse(isWorking, "1");
+            IdentificationManager.getInstance().registerIdentification(eventsController);
+            Identification id = IdentificationManager.getInstance().getIdentification(eventsController).get();
+            Event event = Event.createEvent(super.id+1, id).get();
+            testListenerFalse(isWorking, event);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

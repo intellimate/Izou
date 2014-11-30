@@ -62,6 +62,15 @@ public class Event implements Identifiable{
     }
 
     /**
+     * The type of the Event.
+     * It describes the Type of the Event.
+     * @return A String containing an ID
+     */
+    public String getType() {
+        return type;
+    }
+
+    /**
      * returns the Source of the Event, e.g. the object who fired it.
      * @return an identifiable
      */
@@ -95,11 +104,20 @@ public class Event implements Identifiable{
 
     /**
      * returns a List containing all the Descriptors.
-     * The event-type is also included in the Descriptors.
      * @return a List containing the Descriptors
      */
     public List<String> getDescriptors() {
         return descriptors;
+    }
+
+    /**
+     * returns a List containing all the Descriptors and the type.
+     * @return a List containing the Descriptors
+     */
+    public List<String> getAllIformations() {
+        List<String> information = new LinkedList<>(descriptors);
+        information.add(type);
+        return information;
     }
 
     /**

@@ -2,33 +2,28 @@ package intellimate.izou.activator;
 
 import intellimate.izou.events.Event;
 import intellimate.izou.events.LocalEventManager;
-import intellimate.izou.events.EventManagerTestSetup;
-import intellimate.izou.system.Identification;
-import intellimate.izou.system.IdentificationManager;
+import intellimate.izou.testHelper.IzouTest;
 import org.junit.Test;
 
+import java.util.LinkedList;
 import java.util.Optional;
 import java.util.concurrent.Future;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-public class ActivatorManagerTest {
-    EventManagerTestSetup eventMangrSetup;
-    static ActivatorManager activatorManager;
+public class ActivatorManagerTest extends IzouTest{
     private static final class Lock { }
     private final Object lock = new Lock();
 
     public ActivatorManagerTest() {
-        eventMangrSetup = new EventManagerTestSetup();
-        Thread thread = new Thread(eventMangrSetup.getManager());
-        thread.start();
-        activatorManager = new ActivatorManager(eventMangrSetup.getManager());
+        super(false, ActivatorManagerTest.class.getCanonicalName());
     }
 
     @Test
     public void testAddActivator() throws Exception {
         final boolean[] isWorking = {false};
-        Optional<Event> event = Optional.empty();
+        Optional<Event> event = getEvent(id + 1);
         Activator activator = new Activator() {
             /**
              * An ID must always be unique.
@@ -46,8 +41,6 @@ public class ActivatorManagerTest {
             @Override
             public void activatorStarts() throws InterruptedException {
                 try {
-                    Identification identification= IdentificationManager.getInstance().getIdentification(this).get();
-                    Optional<Event> event = Event.createEvent("1", identification);
                     fireEvent(event.get());
                 } catch (LocalEventManager.MultipleEventsException e) {
                     e.printStackTrace();
@@ -55,16 +48,26 @@ public class ActivatorManagerTest {
             }
 
             @Override
-            public boolean terminated(Exception e) {return false;}
+            public boolean terminated(Exception e) {
+                fail();
+                return false;
+            }
         };
+        LinkedList<String> listenerList = new LinkedList<String>();
+        listenerList.add(event.get().getType());
+        main.getEventDistributor().registerEventListener(listenerList, event1 -> {
+            isWorking[0] = true;
+        });
 
-        eventMangrSetup.getManager().registerEventListener(event.get(), id -> isWorking[0] = true);
+        Future<?> future = main.getActivatorManager().addActivator(activator);
 
-        Future<?> future = activatorManager.addActivator(activator);
 
         synchronized (lock) {
             while (!future.isDone())
             {
+                lock.wait(10);
+            }
+            for (int i = 0; i <= 10; i++) {
                 lock.wait(10);
             }
         }

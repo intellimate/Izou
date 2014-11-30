@@ -1,18 +1,26 @@
 package intellimate.izou.output;
 
-import intellimate.izou.contentgenerator.ContentData;
+import intellimate.izou.events.Event;
+import intellimate.izou.resource.Resource;
+import intellimate.izou.testHelper.IzouTest;
 import org.junit.Test;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-public class OutputManagerTest {
+public class OutputManagerTest extends IzouTest{
+
+    public OutputManagerTest() {
+        super(true, OutputManagerTest.class.getCanonicalName());
+    }
 
     @Test
     public void testAddOutputExtension() throws Exception {
-        OutputManager outputManager = new OutputManager();
+        OutputManager outputManager = main.getOutputManager();
         OutputPlugin outputPlugin = new OutputPlugin("1234") {
             @Override
             public void renderFinalOutput() {
@@ -20,8 +28,14 @@ public class OutputManagerTest {
             }
         };
         OutputExtension outputExtension = new OutputExtension("abcd") {
+            /**
+             * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
+             * to the outputPlugin
+             *
+             * @param event
+             */
             @Override
-            public Object call() throws Exception {
+            public Object generate(Event event) {
                 return null;
             }
         };
@@ -32,7 +46,7 @@ public class OutputManagerTest {
 
     @Test
     public void testRemoveOutputExtension() throws Exception {
-        OutputManager outputManager = new OutputManager();
+        OutputManager outputManager = main.getOutputManager();
         OutputPlugin outputPlugin = new OutputPlugin("1234") {
             @Override
             public void renderFinalOutput() {
@@ -40,8 +54,14 @@ public class OutputManagerTest {
             }
         };
         OutputExtension outputExtension = new OutputExtension("abcd") {
+            /**
+             * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
+             * to the outputPlugin
+             *
+             * @param event
+             */
             @Override
-            public Object call() throws Exception {
+            public Object generate(Event event) {
                 return null;
             }
         };
@@ -53,8 +73,10 @@ public class OutputManagerTest {
 
     @Test
     public void testPassDataToOutputPlugin() throws Exception {
-        List<ContentData> list = new ArrayList<>();
-        OutputManager outputManager = new OutputManager();
+        Optional<Event> event = getEvent(id + 1);
+        if(!event.isPresent()) fail();
+
+        OutputManager outputManager = main.getOutputManager();
         OutputPlugin outputPlugin = new OutputPlugin("1234") {
             @Override
             public void renderFinalOutput() {
@@ -62,23 +84,29 @@ public class OutputManagerTest {
             }
         };
         OutputExtension outputExtension = new OutputExtension("abcd") {
+            /**
+             * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
+             * to the outputPlugin
+             *
+             * @param event
+             */
             @Override
-            public Object call() throws Exception {
+            public Object generate(Event event) {
                 return null;
             }
         };
+        outputExtension.addResourceIdToWishList("1");
+        outputExtension.addResourceIdToWishList("2");
 
-        ContentData cD1 = new ContentData("1");
-        ContentData cD2 = new ContentData("2");
-        ContentData cD3 = new ContentData("3");
-        list.add(cD1);
-        list.add(cD2);
-        list.add(cD3);
+        List<Resource> resources = Arrays.asList(new Resource<String>("1"),
+                                                new Resource<String>("2"),
+                                                new Resource<String>("3"));
+        event.get().getListResourceContainer().addResource(resources);
 
         outputManager.addOutputPlugin(outputPlugin);
         outputManager.addOutputExtension(outputExtension, outputPlugin.getID());
         outputExtension.addResourceIdToWishList("2");
-        outputManager.passDataToOutputPlugins(list);
+        outputManager.passDataToOutputPlugins(event.get());
         assertTrue(outputManager.getOutputPluginsList().get(0).getOutputExtensionList().size() == 1);
     }
 
@@ -92,8 +120,14 @@ public class OutputManagerTest {
             }
         };
         OutputExtension outputExtension = new OutputExtension("abcd") {
+            /**
+             * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
+             * to the outputPlugin
+             *
+             * @param event
+             */
             @Override
-            public Object call() throws Exception {
+            public Object generate(Event event) {
                 return null;
             }
         };

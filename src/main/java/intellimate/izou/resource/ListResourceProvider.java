@@ -2,7 +2,6 @@ package intellimate.izou.resource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,7 +24,7 @@ public class ListResourceProvider implements ResourceProvider {
      * @param resources a List of resources to add
      */
     public void addResource(List<Resource> resources) {
-        resources.addAll(resources);
+        this.resources.addAll(resources);
     }
 
     /**
@@ -89,11 +88,10 @@ public class ListResourceProvider implements ResourceProvider {
      * @return a list of resources found
      */
     @Override
-    public Resource provideResource(String resourceID) {
+    public List<Resource> provideResource(String resourceID) {
         return resources.stream()
                 .filter(resource -> resource.getResourceID().equals(resourceID))
-                .findFirst()
-                .get();
+                .collect(Collectors.toList());
     }
 
     /**

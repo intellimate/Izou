@@ -29,28 +29,47 @@ public class Context {
     private class Events {
         public Distributor distributor = new Distributor();
         /**
-         * Adds an listener for local Events.
+         * Adds an listener for events.
          * <p>
-         * It will register for all Descriptors individually!
-         * It will also ignore if this listener is already listening to an Event. Method is thread-safe.
+         * Be careful with this method, it will register the listener for ALL the informations found in the Event. If your
+         * event-type is a common event type, it will fire EACH time!.
+         * It will also register for all Descriptors individually!
+         * It will also ignore if this listener is already listening to an Event.
+         * Method is thread-safe.
+         * </p>
          * @param event the Event to listen to (it will listen to all descriptors individually!)
-         * @param localEventListener the ActivatorEventListener-interface for receiving activator events
+         * @param eventListener the ActivatorEventListener-interface for receiving activator events
          */
-        public void registerEventListener(Event event, LocalEventListener localEventListener) {
-            main.getLocalEventManager().registerEventListener(event, localEventListener);
+        public void registerEventListener(Event event, EventListener eventListener) {
+            main.getEventDistributor().registerEventListener(event, eventListener);
         }
 
         /**
-         * unregister an EventListener.
+         * Adds an listener for events.
          * <p>
-         *  It will unregister for all Descriptors individually!
-         *  It will also ignore if this listener is not listening to an Event.
-         *  Method is thread-safe.
-         * @param event the Event to stop listen to
-         * @param localEventListener the ActivatorEventListener used to listen for events
+         * It will register for all ids individually!
+         * This method will ignore if this listener is already listening to an Event.
+         * Method is thread-safe.
+         * </p>
+         * @param ids this can be type, or descriptors etc.
+         * @param eventListener the ActivatorEventListener-interface for receiving activator events
          */
-        public void unregisterEventListener(Event event, LocalEventListener localEventListener) {
-            main.getLocalEventManager().unregisterEventListener(event, localEventListener);
+        public void registerEventListener(List<String> ids, EventListener eventListener) {
+            main.getEventDistributor().registerEventListener(ids, eventListener);
+        }
+        /**
+         * unregister an EventListener
+         *<p>
+         * It will unregister for all Descriptors individually!
+         * It will also ignore if this listener is not listening to an Event.
+         * Method is thread-safe.
+         *
+         * @param event the Event to stop listen to
+         * @param eventListener the ActivatorEventListener used to listen for events
+         * @throws IllegalArgumentException if Listener is already listening to the Event or the id is not allowed
+         */
+        public void unregisterEventListener(Event event, EventListener eventListener) {
+            main.getEventDistributor().unregisterEventListener(event, eventListener);
         }
 
         /**

@@ -1,63 +1,66 @@
 package intellimate.izou.events;
 
-import intellimate.izou.output.OutputManager;
+import intellimate.izou.system.Identification;
+import intellimate.izou.system.IdentificationManager;
+import intellimate.izou.testHelper.IzouTest;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-public class LocalEventManagerTest {
-    static LocalEventManager manager;
-    Thread thread;
+public class LocalEventManagerTest extends IzouTest{
     private static final class Lock { }
     private final Object lock = new Lock();
-    private OutputManager outputManager;
 
     public LocalEventManagerTest() {
-        outputManager = new OutputManager();
-        manager = new LocalEventManager(outputManager);
-        thread = new Thread(manager);
-        thread.start();
+        super(false, LocalEventManagerTest.class.getCanonicalName());
+        IdentificationManager.getInstance().registerIdentification(this);
     }
 
     @Test
     public void testRegisterActivatorEvent() throws Exception {
-        LocalEventManager.EventCaller caller = manager.registerCaller("1");
+        Event event = getNextEvent().get();
+        Identification id = getNextIdentification().get();
+        LocalEventManager.EventCaller caller = main.getLocalEventManager().registerCaller(id).get();
         final boolean[] isWorking = {false};
-        manager.registerEventListener("1", id -> {
-            isWorking[0] = true;
-            return null;
-        });
-        manager.registerEventListener("1", id -> {
-            isWorking[0] = true;
-            return null;
-        });
-        caller.fire();
+        main.getEventDistributor().registerEventListener(event, s -> isWorking[0] = true);
+        main.getEventDistributor().registerEventListener(event, s -> isWorking[0] = true);
+        System.out.println(System.currentTimeMillis());
+        caller.fire(event);
 
         synchronized (lock) {
-            while(!manager.getEvents().isEmpty() || !(thread.getState() == Thread.State.WAITING))
+            lock.wait(30);
+            while(!main.getLocalEventManager().getEvents().isEmpty())
             {
-                lock.wait(2);
+                lock.wait(10);
+            }
+            while(!main.getEventDistributor().getEvents().isEmpty())
+            {
+                lock.wait(10);
             }
         }
         assertTrue(isWorking[0]);
     }
 
     @Test
-    public void testUnregisterActivatorEvent() throws Exception {
-        LocalEventManager.EventCaller caller = manager.registerCaller("2");
+    public void testUnregisterEvent() throws Exception {
+        Event event = getNextEvent().get();
+        Identification id = getNextIdentification().get();
+        LocalEventManager.EventCaller caller = main.getLocalEventManager().registerCaller(id).get();
         final boolean[] isWorking = {false};
-        manager.unregisterCaller("2", caller);
-        manager.registerEventListener("2", id -> {
-            isWorking[0] = true;
-            return null;
-        });
-        caller.fire();
-
+        main.getLocalEventManager().unregisterCaller(id);
+        main.getEventDistributor().registerEventListener(event, s -> isWorking[0] = true);
+        caller.fire(event);
 
         synchronized (lock) {
-            while(!manager.getEvents().isEmpty() || !(thread.getState() == Thread.State.WAITING))
+            lock.wait(30);
+            while(!main.getLocalEventManager().getEvents().isEmpty())
             {
                 lock.wait(2);
+            }
+            while(!main.getEventDistributor().getEvents().isEmpty())
+            {
+                lock.wait(10);
             }
         }
         assertFalse(isWorking[0]);
@@ -65,18 +68,22 @@ public class LocalEventManagerTest {
 
     @Test
     public void testAddActivatorEventListener() throws Exception {
-        LocalEventManager.EventCaller caller = manager.registerCaller("3");
+        Event event = getNextEvent().get();
+        Identification id = getNextIdentification().get();
+        LocalEventManager.EventCaller caller = main.getLocalEventManager().registerCaller(id).get();
         final boolean[] isWorking = {false};
-        manager.registerEventListener("3", id -> {
-            isWorking[0] = true;
-            return null;
-        });
-        caller.fire();
+        main.getEventDistributor().registerEventListener(event, s -> isWorking[0] = true);
+        caller.fire(event);
 
         synchronized (lock) {
-            while(!manager.getEvents().isEmpty() || !(thread.getState() == Thread.State.WAITING))
+            lock.wait(30);
+            while(!main.getLocalEventManager().getEvents().isEmpty())
             {
                 lock.wait(2);
+            }
+            while(!main.getEventDistributor().getEvents().isEmpty())
+            {
+                lock.wait(10);
             }
         }
         assertTrue(isWorking[0]);
@@ -84,21 +91,24 @@ public class LocalEventManagerTest {
 
     @Test
     public void testDeleteActivatorEventListener() throws Exception {
-        LocalEventManager.EventCaller caller = manager.registerCaller("4");
+        Event event = getNextEvent().get();
+        Identification id = getNextIdentification().get();
+        LocalEventManager.EventCaller caller = main.getLocalEventManager().registerCaller(id).get();
         final boolean[] isWorking = {false};
-        LocalEventListener listener1;
-        manager.registerEventListener("4", listener1 = id -> {
-            isWorking[0] = true;
-            return null;
-        });
-        manager.unregisterEventListener("4", listener1);
-        caller.fire();
-
+        EventListener listener = s -> isWorking[0] = true;
+        main.getEventDistributor().registerEventListener(event, listener);
+        main.getEventDistributor().unregisterEventListener(event, listener);
+        caller.fire(event);
 
         synchronized (lock) {
-            while(!manager.getEvents().isEmpty() || !(thread.getState() == Thread.State.WAITING))
+            lock.wait(30);
+            while(!main.getLocalEventManager().getEvents().isEmpty())
             {
                 lock.wait(2);
+            }
+            while(!main.getEventDistributor().getEvents().isEmpty())
+            {
+                lock.wait(10);
             }
         }
         assertFalse(isWorking[0]);
@@ -106,56 +116,89 @@ public class LocalEventManagerTest {
 
     @Test
     public void testAddEventController() throws Exception {
+        Event event = getNextEvent().get();
+        Identification id = getNextIdentification().get();
         boolean[] isWorking = {false, true};
-        LocalEventManager.EventCaller caller = manager.registerCaller("5");
-        manager.registerEventListener("5", id -> {
-            isWorking[0] = true;
-            return null;
-        });
-        EventsController eventsController = eventID -> {
-            isWorking[1] = false;
-            return false;
+        LocalEventManager.EventCaller caller = main.getLocalEventManager().registerCaller(id).get();
+        main.getEventDistributor().registerEventListener(event, s -> isWorking[0] = true);
+        EventsController eventsController = new EventsController() {
+            @Override
+            public boolean controlEventDispatcher(Event event) {
+                isWorking[1] = false;
+                return false;
+            }
+
+            @Override
+            public String getID() {
+                return "eventsController";
+            }
         };
-        manager.addEventsController(eventsController);
-        caller.fire();
+        main.getEventDistributor().registerEventsController(eventsController);
+        caller.fire(event);
 
         synchronized (lock) {
-            while(!manager.getEvents().isEmpty() || !(thread.getState() == Thread.State.WAITING))
+            lock.wait(30);
+            while(!main.getLocalEventManager().getEvents().isEmpty())
             {
                 lock.wait(2);
             }
+            while(!main.getEventDistributor().getEvents().isEmpty())
+            {
+                lock.wait(10);
+            }
         }
-        manager.removeEventsController(eventsController);
+
+        main.getEventDistributor().unregisterEventsController(eventsController);
         assertFalse(isWorking[0] && isWorking[1]);
     }
 
     @Test
     public void testRemoveEventController() throws Exception {
+        Event event = getNextEvent().get();
+        Identification id = getNextIdentification().get();
         boolean[] isWorking = {false, true};
-        LocalEventManager.EventCaller caller = manager.registerCaller("5");
-        manager.registerEventListener("5", id -> {
-            isWorking[0] = true;
-            return null;
-        });
-        EventsController eventsController = eventID -> {
-            isWorking[1] = false;
-            return false;
+        LocalEventManager.EventCaller caller = main.getLocalEventManager().registerCaller(id).get();
+        main.getEventDistributor().registerEventListener(event, s -> isWorking[0] = true);
+        EventsController eventsController = new EventsController() {
+            @Override
+            public boolean controlEventDispatcher(Event event) {
+                isWorking[1] = false;
+                return false;
+            }
+
+            @Override
+            public String getID() {
+                return "eventsController2";
+            }
         };
-        manager.addEventsController(eventsController);
-        manager.removeEventsController(eventsController);
-        caller.fire();
+        main.getEventDistributor().registerEventsController(eventsController);
+        main.getEventDistributor().unregisterEventsController(eventsController);
+        caller.fire(event);
 
         synchronized (lock) {
-            while(!manager.getEvents().isEmpty() || !(thread.getState() == Thread.State.WAITING))
+            lock.wait(30);
+            while(!main.getLocalEventManager().getEvents().isEmpty())
             {
                 lock.wait(2);
             }
+            while(!main.getEventDistributor().getEvents().isEmpty())
+            {
+                lock.wait(10);
+            }
         }
-        assertTrue(isWorking[0] && isWorking[1]);
+        assertFalse(!isWorking[0] && isWorking[1]);
     }
 
-    @Test
-    public void testCommonEvents() throws Exception {
-        assertEquals(LocalEventManager.FULL_WELCOME_EVENT, "intellimate.izou.events.EventManager.FullWelcomeEvent");
+    /**
+     * An ID must always be unique.
+     * A Class like Activator or OutputPlugin can just provide their .class.getCanonicalName()
+     * If you have to implement this interface multiple times, just concatenate unique Strings to
+     * .class.getCanonicalName()
+     *
+     * @return A String containing an ID
+     */
+    @Override
+    public String getID() {
+        return LocalEventManagerTest.class.getCanonicalName();
     }
 }

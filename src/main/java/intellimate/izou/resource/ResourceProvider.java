@@ -46,5 +46,5 @@ public interface ResourceProvider {
      * @param resourceID the ID of the resource
      * @return a list of resources found
      */
-    abstract Resource provideResource(String resourceID);
+    abstract List<Resource> provideResource(String resourceID);
 }

@@ -29,17 +29,6 @@ public abstract class Activator implements Runnable, Identifiable{
     public Activator() {
         if(!identificationManager.registerIdentification(this)) {
             //TODO: log fatal
-            return;
-        }
-        Optional<Identification> identification = identificationManager.getIdentification(this);
-        if(!identification.isPresent()) {
-            //TODO:log fatal
-            return;
-        }
-        Optional<LocalEventManager.EventCaller> result = localEventManager.registerCaller(identification.get());
-        //noinspection StatementWithEmptyBody
-        if(!result.isPresent()) {
-            //TODO: log fatal
         }
     }
 
@@ -136,7 +125,18 @@ public abstract class Activator implements Runnable, Identifiable{
 
     private void setLocalEventManager(LocalEventManager localEventManager) {
         this.localEventManager = localEventManager;
-
+        Optional<Identification> identification = identificationManager.getIdentification(this);
+        if(!identification.isPresent()) {
+            //TODO:log fatal
+            return;
+        }
+        Optional<LocalEventManager.EventCaller> result = localEventManager.registerCaller(identification.get());
+        //noinspection StatementWithEmptyBody
+        if(!result.isPresent()) {
+            //TODO: log fatal
+            return;
+        }
+        caller = result.get();
     }
 
     private void setActivatorManager(ActivatorManager activatorManager) {

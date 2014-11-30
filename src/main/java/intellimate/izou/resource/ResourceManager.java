@@ -31,11 +31,15 @@ public class ResourceManager {
      * @return a List containing all the generated resources
      */
     public List<Resource> generateResources(Event event) {
-        List<Future<List<Resource>>> futures = eventSubscribers.get(event.getID())
-                .stream()
+        if(!event.getAllIformations().stream()
+                .anyMatch(eventSubscribers::containsKey)) return new LinkedList<>();
+        List<Future<List<Resource>>> futures = event.getAllIformations().stream()
+                .map(eventSubscribers::get)
+                .flatMap(Collection::stream)
+                .distinct()
                 .map(resource -> new ResourceBuilderCallableWrapper(resource, resource.announceResources(), Optional.of(event)))
-                        .map(executor::submit)
-                        .collect(Collectors.toList());
+                .map(executor::submit)
+                .collect(Collectors.toList());
 
         futures = timeOut(futures);
 
@@ -174,7 +178,7 @@ public class ResourceManager {
     private void registerResourceIDsForResourceBuilder(ResourceBuilder resourceBuilder) {
         List<Resource> resources = resourceBuilder.announceResources();
         for(Resource resource : resources) {
-            if(!resourceIDs.containsKey(resource.getResourceID())) {
+            if(resourceIDs.containsKey(resource.getResourceID())) {
                 resourceIDs.get(resource.getResourceID()).add(resourceBuilder);
             } else {
                 LinkedList<ResourceBuilder> tempList = new LinkedList<>();
@@ -191,7 +195,7 @@ public class ResourceManager {
     private void registerEventsForResourceBuilder(ResourceBuilder resourceBuilder) {
         List<String> events = resourceBuilder.announceEvents();
         for(String event : events) {
-            if(!eventSubscribers.containsKey(event)) {
+            if(eventSubscribers.containsKey(event)) {
                 eventSubscribers.get(event).add(resourceBuilder);
             } else {
                 LinkedList<ResourceBuilder> tempList = new LinkedList<>();

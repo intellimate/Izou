@@ -25,7 +25,7 @@ public class Main {
     private final ActivatorManager activatorManager;
     private final AddOnManager addOnManager;
 
-    private Main() {
+    private Main(boolean debug) {
         outputManager = new OutputManager();
         resourceManager = new ResourceManager();
         eventDistributor = new EventDistributor(resourceManager, outputManager);
@@ -34,7 +34,7 @@ public class Main {
         threadEventManager.start();
         activatorManager = new ActivatorManager(localEventManager);
         addOnManager = new AddOnManager(outputManager,resourceManager,activatorManager, this);
-        addOnManager.retrieveAndRegisterAddOns();
+        if(!debug) addOnManager.retrieveAndRegisterAddOns();
     }
 
     /**
@@ -43,12 +43,22 @@ public class Main {
      * @param addOns a List of AddOns to run
      */
     public Main(List<AddOn> addOns) {
-        this();
-        addOnManager.addAndRegisterAddOns(addOns);
+        this(false);
+        if(addOns != null) addOnManager.addAndRegisterAddOns(addOns);
+    }
+
+    /**
+     * If you want to debug your Plugin, you can get an Main instance with this Method
+     *
+     * @param addOns a List of AddOns to run
+     */
+    public Main(List<AddOn> addOns, boolean debug) {
+        this(debug);
+        if(addOns != null) addOnManager.addAndRegisterAddOns(addOns);
     }
 
     public static void main(String[] args) {
-        @SuppressWarnings("UnusedAssignment") Main main = new Main();
+        @SuppressWarnings("UnusedAssignment") Main main = new Main(false);
     }
 
     public OutputManager getOutputManager() {
