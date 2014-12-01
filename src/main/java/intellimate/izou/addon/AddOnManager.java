@@ -12,6 +12,7 @@ import intellimate.izou.resource.ResourceManager;
 import intellimate.izou.system.Context;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.spi.ExtendedLogger;
 import ro.fortsoft.pf4j.DefaultPluginManager;
 import ro.fortsoft.pf4j.PluginManager;
 
@@ -57,8 +58,9 @@ public class AddOnManager {
                         fileLogger.error(e.getMessage());
                     }
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+            }
+        } catch(Exception e) {
+                fileLogger.error(e.getMessage());
             }
         }
     }
