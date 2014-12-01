@@ -4,8 +4,6 @@ import intellimate.izou.events.Event;
 import intellimate.izou.events.LocalEventManager;
 import intellimate.izou.testHelper.IzouTest;
 import intellimate.izou.addon.AddOn;
-import intellimate.izou.events.EventManager;
-import intellimate.izou.events.EventManagerTestSetup;
 import intellimate.izou.fullplugintesting.TestAddOn;
 import intellimate.izou.main.Main;
 import intellimate.izou.system.Context;
@@ -38,7 +36,7 @@ public class ActivatorManagerTest extends IzouTest{
 
         final boolean[] isWorking = {false};
         Optional<Event> event = getEvent(id + 1);
-        Activator activator = new Activator() {
+        Activator activator = new Activator(getContext()) {
             /**
              * An ID must always be unique.
              * A Class like Activator or OutputPlugin can just provide their .class.getCanonicalName()

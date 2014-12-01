@@ -1,7 +1,6 @@
 package intellimate.izou.activator;
 
 import intellimate.izou.addon.AddOn;
-import intellimate.izou.events.EventManagerTestSetup;
 import intellimate.izou.fullplugintesting.TestAddOn;
 import intellimate.izou.main.Main;
 import intellimate.izou.system.Context;
@@ -22,8 +21,9 @@ public class ActivatorTest extends IzouTest{
     Identification id;
 
     public ActivatorTest() {
-        Context context = new Context(testAddOn, main, "1", "debug");
-        activator = new Activator() {
+        super(false, ActivatorTest.class.getCanonicalName());
+        Context context = getContext();
+        activator = new Activator(getContext()) {
             @Override
             public String getID() {
                 return "unbelievable activator id";
