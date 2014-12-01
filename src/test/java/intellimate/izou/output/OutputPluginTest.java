@@ -1,94 +1,104 @@
 package intellimate.izou.output;
 
-import intellimate.izou.addon.AddOn;
-import intellimate.izou.contentgenerator.ContentData;
-import intellimate.izou.fullplugintesting.TestAddOn;
-import intellimate.izou.main.Main;
-import intellimate.izou.system.Context;
+import intellimate.izou.events.Event;
+import intellimate.izou.resource.Resource;
+import intellimate.izou.testHelper.IzouTest;
 import org.junit.Test;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-public class OutputPluginTest {
+public class OutputPluginTest extends IzouTest{
 
-    private static final class Lock { }
-    private final Object lock = new Lock();
+    public OutputPluginTest() {
+        super(true, OutputManagerTest.class.getCanonicalName());
+    }
 
     @Test
     public void testDistributeContentData() throws Exception {
-        TestAddOn testAddOn = new TestAddOn("test-AddOn");
-        List<AddOn> addOnList = new ArrayList<>();
-        addOnList.add(testAddOn);
-        Main main = new Main(addOnList);
-        Context context = new Context(testAddOn, main, "1", "debug");
+        Optional<Event> event = getNextEvent();
+        if(!event.isPresent()) fail();
+        List<Resource> resources = Arrays.asList(new Resource<String>("1"),
+                new Resource<String>("2"),
+                new Resource<String>("3"));
+        event.get().getListResourceContainer().addResource(resources);
 
-        ContentData cd1 = new ContentData("1");
-        ContentData cd2 = new ContentData("2");
-        ContentData cd3 = new ContentData("3");
-
-        List<ContentData> cdList = new ArrayList<>();
-        cdList.add(cd1);
-        cdList.add(cd2);
-        cdList.add(cd3);
-
-        OutputPlugin outputPlugin = new OutputPlugin("abcd", context) {
+        OutputPlugin outputPlugin = new OutputPlugin("abcd", getContext()) {
             @Override
             public void renderFinalOutput() {
 
             }
         };
-        OutputExtension ext1 = new OutputExtension("789", context) {
+        OutputExtension ext1 = new OutputExtension("789", getContext()) {
+            /**
+             * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
+             * to the outputPlugin
+             *
+             * @param event
+             */
             @Override
-            public Object call() throws Exception {
+            public Object generate(Event event) {
+                System.out.println("test");
                 return null;
             }
         };
-        OutputExtension ext2 = new OutputExtension("10", context) {
+        OutputExtension ext2 = new OutputExtension("10", getContext()) {
+            /**
+             * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
+             * to the outputPlugin
+             *
+             * @param event
+             */
             @Override
-            public Object call() throws Exception {
+            public Object generate(Event event) {
+                System.out.println("test");
                 return null;
             }
         };
         outputPlugin.addOutputExtension(ext1);
         outputPlugin.addOutputExtension(ext2);
 
-        ext1.addContentDataToWishList(cd1.getId());
-        ext2.addContentDataToWishList(cd2.getId());
-        ext2.addContentDataToWishList(cd3.getId());
+        ext1.addResourceIdToWishList(resources.get(0).getResourceID());
+        ext2.addResourceIdToWishList(resources.get(1).getResourceID());
+        ext2.addResourceIdToWishList(resources.get(2).getResourceID());
 
-        outputPlugin.addContentDataList(cdList);
-        outputPlugin.distributeContentData(cdList);
-
-        assertTrue(ext1.getContentDataList().size() == 1);
-        assertTrue(ext2.getContentDataList().size() == 2);
+        outputPlugin.distributeEvent(event.get());
+        assertTrue((ext2.getEvents().size() == 1) && (ext1.getEvents().size() == 1));
     }
 
     @Test
     public void testAddOutputExtension() throws Exception {
-        TestAddOn testAddOn = new TestAddOn("test-AddOn");
-        List<AddOn> addOnList = new ArrayList<>();
-        addOnList.add(testAddOn);
-        Main main = new Main(addOnList);
-        Context context = new Context(testAddOn, main, "1", "debug");
-
-        OutputPlugin outputPlugin = new OutputPlugin("abcd", context) {
+        OutputPlugin outputPlugin = new OutputPlugin("abcd", getContext()) {
             @Override
             public void renderFinalOutput() {
 
             }
         };
-        OutputExtension ext1 = new OutputExtension("789", context) {
+        OutputExtension ext1 = new OutputExtension("789", getContext()) {
+            /**
+             * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
+             * to the outputPlugin
+             *
+             * @param event
+             */
             @Override
-            public Object call() throws Exception {
+            public Object generate(Event event) {
                 return null;
             }
         };
-        OutputExtension ext2 = new OutputExtension("10", context) {
+        OutputExtension ext2 = new OutputExtension("10", getContext()) {
+            /**
+             * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
+             * to the outputPlugin
+             *
+             * @param event
+             */
             @Override
-            public Object call() throws Exception {
+            public Object generate(Event event) {
                 return null;
             }
         };
@@ -99,80 +109,89 @@ public class OutputPluginTest {
 
     @Test
     public void testRemoveOutputExtension() throws Exception {
-        TestAddOn testAddOn = new TestAddOn("test-AddOn");
-        List<AddOn> addOnList = new ArrayList<>();
-        addOnList.add(testAddOn);
-        Main main = new Main(addOnList);
-        Context context = new Context(testAddOn, main, "1", "debug");
-
-        OutputPlugin outputPlugin = new OutputPlugin("abcd", context) {
+        OutputPlugin outputPlugin = new OutputPlugin("abcd", getContext()) {
             @Override
             public void renderFinalOutput() {
 
             }
         };
-        OutputExtension ext1 = new OutputExtension("789", context) {
+        OutputExtension ext1 = new OutputExtension("789", getContext()) {
+            /**
+             * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
+             * to the outputPlugin
+             *
+             * @param event
+             */
             @Override
-            public Object call() throws Exception {
+            public Object generate(Event event) {
                 return null;
             }
         };
-        OutputExtension ext2 = new OutputExtension("10", context) {
+        OutputExtension ext2 = new OutputExtension("10", getContext()) {
+            /**
+             * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
+             * to the outputPlugin
+             *
+             * @param event
+             */
             @Override
-            public Object call() throws Exception {
+            public Object generate(Event event) {
                 return null;
             }
         };
         outputPlugin.addOutputExtension(ext1);
         outputPlugin.addOutputExtension(ext2);
-        outputPlugin.removeOutputExtension(ext1.getId());
+        outputPlugin.removeOutputExtension(ext1.getID());
         assertTrue(outputPlugin.getOutputExtensionList().size() == 1 && outputPlugin.getOutputExtensionList().get(0).equals(ext2));
     }
 
     @Test
     public void testOutputPluginParameters() {
-        TestAddOn testAddOn = new TestAddOn("test-AddOn");
-        List<AddOn> addOnList = new ArrayList<>();
-        addOnList.add(testAddOn);
-        Main main = new Main(addOnList);
-        Context context = new Context(testAddOn, main, "1", "debug");
+        Optional<Event> event = getEvent(id + 1);
+        if(!event.isPresent()) fail();
+        List<Resource> resources = Arrays.asList(new Resource<String>("1"),
+                new Resource<String>("2"),
+                new Resource<String>("3"));
+        event.get().getListResourceContainer().addResource(resources);
 
-        ContentData cd1 = new ContentData("1");
-        ContentData cd2 = new ContentData("2");
-        ContentData cd3 = new ContentData("3");
-
-        List<ContentData> cdList = new ArrayList<>();
-        cdList.add(cd1);
-        cdList.add(cd2);
-        cdList.add(cd3);
-
-        OutputPlugin outputPlugin = new OutputPlugin("abcd", context) {
+        OutputPlugin outputPlugin = new OutputPlugin("abcd", getContext()) {
             @Override
             public void renderFinalOutput() {
 
             }
         };
-        OutputExtension ext1 = new OutputExtension("789", context) {
+        OutputExtension ext1 = new OutputExtension("789", getContext()) {
+            /**
+             * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
+             * to the outputPlugin
+             *
+             * @param event
+             */
             @Override
-            public Object call() throws Exception {
+            public Object generate(Event event) {
                 return null;
             }
         };
-        OutputExtension ext2 = new OutputExtension("10", context) {
+        OutputExtension ext2 = new OutputExtension("10", getContext()) {
+            /**
+             * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
+             * to the outputPlugin
+             *
+             * @param event
+             */
             @Override
-            public Object call() throws Exception {
+            public Object generate(Event event) {
                 return null;
             }
         };
         outputPlugin.addOutputExtension(ext1);
         outputPlugin.addOutputExtension(ext2);
 
-        ext1.addContentDataToWishList(cd1.getId());
-        ext2.addContentDataToWishList(cd2.getId());
-        ext2.addContentDataToWishList(cd3.getId());
+        ext1.addResourceIdToWishList(resources.get(0).getResourceID());
+        ext2.addResourceIdToWishList(resources.get(1).getResourceID());
+        ext2.addResourceIdToWishList(resources.get(2).getResourceID());
 
-        outputPlugin.addContentDataList(cdList);
-        outputPlugin.distributeContentData(cdList);
+        outputPlugin.distributeEvent(event.get());
 
         boolean t1, t2, t3;
         t1 = ext1.canRun();

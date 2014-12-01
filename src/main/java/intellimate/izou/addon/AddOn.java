@@ -2,10 +2,11 @@ package intellimate.izou.addon;
 
 import intellimate.izou.activator.Activator;
 import intellimate.izou.contentgenerator.ContentGenerator;
-import intellimate.izou.events.EventController;
+import intellimate.izou.events.EventsController;
 import intellimate.izou.output.OutputExtension;
 import intellimate.izou.output.OutputPlugin;
 import intellimate.izou.system.Context;
+import intellimate.izou.system.Identifiable;
 import ro.fortsoft.pf4j.ExtensionPoint;
 
 import java.io.*;
@@ -19,8 +20,9 @@ import java.util.Properties;
  * This class has method for a properties-file named addOnID.properties (AddOnsID in the form: package.class)
  */
 @SuppressWarnings("UnusedDeclaration")
-public abstract class AddOn implements ExtensionPoint {
+public abstract class AddOn implements ExtensionPoint, Identifiable {
     private PropertiesContainer propertiesContainer;
+    @SuppressWarnings("FieldCanBeLocal")
     private final String addOnID;
     private final String propertiesPath;
     private String defaultPropertiesPath;
@@ -57,10 +59,10 @@ public abstract class AddOn implements ExtensionPoint {
             try {
                 properties.load(inputStream);
             } catch (IOException e) {
-                context.getLogger().error(e.getMessage());
+                context.logger.getLogger().error(e.getMessage());
             }
         } catch (FileNotFoundException e) {
-            context.getLogger().error(e.getMessage());
+            context.logger.getLogger().error(e.getMessage());
         }
     }
 
@@ -108,7 +110,7 @@ public abstract class AddOn implements ExtensionPoint {
      * @return true if operation has succeeded, else false
      */
     private boolean writeToPropertiesFile(String defaultPropsPath) {
-        return context.getMain().getFileManager().writeToFile(defaultPropsPath, propertiesPath);
+        return context.fileManager.getFileManager().writeToFile(defaultPropsPath, propertiesPath);
     }
 
     /**
@@ -122,7 +124,7 @@ public abstract class AddOn implements ExtensionPoint {
      * @throws IOException is thrown by bufferedWriter
      */
     private void createDefaultPropertyFile(String defaultPropsPath) throws IOException {
-        context.getMain().getFileManager().createDefaultFile(defaultPropsPath, "# Properties should always be in the " +
+        context.fileManager.getFileManager().createDefaultFile(defaultPropsPath, "# Properties should always be in the " +
                 "form of: \"key = value\"");
     }
 
@@ -165,7 +167,7 @@ public abstract class AddOn implements ExtensionPoint {
      * use this method to register (if needed) your EventControllers.
      * @return Array containing Instances of EventControllers
      */
-    public abstract EventController[] registerEventController();
+    public abstract EventsController[] registerEventController();
 
     /**
      * use this method to register (if needed) your OutputPlugins.
@@ -178,14 +180,6 @@ public abstract class AddOn implements ExtensionPoint {
      * @return Array containing Instances of OutputExtensions
      */
     public abstract OutputExtension[] registerOutputExtension();
-
-    /**
-     * The AddOns-Id is usually the following Form: package.class
-     * @return a String containing the PluginID
-     */
-    public String getAddOnID() {
-        return addOnID;
-    }
 
     /**
      * You should probably use getPropertiesContainer() unless you have a very good reason not to.

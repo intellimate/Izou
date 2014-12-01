@@ -1,131 +1,137 @@
 package intellimate.izou.output;
 
-import intellimate.izou.addon.AddOn;
-import intellimate.izou.contentgenerator.ContentData;
-import intellimate.izou.fullplugintesting.TestAddOn;
-import intellimate.izou.main.Main;
-import intellimate.izou.system.Context;
+import intellimate.izou.events.Event;
+import intellimate.izou.resource.Resource;
+import intellimate.izou.testHelper.IzouTest;
 import org.junit.Test;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-public class OutputManagerTest {
+public class OutputManagerTest extends IzouTest{
+
+    public OutputManagerTest() {
+        super(true, OutputManagerTest.class.getCanonicalName());
+    }
 
     @Test
     public void testAddOutputExtension() throws Exception {
-        TestAddOn testAddOn = new TestAddOn("test-AddOn");
-        List<AddOn> addOnList = new ArrayList<>();
-        addOnList.add(testAddOn);
-        Main main = new Main(addOnList);
-        Context context = new Context(testAddOn, main, "1", "debug");
-
-        OutputManager outputManager = new OutputManager();
-        OutputPlugin outputPlugin = new OutputPlugin("1234", context) {
+        OutputManager outputManager = main.getOutputManager();
+        OutputPlugin outputPlugin = new OutputPlugin("1234", getContext()) {
             @Override
             public void renderFinalOutput() {
 
             }
         };
-        OutputExtension outputExtension = new OutputExtension("abcd", context) {
+        OutputExtension outputExtension = new OutputExtension("abcd", getContext()) {
+            /**
+             * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
+             * to the outputPlugin
+             *
+             * @param event
+             */
             @Override
-            public Object call() throws Exception {
+            public Object generate(Event event) {
                 return null;
             }
         };
         outputManager.addOutputPlugin(outputPlugin);
-        outputManager.addOutputExtension(outputExtension, outputPlugin.getId());
+        outputManager.addOutputExtension(outputExtension, outputPlugin.getID());
         assertTrue(outputManager.getOutputPluginsList().get(0).getOutputExtensionList().contains(outputExtension));
     }
 
     @Test
     public void testRemoveOutputExtension() throws Exception {
-        TestAddOn testAddOn = new TestAddOn("test-AddOn");
-        List<AddOn> addOnList = new ArrayList<>();
-        addOnList.add(testAddOn);
-        Main main = new Main(addOnList);
-        Context context = new Context(testAddOn, main, "1", "debug");
-
-        OutputManager outputManager = new OutputManager();
-        OutputPlugin outputPlugin = new OutputPlugin("1234", context) {
+        OutputManager outputManager = main.getOutputManager();
+        OutputPlugin outputPlugin = new OutputPlugin("1234", getContext()) {
             @Override
             public void renderFinalOutput() {
 
             }
         };
-        OutputExtension outputExtension = new OutputExtension("abcd", context) {
+        OutputExtension outputExtension = new OutputExtension("abcd", getContext()) {
+            /**
+             * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
+             * to the outputPlugin
+             *
+             * @param event
+             */
             @Override
-            public Object call() throws Exception {
+            public Object generate(Event event) {
                 return null;
             }
         };
         outputManager.addOutputPlugin(outputPlugin);
-        outputManager.addOutputExtension(outputExtension, outputPlugin.getId());
-        outputManager.removeOutputExtension(outputPlugin.getId(), outputExtension.getId());
+        outputManager.addOutputExtension(outputExtension, outputPlugin.getID());
+        outputManager.removeOutputExtension(outputPlugin.getID(), outputExtension.getID());
         assertTrue(outputManager.getOutputPluginsList().get(0).getOutputExtensionList().isEmpty());
     }
 
     @Test
     public void testPassDataToOutputPlugin() throws Exception {
-        TestAddOn testAddOn = new TestAddOn("test-AddOn");
-        List<AddOn> addOnList = new ArrayList<>();
-        addOnList.add(testAddOn);
-        Main main = new Main(addOnList);
-        Context context = new Context(testAddOn, main, "1", "debug");
+        Optional<Event> event = getEvent(id + 1);
+        if(!event.isPresent()) fail();
 
-        List<ContentData> list = new ArrayList<>();
-        OutputManager outputManager = new OutputManager();
-        OutputPlugin outputPlugin = new OutputPlugin("1234", context) {
+        OutputManager outputManager = main.getOutputManager();
+        OutputPlugin outputPlugin = new OutputPlugin("1234", getContext()) {
             @Override
             public void renderFinalOutput() {
 
             }
         };
-        OutputExtension outputExtension = new OutputExtension("abcd", context) {
+        OutputExtension outputExtension = new OutputExtension("abcd", getContext()) {
+            /**
+             * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
+             * to the outputPlugin
+             *
+             * @param event
+             */
             @Override
-            public Object call() throws Exception {
+            public Object generate(Event event) {
                 return null;
             }
         };
+        outputExtension.addResourceIdToWishList("1");
+        outputExtension.addResourceIdToWishList("2");
 
-        ContentData cD1 = new ContentData("1");
-        ContentData cD2 = new ContentData("2");
-        ContentData cD3 = new ContentData("3");
-        list.add(cD1);
-        list.add(cD2);
-        list.add(cD3);
+        List<Resource> resources = Arrays.asList(new Resource<String>("1"),
+                                                new Resource<String>("2"),
+                                                new Resource<String>("3"));
+        event.get().getListResourceContainer().addResource(resources);
 
         outputManager.addOutputPlugin(outputPlugin);
-        outputManager.addOutputExtension(outputExtension, outputPlugin.getId());
-        outputExtension.addContentDataToWishList("2");
-        outputManager.passDataToOutputPlugins(list);
+        outputManager.addOutputExtension(outputExtension, outputPlugin.getID());
+        outputExtension.addResourceIdToWishList("2");
+        outputManager.passDataToOutputPlugins(event.get());
         assertTrue(outputManager.getOutputPluginsList().get(0).getOutputExtensionList().size() == 1);
     }
 
     @Test
     public void testAddOutputExtensionLater() throws Exception {
-        TestAddOn testAddOn = new TestAddOn("test-AddOn");
-        List<AddOn> addOnList = new ArrayList<>();
-        addOnList.add(testAddOn);
-        Main main = new Main(addOnList);
-        Context context = new Context(testAddOn, main, "1", "debug");
-
         OutputManager outputManager = new OutputManager();
-        OutputPlugin outputPlugin = new OutputPlugin("1234", context) {
+        OutputPlugin outputPlugin = new OutputPlugin("1234", getContext()) {
             @Override
             public void renderFinalOutput() {
 
             }
         };
-        OutputExtension outputExtension = new OutputExtension("abcd", context) {
+        OutputExtension outputExtension = new OutputExtension("abcd", getContext()) {
+            /**
+             * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
+             * to the outputPlugin
+             *
+             * @param event
+             */
             @Override
-            public Object call() throws Exception {
+            public Object generate(Event event) {
                 return null;
             }
         };
-        outputManager.addOutputExtension(outputExtension, outputPlugin.getId());
+        outputManager.addOutputExtension(outputExtension, outputPlugin.getID());
         outputManager.addOutputPlugin(outputPlugin);
         assertTrue(outputManager.getOutputPluginsList().get(0).getOutputExtensionList().contains(outputExtension));
     }

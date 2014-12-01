@@ -1,21 +1,26 @@
 package intellimate.izou.output;
 
-import intellimate.izou.contentgenerator.ContentData;
+import intellimate.izou.events.Event;
+import intellimate.izou.resource.Resource;
+import intellimate.izou.system.Identifiable;
+import intellimate.izou.system.Identification;
+import intellimate.izou.system.IdentificationManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * OutputManager manages all output plugins and is the main class anyone outside the output package should talk to.
  * It can register/remove new output-plugins and add/delete output-extensions
  */
-public class OutputManager {
+public class OutputManager implements Identifiable{
+    public static final String ID = OutputManager.class.getCanonicalName();
 
     /**
      * a list that contains all the registered output-plugins of Jarvis
@@ -49,6 +54,9 @@ public class OutputManager {
         executor = Executors.newCachedThreadPool();
         futureHashMap = new HashMap<>();
         tempExtensionStorage = new HashMap<>();
+        if (!IdentificationManager.getInstance().registerIdentification(this)) {
+            //TODO log fatal
+        }
     }
 
     /**
@@ -65,20 +73,20 @@ public class OutputManager {
      * @param outputPlugin OutputPlugin to add
      */
     public void addOutputPlugin(OutputPlugin outputPlugin) {
-        if (!futureHashMap.containsKey(outputPlugin.getId())) {
+        if (!futureHashMap.containsKey(outputPlugin.getID())) {
             outputPlugin.setExecutor(executor);
             outputPluginsList.add(outputPlugin);
-            futureHashMap.put(outputPlugin.getId(), executor.submit(outputPlugin));
+            futureHashMap.put(outputPlugin.getID(), executor.submit(outputPlugin));
         } else {
-            if (futureHashMap.get(outputPlugin.getId()).isDone()) {
+            if (futureHashMap.get(outputPlugin.getID()).isDone()) {
                 outputPlugin.setExecutor(executor);
-                futureHashMap.remove(outputPlugin.getId());
-                futureHashMap.put(outputPlugin.getId(), executor.submit(outputPlugin));
+                futureHashMap.remove(outputPlugin.getID());
+                futureHashMap.put(outputPlugin.getID(), executor.submit(outputPlugin));
             }
         }
 
-        if (tempExtensionStorage.containsKey(outputPlugin.getId())) {
-            for(OutputExtension oE: tempExtensionStorage.get(outputPlugin.getId())) {
+        if (tempExtensionStorage.containsKey(outputPlugin.getID())) {
+            for(OutputExtension oE: tempExtensionStorage.get(outputPlugin.getID())) {
                 try {
                     //noinspection unchecked
                     outputPlugin.addOutputExtension(oE);
@@ -87,13 +95,13 @@ public class OutputManager {
                     fileLogger.warn(e.getMessage());
                 }
             }
-            tempExtensionStorage.remove(outputPlugin.getId());
+            tempExtensionStorage.remove(outputPlugin.getID());
         }
     }
 
     public OutputPlugin getOutputPlugin(String id) {
         for (OutputPlugin oP: outputPluginsList) {
-            if (oP.getId().equals(id)) {
+            if (oP.getID().equals(id)) {
                 return oP;
             }
         }
@@ -107,11 +115,11 @@ public class OutputManager {
      */
     public void removeOutputPlugin(String pluginId) {
         for(OutputPlugin oPlug: outputPluginsList) {
-            if(oPlug.getId().equals(pluginId)) {
+            if(oPlug.getID().equals(pluginId)) {
                 outputPluginsList.remove(oPlug);
                 oPlug.setExecutor(null);
-                futureHashMap.get(oPlug.getId()).cancel(true);
-                futureHashMap.remove(oPlug.getId());
+                futureHashMap.get(oPlug.getID()).cancel(true);
+                futureHashMap.remove(oPlug.getID());
                 break;
             }
         }
@@ -129,14 +137,14 @@ public class OutputManager {
     public void addOutputExtension(OutputExtension outputExtension, String outputPluginId) {
         boolean found = false;
         for (OutputPlugin oPlug: outputPluginsList) {
-            if (oPlug.getId().equals(outputPluginId)) {
+            if (oPlug.getID().equals(outputPluginId)) {
                 try {
                     //noinspection unchecked
                     oPlug.addOutputExtension(outputExtension);
                 } catch (ClassCastException e) {
                     e.printStackTrace();
                 }
-                outputExtension.setPluginId(oPlug.getId());
+                outputExtension.setPluginId(oPlug.getID());
                 found = true;
                 break;
             }
@@ -161,7 +169,7 @@ public class OutputManager {
      */
     public void removeOutputExtension(String pluginId, String extensionId) {
         for(OutputPlugin oPlug: outputPluginsList) {
-            if(oPlug.getId().equals(pluginId)) {
+            if(oPlug.getID().equals(pluginId)) {
                 oPlug.removeOutputExtension(extensionId);
                 break;
             }
@@ -169,15 +177,91 @@ public class OutputManager {
     }
 
     /**
-     * gets a list of ContentData's and sends it to the right outputPlugin for further processing
+     * gets the Event and sends it to the right outputPlugin for further processing
      *
      * passDataToOutputPlugins is the main method of OutputManger. It is called whenever the output process has to be started
      *
-     * @param dataList list filled with content-data objects. ContentData holds the output of the DataGenerator Package
+     * @param event an Instance of Event
      */
-    public void passDataToOutputPlugins(List<ContentData> dataList) {
-        for(OutputPlugin outputPlugin: outputPluginsList) {
-                outputPlugin.addContentDataList(dataList);
-        }
+    public void passDataToOutputPlugins(Event event) {
+        IdentificationManager identificationManager = IdentificationManager.getInstance();
+        List<Identification> ids = outputPluginsList.stream()
+                .map(identificationManager::getIdentification)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+        HashMap<Integer, List<Identification>> outputPluginBehaviour = event.getEventBehaviourController()
+                .getOutputPluginBehaviour(ids);
+
+        Set<Integer> keySet = outputPluginBehaviour.keySet();
+
+        List<OutputPlugin> orderedPositive = keySet.stream()
+                .sorted()
+                .filter(integer -> integer >= 0)
+                .map(outputPluginBehaviour::get)
+                .flatMap(Collection::stream)
+                .distinct()
+                .map(id -> outputPluginsList.stream()
+                        .filter(outputPlugin -> outputPlugin.isOwner(id))
+                        .findFirst())
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+
+        List<OutputPlugin> orderedNegative = keySet.stream()
+                .sorted()
+                .filter(integer -> integer < 0)
+                .map(outputPluginBehaviour::get)
+                .flatMap(Collection::stream)
+                .distinct()
+                .map(id -> outputPluginsList.stream()
+                        .filter(outputPlugin -> outputPlugin.isOwner(id))
+                        .findFirst())
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+        List<Identification> all = outputPluginBehaviour.values().stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+        @SuppressWarnings("SuspiciousMethodCalls")
+        List<OutputPlugin> orderedNeutral = outputPluginsList.stream()
+                .filter(outputPlugin -> !all.contains(outputPlugin))
+                .collect(Collectors.toList());
+
+        processOutputPlugins(event, orderedPositive);
+        processOutputPlugins(event, orderedNeutral);
+        processOutputPlugins(event, orderedNegative);
+    }
+
+    private void processOutputPlugins(Event event, List<OutputPlugin> outputPlugins) {
+       for(OutputPlugin outputPlugin : outputPlugins) {
+           Optional<Identification> managerID = IdentificationManager.getInstance().getIdentification(this);
+
+           if(!managerID.isPresent()) continue;
+           Resource<Consumer> resource = new Resource<>(outputPlugin.getID());
+           resource.setProvider(managerID.get());
+
+           final boolean[] stop = {false};
+           Consumer<Boolean> consumer = noParam -> stop[0] = true;
+           resource.setResource(consumer);
+
+           outputPlugin.distributeEvent(event);
+           outputPlugin.addToEventList(event);
+
+           int counter = 0;
+           while(!stop[0] && (counter < 10)) {
+               try {
+                   Thread.sleep(100);
+                   counter++;
+               } catch (InterruptedException e) {
+                   //TODO: logging
+               }
+           }
+       }
+    }
+
+    @Override
+    public String getID() {
+        return ID;
     }
 }
