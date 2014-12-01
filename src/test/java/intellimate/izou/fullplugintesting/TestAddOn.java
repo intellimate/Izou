@@ -31,6 +31,7 @@ public class TestAddOn extends AddOn {
     @Override
     public ContentGenerator[] registerContentGenerator() {
         ContentGenerator[] contentGenerators = new ContentGenerator[1];
+        contentGenerators[0] = new TestCG(getContext());
         return contentGenerators;
     }
 
@@ -68,6 +69,6 @@ public class TestAddOn extends AddOn {
      */
     @Override
     public String getID() {
-        return null;
+        return TestAddOn.class.getCanonicalName();
     }
 }

@@ -1,14 +1,10 @@
 package intellimate.izou.output;
 
-import intellimate.izou.addon.AddOn;
 import intellimate.izou.events.Event;
-import intellimate.izou.fullplugintesting.TestAddOn;
-import intellimate.izou.main.Main;
 import intellimate.izou.resource.Resource;
 import intellimate.izou.testHelper.IzouTest;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -76,11 +72,6 @@ public class OutputPluginTest extends IzouTest{
 
     @Test
     public void testAddOutputExtension() throws Exception {
-        TestAddOn testAddOn = new TestAddOn("test-AddOn");
-        List<AddOn> addOnList = new ArrayList<>();
-        addOnList.add(testAddOn);
-        Main main = new Main(addOnList);
-
         OutputPlugin outputPlugin = new OutputPlugin("abcd", getContext()) {
             @Override
             public void renderFinalOutput() {
@@ -118,11 +109,6 @@ public class OutputPluginTest extends IzouTest{
 
     @Test
     public void testRemoveOutputExtension() throws Exception {
-        TestAddOn testAddOn = new TestAddOn("test-AddOn");
-        List<AddOn> addOnList = new ArrayList<>();
-        addOnList.add(testAddOn);
-        Main main = new Main(addOnList);
-
         OutputPlugin outputPlugin = new OutputPlugin("abcd", getContext()) {
             @Override
             public void renderFinalOutput() {

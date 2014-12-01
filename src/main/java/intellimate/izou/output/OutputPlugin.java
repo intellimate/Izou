@@ -161,18 +161,6 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable{
         outputExtensionList.parallelStream()
                 .filter(ext -> event.getListResourceContainer().providesResource(ext.getResourceIdWishList()))
                 .forEach(ext -> ext.setEvent(event));
-        //old code
-        /*
-        for(OutputExtension ext: outputExtensionList) {
-            @SuppressWarnings("unchecked") List<String> contentDataWishList = ext.getResourceIdWishList();
-            for(String strWish: contentDataWishList) {
-                for(ContentData cD: contentDataList) {
-                    if (strWish.equals(cD.getId())) {
-                        ext.addContentData(cD);
-                    }
-                }
-            }
-        }*/
     }
 
     /**

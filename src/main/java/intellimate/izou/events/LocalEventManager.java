@@ -170,9 +170,7 @@ public class LocalEventManager implements Runnable, Identifiable{
             if(locevents == null) return;
             if(locevents.isEmpty()) {
                 locevents.add(event);
-            }
-            else
-            {
+            } else {
                 throw new MultipleEventsException();
             }
         }

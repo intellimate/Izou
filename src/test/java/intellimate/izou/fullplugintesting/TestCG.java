@@ -12,8 +12,8 @@ import java.util.Optional;
 @SuppressWarnings("SameParameterValue")
 public class TestCG extends ContentGenerator {
 
-    public TestCG(String contentGeneratorID, Context context) {
-        super(contentGeneratorID, context);
+    public TestCG(Context context) {
+        super(TestCG.class.getCanonicalName(), context);
     }
 
     /**

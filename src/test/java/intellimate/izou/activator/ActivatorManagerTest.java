@@ -3,16 +3,10 @@ package intellimate.izou.activator;
 import intellimate.izou.events.Event;
 import intellimate.izou.events.LocalEventManager;
 import intellimate.izou.testHelper.IzouTest;
-import intellimate.izou.addon.AddOn;
-import intellimate.izou.fullplugintesting.TestAddOn;
-import intellimate.izou.main.Main;
-import intellimate.izou.system.Context;
 import org.junit.Test;
 
 import java.util.LinkedList;
 import java.util.Optional;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Future;
 
 import static org.junit.Assert.assertTrue;
@@ -28,12 +22,6 @@ public class ActivatorManagerTest extends IzouTest{
 
     @Test
     public void testAddActivator() throws Exception {
-        TestAddOn testAddOn = new TestAddOn("test-AddOn");
-        List<AddOn> addOnList = new ArrayList<>();
-        addOnList.add(testAddOn);
-        Main main = new Main(addOnList);
-        Context context = new Context(testAddOn, main, "debug");
-
         final boolean[] isWorking = {false};
         Optional<Event> event = getEvent(id + 1);
         Activator activator = new Activator(getContext()) {
@@ -67,9 +55,7 @@ public class ActivatorManagerTest extends IzouTest{
         };
         LinkedList<String> listenerList = new LinkedList<String>();
         listenerList.add(event.get().getType());
-        main.getEventDistributor().registerEventListener(listenerList, event1 -> {
-            isWorking[0] = true;
-        });
+        main.getEventDistributor().registerEventListener(listenerList, event1 -> isWorking[0] = true);
 
         Future<?> future = main.getActivatorManager().addActivator(activator);
 
