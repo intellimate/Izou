@@ -5,8 +5,6 @@ import intellimate.izou.addon.AddOn;
 import intellimate.izou.addon.AddOnManager;
 import intellimate.izou.events.EventDistributor;
 import intellimate.izou.events.LocalEventManager;
-import intellimate.izou.contentgenerator.ContentGeneratorManager;
-import intellimate.izou.events.EventManager;
 import intellimate.izou.output.OutputManager;
 import intellimate.izou.resource.ResourceManager;
 import intellimate.izou.system.FileManager;
@@ -15,6 +13,7 @@ import intellimate.izou.system.IzouLogger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -28,7 +27,6 @@ public class Main {
     private final ResourceManager resourceManager;
     private final EventDistributor eventDistributor;
     private final LocalEventManager localEventManager;
-    private final Thread threadEventManager;
     private final ActivatorManager activatorManager;
     private final AddOnManager addOnManager;
     private final Thread threadEventManager;
@@ -41,7 +39,7 @@ public class Main {
         try {
             fileSystemManager.createIzouFileSystem();
         } catch (IOException e) {
-            e.printStackTrace();
+            fileLogger.error(e.getMessage());
         }
 
         izouLogger = new IzouLogger();
