@@ -3,9 +3,10 @@ package intellimate.izou.main;
 import intellimate.izou.activator.ActivatorManager;
 import intellimate.izou.addon.AddOn;
 import intellimate.izou.addon.AddOnManager;
-import intellimate.izou.contentgenerator.ContentGeneratorManager;
-import intellimate.izou.events.EventManager;
+import intellimate.izou.events.EventDistributor;
+import intellimate.izou.events.LocalEventManager;
 import intellimate.izou.output.OutputManager;
+import intellimate.izou.resource.ResourceManager;
 import intellimate.izou.system.FileManager;
 import intellimate.izou.system.FileSystemManager;
 import intellimate.izou.system.IzouLogger;
@@ -23,8 +24,9 @@ import java.util.List;
 @SuppressWarnings("FieldCanBeLocal")
 public class Main {
     private final OutputManager outputManager;
-    private final EventManager eventManager;
-    private final ContentGeneratorManager contentGeneratorManager;
+    private final ResourceManager resourceManager;
+    private final EventDistributor eventDistributor;
+    private final LocalEventManager localEventManager;
     private final ActivatorManager activatorManager;
     private final AddOnManager addOnManager;
     private final Thread threadEventManager;
@@ -32,23 +34,24 @@ public class Main {
     private final IzouLogger izouLogger;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
-    private Main() {
+    private Main(boolean debug) {
         FileSystemManager fileSystemManager = new FileSystemManager();
         try {
             fileSystemManager.createIzouFileSystem();
         } catch (IOException e) {
-            e.printStackTrace();
+            fileLogger.error(e.getMessage());
         }
 
         izouLogger = new IzouLogger();
         outputManager = new OutputManager();
-        eventManager = new EventManager(outputManager);
-        threadEventManager = new Thread(eventManager);
+        resourceManager = new ResourceManager();
+        eventDistributor = new EventDistributor(resourceManager, outputManager);
+        localEventManager = new LocalEventManager(eventDistributor);
+        threadEventManager = new Thread(localEventManager);
         threadEventManager.start();
-        contentGeneratorManager = new ContentGeneratorManager(eventManager);
-        activatorManager = new ActivatorManager(eventManager);
-        addOnManager = new AddOnManager(outputManager,eventManager,contentGeneratorManager,activatorManager, this);
-        addOnManager.retrieveAndRegisterAddOns();
+        activatorManager = new ActivatorManager(localEventManager);
+        addOnManager = new AddOnManager(outputManager,resourceManager,activatorManager, this);
+        if(!debug) addOnManager.retrieveAndRegisterAddOns();
 
         FileManager fileManagerTemp;
         try {
@@ -66,59 +69,50 @@ public class Main {
      * @param addOns a List of AddOns to run
      */
     public Main(List<AddOn> addOns) {
-        FileSystemManager fileSystemManager = new FileSystemManager();
-        try {
-            fileSystemManager.createIzouFileSystem();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this(false);
+        if(addOns != null) addOnManager.addAndRegisterAddOns(addOns);
+    }
 
-        izouLogger = new IzouLogger();
-        outputManager = new OutputManager();
-        eventManager = new EventManager(outputManager);
-        threadEventManager = new Thread(eventManager);
-        threadEventManager.start();
-        contentGeneratorManager = new ContentGeneratorManager(eventManager);
-        activatorManager = new ActivatorManager(eventManager);
-        addOnManager = new AddOnManager(outputManager,eventManager,contentGeneratorManager,activatorManager, this);
-        addOnManager.addAndRegisterAddOns(addOns);
-
-        FileManager fileManagerTemp;
-        try {
-            fileManagerTemp = new FileManager();
-        } catch (IOException e) {
-            fileManagerTemp = null;
-            fileLogger.error(e.getMessage());
-        }
-        fileManager = fileManagerTemp;
+    /**
+     * If you want to debug your Plugin, you can get an Main instance with this Method
+     *
+     * @param addOns a List of AddOns to run
+     */
+    public Main(List<AddOn> addOns, boolean debug) {
+        this(debug);
+        if(addOns != null) addOnManager.addAndRegisterAddOns(addOns);
     }
 
     public static void main(String[] args) {
-        @SuppressWarnings("UnusedAssignment") Main main = new Main();
+        @SuppressWarnings("UnusedAssignment") Main main = new Main(false);
     }
 
-    public synchronized OutputManager getOutputManager() {
+    public OutputManager getOutputManager() {
         return outputManager;
     }
 
-    public synchronized EventManager getEventManager() {
-        return eventManager;
+    public LocalEventManager getLocalEventManager() {
+        return localEventManager;
     }
 
-    public synchronized ContentGeneratorManager getContentGeneratorManager() {
-        return contentGeneratorManager;
-    }
-
-    public synchronized ActivatorManager getActivatorManager() {
+    public ActivatorManager getActivatorManager() {
         return activatorManager;
     }
 
-    public synchronized AddOnManager getAddOnManager() {
+    public AddOnManager getAddOnManager() {
         return addOnManager;
     }
 
-    public synchronized Thread getThreadEventManager() {
+    public Thread getThreadEventManager() {
         return threadEventManager;
+    }
+
+    public ResourceManager getResourceManager() {
+        return resourceManager;
+    }
+
+    public EventDistributor getEventDistributor() {
+        return eventDistributor;
     }
 
     public synchronized FileManager getFileManager() {

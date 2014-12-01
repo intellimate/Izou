@@ -1,19 +1,24 @@
 package intellimate.izou.output;
 
-import intellimate.izou.contentgenerator.ContentData;
+import intellimate.izou.events.Event;
+import intellimate.izou.resource.Resource;
+import intellimate.izou.system.Identifiable;
+import intellimate.izou.system.IdentificationManager;
 import intellimate.izou.system.Context;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.*;
+import java.util.function.Consumer;
 
 /**
- * The OutputPlugin class gets contentData and then starts threads filled with output-extension tasks to create the final
+ * The OutputPlugin class gets Event and then starts threads filled with output-extension tasks to create the final
  * output and then render it on its own medium
  */
 @SuppressWarnings("UnusedDeclaration")
-public abstract class OutputPlugin<T> implements Runnable{
+public abstract class OutputPlugin<T> implements Runnable, Identifiable{
     /**
      * id of the of OutputPlugin, it is primarily used by OutputManager to communicate with specific output plugins
      */
@@ -42,7 +47,7 @@ public abstract class OutputPlugin<T> implements Runnable{
     /**
      * BlockingQueue that stores event-requests that are to be executed
      */
-    private BlockingQueue<List<ContentData>> contentDataBlockingQueue;
+    private BlockingQueue<Event> eventBlockingQueue;
 
     /**
      * the context of the addOn
@@ -61,7 +66,10 @@ public abstract class OutputPlugin<T> implements Runnable{
         futureList = new LinkedList<>();
         tDoneList = new ArrayList<>();
         executor = null;
-        contentDataBlockingQueue = new LinkedBlockingQueue<>();
+        eventBlockingQueue = new LinkedBlockingQueue<>();
+        IdentificationManager identificationManager = IdentificationManager.getInstance();
+        identificationManager.registerIdentification(this);
+
     }
 
     /**
@@ -90,17 +98,17 @@ public abstract class OutputPlugin<T> implements Runnable{
     }
 
     /**
-     * adds a content-data list to blockingQueue
+     * adds an event to blockingQueue
      *
-     * @param contentDataList the content-data list to be added to blockingQueue
-     * @throws IllegalStateException raised if problems adding a content-data list to blockingQueue
+     * @param event the event to add
+     * @throws IllegalStateException raised if problems adding an event to blockingQueue
      */
-    public void addContentDataList(List<ContentData> contentDataList) throws IllegalStateException {
-        contentDataBlockingQueue.add(contentDataList);
+    public void addToEventList(Event event) throws IllegalStateException{
+        eventBlockingQueue.add(event);
     }
 
     /**
-     * sets the executor of the eventManager for efficiency reasons
+     * sets the executor of the OutputManager for efficiency reasons
      * @param executor the executor to be set
      */
     public void setExecutor(ExecutorService executor) {
@@ -112,24 +120,25 @@ public abstract class OutputPlugin<T> implements Runnable{
      *
      * @return id of the outputPlugin
      */
-    public String getId() {
+    @Override
+    public String getID() {
         return this.id;
 
     }
 
     /**
-     * gets the blocking-queue that stores contentDataLists sent by events
+     * gets the blocking-queue that stores the backlog of Events
      *
-     * @return blocking-queue that stores contentDataLists sent by events
+     * @return blocking-queue that stores Events
      */
-    public BlockingQueue<List<ContentData>> getContentDataBlockingQueue() {
-        return contentDataBlockingQueue;
+    public BlockingQueue<Event> getEventBlockingQueue() {
+        return eventBlockingQueue;
     }
 
     /**
-     * checks if the outputPlugin has any output-extensions it can run with the current content-Datas
+     * checks if the outputPlugin has any output-extensions it can run with the current Event
      *
-     * @return state of whether the outputPlugin has any output-extensions it can run with the current content-Datas
+     * @return state of whether the outputPlugin has any output-extensions it can run with the current Event
      */
     public boolean canRun() {
         boolean canRun = false;
@@ -141,24 +150,17 @@ public abstract class OutputPlugin<T> implements Runnable{
     }
 
     /**
-     * distributes the content-Data elements in the contentDataList to the output-extensions that will need them
+     * distributes the Event in the eventDataList to the output-extensions that will need them.
      *
-     * it uses the id of the contentData which is the same as the id of the outputExtension to identify which output-extension
-     * it should send the content-data to
+     * all OutputExtensions have a wishList, where Ids of resources are stored. This method compares the wishList with
+     * resources in provided from the event.
      *
-     * @param contentDataList the Data to distribute
+     * @param event the Event to distribute
      */
-    public void distributeContentData(List<ContentData> contentDataList) {
-        for(OutputExtension ext: outputExtensionList) {
-            @SuppressWarnings("unchecked") List<String> contentDataWishList = ext.getContentDataWishList();
-            for(String strWish: contentDataWishList) {
-                for(ContentData cD: contentDataList) {
-                    if (strWish.equals(cD.getId())) {
-                        ext.addContentData(cD);
-                    }
-                }
-            }
-        }
+    public void distributeEvent(Event event) {
+        outputExtensionList.parallelStream()
+                .filter(ext -> event.getListResourceContainer().providesResource(ext.getResourceIdWishList()))
+                .forEach(ext -> ext.setEvent(event));
     }
 
     /**
@@ -168,7 +170,7 @@ public abstract class OutputPlugin<T> implements Runnable{
      */
     public void addOutputExtension(OutputExtension<T> outputExtension) {
         outputExtensionList.add(outputExtension);
-        outputExtension.setPluginId(this.getId());
+        outputExtension.setPluginId(this.getID());
         outputExtensionWasAdded(outputExtension);
     }
 
@@ -182,7 +184,7 @@ public abstract class OutputPlugin<T> implements Runnable{
      */
     public void removeOutputExtension(String id) {
         for(OutputExtension ext: outputExtensionList) {
-            if(ext.getId().equals(id)) {
+            if(ext.getID().equals(id)) {
                 ext.setPluginId(null);
                 outputExtensionList.remove(ext);
                 break;
@@ -208,7 +210,7 @@ public abstract class OutputPlugin<T> implements Runnable{
 
     /**
      * method that uses tDoneList to generate a final output that will then be rendered.
-     * The processed content-data objects are found in tDoneList
+     * The processed data is found in tDoneList
      */
     public abstract void renderFinalOutput();
 
@@ -224,35 +226,49 @@ public abstract class OutputPlugin<T> implements Runnable{
     public void outputDataIsDone(Future<T> tFuture) {}
 
     /**
-     * Default implementation waits until a new list of content-Datas has been received and then processes it.
+     * Default implementation waits until a new Event has been received and then processes it.
      *
      * This method is made to be overwritten as seen fit by the developer
      *
      * @throws java.lang.InterruptedException if interrupted while waiting
-     * @return the list of content-Datas to be processed by the outputPlugin
+     * @return the recently added Event-instance to be processed by the outputPlugin
      */
-    public List<ContentData> blockingQueueHandling() throws InterruptedException {
-        return contentDataBlockingQueue.take();
+    public Event blockingQueueHandling() throws InterruptedException {
+        return eventBlockingQueue.take();
+    }
+
+    /**
+     *
+     */
+    public void isDone(Event event) {
+        Optional<Resource> resource = event.getListResourceContainer().provideResource(getID()).stream()
+                .filter(resourceS -> resourceS.getProvider().getID().equals(OutputManager.ID))
+                .findFirst();
+        if(!resource.isPresent()) return;
+        if(resource.get().getResource() instanceof Consumer) {
+            Consumer consumer = (Consumer) resource.get().getResource();
+            consumer.accept(null);
+        }
     }
 
     /**
      * main method for outputPlugin, runs the data-conversion and output-renderer
      *
-     * when the outputExtensions are done processing the ContentData objects, they add their finished objects into tDoneList,
+     * when the outputExtensions are done processing the Event object, they add their finished objects into tDoneList,
      * from where they will have to be gotten to render them in renderFinalOutput
      */
     @Override
     public void run() {
         while (true) {
-            List<ContentData> contentDataList;
+            Event event;
             try {
-                contentDataList = blockingQueueHandling();  //gets the new contentDataList if one was added to the blockingQueue
+                event = blockingQueueHandling();  //gets the new Event if one was added to the blockingQueue
             } catch (InterruptedException e) {
-                context.getLogger().error(e.getMessage());
+                context.logger.getLogger().error(e.getMessage());
                 break;
             }
 
-            distributeContentData(contentDataList); //distributes the contentDatas among all outputExtensions
+            distributeEvent(event); //distributes the Event among all outputExtensions
             if(canRun()) {  //checks if there are any outputExtensions that can run at all
                 for (OutputExtension<T> ext : outputExtensionList) {
                     prepareDistribution(ext);
@@ -277,15 +293,16 @@ public abstract class OutputPlugin<T> implements Runnable{
                     try {
                         outputDataIsDone(tF);
                         tDoneList.add(tF.get());
-                    } catch (InterruptedException e) {
-                        context.getLogger().warn(e.getMessage());
-                    } catch (ExecutionException e) {
-                        context.getLogger().warn(e.getMessage());
+                    } catch (InterruptedException | ExecutionException e) {
+                        context.logger.getLogger().warn(e.getMessage());
                     }
                 }
 
                 //render final output
                 renderFinalOutput();
+
+                //notifies output-manager when done processing
+                isDone(event);
             }
         }
     }

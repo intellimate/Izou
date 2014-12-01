@@ -1,20 +1,22 @@
 package intellimate.izou.output;
 
-import intellimate.izou.contentgenerator.ContentData;
+import intellimate.izou.events.Event;
 import intellimate.izou.system.Context;
+import intellimate.izou.system.Identifiable;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
 /**
- * OutputExtension's purpose is to take contentData and convert it into another data format so that it can be rendered correctly
+ * OutputExtension's purpose is to take resourceData and convert it into another data format so that it can be rendered correctly
  * by the output-plugin. These objects are represented in the form of future objects that are stored in tDoneList
  */
-public abstract class OutputExtension<T> implements Callable<T> {
+public abstract class OutputExtension<T> implements Callable<T>, Identifiable {
 
     /**
-     * the id of the outputExtension, same as the id of its contentData
+     * the id of the outputExtension
      */
     private final String id;
 
@@ -24,14 +26,14 @@ public abstract class OutputExtension<T> implements Callable<T> {
     private String pluginId;
 
     /**
-     * the contentDatas which it will convert to the desired Data type
+     * the current Event
      */
-    private List<ContentData> contentDataList;
+    private LinkedList<Event> events = new LinkedList<>();
 
     /**
-     * a list of all the contentData's which the outputExtension would like to receive theoretically to work with
+     * a list of all the resource's which the outputExtension would like to receive theoretically to work with
      */
-    private List<String> contentDataWishList;
+    private List<String> resourceIdWishList;
 
     /**
      * the context of the addOn - where "global" methods are stored
@@ -44,76 +46,69 @@ public abstract class OutputExtension<T> implements Callable<T> {
      */
     public OutputExtension(String id, Context context) {
         this.id = id;
+        resourceIdWishList = new ArrayList<>();
         this.context = context;
-        contentDataList = new ArrayList<>();
-        contentDataWishList = new ArrayList<>();
     }
 
     /**
-     * returns its contentDataList
-     * @return the contentDataList to return
+     * returns the current event
+     * @return the event
      */
-    public List<ContentData> getContentDataList() {
-        return contentDataList;
+    public List<Event> getEvents() {
+        return events;
     }
 
     /**
-     * returns its contentDataWishList
-     * @return the contentDataWishList to return
+     * returns its resourceIdWishList
+     * @return a List containing the resourceIDs
      */
-    public List<String> getContentDataWishList() {
-        return contentDataWishList;
+    public List<String> getResourceIdWishList() {
+        return resourceIdWishList;
     }
 
     /**
-     * adds contentData to the contentDataList
+     * sets the event
      *
-     * @param contentData the content-data to be added
+     * @param event the event to be added
      */
-    public void addContentData(ContentData contentData) {
-        contentDataList.add(contentData);
+    public void setEvent(Event event) {
+        events.add(event);
     }
 
     /**
-     * checks if the outputExtension can execute with the current content-Datas
+     * checks if the outputExtension can execute with the current event
      *
-     * @return the state of whether the outputExtension can execute with the current content-Datas
+     * @return the state of whether the outputExtension can execute with the current event
      */
     public boolean canRun() {
-        return !contentDataList.isEmpty();
+        return !events.isEmpty();
     }
 
     /**
-     * removes content-data with id: id from the contentDataList
+     * removes content-data with id: id from the event
      *
      * @param id the id of the content-data to be removed
      */
+    @Deprecated
     public void removeContentData(String id) {
-        for(ContentData cD: contentDataList) {
-            if(cD.getId().equals(id))
-                contentDataList.remove(cD);
-        }
     }
 
     /**
-     * adds id of content-Datas to the wish list
+     * adds id of resource to the wish list
      *
-     * @param id the id of the content-data to be added to the wish list
+     * @param id the id of the resource to be added to the wish list
      */
-    public void addContentDataToWishList(String id) {
-        contentDataWishList.add(id);
+    public void addResourceIdToWishList(String id) {
+        resourceIdWishList.add(id);
     }
 
     /**
-     * removes content-data with id: id from the contentDataWishList
+     * removes resourceId from the resourceIdWishList
      *
-     * @param id the id of the content-data to be removed
+     * @param id the id of the resource to be removed
      */
-    public void removeContentDataFromWishList(String id) {
-        for(String str: contentDataWishList) {
-            if(str.equals(id))
-                contentDataWishList.remove(str);
-        }
+    public void removeResourceIdFromWishList(String id) {
+        resourceIdWishList.remove(id);
     }
 
     /**
@@ -121,7 +116,8 @@ public abstract class OutputExtension<T> implements Callable<T> {
      *
      * @return id of outputExtension to be returned
      */
-    public String getId() {
+    @Override
+    public String getID() {
         return id;
     }
 
@@ -142,10 +138,14 @@ public abstract class OutputExtension<T> implements Callable<T> {
     }
 
     @Override
+    public final T call() throws Exception {
+        return generate(events.pop());
+    }
+
     /**
-     * the main method of the outputExtension, it converts the contentData into the necessary data format and returns it
+     * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
      * to the outputPlugin
      */
-    public abstract T call() throws Exception;
+    public abstract T generate(Event event);
 }
 
