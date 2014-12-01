@@ -3,8 +3,6 @@ package intellimate.izou.fullplugintesting;
 import intellimate.izou.activator.Activator;
 import intellimate.izou.addon.AddOn;
 import intellimate.izou.contentgenerator.ContentGenerator;
-import intellimate.izou.events.EventController;
-import intellimate.izou.events.EventManager;
 import intellimate.izou.output.OutputExtension;
 import intellimate.izou.output.OutputPlugin;
 

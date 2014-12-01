@@ -5,7 +5,6 @@ import intellimate.izou.events.Event;
 import intellimate.izou.events.LocalEventManager;
 import intellimate.izou.system.Identification;
 import intellimate.izou.system.IdentificationManager;
-import intellimate.izou.events.EventManager;
 import intellimate.izou.system.Context;
 
 import java.util.Optional;
