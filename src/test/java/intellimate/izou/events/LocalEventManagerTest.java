@@ -25,7 +25,6 @@ public class LocalEventManagerTest extends IzouTest{
         final boolean[] isWorking = {false};
         main.getEventDistributor().registerEventListener(event, s -> isWorking[0] = true);
         main.getEventDistributor().registerEventListener(event, s -> isWorking[0] = true);
-        System.out.println(System.currentTimeMillis());
         caller.fire(event);
 
         synchronized (lock) {

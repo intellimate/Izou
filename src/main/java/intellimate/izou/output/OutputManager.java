@@ -190,7 +190,6 @@ public class OutputManager implements Identifiable{
                 .collect(Collectors.toList());
         HashMap<Integer, List<Identification>> outputPluginBehaviour = event.getEventBehaviourController()
                 .getOutputPluginBehaviour(ids);
-        outputPluginBehaviour.get(EventBehaviourController.MostPriority);
 
         Set<Integer> keySet = outputPluginBehaviour.keySet();
 
@@ -245,9 +244,10 @@ public class OutputManager implements Identifiable{
            resource.setResource(consumer);
 
            outputPlugin.distributeEvent(event);
+           outputPlugin.addToEventList(event);
 
            int counter = 0;
-           while(!stop[0] || (counter > 10)) {
+           while(!stop[0] && (counter < 10)) {
                try {
                    Thread.sleep(100);
                    counter++;
@@ -260,6 +260,6 @@ public class OutputManager implements Identifiable{
 
     @Override
     public String getID() {
-        return OutputManager.class.getCanonicalName();
+        return ID;
     }
 }

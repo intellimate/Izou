@@ -40,6 +40,7 @@ public class EventBehaviourController {
      * @return a HashMap, where the keys represent the associated Behaviour and the values the Identification;
      */
     public HashMap<Integer, List<Identification>> getOutputPluginBehaviour(List<Identification> identifications) {
+        if(outputPluginBehaviour == null) return new HashMap<>();
         return outputPluginBehaviour.apply(identifications);
     }
 
