@@ -58,8 +58,7 @@ public class AddOnManager {
                         fileLogger.error(e.getMessage());
                     }
                 }
-            }
-        } catch(Exception e) {
+            } catch(Exception e) {
                 fileLogger.error(e.getMessage());
             }
         }
