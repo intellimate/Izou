@@ -1,6 +1,5 @@
 package intellimate.izou.activator;
 
-import intellimate.izou.events.EventManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import intellimate.izou.events.LocalEventManager;

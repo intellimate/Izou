@@ -1,6 +1,5 @@
 package intellimate.izou.contentgenerator;
 
-import intellimate.izou.events.EventManager;
 import intellimate.izou.system.Context;
 import intellimate.izou.events.Event;
 import intellimate.izou.resource.Resource;
