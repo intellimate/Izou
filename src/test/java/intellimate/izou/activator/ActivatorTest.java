@@ -22,7 +22,6 @@ public class ActivatorTest extends IzouTest{
     Identification id;
 
     public ActivatorTest() {
-        eventManagerTestSetup = new EventManagerTestSetup();
         Context context = new Context(testAddOn, main, "1", "debug");
         activator = new Activator() {
             @Override

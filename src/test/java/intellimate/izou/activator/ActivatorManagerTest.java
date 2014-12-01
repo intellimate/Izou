@@ -34,7 +34,7 @@ public class ActivatorManagerTest extends IzouTest{
         List<AddOn> addOnList = new ArrayList<>();
         addOnList.add(testAddOn);
         Main main = new Main(addOnList);
-        Context context = new Context(testAddOn, main, "1", "debug");
+        Context context = new Context(testAddOn, main, "debug");
 
         final boolean[] isWorking = {false};
         Optional<Event> event = getEvent(id + 1);

@@ -2,16 +2,16 @@ package intellimate.izou.testHelper;
 
 import intellimate.izou.events.Event;
 import intellimate.izou.events.LocalEventManager;
+import intellimate.izou.fullplugintesting.TestAddOn;
 import intellimate.izou.main.Main;
+import intellimate.izou.system.Context;
 import intellimate.izou.system.Identifiable;
 import intellimate.izou.system.Identification;
 import intellimate.izou.system.IdentificationManager;
 
 import java.util.Optional;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * Helper class for Unit-testing
@@ -25,6 +25,8 @@ public class IzouTest implements Identifiable{
     private static int eventNumber;
     private static final class Lock { }
     private final Object lock = new Lock();
+    private TestAddOn testAddOn = new TestAddOn(getID());
+    private Context  context = new Context(testAddOn, main, "debug");
 
     /**
      * creates a new instance of IzouTest
@@ -147,6 +149,10 @@ public class IzouTest implements Identifiable{
                 }
             }
         }
+    }
+
+    public Context getContext() {
+        return context;
     }
 
     public Optional<Identification> getNextIdentification() {

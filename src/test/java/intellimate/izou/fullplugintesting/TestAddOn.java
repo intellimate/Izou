@@ -3,6 +3,7 @@ package intellimate.izou.fullplugintesting;
 import intellimate.izou.activator.Activator;
 import intellimate.izou.addon.AddOn;
 import intellimate.izou.contentgenerator.ContentGenerator;
+import intellimate.izou.events.EventsController;
 import intellimate.izou.output.OutputExtension;
 import intellimate.izou.output.OutputPlugin;
 
@@ -30,13 +31,17 @@ public class TestAddOn extends AddOn {
     @Override
     public ContentGenerator[] registerContentGenerator() {
         ContentGenerator[] contentGenerators = new ContentGenerator[1];
-        contentGenerators[0] = new TestCG(EventManager.FULL_WELCOME_EVENT, getContext());
         return contentGenerators;
     }
 
+    /**
+     * use this method to register (if needed) your EventControllers.
+     *
+     * @return Array containing Instances of EventControllers
+     */
     @Override
-    public EventController[] registerEventController() {
-        return new EventController[0];
+    public EventsController[] registerEventController() {
+        return new EventsController[0];
     }
 
     @Override
@@ -51,5 +56,18 @@ public class TestAddOn extends AddOn {
         OutputExtension[] outputExtensions= new OutputExtension[1];
         outputExtensions[0] = new TestOE("test-OE", getContext());
         return outputExtensions;
+    }
+
+    /**
+     * An ID must always be unique.
+     * A Class like Activator or OutputPlugin can just provide their .class.getCanonicalName()
+     * If you have to implement this interface multiple times, just concatenate unique Strings to
+     * .class.getCanonicalName()
+     *
+     * @return A String containing an ID
+     */
+    @Override
+    public String getID() {
+        return null;
     }
 }
