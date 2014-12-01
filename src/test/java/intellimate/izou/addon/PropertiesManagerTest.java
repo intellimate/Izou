@@ -8,6 +8,9 @@ import intellimate.izou.output.OutputExtension;
 import intellimate.izou.output.OutputPlugin;
 import junit.framework.TestCase;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.LinkedList;
 
 public class PropertiesManagerTest extends TestCase {
@@ -18,6 +21,7 @@ public class PropertiesManagerTest extends TestCase {
         addOns.add(testAddOn);
         Main main = new Main(addOns, true);
         //for(;;){}
+        assertTrue(Files.exists(Paths.get("." + File.separator + "properties" + File.separator + "TestID.properties")));
         //TODO: @Julian the for loop never ends
     }
 
