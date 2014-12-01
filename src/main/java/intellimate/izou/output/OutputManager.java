@@ -1,19 +1,26 @@
 package intellimate.izou.output;
 
 import intellimate.izou.events.Event;
+import intellimate.izou.events.EventBehaviourController;
+import intellimate.izou.resource.Resource;
+import intellimate.izou.system.Identifiable;
+import intellimate.izou.system.Identification;
+import intellimate.izou.system.IdentificationManager;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * OutputManager manages all output plugins and is the main class anyone outside the output package should talk to.
  * It can register/remove new output-plugins and add/delete output-extensions
  */
-public class OutputManager {
+public class OutputManager implements Identifiable{
+    public static final String ID = OutputManager.class.getCanonicalName();
 
     /**
      * a list that contains all the registered output-plugins of Jarvis
@@ -44,6 +51,9 @@ public class OutputManager {
         executor = Executors.newCachedThreadPool();
         futureHashMap = new HashMap<>();
         tempExtensionStorage = new HashMap<>();
+        if (!IdentificationManager.getInstance().registerIdentification(this)) {
+            //TODO log fatal
+        }
     }
 
     /**
@@ -172,8 +182,84 @@ public class OutputManager {
      * @param event an Instance of Event
      */
     public void passDataToOutputPlugins(Event event) {
-        for(OutputPlugin outputPlugin: outputPluginsList) {
-                outputPlugin.addToEventList(event);
-        }
+        IdentificationManager identificationManager = IdentificationManager.getInstance();
+        List<Identification> ids = outputPluginsList.stream()
+                .map(identificationManager::getIdentification)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+        HashMap<Integer, List<Identification>> outputPluginBehaviour = event.getEventBehaviourController()
+                .getOutputPluginBehaviour(ids);
+        outputPluginBehaviour.get(EventBehaviourController.MostPriority);
+
+        Set<Integer> keySet = outputPluginBehaviour.keySet();
+
+        List<OutputPlugin> orderedPositive = keySet.stream()
+                .sorted()
+                .filter(integer -> integer >= 0)
+                .map(outputPluginBehaviour::get)
+                .flatMap(Collection::stream)
+                .distinct()
+                .map(id -> outputPluginsList.stream()
+                        .filter(outputPlugin -> outputPlugin.isOwner(id))
+                        .findFirst())
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+
+        List<OutputPlugin> orderedNegative = keySet.stream()
+                .sorted()
+                .filter(integer -> integer < 0)
+                .map(outputPluginBehaviour::get)
+                .flatMap(Collection::stream)
+                .distinct()
+                .map(id -> outputPluginsList.stream()
+                        .filter(outputPlugin -> outputPlugin.isOwner(id))
+                        .findFirst())
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+        List<Identification> all = outputPluginBehaviour.values().stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+        @SuppressWarnings("SuspiciousMethodCalls")
+        List<OutputPlugin> orderedNeutral = outputPluginsList.stream()
+                .filter(outputPlugin -> !all.contains(outputPlugin))
+                .collect(Collectors.toList());
+
+        processOutputPlugins(event, orderedPositive);
+        processOutputPlugins(event, orderedNeutral);
+        processOutputPlugins(event, orderedNegative);
+    }
+
+    private void processOutputPlugins(Event event, List<OutputPlugin> outputPlugins) {
+       for(OutputPlugin outputPlugin : outputPlugins) {
+           Optional<Identification> managerID = IdentificationManager.getInstance().getIdentification(this);
+
+           if(!managerID.isPresent()) continue;
+           Resource<Consumer> resource = new Resource<>(outputPlugin.getID());
+           resource.setProvider(managerID.get());
+
+           final boolean[] stop = {false};
+           Consumer<Boolean> consumer = noParam -> stop[0] = true;
+           resource.setResource(consumer);
+
+           outputPlugin.distributeEvent(event);
+
+           int counter = 0;
+           while(!stop[0] || (counter > 10)) {
+               try {
+                   Thread.sleep(100);
+                   counter++;
+               } catch (InterruptedException e) {
+                   //TODO: logging
+               }
+           }
+       }
+    }
+
+    @Override
+    public String getID() {
+        return OutputManager.class.getCanonicalName();
     }
 }

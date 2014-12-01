@@ -13,7 +13,7 @@ public class EventBehaviourController {
     public static final int MostPriority = 0;
     public static final int LeastPriority = 1;
     private final Event event;
-    private Function<List<Identification>, HashMap<Integer, Identification>> outputPluginBehaviour;
+    private Function<List<Identification>, HashMap<Integer, List<Identification>>> outputPluginBehaviour;
     protected EventBehaviourController(Event event) {
         this.event = event;
     }
@@ -28,7 +28,7 @@ public class EventBehaviourController {
      * @param outputPluginBehaviour all the registered outputPlugins
      */
     public void controlOutputPluginBehaviour(Function<List<Identification>,
-                                                        HashMap<Integer, Identification>> outputPluginBehaviour) {
+            HashMap<Integer, List<Identification>>> outputPluginBehaviour) {
         this.outputPluginBehaviour = outputPluginBehaviour;
     }
 
@@ -37,7 +37,7 @@ public class EventBehaviourController {
      * @param identifications the Identifications of the OutputPlugins
      * @return a HashMap, where the keys represent the associated Behaviour and the values the Identification;
      */
-    protected HashMap<Integer, Identification> getOutputPluginBehaviour(List<Identification> identifications) {
+    public HashMap<Integer, List<Identification>> getOutputPluginBehaviour(List<Identification> identifications) {
         return outputPluginBehaviour.apply(identifications);
     }
 

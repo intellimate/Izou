@@ -12,7 +12,7 @@ import java.util.concurrent.Callable;
  * OutputExtension's purpose is to take resourceData and convert it into another data format so that it can be rendered correctly
  * by the output-plugin. These objects are represented in the form of future objects that are stored in tDoneList
  */
-public abstract class OutputExtension<T> implements Callable<T>, Identifiable{
+public abstract class OutputExtension<T> implements Callable<T>, Identifiable {
 
     /**
      * the id of the outputExtension

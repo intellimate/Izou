@@ -58,11 +58,15 @@ public final class Identification {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Identification)) return false;
-
-        Identification that = (Identification) o;
-
-        return equals(that);
+        if(o instanceof Identifiable) {
+            Identifiable that = (Identifiable) o;
+            return identifiable.getID().equals(that.getID());
+        } else if (o instanceof Identification) {
+            Identification that = (Identification) o;
+            return equals(that);
+        } else {
+            return false;
+        }
     }
 
     @Override

@@ -1,12 +1,17 @@
 package intellimate.izou.output;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import intellimate.izou.events.Event;
+import intellimate.izou.resource.Resource;
 import intellimate.izou.system.Identifiable;
+import intellimate.izou.system.IdentificationManager;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.*;
+import java.util.function.Consumer;
 
 /**
  * The OutputPlugin class gets Event and then starts threads filled with output-extension tasks to create the final
@@ -57,6 +62,9 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable{
         tDoneList = new ArrayList<>();
         executor = null;
         eventBlockingQueue = new LinkedBlockingQueue<>();
+        IdentificationManager identificationManager = IdentificationManager.getInstance();
+        identificationManager.registerIdentification(this);
+
     }
 
     /**
@@ -237,6 +245,20 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable{
     }
 
     /**
+     *
+     */
+    public void isDone(Event event) {
+        Optional<Resource> resource = event.getListResourceContainer().provideResource(getID()).stream()
+                .filter(resourceS -> resourceS.getProvider().getID().equals(OutputManager.ID))
+                .findFirst();
+        if(!resource.isPresent()) return;
+        if(resource.get().getResource() instanceof Consumer) {
+            Consumer consumer = (Consumer) resource.get().getResource();
+            consumer.accept(null);
+        }
+    }
+
+    /**
      * main method for outputPlugin, runs the data-conversion and output-renderer
      *
      * when the outputExtensions are done processing the Event object, they add their finished objects into tDoneList,
@@ -287,6 +309,9 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable{
 
                 //render final output
                 renderFinalOutput();
+
+                //notifies output-manager when done processing
+                isDone(event);
             }
         }
     }
