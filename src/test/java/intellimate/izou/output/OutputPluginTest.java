@@ -1,15 +1,14 @@
 package intellimate.izou.output;
 
-import intellimate.izou.events.Event;
-import intellimate.izou.resource.Resource;
-import intellimate.izou.testHelper.IzouTest;
 import intellimate.izou.addon.AddOn;
-import intellimate.izou.contentgenerator.ContentData;
+import intellimate.izou.events.Event;
 import intellimate.izou.fullplugintesting.TestAddOn;
 import intellimate.izou.main.Main;
-import intellimate.izou.system.Context;
+import intellimate.izou.resource.Resource;
+import intellimate.izou.testHelper.IzouTest;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -27,19 +26,18 @@ public class OutputPluginTest extends IzouTest{
     public void testDistributeContentData() throws Exception {
         Optional<Event> event = getNextEvent();
         if(!event.isPresent()) fail();
-        Context context = new Context(testAddOn, main, "1", "debug");
         List<Resource> resources = Arrays.asList(new Resource<String>("1"),
                 new Resource<String>("2"),
                 new Resource<String>("3"));
         event.get().getListResourceContainer().addResource(resources);
 
-        OutputPlugin outputPlugin = new OutputPlugin("abcd") {
+        OutputPlugin outputPlugin = new OutputPlugin("abcd", getContext()) {
             @Override
             public void renderFinalOutput() {
 
             }
         };
-        OutputExtension ext1 = new OutputExtension("789") {
+        OutputExtension ext1 = new OutputExtension("789", getContext()) {
             /**
              * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
              * to the outputPlugin
@@ -52,7 +50,7 @@ public class OutputPluginTest extends IzouTest{
                 return null;
             }
         };
-        OutputExtension ext2 = new OutputExtension("10") {
+        OutputExtension ext2 = new OutputExtension("10", getContext()) {
             /**
              * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
              * to the outputPlugin
@@ -82,15 +80,14 @@ public class OutputPluginTest extends IzouTest{
         List<AddOn> addOnList = new ArrayList<>();
         addOnList.add(testAddOn);
         Main main = new Main(addOnList);
-        Context context = new Context(testAddOn, main, "1", "debug");
 
-        OutputPlugin outputPlugin = new OutputPlugin("abcd", context) {
+        OutputPlugin outputPlugin = new OutputPlugin("abcd", getContext()) {
             @Override
             public void renderFinalOutput() {
 
             }
         };
-        OutputExtension ext1 = new OutputExtension("789") {
+        OutputExtension ext1 = new OutputExtension("789", getContext()) {
             /**
              * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
              * to the outputPlugin
@@ -102,7 +99,7 @@ public class OutputPluginTest extends IzouTest{
                 return null;
             }
         };
-        OutputExtension ext2 = new OutputExtension("10") {
+        OutputExtension ext2 = new OutputExtension("10", getContext()) {
             /**
              * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
              * to the outputPlugin
@@ -125,15 +122,14 @@ public class OutputPluginTest extends IzouTest{
         List<AddOn> addOnList = new ArrayList<>();
         addOnList.add(testAddOn);
         Main main = new Main(addOnList);
-        Context context = new Context(testAddOn, main, "1", "debug");
 
-        OutputPlugin outputPlugin = new OutputPlugin("abcd", context) {
+        OutputPlugin outputPlugin = new OutputPlugin("abcd", getContext()) {
             @Override
             public void renderFinalOutput() {
 
             }
         };
-        OutputExtension ext1 = new OutputExtension("789") {
+        OutputExtension ext1 = new OutputExtension("789", getContext()) {
             /**
              * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
              * to the outputPlugin
@@ -145,7 +141,7 @@ public class OutputPluginTest extends IzouTest{
                 return null;
             }
         };
-        OutputExtension ext2 = new OutputExtension("10") {
+        OutputExtension ext2 = new OutputExtension("10", getContext()) {
             /**
              * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
              * to the outputPlugin
@@ -167,19 +163,18 @@ public class OutputPluginTest extends IzouTest{
     public void testOutputPluginParameters() {
         Optional<Event> event = getEvent(id + 1);
         if(!event.isPresent()) fail();
-        Context context = new Context(testAddOn, main, "1", "debug");
         List<Resource> resources = Arrays.asList(new Resource<String>("1"),
                 new Resource<String>("2"),
                 new Resource<String>("3"));
         event.get().getListResourceContainer().addResource(resources);
 
-        OutputPlugin outputPlugin = new OutputPlugin("abcd") {
+        OutputPlugin outputPlugin = new OutputPlugin("abcd", getContext()) {
             @Override
             public void renderFinalOutput() {
 
             }
         };
-        OutputExtension ext1 = new OutputExtension("789") {
+        OutputExtension ext1 = new OutputExtension("789", getContext()) {
             /**
              * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
              * to the outputPlugin
@@ -191,7 +186,7 @@ public class OutputPluginTest extends IzouTest{
                 return null;
             }
         };
-        OutputExtension ext2 = new OutputExtension("10") {
+        OutputExtension ext2 = new OutputExtension("10", getContext()) {
             /**
              * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
              * to the outputPlugin

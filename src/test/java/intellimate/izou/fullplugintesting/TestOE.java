@@ -15,7 +15,6 @@ public class TestOE extends OutputExtension<TestOD>{
 
     public TestOE(String id, Context context) {
         super(id, context);
-        addContentDataToWishList("Test-CG");
         setPluginId("test-OP");
     }
 
