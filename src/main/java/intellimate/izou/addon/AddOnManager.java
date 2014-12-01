@@ -10,8 +10,6 @@ import intellimate.izou.output.OutputManager;
 import intellimate.izou.output.OutputPlugin;
 import intellimate.izou.resource.ResourceManager;
 import intellimate.izou.system.Context;
-import intellimate.izou.system.FileManager;
-import intellimate.izou.system.Context;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ro.fortsoft.pf4j.DefaultPluginManager;
@@ -19,7 +17,6 @@ import ro.fortsoft.pf4j.PluginManager;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -31,10 +28,8 @@ public class AddOnManager {
     private final OutputManager outputManager;
     private final ResourceManager resourceManager;
     private final ActivatorManager activatorManager;
-    private final Main main;
     public static final String ADDON_DATA_PATH = "." + File.separator + "resources" + File.separator;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
-    private final PropertiesManager propertiesManager;
     private final Main main;
 
     public AddOnManager(OutputManager outputManager,
@@ -52,14 +47,15 @@ public class AddOnManager {
     private void registerActivators() {
         for (AddOn addOn : addOnList) {
             try {
-            Activator[] activators = addOn.registerActivator();
-            if (activators == null || activators.length == 0) continue;
-            for (Activator activator : activators) {
-                if (activator == null) continue;
-                try {
-                    activatorManager.addActivator(activator);
-                } catch (Exception e) {
-                    fileLogger.error(e.getMessage());
+                Activator[] activators = addOn.registerActivator();
+                if (activators == null || activators.length == 0) continue;
+                for (Activator activator : activators) {
+                    if (activator == null) continue;
+                    try {
+                        activatorManager.addActivator(activator);
+                    } catch (Exception e) {
+                        fileLogger.error(e.getMessage());
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -277,7 +273,7 @@ public class AddOnManager {
      */
     private void initAllAddOns() {
         for (AddOn addOn : addOnList) {
-            addOn.initAddOn(new Context(addOn, main, addOn.getAddOnID(), "warn"));
+            addOn.initAddOn(new Context(addOn, main, "warn"));
         }
     }
 

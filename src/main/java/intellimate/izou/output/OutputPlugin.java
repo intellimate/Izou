@@ -1,11 +1,9 @@
 package intellimate.izou.output;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import intellimate.izou.events.Event;
 import intellimate.izou.resource.Resource;
 import intellimate.izou.system.Identifiable;
 import intellimate.izou.system.IdentificationManager;
-import intellimate.izou.contentgenerator.ContentData;
 import intellimate.izou.system.Context;
 
 import java.util.ArrayList;

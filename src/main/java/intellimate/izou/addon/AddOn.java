@@ -7,7 +7,6 @@ import intellimate.izou.output.OutputExtension;
 import intellimate.izou.output.OutputPlugin;
 import intellimate.izou.system.Context;
 import intellimate.izou.system.Identifiable;
-import intellimate.izou.system.Context;
 import ro.fortsoft.pf4j.ExtensionPoint;
 
 import java.io.*;
@@ -60,10 +59,10 @@ public abstract class AddOn implements ExtensionPoint, Identifiable {
             try {
                 properties.load(inputStream);
             } catch (IOException e) {
-                context.getLogger().error(e.getMessage());
+                context.logger.getLogger().error(e.getMessage());
             }
         } catch (FileNotFoundException e) {
-            context.getLogger().error(e.getMessage());
+            context.logger.getLogger().error(e.getMessage());
         }
     }
 
@@ -111,7 +110,7 @@ public abstract class AddOn implements ExtensionPoint, Identifiable {
      * @return true if operation has succeeded, else false
      */
     private boolean writeToPropertiesFile(String defaultPropsPath) {
-        return context.getMain().getFileManager().writeToFile(defaultPropsPath, propertiesPath);
+        return context.fileManager.getFileManager().writeToFile(defaultPropsPath, propertiesPath);
     }
 
     /**
@@ -125,7 +124,7 @@ public abstract class AddOn implements ExtensionPoint, Identifiable {
      * @throws IOException is thrown by bufferedWriter
      */
     private void createDefaultPropertyFile(String defaultPropsPath) throws IOException {
-        context.getMain().getFileManager().createDefaultFile(defaultPropsPath, "# Properties should always be in the " +
+        context.fileManager.getFileManager().createDefaultFile(defaultPropsPath, "# Properties should always be in the " +
                 "form of: \"key = value\"");
     }
 

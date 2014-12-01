@@ -5,18 +5,17 @@ import intellimate.izou.events.*;
 import intellimate.izou.main.Main;
 import intellimate.izou.resource.Resource;
 import intellimate.izou.resource.ResourceBuilder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.spi.ExtendedLogger;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.spi.ExtendedLogger;
-import sun.rmi.runtime.Log;
 
 /**
  * This class provides much of the general Communication with Izou.
  */
+
 @SuppressWarnings("UnusedDeclaration")
 public class Context {
     @SuppressWarnings("FieldCanBeLocal")
@@ -24,8 +23,8 @@ public class Context {
     private Main main;
     public Events events = new Events();
     public Resources resources = new Resources();
+    public FileManager fileManager = new FileManager();
     public Logger logger;
-    private final FileManager fileManager;
 
     /**
      * creates a new context for the addOn
@@ -39,7 +38,6 @@ public class Context {
     public Context(AddOn addOn, Main main, String logLevel) {
         this.addOn = addOn;
         this.main = main;
-        this.fileManager = main.getFileManager();
 
         IzouLogger izouLogger = main.getIzouLogger();
         ExtendedLogger logger = null;
@@ -62,7 +60,21 @@ public class Context {
         return addOn;
     }
 
-    private class Logger {
+    public class FileManager {
+        /**
+         * returns a FileManager-Instance
+         * <p>
+         * The file manager listens for events that were caused by modifications made to property files and
+         * then reloads the file
+         * </p>
+         * @return an instance of FileManager
+         */
+        public intellimate.izou.system.FileManager getFileManager() {
+            return main.getFileManager();
+        }
+    }
+
+    public class Logger {
         private final ExtendedLogger logger;
 
         public Logger(ExtendedLogger logger) {
@@ -88,7 +100,7 @@ public class Context {
         }
     }
 
-    private class Events {
+    public class Events {
         public Distributor distributor = new Distributor();
         /**
          * Adds an listener for events.
@@ -156,7 +168,7 @@ public class Context {
             main.getLocalEventManager().unregisterCaller(identification);
         }
 
-        private class Distributor {
+        public class Distributor {
             /**
              * with this method you can register EventPublisher add a Source of Events to the System.
              * <p>
@@ -205,7 +217,7 @@ public class Context {
         }
     }
 
-    private class Resources {
+    public class Resources {
         /**
          * registers a ResourceBuilder.
          * <p>

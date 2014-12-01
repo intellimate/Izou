@@ -2,11 +2,10 @@ package intellimate.izou.activator;
 
 import intellimate.izou.events.Event;
 import intellimate.izou.events.LocalEventManager;
+import intellimate.izou.system.Context;
 import intellimate.izou.system.Identifiable;
 import intellimate.izou.system.Identification;
 import intellimate.izou.system.IdentificationManager;
-import intellimate.izou.events.EventManager;
-import intellimate.izou.system.Context;
 
 import java.util.Optional;
 
@@ -72,7 +71,7 @@ public abstract class Activator implements Runnable, Identifiable{
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException e1) {
-                    context.getLogger().warn(e.getMessage());
+                    context.logger.getLogger().warn(e.getMessage());
                 }
                 activatorManager.addActivator(this);
             }
