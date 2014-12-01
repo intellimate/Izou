@@ -1,5 +1,8 @@
 package intellimate.izou.activator;
 
+import intellimate.izou.events.EventManager;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import intellimate.izou.events.LocalEventManager;
 
 import java.lang.reflect.Field;
@@ -14,6 +17,7 @@ import java.util.concurrent.ThreadFactory;
 public class ActivatorManager {
     private final ExecutorService executor = Executors.newCachedThreadPool(new CustomThreadFactory());
     private final LocalEventManager localEventManager;
+    private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     public ActivatorManager(LocalEventManager localEventManager) {
         this.localEventManager = localEventManager;
@@ -52,9 +56,7 @@ public class ActivatorManager {
                             Activator activator = (Activator) target.get(this);
                             activator.exceptionThrown(e);
                         } catch (NoSuchFieldException | IllegalAccessException | ClassCastException ecp ) {
-                            //TODO: real Exception handling is not implemented jet
-
-                            e.printStackTrace();
+                            fileLogger.fatal(e.getMessage());
                         }
                     }
                 }

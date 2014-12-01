@@ -1,18 +1,29 @@
 package intellimate.izou.addon;
 
+import intellimate.izou.system.Context;
+
 import java.util.Properties;
 
 /**
  * Wrapper class for properties
  */
 public class PropertiesContainer {
-    Properties properties;
+    private Properties properties;
+    private Context context;
 
     /**
      * creates a new properties-container
      */
     public PropertiesContainer() {
         this.properties = new Properties();
+    }
+
+    /**
+     * creates a new properties-container
+     */
+    public PropertiesContainer(Context context) {
+        this.properties = new Properties();
+        this.context = context;
     }
 
     /**

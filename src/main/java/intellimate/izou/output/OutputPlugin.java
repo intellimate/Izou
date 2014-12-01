@@ -5,6 +5,8 @@ import intellimate.izou.events.Event;
 import intellimate.izou.resource.Resource;
 import intellimate.izou.system.Identifiable;
 import intellimate.izou.system.IdentificationManager;
+import intellimate.izou.contentgenerator.ContentData;
+import intellimate.izou.system.Context;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -49,14 +51,19 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable{
      */
     private BlockingQueue<Event> eventBlockingQueue;
 
+    /**
+     * the context of the addOn
+     */
+    private Context context;
 
     /**
      * creates a new output-plugin with a new id
      *
      * @param id the id of the new output-plugin
      */
-    public OutputPlugin(String id) {
+    public OutputPlugin(String id, Context context) {
         this.id = id;
+        this.context = context;
         outputExtensionList = new ArrayList<>();
         futureList = new LinkedList<>();
         tDoneList = new ArrayList<>();
@@ -271,8 +278,7 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable{
             try {
                 event = blockingQueueHandling();  //gets the new Event if one was added to the blockingQueue
             } catch (InterruptedException e) {
-                e.printStackTrace();
-                //TODO: implement exception handling
+                context.getLogger().error(e.getMessage());
                 break;
             }
 
@@ -301,9 +307,10 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable{
                     try {
                         outputDataIsDone(tF);
                         tDoneList.add(tF.get());
-                    } catch (InterruptedException | ExecutionException e) {
-                        e.printStackTrace();
-                        //TODO: implement exception handling
+                    } catch (InterruptedException e) {
+                        context.getLogger().warn(e.getMessage());
+                    } catch (ExecutionException e) {
+                        context.getLogger().warn(e.getMessage());
                     }
                 }
 

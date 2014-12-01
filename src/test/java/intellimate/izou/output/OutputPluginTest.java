@@ -3,6 +3,11 @@ package intellimate.izou.output;
 import intellimate.izou.events.Event;
 import intellimate.izou.resource.Resource;
 import intellimate.izou.testHelper.IzouTest;
+import intellimate.izou.addon.AddOn;
+import intellimate.izou.contentgenerator.ContentData;
+import intellimate.izou.fullplugintesting.TestAddOn;
+import intellimate.izou.main.Main;
+import intellimate.izou.system.Context;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -22,6 +27,7 @@ public class OutputPluginTest extends IzouTest{
     public void testDistributeContentData() throws Exception {
         Optional<Event> event = getNextEvent();
         if(!event.isPresent()) fail();
+        Context context = new Context(testAddOn, main, "1", "debug");
         List<Resource> resources = Arrays.asList(new Resource<String>("1"),
                 new Resource<String>("2"),
                 new Resource<String>("3"));
@@ -72,7 +78,13 @@ public class OutputPluginTest extends IzouTest{
 
     @Test
     public void testAddOutputExtension() throws Exception {
-        OutputPlugin outputPlugin = new OutputPlugin("abcd") {
+        TestAddOn testAddOn = new TestAddOn("test-AddOn");
+        List<AddOn> addOnList = new ArrayList<>();
+        addOnList.add(testAddOn);
+        Main main = new Main(addOnList);
+        Context context = new Context(testAddOn, main, "1", "debug");
+
+        OutputPlugin outputPlugin = new OutputPlugin("abcd", context) {
             @Override
             public void renderFinalOutput() {
 
@@ -109,7 +121,13 @@ public class OutputPluginTest extends IzouTest{
 
     @Test
     public void testRemoveOutputExtension() throws Exception {
-        OutputPlugin outputPlugin = new OutputPlugin("abcd") {
+        TestAddOn testAddOn = new TestAddOn("test-AddOn");
+        List<AddOn> addOnList = new ArrayList<>();
+        addOnList.add(testAddOn);
+        Main main = new Main(addOnList);
+        Context context = new Context(testAddOn, main, "1", "debug");
+
+        OutputPlugin outputPlugin = new OutputPlugin("abcd", context) {
             @Override
             public void renderFinalOutput() {
 
@@ -149,6 +167,7 @@ public class OutputPluginTest extends IzouTest{
     public void testOutputPluginParameters() {
         Optional<Event> event = getEvent(id + 1);
         if(!event.isPresent()) fail();
+        Context context = new Context(testAddOn, main, "1", "debug");
         List<Resource> resources = Arrays.asList(new Resource<String>("1"),
                 new Resource<String>("2"),
                 new Resource<String>("3"));

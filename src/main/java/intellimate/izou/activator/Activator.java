@@ -5,6 +5,8 @@ import intellimate.izou.events.LocalEventManager;
 import intellimate.izou.system.Identifiable;
 import intellimate.izou.system.Identification;
 import intellimate.izou.system.IdentificationManager;
+import intellimate.izou.events.EventManager;
+import intellimate.izou.system.Context;
 
 import java.util.Optional;
 
@@ -25,13 +27,14 @@ public abstract class Activator implements Runnable, Identifiable{
     //limit of the exceptionCount
     @SuppressWarnings("FieldCanBeLocal")
     private final int exceptionLimit = 100;
+    private Context context;
 
-    public Activator() {
+    public Activator(Context context) {
         if(!identificationManager.registerIdentification(this)) {
             //TODO: log fatal
         }
+        this.context = context;
     }
-
 
     /**
      * This method implements runnable and should only be called by a Thread.
@@ -69,7 +72,7 @@ public abstract class Activator implements Runnable, Identifiable{
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException e1) {
-                    e.printStackTrace();
+                    context.getLogger().warn(e.getMessage());
                 }
                 activatorManager.addActivator(this);
             }

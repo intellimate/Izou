@@ -1,5 +1,10 @@
 package intellimate.izou.output;
 
+import intellimate.izou.addon.AddOn;
+import intellimate.izou.contentgenerator.ContentData;
+import intellimate.izou.fullplugintesting.TestAddOn;
+import intellimate.izou.main.Main;
+import intellimate.izou.system.Context;
 import intellimate.izou.events.Event;
 import intellimate.izou.resource.Resource;
 import intellimate.izou.testHelper.IzouTest;
@@ -21,6 +26,7 @@ public class OutputManagerTest extends IzouTest{
     @Test
     public void testAddOutputExtension() throws Exception {
         OutputManager outputManager = main.getOutputManager();
+        Context context = new Context(testAddOn, main, "1", "debug");
         OutputPlugin outputPlugin = new OutputPlugin("1234") {
             @Override
             public void renderFinalOutput() {
@@ -47,6 +53,7 @@ public class OutputManagerTest extends IzouTest{
     @Test
     public void testRemoveOutputExtension() throws Exception {
         OutputManager outputManager = main.getOutputManager();
+        Context context = new Context(testAddOn, main, "1", "debug");
         OutputPlugin outputPlugin = new OutputPlugin("1234") {
             @Override
             public void renderFinalOutput() {
@@ -74,6 +81,7 @@ public class OutputManagerTest extends IzouTest{
     @Test
     public void testPassDataToOutputPlugin() throws Exception {
         Optional<Event> event = getEvent(id + 1);
+        Context context = new Context(testAddOn, main, "1", "debug");
         if(!event.isPresent()) fail();
 
         OutputManager outputManager = main.getOutputManager();
@@ -112,8 +120,14 @@ public class OutputManagerTest extends IzouTest{
 
     @Test
     public void testAddOutputExtensionLater() throws Exception {
+        TestAddOn testAddOn = new TestAddOn("test-AddOn");
+        List<AddOn> addOnList = new ArrayList<>();
+        addOnList.add(testAddOn);
+        Main main = new Main(addOnList);
+        Context context = new Context(testAddOn, main, "1", "debug");
+
         OutputManager outputManager = new OutputManager();
-        OutputPlugin outputPlugin = new OutputPlugin("1234") {
+        OutputPlugin outputPlugin = new OutputPlugin("1234", context) {
             @Override
             public void renderFinalOutput() {
 

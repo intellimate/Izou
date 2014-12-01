@@ -6,6 +6,9 @@ import intellimate.izou.resource.Resource;
 import intellimate.izou.system.Identifiable;
 import intellimate.izou.system.Identification;
 import intellimate.izou.system.IdentificationManager;
+import intellimate.izou.contentgenerator.ContentData;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -42,6 +45,9 @@ public class OutputManager implements Identifiable{
      * this HashMap gets checked every time a new output-plugin is added for relevant output-extensions
      */
     private HashMap<String, List<OutputExtension>> tempExtensionStorage;
+
+    private final Logger fileLogger = LogManager.getLogger(this.getClass());
+
 
     /**
      * Creates a new output-manager with a list of output-plugins
@@ -89,8 +95,7 @@ public class OutputManager implements Identifiable{
                     outputPlugin.addOutputExtension(oE);
                 }
                 catch (ClassCastException e) {
-                    //TODO: handle exception
-                    e.printStackTrace();
+                    fileLogger.warn(e.getMessage());
                 }
             }
             tempExtensionStorage.remove(outputPlugin.getID());

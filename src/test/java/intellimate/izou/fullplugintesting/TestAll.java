@@ -1,15 +1,30 @@
 package intellimate.izou.fullplugintesting;
 
 import intellimate.izou.main.Main;
+import intellimate.izou.activator.Activator;
+import intellimate.izou.activator.ActivatorManager;
+import intellimate.izou.addon.AddOn;
+import intellimate.izou.contentgenerator.ContentGenerator;
+import intellimate.izou.contentgenerator.ContentGeneratorManager;
+import intellimate.izou.events.EventController;
+import intellimate.izou.events.EventManager;
+import intellimate.izou.main.Main;
+import intellimate.izou.output.OutputExtension;
+import intellimate.izou.output.OutputManager;
+import intellimate.izou.output.OutputPlugin;
+import intellimate.izou.system.Context;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 /**
  * Created by julianbrendl on 10/7/14.
  */
 public class TestAll {
-
     public static boolean isWorking = false;
 
     @Test
@@ -34,7 +49,7 @@ public class TestAll {
         int count = 0;
         int limit = 150;
         while(!isWorking && (count < limit)) {
-            Thread.sleep(20);
+            Thread.sleep(50);
             count++;
         }
         //should print out:
@@ -45,6 +60,4 @@ public class TestAll {
         //It Works
         assertTrue(isWorking);
     }
-
-
 }

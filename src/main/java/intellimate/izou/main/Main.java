@@ -5,8 +5,15 @@ import intellimate.izou.addon.AddOn;
 import intellimate.izou.addon.AddOnManager;
 import intellimate.izou.events.EventDistributor;
 import intellimate.izou.events.LocalEventManager;
+import intellimate.izou.contentgenerator.ContentGeneratorManager;
+import intellimate.izou.events.EventManager;
 import intellimate.izou.output.OutputManager;
 import intellimate.izou.resource.ResourceManager;
+import intellimate.izou.system.FileManager;
+import intellimate.izou.system.FileSystemManager;
+import intellimate.izou.system.IzouLogger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 
@@ -24,8 +31,20 @@ public class Main {
     private final Thread threadEventManager;
     private final ActivatorManager activatorManager;
     private final AddOnManager addOnManager;
+    private final Thread threadEventManager;
+    private final FileManager fileManager;
+    private final IzouLogger izouLogger;
+    private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     private Main(boolean debug) {
+        FileSystemManager fileSystemManager = new FileSystemManager();
+        try {
+            fileSystemManager.createIzouFileSystem();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        izouLogger = new IzouLogger();
         outputManager = new OutputManager();
         resourceManager = new ResourceManager();
         eventDistributor = new EventDistributor(resourceManager, outputManager);
@@ -35,6 +54,15 @@ public class Main {
         activatorManager = new ActivatorManager(localEventManager);
         addOnManager = new AddOnManager(outputManager,resourceManager,activatorManager, this);
         if(!debug) addOnManager.retrieveAndRegisterAddOns();
+
+        FileManager fileManagerTemp;
+        try {
+            fileManagerTemp = new FileManager();
+        } catch (IOException e) {
+            fileManagerTemp = null;
+            fileLogger.error(e.getMessage());
+        }
+        fileManager = fileManagerTemp;
     }
 
     /**
@@ -87,5 +115,13 @@ public class Main {
 
     public EventDistributor getEventDistributor() {
         return eventDistributor;
+    }
+
+    public synchronized FileManager getFileManager() {
+        return fileManager;
+    }
+
+    public synchronized IzouLogger getIzouLogger() {
+        return izouLogger;
     }
 }

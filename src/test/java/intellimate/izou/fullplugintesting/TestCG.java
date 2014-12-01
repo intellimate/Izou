@@ -1,6 +1,8 @@
 package intellimate.izou.fullplugintesting;
 
 import intellimate.izou.contentgenerator.ContentGenerator;
+import intellimate.izou.events.EventManager;
+import intellimate.izou.system.Context;
 import intellimate.izou.events.Event;
 import intellimate.izou.resource.Resource;
 
@@ -11,8 +13,8 @@ import java.util.Optional;
 @SuppressWarnings("SameParameterValue")
 public class TestCG extends ContentGenerator {
 
-    public TestCG(String contentGeneratorID) {
-        super(contentGeneratorID);
+    public TestCG(String contentGeneratorID, Context context) {
+        super(contentGeneratorID, context);
     }
 
     /**

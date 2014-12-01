@@ -5,6 +5,8 @@ import intellimate.izou.events.Event;
 import intellimate.izou.events.LocalEventManager;
 import intellimate.izou.system.Identification;
 import intellimate.izou.system.IdentificationManager;
+import intellimate.izou.events.EventManager;
+import intellimate.izou.system.Context;
 
 import java.util.Optional;
 
@@ -15,8 +17,9 @@ import java.util.Optional;
 public class TestAct extends Activator {
     private boolean start;
 
-    public TestAct() {
-        start = false;
+    public TestAct(Context context) {
+        super(context);
+        start = true;
     }
 
     public void setStart(boolean input) {
@@ -28,6 +31,7 @@ public class TestAct extends Activator {
         boolean firedEvent = false;
         while (!firedEvent) {
             if(start) {
+                start = false;
                 System.out.println("1");
                 Optional<Identification> id = IdentificationManager.getInstance().getIdentification(this);
                 if(!id.isPresent()) return;

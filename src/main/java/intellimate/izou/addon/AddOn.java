@@ -7,6 +7,7 @@ import intellimate.izou.output.OutputExtension;
 import intellimate.izou.output.OutputPlugin;
 import intellimate.izou.system.Context;
 import intellimate.izou.system.Identifiable;
+import intellimate.izou.system.Context;
 import ro.fortsoft.pf4j.ExtensionPoint;
 
 import java.io.*;
@@ -59,11 +60,10 @@ public abstract class AddOn implements ExtensionPoint, Identifiable {
             try {
                 properties.load(inputStream);
             } catch (IOException e) {
-                //TODO: log exception
-                e.printStackTrace();
+                context.getLogger().error(e.getMessage());
             }
         } catch (FileNotFoundException e) {
-            //TODO: log exception
+            context.getLogger().error(e.getMessage());
         }
     }
 
@@ -96,7 +96,7 @@ public abstract class AddOn implements ExtensionPoint, Identifiable {
             }
             if (!writeToPropertiesFile (defaultPropertiesPath)) return;
             try {
-                reloadProperties();
+                reloadFiles();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -111,40 +111,7 @@ public abstract class AddOn implements ExtensionPoint, Identifiable {
      * @return true if operation has succeeded, else false
      */
     private boolean writeToPropertiesFile(String defaultPropsPath) {
-        boolean outcome = true;
-
-        BufferedReader bufferedReader = null;
-        BufferedWriter bufferedWriter = null;
-        try {
-            bufferedReader = new BufferedReader(new FileReader(defaultPropsPath));
-            bufferedWriter = new BufferedWriter(new FileWriter(propertiesPath));
-
-            // c is the character read from bufferedReader and written to bufferedWriter
-            int c = 0;
-            if (bufferedReader.ready()) {
-                while (c != -1) {
-                    c = bufferedReader.read();
-                    bufferedWriter.write(c);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            outcome =  false;
-        } finally {
-            if (bufferedReader != null)
-                try {
-                    bufferedReader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            if (bufferedWriter != null)
-                try {
-                    bufferedWriter.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-        }
-        return outcome;
+        return context.getMain().getFileManager().writeToFile(defaultPropsPath, propertiesPath);
     }
 
     /**
@@ -158,21 +125,8 @@ public abstract class AddOn implements ExtensionPoint, Identifiable {
      * @throws IOException is thrown by bufferedWriter
      */
     private void createDefaultPropertyFile(String defaultPropsPath) throws IOException {
-        File file = new File(defaultPropsPath);
-        BufferedWriter bufferedWriterInit = null;
-        try {
-            if (!file.exists()) {
-                file.createNewFile();
-                bufferedWriterInit = new BufferedWriter(new FileWriter(defaultPropsPath));
-                System.out.println(defaultPropsPath);
-                bufferedWriterInit.write("# Add properties in the form of key = value");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if(bufferedWriterInit != null)
-                bufferedWriterInit.close();
-        }
+        context.getMain().getFileManager().createDefaultFile(defaultPropsPath, "# Properties should always be in the " +
+                "form of: \"key = value\"");
     }
 
     /**
@@ -180,7 +134,7 @@ public abstract class AddOn implements ExtensionPoint, Identifiable {
      *
      * @throws IOException thrown by inputStream
      */
-    public void reloadProperties() throws IOException {
+    public void reloadFiles() throws IOException {
         Properties temp = new Properties();
         InputStream inputStream = null;
         try {
