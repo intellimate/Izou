@@ -1,12 +1,10 @@
 package intellimate.izou.output;
 
 import intellimate.izou.events.Event;
-import intellimate.izou.events.EventBehaviourController;
 import intellimate.izou.resource.Resource;
 import intellimate.izou.system.Identifiable;
 import intellimate.izou.system.Identification;
 import intellimate.izou.system.IdentificationManager;
-import intellimate.izou.contentgenerator.ContentData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -15,7 +13,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**

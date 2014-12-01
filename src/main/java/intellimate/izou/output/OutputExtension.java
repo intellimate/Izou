@@ -1,8 +1,7 @@
 package intellimate.izou.output;
 
-import intellimate.izou.contentgenerator.ContentData;
-import intellimate.izou.system.Context;
 import intellimate.izou.events.Event;
+import intellimate.izou.system.Context;
 import intellimate.izou.system.Identifiable;
 
 import java.util.ArrayList;
@@ -49,8 +48,6 @@ public abstract class OutputExtension<T> implements Callable<T>, Identifiable {
         this.id = id;
         resourceIdWishList = new ArrayList<>();
         this.context = context;
-        contentDataList = new ArrayList<>();
-        contentDataWishList = new ArrayList<>();
     }
 
     /**

@@ -276,7 +276,7 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable{
             try {
                 event = blockingQueueHandling();  //gets the new Event if one was added to the blockingQueue
             } catch (InterruptedException e) {
-                context.getLogger().error(e.getMessage());
+                context.logger.getLogger().error(e.getMessage());
                 break;
             }
 
@@ -305,10 +305,8 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable{
                     try {
                         outputDataIsDone(tF);
                         tDoneList.add(tF.get());
-                    } catch (InterruptedException e) {
-                        context.getLogger().warn(e.getMessage());
-                    } catch (ExecutionException e) {
-                        context.getLogger().warn(e.getMessage());
+                    } catch (InterruptedException | ExecutionException e) {
+                        context.logger.getLogger().warn(e.getMessage());
                     }
                 }
 
