@@ -26,7 +26,7 @@ public class IzouTest implements Identifiable{
     private static final class Lock { }
     private final Object lock = new Lock();
     private TestAddOn testAddOn = new TestAddOn(getID());
-    private Context  context = new Context(testAddOn, main, "debug");
+    private Context  context;
 
     /**
      * creates a new instance of IzouTest
@@ -41,6 +41,7 @@ public class IzouTest implements Identifiable{
             }
             this.main = staticMain;
         }
+        context = new Context(testAddOn, main, "debug");
         this.id = id;
         identificationManager = IdentificationManager.getInstance();
         identificationManager.registerIdentification(this);
