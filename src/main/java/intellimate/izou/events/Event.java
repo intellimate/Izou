@@ -124,7 +124,7 @@ public class Event implements Identifiable{
      * sets the Descriptors (but not the Event-Type).
      * @param descriptors a List containing all the Descriptors
      */
-    public void setDescriptors(LinkedList<String> descriptors) {
+    public void setDescriptors(List<String> descriptors) {
         this.descriptors = descriptors;
     }
 

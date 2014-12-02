@@ -1,9 +1,10 @@
 package intellimate.izou.contentgenerator;
 
-import intellimate.izou.system.Context;
 import intellimate.izou.events.Event;
 import intellimate.izou.resource.Resource;
 import intellimate.izou.resource.ResourceBuilder;
+import intellimate.izou.system.Context;
+import intellimate.izou.system.IdentificationManager;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +23,7 @@ public abstract class ContentGenerator implements ResourceBuilder{
     public ContentGenerator(String id, Context context) {
         this.contentGeneratorID = id;
         this.context = context;
+        IdentificationManager.getInstance().registerIdentification(this);
     }
     /**
      * this method is called to register what resources the object provides.

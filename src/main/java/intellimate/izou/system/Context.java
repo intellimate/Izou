@@ -82,15 +82,6 @@ public class Context {
         }
 
         /**
-         * gets instance of main
-         *
-         * @return instance of main
-         */
-        public Main getMain() {
-            return main;
-        }
-
-        /**
          * gets logger for addOn
          *
          * @return the logger
