@@ -4,26 +4,8 @@
   <artifactId>Izou</artifactId>
   <versioning>
     <versions>
-<<<<<<< Updated upstream
-      <version>0.9.5-SNAPSHOT</version>
-    </versions>
-    <lastUpdated>20141120164013</lastUpdated>
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
       <version>0.9.9-SNAPSHOT</version>
     </versions>
-    <lastUpdated>20141201223431</lastUpdated>
-=======
-      <version>0.9.5-SNAPSHOT</version>
-    </versions>
-    <lastUpdated>20141120164013</lastUpdated>
->>>>>>> FETCH_HEAD
-=======
-      <version>0.9.5-SNAPSHOT</version>
-    </versions>
-    <lastUpdated>20141120164013</lastUpdated>
->>>>>>> FETCH_HEAD
->>>>>>> Stashed changes
+    <lastUpdated>20141202162750</lastUpdated>
   </versioning>
 </metadata>
