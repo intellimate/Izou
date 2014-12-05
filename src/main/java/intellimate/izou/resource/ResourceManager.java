@@ -36,8 +36,10 @@ public class ResourceManager {
     public List<Resource> generateResources(Event event) {
         if(!event.getAllIformations().stream()
                 .anyMatch(eventSubscribers::containsKey)) return new LinkedList<>();
+
         List<Future<List<Resource>>> futures = event.getAllIformations().stream()
                 .map(eventSubscribers::get)
+                .filter(Objects::nonNull)
                 .flatMap(Collection::stream)
                 .distinct()
                 .map(resource -> new ResourceBuilderCallableWrapper(resource, resource.announceResources(), Optional.of(event)))
@@ -52,6 +54,7 @@ public class ResourceManager {
                         return future.get();
                     } catch (InterruptedException | ExecutionException e) {
                         //Todo: log
+                        e.printStackTrace();
                         return null;
                     }
                 })
@@ -95,6 +98,7 @@ public class ResourceManager {
      * @param consumer the callback when the ResourceBuilder finishes
      */
     public void generatedResource(Resource resource, Consumer<List<Resource>> consumer) {
+        if(resourceIDs.get(resource.getResourceID()) == null) return;
         Optional<ResourceBuilder> resourceBuilder = resourceIDs.get(resource.getResourceID()).stream()
                 //return true if resource has no provider, if not check provider
                 .filter(resourceS -> !resource.hasProvider() || resourceS.isOwner(resource.getProvider()))
@@ -112,6 +116,7 @@ public class ResourceManager {
      * @return a List of generated resources
      */
     private List<Resource> generateResource(List<ResourceBuilder> resourceBuilders) {
+        if(resourceBuilders == null) return new LinkedList<>();
         List<Future<List<Resource>>> futures = resourceBuilders.stream()
                 .map(resource -> new ResourceBuilderCallableWrapper(resource, resource.announceResources(), Optional.empty()))
                 .map(executor::submit)
@@ -180,6 +185,7 @@ public class ResourceManager {
      */
     private void registerResourceIDsForResourceBuilder(ResourceBuilder resourceBuilder) {
         List<Resource> resources = resourceBuilder.announceResources();
+        if(resources == null) return;
         for(Resource resource : resources) {
             if(resourceIDs.containsKey(resource.getResourceID())) {
                 resourceIDs.get(resource.getResourceID()).add(resourceBuilder);
@@ -197,6 +203,7 @@ public class ResourceManager {
      */
     private void registerEventsForResourceBuilder(ResourceBuilder resourceBuilder) {
         List<String> events = resourceBuilder.announceEvents();
+        if(events == null) return;
         for(String event : events) {
             if(eventSubscribers.containsKey(event)) {
                 eventSubscribers.get(event).add(resourceBuilder);
