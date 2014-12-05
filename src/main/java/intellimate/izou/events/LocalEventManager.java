@@ -13,34 +13,6 @@ import java.util.concurrent.LinkedBlockingQueue;
  * This class is used to manage local events.
  */
 public class LocalEventManager implements Runnable, Identifiable{
-    //common Events:
-    /**
-     * Event for a Welcome with maximum response.
-     *
-     * Every component that can contribute should contribute to this Event.
-     */
-    public static final String FULL_WELCOME_EVENT = LocalEventManager.class.getCanonicalName() + ".FullWelcomeEvent";
-    /**
-     * Event for a Welcome with major response.
-     *
-     * Every component that is import should contribute to this Event.
-     */
-    @SuppressWarnings("UnusedDeclaration")
-    public static final String MAJOR_WELCOME_EVENT = LocalEventManager.class.getCanonicalName() + ".MajorWelcomeEvent";
-    /**
-     * Event for a Welcome with major response.
-     *
-     * Only components that have information of great importance should contribute to this event.
-     */
-    @SuppressWarnings("UnusedDeclaration")
-    public static final String MINOR_WELCOME_EVENT = LocalEventManager.class.getCanonicalName() + ".MinorWelcomeEvent";
-    /**
-     * Event for a Welcome with major response.
-     *
-     * Only components that have information of great importance should contribute to this event.
-     */
-    @SuppressWarnings("UnusedDeclaration")
-    public static final String SUBSCRIBE_TO_ALL_EVENTS = LocalEventManager.class.getCanonicalName() + ".SubscribeToAllEvents";
     //here are all the Instances which fire events stored
     private final ConcurrentHashMap<Identification, EventCaller> callers = new ConcurrentHashMap<>();
     //the queue where all the Events are stored

@@ -23,6 +23,27 @@ public class Event implements Identifiable{
      * Use this type when other AddOns should just notice (they needn't).
      */
     public static final String NOTIFICATION = Event.class.getCanonicalName() + "Notification";
+    //common Events-Descriptors:
+    /**
+     * Event for a Welcome with maximum response.
+     *
+     * Every component that can contribute should contribute to this Event.
+     */
+    public static final String FULL_WELCOME_EVENT = LocalEventManager.class.getCanonicalName() + ".FullWelcomeEvent";
+    /**
+     * Event for a Welcome with major response.
+     *
+     * Every component that is import should contribute to this Event.
+     */
+    @SuppressWarnings("UnusedDeclaration")
+    public static final String MAJOR_WELCOME_EVENT = LocalEventManager.class.getCanonicalName() + ".MajorWelcomeEvent";
+    /**
+     * Event for a Welcome with major response.
+     *
+     * Only components that have information of great importance should contribute to this event.
+     */
+    @SuppressWarnings("UnusedDeclaration")
+    public static final String MINOR_WELCOME_EVENT = LocalEventManager.class.getCanonicalName() + ".MinorWelcomeEvent";
     private final String type;
     private final Identification source;
     private List<String> descriptors = new ArrayList<>();
