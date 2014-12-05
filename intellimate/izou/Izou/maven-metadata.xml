@@ -4,12 +4,8 @@
   <artifactId>Izou</artifactId>
   <versioning>
     <versions>
-      <version>0.9.9.4-SNAPSHOT</version>
+      <version>0.9.5-SNAPSHOT</version>
     </versions>
-<<<<<<< Updated upstream
-    <lastUpdated>20141205145546</lastUpdated>
-=======
-    <lastUpdated>20141205154019</lastUpdated>
->>>>>>> Stashed changes
+    <lastUpdated>20141205154412</lastUpdated>
   </versioning>
 </metadata>
