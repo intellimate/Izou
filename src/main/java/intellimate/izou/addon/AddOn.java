@@ -24,7 +24,7 @@ public abstract class AddOn implements ExtensionPoint, Identifiable {
     private PropertiesContainer propertiesContainer;
     @SuppressWarnings("FieldCanBeLocal")
     private final String addOnID;
-    private final String propertiesPath;
+    private String propertiesPath;
     private String defaultPropertiesPath;
     private Context context;
 
@@ -35,6 +35,21 @@ public abstract class AddOn implements ExtensionPoint, Identifiable {
     public AddOn(String addOnID) {
         this.addOnID = addOnID;
         this.propertiesContainer = new PropertiesContainer();
+    }
+
+    /**
+     * use this method to build your instances etc.
+     */
+    public abstract void prepare();
+
+    /**
+     * internal initiation of addOn
+     */
+    protected void initAddOn(Context context) {
+        if(defaultPropertiesPath != null)
+            initProperties();
+        this.context = context;
+
         Properties properties = propertiesContainer.getProperties();
         String propertiesPathTemp;
         try {
@@ -64,20 +79,6 @@ public abstract class AddOn implements ExtensionPoint, Identifiable {
         } catch (FileNotFoundException e) {
             context.logger.getLogger().error(e.getMessage());
         }
-    }
-
-    /**
-     * use this method to build your instances etc.
-     */
-    public abstract void prepare();
-
-    /**
-     * internal initiation of addOn
-     */
-    protected void initAddOn(Context context) {
-        if(defaultPropertiesPath != null)
-            initProperties();
-        this.context = context;
     }
 
     /**
