@@ -63,4 +63,15 @@ public abstract class ContentGenerator implements ResourceBuilder{
     public String getID() {
         return contentGeneratorID;
     }
+
+    /**
+     * returns the Context of the AddOn.
+     *
+     * Context provides some general Communications.
+     *
+     * @return an instance of Context.
+     */
+    public Context getContext() {
+        return context;
+    }
 }

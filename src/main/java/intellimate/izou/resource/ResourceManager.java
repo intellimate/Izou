@@ -1,6 +1,8 @@
 package intellimate.izou.resource;
 
 import intellimate.izou.events.Event;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -24,6 +26,7 @@ public class ResourceManager {
      * the List contains all the ResourceBuilders registered
      */
     private HashMap<String, LinkedList<ResourceBuilder>> resourceIDs= new HashMap<>();
+    private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     /**
      * generates all the resources for an event

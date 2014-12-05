@@ -1,6 +1,8 @@
 package intellimate.izou.events;
 
 import intellimate.izou.system.Identification;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +17,7 @@ public class EventBehaviourController {
     protected EventBehaviourController(Event event) {
         this.event = event;
     }
+    private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     /**
      * this method sets the controls for the Output-Plugin Behaviour.

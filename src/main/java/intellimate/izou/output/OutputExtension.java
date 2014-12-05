@@ -147,5 +147,16 @@ public abstract class OutputExtension<T> implements Callable<T>, Identifiable {
      * to the outputPlugin
      */
     public abstract T generate(Event event);
+
+    /**
+     * returns the Context of the AddOn.
+     *
+     * Context provides some general Communications.
+     *
+     * @return an instance of Context.
+     */
+    public Context getContext() {
+        return context;
+    }
 }
 

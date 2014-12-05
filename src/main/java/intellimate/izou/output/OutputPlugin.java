@@ -193,6 +193,17 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable{
     }
 
     /**
+     * returns the Context of the AddOn.
+     *
+     * Context provides some general Communications.
+     *
+     * @return an instance of Context.
+     */
+    public Context getContext() {
+        return context;
+    }
+
+    /**
      * event is called when an output-extension is added to this output-plugin
      *
      * @param outputExtension the outputExtension that was added to the outputPlugin

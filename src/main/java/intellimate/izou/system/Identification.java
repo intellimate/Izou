@@ -1,5 +1,8 @@
 package intellimate.izou.system;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * Used to provide identification.
  * You can obtain an Instance through IdentificationManager
@@ -7,6 +10,8 @@ package intellimate.izou.system;
 public final class Identification {
     private Identifiable identifiable;
     private boolean createdFromInstance;
+    private final Logger fileLogger = LogManager.getLogger(this.getClass());
+
     private Identification(Identifiable identifiable, boolean createdFromInstance) {
         this.identifiable = identifiable;
         this.createdFromInstance = createdFromInstance;

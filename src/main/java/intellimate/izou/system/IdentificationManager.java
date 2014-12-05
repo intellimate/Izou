@@ -1,5 +1,8 @@
 package intellimate.izou.system;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.LinkedList;
 import java.util.Optional;
 
@@ -9,6 +12,7 @@ import java.util.Optional;
 public class IdentificationManager {
     private LinkedList<Identifiable> identifiables = new LinkedList<>();
     private static IdentificationManager ourInstance = new IdentificationManager();
+    private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     public static IdentificationManager getInstance() {
         return ourInstance;

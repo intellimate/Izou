@@ -198,7 +198,9 @@ public abstract class AddOn implements ExtensionPoint, Identifiable {
 
     /**
      * returns the Context of the AddOn.
+     *
      * Context provides some general Communications.
+     *
      * @return an instance of Context.
      */
     public Context getContext() {
@@ -277,4 +279,6 @@ public abstract class AddOn implements ExtensionPoint, Identifiable {
         else
             throw new NullPointerException("File path does not exist");
     }
+
+
 }

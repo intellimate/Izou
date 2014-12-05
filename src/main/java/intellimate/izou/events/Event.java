@@ -4,6 +4,8 @@ import intellimate.izou.system.Identifiable;
 import intellimate.izou.system.Identification;
 import intellimate.izou.resource.ListResourceProvider;
 import intellimate.izou.resource.Resource;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -18,7 +20,6 @@ public class Event implements Identifiable{
      * Use this type when other AddOns should react to this Event.
      */
     public static final String RESPONSE = Event.class.getCanonicalName() + "Response";
-
     /**
      * Use this type when other AddOns should just notice (they needn't).
      */
@@ -28,6 +29,7 @@ public class Event implements Identifiable{
     private List<String> descriptors = new ArrayList<>();
     private ListResourceProvider listResourceContainer = new ListResourceProvider();
     private final EventBehaviourController eventBehaviourController = new EventBehaviourController(this);
+    private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     /**
      * Creates a new Event Object

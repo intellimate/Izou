@@ -30,7 +30,7 @@ public abstract class Activator implements Runnable, Identifiable{
 
     public Activator(Context context) {
         if(!identificationManager.registerIdentification(this)) {
-            //TODO: log fatal
+            context.logger.getLogger().fatal("Failed to register with identification manager");
         }
         this.context = context;
     }
@@ -129,13 +129,13 @@ public abstract class Activator implements Runnable, Identifiable{
         this.localEventManager = localEventManager;
         Optional<Identification> identification = identificationManager.getIdentification(this);
         if(!identification.isPresent()) {
-            //TODO:log fatal
+            context.logger.getLogger().fatal("Identification not found while setting local event manager");
             return;
         }
         Optional<LocalEventManager.EventCaller> result = localEventManager.registerCaller(identification.get());
         //noinspection StatementWithEmptyBody
         if(!result.isPresent()) {
-            //TODO: log fatal
+            context.logger.getLogger().fatal("Unable to register with local event manager");
             return;
         }
         caller = result.get();
@@ -145,4 +145,22 @@ public abstract class Activator implements Runnable, Identifiable{
         this.activatorManager = activatorManager;
     }
 
+    /**
+     * returns the Context of the AddOn.
+     *
+     * Context provides some general Communications.
+     *
+     * @return an instance of Context.
+     */
+    public Context getContext() {
+        return context;
+    }
+
+    /**
+     * get identification manager
+     * @return get identification manager
+     */
+    public IdentificationManager getIdentificationManager() {
+        return identificationManager;
+    }
 }

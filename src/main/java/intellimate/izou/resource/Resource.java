@@ -1,6 +1,8 @@
 package intellimate.izou.resource;
 
 import intellimate.izou.system.Identification;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -17,6 +19,7 @@ public class Resource <T> {
     private Identification consumer;
     private final Lock resourceLock = new ReentrantLock();
     private T resource;
+    private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     /**
      * creates a new Resource.

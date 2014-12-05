@@ -41,4 +41,8 @@ public class PropertiesContainer {
     public void setProperties(Properties properties) {
         this.properties = properties;
     }
+
+    public Context getContext() {
+        return context;
+    }
 }

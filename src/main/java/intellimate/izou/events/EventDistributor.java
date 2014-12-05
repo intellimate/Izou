@@ -4,6 +4,8 @@ import intellimate.izou.output.OutputManager;
 import intellimate.izou.resource.Resource;
 import intellimate.izou.resource.ResourceManager;
 import intellimate.izou.system.Identification;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -24,6 +26,7 @@ public class EventDistributor implements Runnable{
     private final ConcurrentHashMap<String, ArrayList<EventListener>> listeners = new ConcurrentHashMap<>();
     //ThreadPool where all the Listeners are executed
     private final ExecutorService executor = Executors.newCachedThreadPool();
+    private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     public EventDistributor(ResourceManager resourceManager, OutputManager outputManager) {
         this.resourceManager = resourceManager;

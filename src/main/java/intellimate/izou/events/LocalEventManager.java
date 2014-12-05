@@ -3,6 +3,8 @@ package intellimate.izou.events;
 import intellimate.izou.system.Identifiable;
 import intellimate.izou.system.Identification;
 import intellimate.izou.system.IdentificationManager;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
@@ -48,6 +50,7 @@ public class LocalEventManager implements Runnable, Identifiable{
     //if false, run() will stop
     private boolean stop = false;
     private Optional<EventPublisher> eventPublisher = Optional.empty();
+    private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     public LocalEventManager(EventDistributor eventDistributor) {
         IdentificationManager identificationManager = IdentificationManager.getInstance();

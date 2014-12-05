@@ -24,7 +24,7 @@ public class IzouLogger {
      * of Izou
      *
      * @param addOnId the Id of the addOn the logger is created for
-     * @param level level of logger (at what level of log the logger should be activated)
+     * @param level level of logger (at what level of log the logger should be activated
      * @return the new logger
      */
     public synchronized ExtendedLogger createFileLogger(String addOnId, String level) {
