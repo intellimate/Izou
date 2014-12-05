@@ -6,6 +6,10 @@
     <versions>
       <version>0.9.9.4-SNAPSHOT</version>
     </versions>
+<<<<<<< Updated upstream
     <lastUpdated>20141205145546</lastUpdated>
+=======
+    <lastUpdated>20141205154019</lastUpdated>
+>>>>>>> Stashed changes
   </versioning>
 </metadata>
