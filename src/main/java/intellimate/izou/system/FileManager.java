@@ -4,12 +4,12 @@ import intellimate.izou.addon.AddOn;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import static java.nio.file.StandardWatchEventKinds.*;
-
 import java.io.*;
 import java.nio.file.*;
 import java.util.HashMap;
 import java.util.Map;
+
+import static java.nio.file.StandardWatchEventKinds.*;
 
 /**
  * The file manager listens for events that were caused by modifications made to property files and
@@ -125,19 +125,19 @@ public class FileManager implements Runnable {
                 }
             }
         } catch (IOException e) {
-            fileLogger.error(e.getMessage());
+            fileLogger.error("Unable to write to the Properties-File", e);
             outcome =  false;
         } finally {
             if (bufferedReader != null)
                 try {
                     bufferedReader.close();
                 } catch (IOException e) {
-                    fileLogger.error(e.getMessage());                }
+                    fileLogger.error(e);                }
             if (bufferedWriter != null)
                 try {
                     bufferedWriter.close();
                 } catch (IOException e) {
-                    fileLogger.error(e.getMessage());
+                    fileLogger.error(e);
                 }
         }
         return outcome;
@@ -161,7 +161,7 @@ public class FileManager implements Runnable {
                 bufferedWriterInit.write(initMessage);
             }
         } catch (IOException e) {
-            fileLogger.error(e.getMessage());
+            fileLogger.error("unable to create the Default-File", e);
         } finally {
             if(bufferedWriterInit != null)
                 bufferedWriterInit.close();
@@ -178,8 +178,8 @@ public class FileManager implements Runnable {
             try {
                 key = watcher.take();
             } catch (InterruptedException e) {
-                fileLogger.error(e.getMessage());
-                return;
+                fileLogger.warn(e);
+                continue;
             }
 
             FileInfo fileInfo = addOnMap.get(key);
@@ -194,7 +194,7 @@ public class FileManager implements Runnable {
                     try {
                         throw new IncompletePropertyEventException();
                     } catch (IncompletePropertyEventException e) {
-                        fileLogger.warn(e.getMessage());
+                        fileLogger.warn(e);
                     }
                 } else if ((kind == ENTRY_CREATE || kind == ENTRY_MODIFY || kind == ENTRY_DELETE)
                         && isFileType(event, fileInfo.getFileType())) {
@@ -203,12 +203,12 @@ public class FileManager implements Runnable {
                         if(fileInfo.getReloadableFiles() != null)
                             fileInfo.getReloadableFiles().reloadFile(kind.toString());
                     } catch (Exception e) {
-                        fileLogger.warn(e.getMessage());
+                        fileLogger.warn(e);
                     }
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
-                        fileLogger.warn(e.getMessage());
+                        fileLogger.warn(e);
                     }
                 }
 

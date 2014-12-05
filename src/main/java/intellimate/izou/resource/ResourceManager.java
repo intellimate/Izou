@@ -53,8 +53,7 @@ public class ResourceManager {
                     try {
                         return future.get();
                     } catch (InterruptedException | ExecutionException e) {
-                        //Todo: log
-                        e.printStackTrace();
+                        fileLogger.debug(e);
                         return null;
                     }
                 })
@@ -129,7 +128,7 @@ public class ResourceManager {
                     try {
                         return future.get();
                     } catch (InterruptedException | ExecutionException e) {
-                        //Todo: log
+                        fileLogger.warn(e);
                         return null;
                     }
                 })
@@ -154,7 +153,7 @@ public class ResourceManager {
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
-                //TODO: log
+                fileLogger.warn(e);
             }
         }
         //cancel all running tasks

@@ -22,7 +22,6 @@ public class PropertiesManagerTest extends TestCase {
         Main main = new Main(addOns, true);
         //for(;;){}
         assertTrue(Files.exists(Paths.get("." + File.separator + "properties" + File.separator + "TestID.properties")));
-        //TODO: @Julian the for loop never ends
     }
 
     public void testRun() throws Exception {

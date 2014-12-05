@@ -29,7 +29,7 @@ public class LocalEventManager implements Runnable, Identifiable{
         identificationManager.registerIdentification(this);
         Optional<Identification> id = identificationManager.getIdentification(this);
         if(!id.isPresent()) {
-            //TODO: log fatal
+            fileLogger.fatal("Unable to obtain ID for " + getID());
         } else {
             eventPublisher = eventDistributor.registerEventPublisher(id.get());
         }
@@ -83,7 +83,8 @@ public class LocalEventManager implements Runnable, Identifiable{
             try {
                 fireEvent(events.take());
             } catch (InterruptedException e) {
-                break;
+                fileLogger.warn(e);
+                continue;
             }
         }
     }

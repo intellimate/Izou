@@ -275,8 +275,8 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable{
             try {
                 event = blockingQueueHandling();  //gets the new Event if one was added to the blockingQueue
             } catch (InterruptedException e) {
-                context.logger.getLogger().error(e.getMessage());
-                break;
+                context.logger.getLogger().warn(e);
+                continue;
             }
 
             distributeEvent(event); //distributes the Event among all outputExtensions
@@ -290,10 +290,10 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable{
                 //waits until all the outputExtensions have finished processing
                 boolean isWorking;
                 do {
-                    isWorking = true;
+                    isWorking = false;
                     for (Future<T> cDF : futureList) {
-                        if(cDF.isDone())
-                            isWorking = false;
+                        if(!cDF.isDone())
+                            isWorking = true;
                         else
                             break;
                     }
@@ -305,7 +305,7 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable{
                         outputDataIsDone(tF);
                         tDoneList.add(tF.get());
                     } catch (InterruptedException | ExecutionException e) {
-                        context.logger.getLogger().warn(e.getMessage());
+                        context.logger.getLogger().warn(e);
                     }
                 }
 

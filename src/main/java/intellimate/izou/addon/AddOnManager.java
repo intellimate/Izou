@@ -12,7 +12,6 @@ import intellimate.izou.resource.ResourceManager;
 import intellimate.izou.system.Context;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.spi.ExtendedLogger;
 import ro.fortsoft.pf4j.DefaultPluginManager;
 import ro.fortsoft.pf4j.PluginManager;
 
@@ -55,11 +54,11 @@ public class AddOnManager {
                     try {
                         activatorManager.addActivator(activator);
                     } catch (Exception e) {
-                        fileLogger.error(e.getMessage());
+                        fileLogger.error("Error while trying to add the activator: " + activator.getID(), e.getMessage());
                     }
                 }
             } catch(Exception e) {
-                fileLogger.error(e.getMessage());
+                fileLogger.error("Error while trying to add the activators", e.getMessage());
             }
         }
     }
@@ -77,11 +76,11 @@ public class AddOnManager {
                     try {
                         resourceManager.registerResourceBuilder(contentGenerator);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        fileLogger.error("Error while registering ContentGenerator: " + contentGenerator.getID(), e);
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                fileLogger.error("Error while trying to register the ContentGenerators", e);
             }
         }
     }
@@ -99,11 +98,11 @@ public class AddOnManager {
                     try {
                         main.getEventDistributor().registerEventsController(eventsController);
                     } catch (IllegalArgumentException e) {
-                        e.printStackTrace();
+                        fileLogger.error("Error while registering EventsController:" + eventsController.getID(), e);
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                fileLogger.error("Error while trying to register the EventsControllers");
             }
         }
     }
@@ -121,11 +120,11 @@ public class AddOnManager {
                     try {
                         outputManager.addOutputPlugin(outputPlugin);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        fileLogger.error("Error while registering OutputPlugin: " + outputPlugin.getID(), e);
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                fileLogger.error("Error while trying to register the OutputPlugins");
             }
         }
     }
@@ -143,11 +142,11 @@ public class AddOnManager {
                     try {
                         outputManager.addOutputExtension(outputExtension, outputExtension.getPluginId());
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        fileLogger.error("Error while registering the OutputExtension: " + outputExtension.getID(), e);
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                fileLogger.error("Error while trying to register the OutputExtensions");
             }
         }
     }
@@ -164,7 +163,7 @@ public class AddOnManager {
                 //fileManager.registerFileDir(Paths.get(dir), "properties", addOn);
                 addOn.setDefaultPropertiesPath(getFolder(addOn));
             } else {
-                //TODO implement log that says no property file was found
+                fileLogger.debug("no property file was found for AddOn: " + addOn.getID());
             }
         }
     }
@@ -198,8 +197,7 @@ public class AddOnManager {
         try {
             registerFiles();
         } catch(IOException e) {
-            e.printStackTrace();
-            //TODO: implement exception handling
+            fileLogger.error("Error while trying to register the Files for the AddOns",e);
         }
         //has to be last because of properties that require file paths from prepare and register
         initAllAddOns();
@@ -217,8 +215,7 @@ public class AddOnManager {
         try {
             registerFiles();
         } catch(IOException e) {
-            e.printStackTrace();
-            //TODO: implement exception handling
+            fileLogger.error("Error while trying to register the files for the AddOns",e);
         }
         //has to be last because of properties that require file paths from prepare and register
         initAllAddOns();
@@ -234,8 +231,7 @@ public class AddOnManager {
             String libPath = new File(".").getCanonicalPath() + File.separator + "lib";
             libFile = new File(libPath);
         } catch (IOException e) {
-            //TODO: implement Exception handling
-            e.printStackTrace();
+            fileLogger.error("Error while trying to get the lib-directory"+e);
             return;
         }
 
@@ -250,13 +246,13 @@ public class AddOnManager {
         try {
             pluginManager.startPlugins();
         } catch (Exception e) {
-            e.printStackTrace();
+            fileLogger.fatal("Error while trying to start the PF4J-Plugins", e);
         }
         try {
             List<AddOn> addOns = pluginManager.getExtensions(AddOn.class);
             addOnList.addAll(addOns);
         } catch (Exception e) {
-            e.printStackTrace();
+            fileLogger.fatal("Error while trying to start the AddOns", e);
         }
     }
 

@@ -55,7 +55,7 @@ public class OutputManager implements Identifiable{
         futureHashMap = new HashMap<>();
         tempExtensionStorage = new HashMap<>();
         if (!IdentificationManager.getInstance().registerIdentification(this)) {
-            //TODO log fatal
+            fileLogger.fatal("Unable to obtain ID for" + getID());
         }
     }
 
@@ -92,7 +92,7 @@ public class OutputManager implements Identifiable{
                     outputPlugin.addOutputExtension(oE);
                 }
                 catch (ClassCastException e) {
-                    fileLogger.warn(e.getMessage());
+                    fileLogger.warn(e);
                 }
             }
             tempExtensionStorage.remove(outputPlugin.getID());
@@ -142,7 +142,8 @@ public class OutputManager implements Identifiable{
                     //noinspection unchecked
                     oPlug.addOutputExtension(outputExtension);
                 } catch (ClassCastException e) {
-                    e.printStackTrace();
+                    fileLogger.error("Error while trying to add the OutputExtension: " + outputExtension.getID()
+                                    + " to the OutputPlugin: " + oPlug.getID(), e);
                 }
                 outputExtension.setPluginId(oPlug.getID());
                 found = true;
@@ -254,7 +255,7 @@ public class OutputManager implements Identifiable{
                    Thread.sleep(100);
                    counter++;
                } catch (InterruptedException e) {
-                   //TODO: logging
+                   fileLogger.warn(e);
                }
            }
        }

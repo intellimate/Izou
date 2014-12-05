@@ -38,17 +38,13 @@ public abstract class AddOn implements ExtensionPoint, Identifiable {
     }
 
     /**
-     * use this method to build your instances etc.
-     */
-    public abstract void prepare();
-
-    /**
      * internal initiation of addOn
      */
     protected void initAddOn(Context context) {
+        this.context = context;
+
         if(defaultPropertiesPath != null)
             initProperties();
-        this.context = context;
 
         Properties properties = propertiesContainer.getProperties();
         String propertiesPathTemp;
@@ -56,7 +52,7 @@ public abstract class AddOn implements ExtensionPoint, Identifiable {
             propertiesPathTemp = new File(".").getCanonicalPath() + File.separator + "properties" + File.separator + addOnID + ".properties";
         } catch (IOException e) {
             propertiesPathTemp = null;
-            e.printStackTrace();
+            context.logger.getLogger().error("Error while trying to build the propertiesPathTemp", e);
         }
 
         propertiesPath = propertiesPathTemp;
@@ -65,7 +61,7 @@ public abstract class AddOn implements ExtensionPoint, Identifiable {
         if (!propertiesFile.exists()) try {
             propertiesFile.createNewFile();
         } catch (IOException e) {
-            e.printStackTrace();
+            context.logger.getLogger().error("Error while trying to create the new Properties file", e);
         }
 
         InputStream inputStream;
@@ -74,12 +70,17 @@ public abstract class AddOn implements ExtensionPoint, Identifiable {
             try {
                 properties.load(inputStream);
             } catch (IOException e) {
-                context.logger.getLogger().error(e.getMessage());
+                context.logger.getLogger().error("unable to load the InputStream for the PropertiesFile",e);
             }
         } catch (FileNotFoundException e) {
-            context.logger.getLogger().error(e.getMessage());
+            context.logger.getLogger().error("Properties-File not found", e);
         }
     }
+
+    /**
+     * use this method to build your instances etc.
+     */
+    public abstract void prepare();
 
     /**
      * Initializes properties in the addOn. Creates new properties file with default properties.
@@ -92,13 +93,13 @@ public abstract class AddOn implements ExtensionPoint, Identifiable {
             try {
                 createDefaultPropertyFile(defaultPropertiesPath);
             } catch (IOException e) {
-                e.printStackTrace();
+                context.logger.getLogger().error("Error while trying to copy the Default-Properties File", e);
             }
-            if (!writeToPropertiesFile (defaultPropertiesPath)) return;
+            if (new File(defaultPropertiesPath).exists() || !writeToPropertiesFile (defaultPropertiesPath)) return;
             try {
                 reloadFiles();
             } catch (IOException e) {
-                e.printStackTrace();
+                context.logger.getLogger().error("Error while trying to reload the Properties-Files", e);
             }
         }
     }
@@ -143,7 +144,7 @@ public abstract class AddOn implements ExtensionPoint, Identifiable {
             inputStream = new FileInputStream(properties);
             temp.load(inputStream);
         } catch(IOException e) {
-            e.printStackTrace();
+            context.logger.getLogger().error("Error while trying to load the Properties-File: " + propertiesPath, e);
             return;
         } finally {
             if (inputStream != null)
@@ -280,6 +281,4 @@ public abstract class AddOn implements ExtensionPoint, Identifiable {
         else
             throw new NullPointerException("File path does not exist");
     }
-
-
 }

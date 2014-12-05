@@ -43,6 +43,7 @@ public abstract class Activator implements Runnable, Identifiable{
         try {
             activatorStarts();
         } catch (InterruptedException e) {
+            context.logger.getLogger().warn(e);
             //noinspection UnnecessaryReturnStatement
             return;
         } catch (Exception e) {
@@ -71,7 +72,7 @@ public abstract class Activator implements Runnable, Identifiable{
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException e1) {
-                    context.logger.getLogger().warn(e.getMessage());
+                    context.logger.getLogger().warn(e);
                 }
                 activatorManager.addActivator(this);
             }

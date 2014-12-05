@@ -221,8 +221,7 @@ public class EventDistributor implements Runnable{
                     outputManager.passDataToOutputPlugins(event);
                 }
             } catch (InterruptedException e) {
-                //Todo print exception
-                e.printStackTrace();
+                fileLogger.warn(e);
             }
         }
     }
@@ -243,7 +242,7 @@ public class EventDistributor implements Runnable{
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
-                //TODO: log
+                fileLogger.warn(e);
             }
         }
         //cancel all running tasks

@@ -39,7 +39,7 @@ public class Main {
         try {
             fileSystemManager.createIzouFileSystem();
         } catch (IOException e) {
-            fileLogger.error(e.getMessage());
+            fileLogger.fatal("Failed to create the FileSystemManager", e);
         }
 
         izouLogger = new IzouLogger();
@@ -51,16 +51,17 @@ public class Main {
         threadEventManager.start();
         activatorManager = new ActivatorManager(localEventManager);
         addOnManager = new AddOnManager(outputManager,resourceManager,activatorManager, this);
-        if(!debug) addOnManager.retrieveAndRegisterAddOns();
 
         FileManager fileManagerTemp;
         try {
             fileManagerTemp = new FileManager();
         } catch (IOException e) {
             fileManagerTemp = null;
-            fileLogger.error(e.getMessage());
+            fileLogger.fatal("Failed to create the FileManager", e);
         }
         fileManager = fileManagerTemp;
+
+        if(!debug) addOnManager.retrieveAndRegisterAddOns();
     }
 
     /**
