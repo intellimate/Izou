@@ -23,7 +23,7 @@ public class Context {
     private Main main;
     public Events events = new Events();
     public Resources resources = new Resources();
-    public FileManager fileManager = new FileManager();
+    public FileManager fileManager;
     public Logger logger;
 
     /**
@@ -38,6 +38,7 @@ public class Context {
     public Context(AddOn addOn, Main main, String logLevel) {
         this.addOn = addOn;
         this.main = main;
+        this.fileManager = new FileManager();
 
         IzouLogger izouLogger = main.getIzouLogger();
         ExtendedLogger logger = null;

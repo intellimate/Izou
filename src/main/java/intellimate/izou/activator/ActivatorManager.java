@@ -1,8 +1,8 @@
 package intellimate.izou.activator;
 
+import intellimate.izou.events.LocalEventManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import intellimate.izou.events.LocalEventManager;
 
 import java.lang.reflect.Field;
 import java.util.concurrent.ExecutorService;
@@ -35,6 +35,14 @@ public class ActivatorManager {
     public java.util.concurrent.Future<?> addActivator(Activator activator) {
         activator.registerAllNeededDependencies(localEventManager, this);
         return executor.submit(activator);
+    }
+
+    /**
+     * restarts an activator
+     * @param activator the activator to restart
+     */
+    public void restartActivator(Activator activator) {
+        executor.submit(activator);
     }
 
     /**

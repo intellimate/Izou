@@ -74,7 +74,7 @@ public abstract class Activator implements Runnable, Identifiable{
                 } catch (InterruptedException e1) {
                     context.logger.getLogger().warn(e);
                 }
-                activatorManager.addActivator(this);
+                activatorManager.restartActivator(this);
             }
         }
     }

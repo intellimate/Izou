@@ -50,7 +50,6 @@ public class Main {
         threadEventManager = new Thread(localEventManager);
         threadEventManager.start();
         activatorManager = new ActivatorManager(localEventManager);
-        addOnManager = new AddOnManager(outputManager,resourceManager,activatorManager, this);
 
         FileManager fileManagerTemp;
         try {
@@ -61,6 +60,7 @@ public class Main {
         }
         fileManager = fileManagerTemp;
 
+        addOnManager = new AddOnManager(outputManager,resourceManager,activatorManager, fileManager, this);
         if(!debug) addOnManager.retrieveAndRegisterAddOns();
     }
 

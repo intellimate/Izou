@@ -19,11 +19,12 @@ public abstract class ContentGenerator implements ResourceBuilder{
     //stores the ID of the ContentGenerator
     private final String contentGeneratorID;
     private final Context context;
+    private IdentificationManager identificationManager = IdentificationManager.getInstance();
 
     public ContentGenerator(String id, Context context) {
         this.contentGeneratorID = id;
         this.context = context;
-        IdentificationManager.getInstance().registerIdentification(this);
+        identificationManager.registerIdentification(this);
     }
     /**
      * this method is called to register what resources the object provides.
@@ -75,5 +76,14 @@ public abstract class ContentGenerator implements ResourceBuilder{
      */
     public Context getContext() {
         return context;
+    }
+
+    /**
+     * gets the singleton instance of IdentificationManager
+     *
+     * @return the singleton instance of IdentificationManager
+     */
+    public IdentificationManager getIdentificationManager() {
+        return identificationManager;
     }
 }

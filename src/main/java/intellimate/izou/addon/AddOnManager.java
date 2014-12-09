@@ -10,6 +10,7 @@ import intellimate.izou.output.OutputManager;
 import intellimate.izou.output.OutputPlugin;
 import intellimate.izou.resource.ResourceManager;
 import intellimate.izou.system.Context;
+import intellimate.izou.system.FileManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ro.fortsoft.pf4j.DefaultPluginManager;
@@ -17,6 +18,7 @@ import ro.fortsoft.pf4j.PluginManager;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -30,14 +32,16 @@ public class AddOnManager {
     private final ActivatorManager activatorManager;
     public static final String ADDON_DATA_PATH = "." + File.separator + "resources" + File.separator;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
+    private final FileManager fileManager;
     private final Main main;
 
     public AddOnManager(OutputManager outputManager,
-                        ResourceManager resourceManager, ActivatorManager activatorManager, Main main) {
+                        ResourceManager resourceManager, ActivatorManager activatorManager, FileManager fileManager, Main main) {
         addOnList = new LinkedList<>();
         this.outputManager = outputManager;
         this.resourceManager = resourceManager;
         this.activatorManager = activatorManager;
+        this.fileManager = fileManager;
         this.main = main;
     }
 
@@ -160,7 +164,7 @@ public class AddOnManager {
         String dir = "." + File.separator + "properties";
         for (AddOn addOn : addOnList) {
             if(!(getFolder(addOn) == null)) {
-                //fileManager.registerFileDir(Paths.get(dir), "properties", addOn);
+                fileManager.registerFileDir(Paths.get(dir), "properties", addOn);
                 addOn.setDefaultPropertiesPath(getFolder(addOn));
             } else {
                 fileLogger.debug("no property file was found for AddOn: " + addOn.getID());
