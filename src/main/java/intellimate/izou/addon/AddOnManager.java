@@ -197,15 +197,14 @@ public class AddOnManager {
      */
     public void retrieveAndRegisterAddOns() {
         addAllAddOns();
-        prepareAllAddOns();
+        initAllAddOns();
         try {
             registerFiles();
         } catch(IOException e) {
             fileLogger.error("Error while trying to register the Files for the AddOns",e);
         }
-        //has to be last because of properties that require file paths from prepare and register
-        initAllAddOns();
         registerAllAddOns();
+        prepareAllAddOns();
     }
 
     /**
@@ -215,15 +214,14 @@ public class AddOnManager {
      */
     public void addAndRegisterAddOns(List<AddOn> addOns) {
         addOnList.addAll(addOns);
-        prepareAllAddOns();
+        initAllAddOns();
         try {
             registerFiles();
         } catch(IOException e) {
             fileLogger.error("Error while trying to register the files for the AddOns",e);
         }
-        //has to be last because of properties that require file paths from prepare and register
-        initAllAddOns();
         registerAllAddOns();
+        prepareAllAddOns();
     }
 
     /**
@@ -282,10 +280,19 @@ public class AddOnManager {
      * registers all AddOns
      */
     private void registerAllAddOns() {
+        registerProterties();
         registerOutputPlugins();
         registerOutputExtensions();
         registerContentGenerators();
         registerEventControllers();
         registerActivators();
+    }
+
+    /**
+     * registers all the properties-Files for the AddOns
+     */
+    private void registerProterties() {
+        addOnList.stream()
+                .forEach(AddOn::initProperties);
     }
 }

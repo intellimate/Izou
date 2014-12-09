@@ -42,10 +42,17 @@ public abstract class AddOn implements ExtensionPoint, Identifiable {
      */
     protected void initAddOn(Context context) {
         this.context = context;
+    }
 
-        if(defaultPropertiesPath != null)
-            initProperties();
+    /**
+     * use this method to build your instances etc.
+     */
+    public abstract void prepare();
 
+    /**
+     * Initializes properties in the addOn. Creates new properties file with default properties.
+     */
+    public void initProperties() {
         Properties properties = propertiesContainer.getProperties();
         String propertiesPathTemp;
         try {
@@ -56,7 +63,6 @@ public abstract class AddOn implements ExtensionPoint, Identifiable {
         }
 
         propertiesPath = propertiesPathTemp;
-        defaultPropertiesPath = null;
         File propertiesFile = new File(propertiesPath);
         if (!propertiesFile.exists()) try {
             propertiesFile.createNewFile();
@@ -75,33 +81,26 @@ public abstract class AddOn implements ExtensionPoint, Identifiable {
         } catch (FileNotFoundException e) {
             context.logger.getLogger().error("Properties-File not found", e);
         }
-    }
 
-    /**
-     * use this method to build your instances etc.
-     */
-    public abstract void prepare();
+        if(defaultPropertiesPath != null) {
+            @SuppressWarnings("unchecked")
+            Enumeration<String> keys = (Enumeration<String>)this.propertiesContainer.getProperties().propertyNames();
 
-    /**
-     * Initializes properties in the addOn. Creates new properties file with default properties.
-     */
-    private void initProperties() {
-        @SuppressWarnings("unchecked")
-        Enumeration<String> keys = (Enumeration<String>)this.propertiesContainer.getProperties().propertyNames();
-
-        if (!keys.hasMoreElements()) {
-            try {
-                createDefaultPropertyFile(defaultPropertiesPath);
-            } catch (IOException e) {
-                context.logger.getLogger().error("Error while trying to copy the Default-Properties File", e);
-            }
-            if (new File(defaultPropertiesPath).exists() || !writeToPropertiesFile (defaultPropertiesPath)) return;
-            try {
-                reloadFiles();
-            } catch (IOException e) {
-                context.logger.getLogger().error("Error while trying to reload the Properties-Files", e);
+            if (!keys.hasMoreElements()) {
+                try {
+                    createDefaultPropertyFile(defaultPropertiesPath);
+                } catch (IOException e) {
+                    context.logger.getLogger().error("Error while trying to copy the Default-Properties File", e);
+                }
+                if (new File(defaultPropertiesPath).exists() && !writeToPropertiesFile (defaultPropertiesPath)) return;
+                try {
+                    reloadFiles();
+                } catch (IOException e) {
+                    context.logger.getLogger().error("Error while trying to reload the Properties-Files", e);
+                }
             }
         }
+        //defaultPropertiesPath = null;
     }
 
     /**
