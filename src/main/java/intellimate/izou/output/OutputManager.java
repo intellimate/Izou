@@ -245,12 +245,12 @@ public class OutputManager implements Identifiable{
            final boolean[] stop = {false};
            Consumer<Boolean> consumer = noParam -> stop[0] = true;
            resource.setResource(consumer);
+           event.getListResourceContainer().addResource(resource);
 
-           outputPlugin.distributeEvent(event);
            outputPlugin.addToEventList(event);
 
            int counter = 0;
-           while(!stop[0] && (counter < 10)) {
+           while(!stop[0] && (counter < 100)) {
                try {
                    Thread.sleep(100);
                    counter++;
