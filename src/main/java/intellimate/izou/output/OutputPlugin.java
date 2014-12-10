@@ -311,10 +311,9 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable{
 
                 //render final output
                 renderFinalOutput();
-
-                //notifies output-manager when done processing
-                isDone(event);
             }
+            //notifies output-manager when done processing
+            isDone(event);
         }
     }
 }

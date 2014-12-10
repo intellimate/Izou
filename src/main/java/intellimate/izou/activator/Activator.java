@@ -30,7 +30,7 @@ public abstract class Activator implements Runnable, Identifiable{
 
     public Activator(Context context) {
         if(!identificationManager.registerIdentification(this)) {
-            context.logger.getLogger().fatal("Failed to register with identification manager");
+            context.logger.getLogger().fatal("Failed to register with identification manager" + getID());
         }
         this.context = context;
     }

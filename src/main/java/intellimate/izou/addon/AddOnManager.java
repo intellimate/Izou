@@ -58,11 +58,11 @@ public class AddOnManager {
                     try {
                         activatorManager.addActivator(activator);
                     } catch (Exception e) {
-                        fileLogger.error("Error while trying to add the activator: " + activator.getID(), e.getMessage());
+                        fileLogger.error("Error while trying to add the activator: " + activator.getID(), e);
                     }
                 }
-            } catch(Exception e) {
-                fileLogger.error("Error while trying to add the activators", e.getMessage());
+            } catch(Exception | NoClassDefFoundError e) {
+                fileLogger.error("Error while trying to add the activators", e);
             }
         }
     }
@@ -83,7 +83,7 @@ public class AddOnManager {
                         fileLogger.error("Error while registering ContentGenerator: " + contentGenerator.getID(), e);
                     }
                 }
-            } catch (Exception e) {
+            } catch (Exception | NoClassDefFoundError e) {
                 fileLogger.error("Error while trying to register the ContentGenerators", e);
             }
         }
@@ -105,8 +105,8 @@ public class AddOnManager {
                         fileLogger.error("Error while registering EventsController:" + eventsController.getID(), e);
                     }
                 }
-            } catch (Exception e) {
-                fileLogger.error("Error while trying to register the EventsControllers");
+            } catch (Exception | NoClassDefFoundError e) {
+                fileLogger.error("Error while trying to register the EventsControllers", e);
             }
         }
     }
@@ -127,8 +127,8 @@ public class AddOnManager {
                         fileLogger.error("Error while registering OutputPlugin: " + outputPlugin.getID(), e);
                     }
                 }
-            } catch (Exception e) {
-                fileLogger.error("Error while trying to register the OutputPlugins");
+            } catch (Exception | NoClassDefFoundError e) {
+                fileLogger.error("Error while trying to register the OutputPlugins", e);
             }
         }
     }
@@ -149,8 +149,8 @@ public class AddOnManager {
                         fileLogger.error("Error while registering the OutputExtension: " + outputExtension.getID(), e);
                     }
                 }
-            } catch (Exception e) {
-                fileLogger.error("Error while trying to register the OutputExtensions");
+            } catch (Exception | NoClassDefFoundError e) {
+                fileLogger.error("Error while trying to register the OutputExtensions", e);
             }
         }
     }
