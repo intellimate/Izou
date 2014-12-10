@@ -202,6 +202,7 @@ public class EventDistributor implements Runnable{
         while(!stop) {
             try {
                 Event event = events.take();
+                fileLogger.debug("EventFired: " + event.getID() + " from " + event.getSource().getID());
                 if (checkEventsControllers(event)) {
                     List<Resource> resourceList = resourceManager.generateResources(event);
                     event.addResources(resourceList);
