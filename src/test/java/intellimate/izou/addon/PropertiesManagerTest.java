@@ -25,12 +25,10 @@ public class PropertiesManagerTest extends TestCase {
     }
 
     public void testRun() throws Exception {
-
     }
 
     @SuppressWarnings("SameParameterValue")
     private class TestAddOn extends AddOn{
-
         /**
          * the default constructor for AddOns
          *

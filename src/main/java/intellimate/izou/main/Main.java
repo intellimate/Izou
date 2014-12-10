@@ -35,6 +35,24 @@ public class Main {
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     private Main(boolean debug) {
+        this(null, debug);
+    }
+
+    /**
+     * If you want to debug your Plugin, you can get an Main instance with this Method
+     *
+     * @param addOns a List of AddOns to run
+     */
+    public Main(List<AddOn> addOns) {
+        this(addOns, false);
+    }
+
+    /**
+     * If you want to debug your Plugin, you can get an Main instance with this Method
+     *
+     * @param addOns a List of AddOns to run
+     */
+    public Main(List<AddOn> addOns, boolean debug) {
         FileSystemManager fileSystemManager = new FileSystemManager();
         try {
             fileSystemManager.createIzouFileSystem();
@@ -61,27 +79,12 @@ public class Main {
         fileManager = fileManagerTemp;
 
         addOnManager = new AddOnManager(outputManager,resourceManager,activatorManager, fileManager, this);
+        if(addOns != null && !debug) {
+            addOnManager.addAddOnsWithoutRegistering(addOns);
+        } else if(addOns != null) {
+            addOnManager.addAndRegisterAddOns(addOns);
+        }
         if(!debug) addOnManager.retrieveAndRegisterAddOns();
-    }
-
-    /**
-     * If you want to debug your Plugin, you can get an Main instance with this Method
-     *
-     * @param addOns a List of AddOns to run
-     */
-    public Main(List<AddOn> addOns) {
-        this(false);
-        if(addOns != null) addOnManager.addAndRegisterAddOns(addOns);
-    }
-
-    /**
-     * If you want to debug your Plugin, you can get an Main instance with this Method
-     *
-     * @param addOns a List of AddOns to run
-     */
-    public Main(List<AddOn> addOns, boolean debug) {
-        this(debug);
-        if(addOns != null) addOnManager.addAndRegisterAddOns(addOns);
     }
 
     public static void main(String[] args) {

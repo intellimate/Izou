@@ -208,6 +208,13 @@ public class AddOnManager {
     }
 
     /**
+     * Adds AddOns without registering them.
+     */
+    public void addAddOnsWithoutRegistering(List<AddOn> addOns) {
+        addOnList.addAll(addOns);
+    }
+
+    /**
      * registers all AddOns.
      *
      * @param addOns a List containing all the AddOns

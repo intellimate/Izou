@@ -163,6 +163,12 @@ public class IzouTest implements Identifiable{
         return identificationManager.getIdentification(identifiable);
     }
 
+    public String getNextID() {
+        String idStr = id + identificationNumber;
+        identificationNumber++;
+        return idStr;
+    }
+
     public Optional<Event> getNextEvent() {
         eventNumber++;
         return getEvent(id + eventNumber);
