@@ -18,6 +18,7 @@ import java.io.File;
 public class IzouLogger {
     private static final Logger rootLogger = LogManager.getRootLogger();
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
+    //private final Logger fileLogger = LogManager.getRootLogger();
 
     /**
      * creates a new file-logger for an addOn. The logger will log to a file with the addOnId as name in the logs folder
@@ -46,23 +47,23 @@ public class IzouLogger {
             Appender consoleAppender = ConsoleAppender.createAppender(layout, null, "SYSTEM_OUT", "console", null, null);
             consoleAppender.start();
             config.addAppender(consoleAppender);
-
             //adds appenders to an array called refs. It will later serve as references to the logger as to what appenders
             //it has
-            AppenderRef fileRef = AppenderRef.createAppenderRef("file", null, null);
-            AppenderRef consoleRef = AppenderRef.createAppenderRef("console", null, null);
+            AppenderRef fileRef = AppenderRef.createAppenderRef("file", Level.WARN, null);
+            AppenderRef consoleRef = AppenderRef.createAppenderRef("console", Level.DEBUG, null);
             AppenderRef[] refs = new AppenderRef[]{fileRef, consoleRef};
 
             //creates the logger configurations for the logger, where the appender-references are also added
-            LoggerConfig loggerConfig = LoggerConfig.createLogger("false", Level.toLevel(level), "org.apache.logging.log4j",
+            LoggerConfig loggerConfig = LoggerConfig.createLogger("false", Level.DEBUG, addOnId,
                     "true", refs, null, config, null);
-            loggerConfig.addAppender(fileAppender, null, null);
-            loggerConfig.addAppender(consoleAppender, null, null);
+            loggerConfig.addAppender(fileAppender, Level.WARN, null);
+            loggerConfig.addAppender(consoleAppender, Level.DEBUG, null);
 
             //finally creates the logger and returns it
-            config.addLogger("org.apache.logging.log4j", loggerConfig);
+            config.addLogger(addOnId, loggerConfig);
             ((org.apache.logging.log4j.core.LoggerContext) ctx).updateLoggers();
-            ExtendedLogger logger = ctx.getLogger("org.apache.logging.log4j");
+            ctx.getLogger(addOnId);
+            ExtendedLogger logger = ctx.getLogger(addOnId);
             return logger;
         } catch(Exception e) {
             fileLogger.error("Unable to create FileLogger",e);
