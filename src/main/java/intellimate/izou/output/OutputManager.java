@@ -242,22 +242,25 @@ public class OutputManager implements Identifiable{
            Resource<Consumer> resource = new Resource<>(outputPlugin.getID());
            resource.setProvider(managerID.get());
 
-           final boolean[] stop = {false};
-           Consumer<Boolean> consumer = noParam -> stop[0] = true;
+           Object lock = new Object();
+
+           Consumer<Boolean> consumer = noParam -> lock.notifyAll();
            resource.setResource(consumer);
            event.getListResourceContainer().addResource(resource);
 
            outputPlugin.addToEventList(event);
 
-           int counter = 0;
-           while(!stop[0] && (counter < 100)) {
+           boolean interrupted = false;
+           synchronized (lock) {
                try {
-                   Thread.sleep(100);
-                   counter++;
+                   lock.wait(10000);
                } catch (InterruptedException e) {
-                   fileLogger.warn(e);
+                   interrupted = true;
+                   fileLogger.debug("OutputPlugin: " + outputPlugin.getID() + "finished");
                }
            }
+           if (!interrupted)
+               fileLogger.debug("OutputPlugin: " + outputPlugin.getID() + "timed out");
        }
     }
 
