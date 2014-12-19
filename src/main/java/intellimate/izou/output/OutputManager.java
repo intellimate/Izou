@@ -1,6 +1,7 @@
 package intellimate.izou.output;
 
 import intellimate.izou.events.Event;
+import intellimate.izou.main.Main;
 import intellimate.izou.resource.Resource;
 import intellimate.izou.system.Identifiable;
 import intellimate.izou.system.Identification;
@@ -10,7 +11,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -49,9 +49,9 @@ public class OutputManager implements Identifiable{
     /**
      * Creates a new output-manager with a list of output-plugins
      */
-    public OutputManager() {
+    public OutputManager(Main main) {
         outputPluginsList = new ArrayList<>();
-        executor = Executors.newCachedThreadPool();
+        executor = main.getThreadPoolManager().getAddOnsThreadPool();
         futureHashMap = new HashMap<>();
         tempExtensionStorage = new HashMap<>();
         if (!IdentificationManager.getInstance().registerIdentification(this)) {
@@ -196,8 +196,10 @@ public class OutputManager implements Identifiable{
 
         Set<Integer> keySet = outputPluginBehaviour.keySet();
 
+        Comparator<Integer> reversed = Comparator.<Integer>naturalOrder().reversed();
+
         List<OutputPlugin> orderedPositive = keySet.stream()
-                .sorted()
+                .sorted(reversed)
                 .filter(integer -> integer >= 0)
                 .map(outputPluginBehaviour::get)
                 .flatMap(Collection::stream)
@@ -208,9 +210,32 @@ public class OutputManager implements Identifiable{
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());
+        /*
+        List<List<Identification>> positiveIdentifications = new ArrayList<>();
+        for (int i : keySet) {
+            if(i > 0) {
+                positiveIdentifications.add(i, outputPluginBehaviour.get(i));
+            }
+        }
+
+        LinkedList<OutputPlugin> positiveOutputPlugins = new LinkedList<>();
+        for(int i = 0; i < positiveIdentifications.size(); i++) {
+            int index = (positiveIdentifications.size() -1) - i;
+
+            List<Identification> listIdentifications = positiveIdentifications.get(index);
+            if(listIdentifications == null) continue;
+            for (Identification id : listIdentifications) {
+                for (OutputPlugin outputPlugin : outputPluginsList) {
+                    if(outputPlugin.isOwner(id) && !positiveOutputPlugins.contains(outputPlugin)) {
+                        positiveOutputPlugins.push(outputPlugin);
+                    }
+                }
+            }
+        }
+        */
 
         List<OutputPlugin> orderedNegative = keySet.stream()
-                .sorted()
+                .sorted(reversed)
                 .filter(integer -> integer < 0)
                 .map(outputPluginBehaviour::get)
                 .flatMap(Collection::stream)

@@ -112,7 +112,7 @@ public class OutputManagerTest extends IzouTest{
 
     @Test
     public void testAddOutputExtensionLater() throws Exception {
-        OutputManager outputManager = new OutputManager();
+        OutputManager outputManager = new OutputManager(getMain());
         OutputPlugin outputPlugin = new OutputPlugin("1234", getContext()) {
             @Override
             public void renderFinalOutput() {

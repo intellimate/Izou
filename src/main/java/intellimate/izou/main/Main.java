@@ -10,6 +10,7 @@ import intellimate.izou.resource.ResourceManager;
 import intellimate.izou.system.FileManager;
 import intellimate.izou.system.FileSystemManager;
 import intellimate.izou.system.IzouLogger;
+import intellimate.izou.threadpool.ThreadPoolManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -29,9 +30,9 @@ public class Main {
     private final LocalEventManager localEventManager;
     private final ActivatorManager activatorManager;
     private final AddOnManager addOnManager;
-    private final Thread threadEventManager;
     private final FileManager fileManager;
     private final IzouLogger izouLogger;
+    private final ThreadPoolManager threadPoolManager;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     private Main(boolean debug) {
@@ -59,15 +60,14 @@ public class Main {
         } catch (IOException e) {
             fileLogger.fatal("Failed to create the FileSystemManager", e);
         }
-
+        threadPoolManager = new ThreadPoolManager();
         izouLogger = new IzouLogger();
-        outputManager = new OutputManager();
-        resourceManager = new ResourceManager();
-        eventDistributor = new EventDistributor(resourceManager, outputManager);
+        outputManager = new OutputManager(this);
+        resourceManager = new ResourceManager(this);
+        eventDistributor = new EventDistributor(this);
         localEventManager = new LocalEventManager(eventDistributor);
-        threadEventManager = new Thread(localEventManager);
-        threadEventManager.start();
-        activatorManager = new ActivatorManager(localEventManager);
+        threadPoolManager.getIzouThreadPool().submit(localEventManager);
+        activatorManager = new ActivatorManager(this);
 
         FileManager fileManagerTemp;
         try {
@@ -107,16 +107,16 @@ public class Main {
         return addOnManager;
     }
 
-    public Thread getThreadEventManager() {
-        return threadEventManager;
-    }
-
     public ResourceManager getResourceManager() {
         return resourceManager;
     }
 
     public EventDistributor getEventDistributor() {
         return eventDistributor;
+    }
+
+    public ThreadPoolManager getThreadPoolManager() {
+        return threadPoolManager;
     }
 
     public synchronized FileManager getFileManager() {

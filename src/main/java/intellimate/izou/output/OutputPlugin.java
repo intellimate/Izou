@@ -5,6 +5,7 @@ import intellimate.izou.resource.Resource;
 import intellimate.izou.system.Identifiable;
 import intellimate.izou.system.IdentificationManager;
 import intellimate.izou.system.Context;
+import intellimate.izou.threadpool.ExceptionCallback;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -18,7 +19,7 @@ import java.util.function.Consumer;
  * output and then render it on its own medium
  */
 @SuppressWarnings("UnusedDeclaration")
-public abstract class OutputPlugin<T> implements Runnable, Identifiable{
+public abstract class OutputPlugin<T> implements Runnable, Identifiable, ExceptionCallback {
     /**
      * id of the of OutputPlugin, it is primarily used by OutputManager to communicate with specific output plugins
      */
@@ -65,7 +66,7 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable{
         outputExtensionList = new ArrayList<>();
         futureList = new LinkedList<>();
         tDoneList = new ArrayList<>();
-        executor = null;
+        executor = context.threadPool.getThreadPool();
         eventBlockingQueue = new LinkedBlockingQueue<>();
         IdentificationManager identificationManager = IdentificationManager.getInstance();
         identificationManager.registerIdentification(this);
@@ -260,6 +261,16 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable{
             Consumer consumer = (Consumer) resource.get().getResource();
             consumer.accept(null);
         }
+    }
+
+    /**
+     * this method gets called when the task submitted to the ThreadPool crashes
+     *
+     * @param e the exception catched
+     */
+    @Override
+    public void exceptionThrown(Exception e) {
+        context.logger.getLogger().fatal("OutputPlugin " + getID() + " crashed", e);
     }
 
     /**

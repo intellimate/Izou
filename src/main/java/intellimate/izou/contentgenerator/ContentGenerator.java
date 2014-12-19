@@ -5,6 +5,7 @@ import intellimate.izou.resource.Resource;
 import intellimate.izou.resource.ResourceBuilder;
 import intellimate.izou.system.Context;
 import intellimate.izou.system.IdentificationManager;
+import intellimate.izou.threadpool.ExceptionCallback;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,7 +16,7 @@ import java.util.Optional;
  * When an Event this ContentGenerator subscribed to was fired, the ContentGeneratorManager will run the instance of it
  * in a ThreadPool and generate(String eventID) will be called.
  */
-public abstract class ContentGenerator implements ResourceBuilder{
+public abstract class ContentGenerator implements ResourceBuilder, ExceptionCallback {
     //stores the ID of the ContentGenerator
     private final String contentGeneratorID;
     private final Context context;
@@ -53,6 +54,16 @@ public abstract class ContentGenerator implements ResourceBuilder{
      */
     @Override
     public abstract List<Resource> provideResource(List<Resource> resources, Optional<Event> event);
+
+    /**
+     * this method gets called when the task submitted to the ThreadPool crashes
+     *
+     * @param e the exception catched
+     */
+    @Override
+    public void exceptionThrown(Exception e) {
+        context.logger.getLogger().fatal("ContentGenerator: " + getID() + " crashed", e);
+    }
 
     /**
      * An ID must always be unique.

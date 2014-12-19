@@ -173,4 +173,8 @@ public class IzouTest implements Identifiable{
         eventNumber++;
         return getEvent(id + eventNumber);
     }
+
+    public Main getMain() {
+        return main;
+    }
 }

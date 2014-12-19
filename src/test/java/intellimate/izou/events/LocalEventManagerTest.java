@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class LocalEventManagerTest extends IzouTest{
     private static final class Lock { }
@@ -121,6 +122,16 @@ public class LocalEventManagerTest extends IzouTest{
         LocalEventManager.EventCaller caller = main.getLocalEventManager().registerCaller(id).get();
         main.getEventDistributor().registerEventListener(event, s -> isWorking[0] = true);
         EventsController eventsController = new EventsController() {
+            /**
+             * this method gets called when the task submitted to the ThreadPool crashes
+             *
+             * @param e the exception catched
+             */
+            @Override
+            public void exceptionThrown(Exception e) {
+                fail();
+            }
+
             @Override
             public boolean controlEventDispatcher(Event event) {
                 isWorking[1] = false;
@@ -159,6 +170,16 @@ public class LocalEventManagerTest extends IzouTest{
         LocalEventManager.EventCaller caller = main.getLocalEventManager().registerCaller(id).get();
         main.getEventDistributor().registerEventListener(event, s -> isWorking[0] = true);
         EventsController eventsController = new EventsController() {
+            /**
+             * this method gets called when the task submitted to the ThreadPool crashes
+             *
+             * @param e the exception catched
+             */
+            @Override
+            public void exceptionThrown(Exception e) {
+                fail();
+            }
+
             @Override
             public boolean controlEventDispatcher(Event event) {
                 isWorking[1] = false;

@@ -10,6 +10,9 @@ import org.apache.logging.log4j.spi.ExtendedLogger;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 /**
@@ -25,6 +28,7 @@ public class Context {
     public Resources resources = new Resources();
     public FileManager fileManager;
     public Logger logger;
+    public ThreadPool threadPool;
 
     /**
      * creates a new context for the addOn
@@ -39,6 +43,7 @@ public class Context {
         this.addOn = addOn;
         this.main = main;
         this.fileManager = new FileManager();
+        this.threadPool = new ThreadPool();
 
         IzouLogger izouLogger = main.getIzouLogger();
         ExtendedLogger logger = null;
@@ -238,6 +243,26 @@ public class Context {
          */
         public void generateResource(Resource resource, Consumer<List<Resource>> consumer) {
             main.getResourceManager().generatedResource(resource, consumer);
+        }
+    }
+
+    public class ThreadPool {
+        /**
+         * Submits a new Callable to the ThreadPool
+         * @param callable the callable to submit
+         * @param <V> the type of the callable
+         * @return a Future representing pending completion of the task
+         */
+        public <V> Future<V> submitToIzouThreadPool(Callable<V> callable) {
+            return main.getThreadPoolManager().getAddOnsThreadPool().submit(callable);
+        }
+
+        /**
+         * returns an ThreadPool where all the IzouPlugins are running
+         * @return an instance of ExecutorService
+         */
+        public ExecutorService getThreadPool() {
+            return main.getThreadPoolManager().getAddOnsThreadPool();
         }
     }
 }

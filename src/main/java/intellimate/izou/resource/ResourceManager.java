@@ -1,6 +1,7 @@
 package intellimate.izou.resource;
 
 import intellimate.izou.events.Event;
+import intellimate.izou.main.Main;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -14,7 +15,7 @@ import java.util.stream.Collectors;
  */
 public class ResourceManager {
     //holds the threads
-    private final ExecutorService executor = Executors.newCachedThreadPool();
+    private final ExecutorService executor;
     /**
      * this object maps all the eventIDs to ResourceBuilders
      * the key is the registered event (or noEvent)
@@ -27,6 +28,10 @@ public class ResourceManager {
      */
     private HashMap<String, LinkedList<ResourceBuilder>> resourceIDs= new HashMap<>();
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
+
+    public ResourceManager(Main main) {
+        executor = main.getThreadPoolManager().getAddOnsThreadPool();
+    }
 
     /**
      * generates all the resources for an event

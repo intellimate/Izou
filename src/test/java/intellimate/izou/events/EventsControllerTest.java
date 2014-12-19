@@ -15,6 +15,16 @@ public class EventsControllerTest extends IzouTest{
     public void testControlEventDispatcher () {
         boolean[] isWorking = {false, true};
         EventsController eventsController = new EventsController() {
+            /**
+             * this method gets called when the task submitted to the ThreadPool crashes
+             *
+             * @param e the exception catched
+             */
+            @Override
+            public void exceptionThrown(Exception e) {
+                System.out.println(getID() + " crashed");
+            }
+
             @Override
             public boolean controlEventDispatcher(Event event) {
                 isWorking[1] = false;

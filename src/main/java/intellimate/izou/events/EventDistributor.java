@@ -1,5 +1,6 @@
 package intellimate.izou.events;
 
+import intellimate.izou.main.Main;
 import intellimate.izou.output.OutputManager;
 import intellimate.izou.resource.Resource;
 import intellimate.izou.resource.ResourceManager;
@@ -25,13 +26,14 @@ public class EventDistributor implements Runnable{
     //here are all the Listeners stored
     private final ConcurrentHashMap<String, ArrayList<EventListener>> listeners = new ConcurrentHashMap<>();
     //ThreadPool where all the Listeners are executed
-    private final ExecutorService executor = Executors.newCachedThreadPool();
+    private final ExecutorService executor;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
-    public EventDistributor(ResourceManager resourceManager, OutputManager outputManager) {
-        this.resourceManager = resourceManager;
-        this.outputManager = outputManager;
-        executor.submit(this);
+    public EventDistributor(Main main) {
+        this.resourceManager = main.getResourceManager();
+        this.outputManager = main.getOutputManager();
+        executor = main.getThreadPoolManager().getAddOnsThreadPool();
+        main.getThreadPoolManager().getIzouThreadPool().submit(this);
     }
 
     /**

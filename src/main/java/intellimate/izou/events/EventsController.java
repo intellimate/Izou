@@ -1,12 +1,13 @@
 package intellimate.izou.events;
 
 import intellimate.izou.system.Identifiable;
+import intellimate.izou.threadpool.ExceptionCallback;
 
 /**
  * This class can control the whether Events-Dispatcher  get Fired or not.
  * It is expected, that the method-implementation gets executed quickly.
  */
-public interface EventsController extends Identifiable {
+public interface EventsController extends Identifiable, ExceptionCallback {
 
     /**
      * Controls whether the fired Event should be dispatched to all the listeners

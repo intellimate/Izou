@@ -7,6 +7,7 @@ import intellimate.izou.output.OutputExtension;
 import intellimate.izou.output.OutputPlugin;
 import intellimate.izou.system.Context;
 import intellimate.izou.system.Identifiable;
+import intellimate.izou.threadpool.ExceptionCallback;
 import ro.fortsoft.pf4j.ExtensionPoint;
 
 import java.io.*;
@@ -20,7 +21,7 @@ import java.util.Properties;
  * This class has method for a properties-file named addOnID.properties (AddOnsID in the form: package.class)
  */
 @SuppressWarnings("UnusedDeclaration")
-public abstract class AddOn implements ExtensionPoint, Identifiable {
+public abstract class AddOn implements ExtensionPoint, Identifiable, ExceptionCallback {
     private PropertiesContainer propertiesContainer;
     @SuppressWarnings("FieldCanBeLocal")
     private final String addOnID;
@@ -279,6 +280,16 @@ public abstract class AddOn implements ExtensionPoint, Identifiable {
             this.defaultPropertiesPath = tempPath + "defaultProperties.txt";
         else
             throw new NullPointerException("File path does not exist");
+    }
+
+    /**
+     * this method gets called when the task submitted to the ThreadPool crashes
+     *
+     * @param e the exception catched
+     */
+    @Override
+    public void exceptionThrown(Exception e) {
+        context.logger.getLogger().fatal("Addon: " + getID() + " crashed", e);
     }
 
     /**

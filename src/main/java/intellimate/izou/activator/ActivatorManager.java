@@ -1,12 +1,12 @@
 package intellimate.izou.activator;
 
 import intellimate.izou.events.LocalEventManager;
+import intellimate.izou.main.Main;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Field;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 /**
@@ -14,12 +14,15 @@ import java.util.concurrent.ThreadFactory;
  */
 @SuppressWarnings("WeakerAccess")
 public class ActivatorManager {
-    private final ExecutorService executor = Executors.newCachedThreadPool(new CustomThreadFactory());
+    private final Main main;
+    private final ExecutorService executor;
     private final LocalEventManager localEventManager;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
-    public ActivatorManager(LocalEventManager localEventManager) {
-        this.localEventManager = localEventManager;
+    public ActivatorManager(Main main) {
+        this.main = main;
+        this.executor = main.getThreadPoolManager().getAddOnsThreadPool();
+        this.localEventManager = main.getLocalEventManager();
     }
 
     /**
