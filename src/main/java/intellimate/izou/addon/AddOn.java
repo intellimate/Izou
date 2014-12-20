@@ -74,14 +74,17 @@ public abstract class AddOn implements ExtensionPoint, Identifiable, ExceptionCa
 
         InputStream inputStream;
         try {
-            inputStream = new FileInputStream(propertiesFile);
+            BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(propertiesFile),
+                    "UTF8"));
+            //inputStream = new FileInputStream(propertiesFile);
             try {
-                properties.load(inputStream);
+                //properties.load(inputStream);
+                properties.load(in);
             } catch (IOException e) {
                 context.logger.getLogger().error("unable to load the InputStream for the PropertiesFile",e);
             }
-        } catch (FileNotFoundException e) {
-            context.logger.getLogger().error("Properties-File not found", e);
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            context.logger.getLogger().error("Error while trying to read Properties-File", e);
         }
 
         if(defaultPropertiesPath != null) {

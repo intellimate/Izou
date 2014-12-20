@@ -252,6 +252,7 @@ public class EventDistributor implements Runnable{
         if(notFinished) {
             futures.stream()
                     .filter(future -> !future.isDone())
+                    .peek(future -> fileLogger.error(future.toString() + " timed out"))
                     .forEach(future -> future.cancel(true));
         }
         return futures.stream()
