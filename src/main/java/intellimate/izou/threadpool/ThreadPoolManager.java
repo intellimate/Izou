@@ -47,7 +47,6 @@ public class ThreadPoolManager {
     /**
      * Submits a new AddOn Callable to the ThreadPool
      * @param runnable the runnable to submit
-     * @return a Future representing pending completion of the task
      */
     public void submitToIzouThreadPool(Runnable runnable) {
         addOnsThreadPool.submit(runnable);

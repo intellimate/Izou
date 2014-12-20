@@ -38,6 +38,7 @@ public class Context {
      *
      * @param addOn the addOn for which to create a new context
      * @param main instance of main
+     * @param logLevel the logLevel to initialize the IzouLogger with
      */
     public Context(AddOn addOn, Main main, String logLevel) {
         this.addOn = addOn;

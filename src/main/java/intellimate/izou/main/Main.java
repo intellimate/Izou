@@ -35,6 +35,9 @@ public class Main {
     private final ThreadPoolManager threadPoolManager;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
+    /**
+     * creates a new Main instance with debugging enabled (doesn't search the lib-folder)
+     */
     private Main(boolean debug) {
         this(null, debug);
     }

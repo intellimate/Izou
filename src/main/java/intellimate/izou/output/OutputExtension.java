@@ -43,6 +43,7 @@ public abstract class OutputExtension<T> implements Callable<T>, Identifiable {
     /**
      * creates a new outputExtension with a new id
      * @param id the id to be set to the id of outputExtension
+     * @param context the context of the addon
      */
     public OutputExtension(String id, Context context) {
         this.id = id;
@@ -145,6 +146,7 @@ public abstract class OutputExtension<T> implements Callable<T>, Identifiable {
     /**
      * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
      * to the outputPlugin
+     * @param event the Event to generate for
      */
     public abstract T generate(Event event);
 

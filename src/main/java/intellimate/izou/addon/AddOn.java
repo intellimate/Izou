@@ -40,6 +40,7 @@ public abstract class AddOn implements ExtensionPoint, Identifiable, ExceptionCa
 
     /**
      * internal initiation of addOn
+     * @param context the context to initialize with
      */
     protected void initAddOn(Context context) {
         this.context = context;
@@ -141,8 +142,12 @@ public abstract class AddOn implements ExtensionPoint, Identifiable, ExceptionCa
         try {
             File properties = new File(propertiesPath);
 
-            inputStream = new FileInputStream(properties);
-            temp.load(inputStream);
+            //Reader reader = new FileReader(properties);
+            BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(properties),
+                    "UTF8"));
+            temp.load(in);
+            //inputStream = new FileInputStream(properties);
+            //temp.load(inputStream);
         } catch(IOException e) {
             context.logger.getLogger().error("Error while trying to load the Properties-File: " + propertiesPath, e);
             return;

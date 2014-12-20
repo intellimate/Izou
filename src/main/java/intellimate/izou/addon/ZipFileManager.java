@@ -18,7 +18,7 @@ public abstract class ZipFileManager extends Plugin{
      * Your plugins have to provide constructor with this exact signature to
      * be successfully loaded by manager.
      *
-     * @param wrapper
+     * @param wrapper the PluginWrapper to assign the ZipFileManager to
      */
     public ZipFileManager(PluginWrapper wrapper) {
         super(wrapper);

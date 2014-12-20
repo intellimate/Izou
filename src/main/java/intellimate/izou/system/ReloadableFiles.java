@@ -8,6 +8,7 @@ public interface ReloadableFiles {
 
     /**
      * Method that system-manager uses to update file when it has detected a change in it.
+     * @param eventType the Type which caused the reloading
      */
     public void reloadFile(String eventType);
 }

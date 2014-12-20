@@ -55,6 +55,7 @@ public class IdentificationManager {
 
     /**
      * Registers an Identifiable, ID has to be unique.
+     * @param identifiable the Identifiable to register
      * @return true if registered/already registered or false if the ID is already existing
      */
     public boolean registerIdentification(Identifiable identifiable) {

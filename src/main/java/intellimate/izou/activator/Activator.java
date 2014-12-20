@@ -109,6 +109,7 @@ public abstract class Activator implements Runnable, Identifiable, ExceptionCall
      *
      * @param event the event to fire
      * @throws IllegalArgumentException             thrown if the event is null or empty
+     * @throws LocalEventManager.MultipleEventsException if there are other addons firing events
      */
     public void fireEvent(Event event) throws IllegalArgumentException, LocalEventManager.MultipleEventsException {
         if (event == null) {

@@ -59,6 +59,7 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable, Excepti
      * creates a new output-plugin with a new id
      *
      * @param id the id of the new output-plugin
+     * @param context context and sh*t, you know
      */
     public OutputPlugin(String id, Context context) {
         this.id = id;
@@ -250,7 +251,7 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable, Excepti
     }
 
     /**
-     *
+     *@param event the current processed Event
      */
     public void isDone(Event event) {
         Optional<Resource> resource = event.getListResourceContainer().provideResource(getID()).stream()

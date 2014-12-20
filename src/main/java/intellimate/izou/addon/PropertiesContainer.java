@@ -20,6 +20,7 @@ public class PropertiesContainer {
 
     /**
      * creates a new properties-container
+     * @param context instance of Context
      */
     public PropertiesContainer(Context context) {
         this.properties = new Properties();

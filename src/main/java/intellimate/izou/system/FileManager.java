@@ -113,6 +113,7 @@ public class FileManager implements Runnable {
         try {
             bufferedReader = new BufferedReader(new FileReader(defaultFilePath));
             bufferedWriter = new BufferedWriter(new FileWriter(realFilePath));
+            String line;
 
             // c is the character read from bufferedReader and written to bufferedWriter
             int c = 0;
@@ -124,6 +125,7 @@ public class FileManager implements Runnable {
                     }
                 }
             }
+
         } catch (IOException e) {
             fileLogger.error("Unable to write to the Properties-File", e);
             outcome =  false;

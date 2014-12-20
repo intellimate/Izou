@@ -48,6 +48,7 @@ public class OutputManager implements Identifiable{
 
     /**
      * Creates a new output-manager with a list of output-plugins
+     * @param main the main instance started from
      */
     public OutputManager(Main main) {
         outputPluginsList = new ArrayList<>();
