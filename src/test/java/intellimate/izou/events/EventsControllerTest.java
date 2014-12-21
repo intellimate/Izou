@@ -5,7 +5,7 @@ import intellimate.izou.system.IdentificationManager;
 import intellimate.izou.testHelper.IzouTest;
 import org.junit.Test;
 
-public class EventsControllerTest extends IzouTest{
+public class EventsControllerTest extends IzouTest {
 
     public EventsControllerTest() {
         super(true, EventsControllerTest.class.getCanonicalName());

@@ -10,7 +10,7 @@ import java.util.Optional;
  * This interface is used to provide resources to other parts of the application.
  */
 @SuppressWarnings("UnusedDeclaration")
-public interface ResourceBuilder extends Identifiable{
+public interface ResourceBuilder extends Identifiable {
     /**
      * this method is called to register what resources the object provides.
      * just pass a List of Resources without Data in it.

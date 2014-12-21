@@ -9,7 +9,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-public class LocalEventManagerTest extends IzouTest{
+public class LocalEventManagerTest extends IzouTest {
     private static final class Lock { }
     private final Object lock = new Lock();
 

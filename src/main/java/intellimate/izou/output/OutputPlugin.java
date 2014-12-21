@@ -206,15 +206,6 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable, Excepti
     }
 
     /**
-     * Gets the executor service of the addons
-     *
-     * @return Gets the executor service
-     */
-    public ExecutorService getExecutor() {
-        return executor;
-    }
-
-    /**
      * event is called when an output-extension is added to this output-plugin
      *
      * @param outputExtension the outputExtension that was added to the outputPlugin
