@@ -15,7 +15,7 @@ import java.util.Optional;
 /**
  * This class represents an Event.
  */
-public class Event implements Identifiable{
+public class Event implements Identifiable {
     /**
      * Use this type when other AddOns should react to this Event.
      */

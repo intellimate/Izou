@@ -206,6 +206,15 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable, Excepti
     }
 
     /**
+     * Gets the executor service of the addons
+     *
+     * @return Gets the executor service
+     */
+    public ExecutorService getExecutor() {
+        return executor;
+    }
+
+    /**
      * event is called when an output-extension is added to this output-plugin
      *
      * @param outputExtension the outputExtension that was added to the outputPlugin
@@ -228,7 +237,7 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable, Excepti
     public abstract void renderFinalOutput();
 
     /**
-     * the event raised when an outputData has finished processing and is about to be added to the tDoneList.
+     * The event raised when an outputData has finished processing and is about to be added to the tDoneList.
      * It is NOT raised immediately raised after it is done, instead it is raised exactly when it is about to be
      * added to the tDoneList, by which time all other outputExtensions will also have finished. However it is an
      * opportunity to work with a finished future object (or get the outputData inside) before it is thrown back
