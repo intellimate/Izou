@@ -5,7 +5,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.nio.file.Path;
-import java.nio.file.WatchKey;
 
 /**
  * Information for files registered in the FileManager, it is what is processed when a file-event has been raised in the
@@ -15,7 +14,7 @@ public class FileInfo {
     private Path path;
     private String fileType;
     private AddOn addOn;
-    private ReloadableFiles reloadableFiles;
+    private ReloadableFile reloadableFile;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
 
@@ -37,10 +36,10 @@ public class FileInfo {
      * @param path path of DIRECTORY (not file itself!!!!) where file to be watched is located
      * @param fileType the type of file the file is, can be name or extension or both
      *                 (Ex: "test", "txt", "test.txt" all work)
-     * @param reloadableFiles interface that includes update method
+     * @param reloadableFile interface that includes update method
      */
-    public FileInfo(Path path, String fileType, ReloadableFiles reloadableFiles) {
-        this(path, fileType, null, reloadableFiles);
+    public FileInfo(Path path, String fileType, ReloadableFile reloadableFile) {
+        this(path, fileType, null, reloadableFile);
     }
 
     /**
@@ -50,13 +49,13 @@ public class FileInfo {
      * @param fileType the type of file the file is, can be name or extension or both
      *                 (Ex: "test", "txt", "test.txt" all work)
      * @param addOn the addOn that requires the file
-     * @param reloadableFiles interface that includes update method
+     * @param reloadableFile interface that includes update method
      */
-    public FileInfo(Path path, String fileType, AddOn addOn, ReloadableFiles reloadableFiles) {
+    public FileInfo(Path path, String fileType, AddOn addOn, ReloadableFile reloadableFile) {
         this.path = path;
         this.fileType = fileType;
         this.addOn = addOn;
-        this.reloadableFiles = reloadableFiles;
+        this.reloadableFile = reloadableFile;
     }
 
     /**
@@ -91,7 +90,7 @@ public class FileInfo {
      *
      * @return the reloadable files to which the registered file belongs
      */
-    public ReloadableFiles getReloadableFiles() {
-        return reloadableFiles;
+    public ReloadableFile getReloadableFile() {
+        return reloadableFile;
     }
 }

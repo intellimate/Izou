@@ -62,12 +62,12 @@ public class FileManager implements Runnable {
      * @param fileType the name/extension of the file
      *                 IMPORTANT: Please try to always enter the full name with extension of the file (Ex: "test.txt")
      * @param addOn addOn that file belongs to
-     * @param reloadableFiles object of interface that file belongs to
+     * @param reloadableFile object of interface that file belongs to
      * @throws IOException exception thrown by watcher service
      */
-    public void registerFileDir(Path dir, String fileType, AddOn addOn, ReloadableFiles reloadableFiles) throws IOException {
+    public void registerFileDir(Path dir, String fileType, AddOn addOn, ReloadableFile reloadableFile) throws IOException {
         WatchKey key = dir.register(watcher, ENTRY_MODIFY);
-        addOnMap.put(key, new FileInfo(dir, fileType, addOn, reloadableFiles));
+        addOnMap.put(key, new FileInfo(dir, fileType, addOn, reloadableFile));
     }
 
     /**
@@ -76,12 +76,12 @@ public class FileManager implements Runnable {
      * @param dir directory of file
      * @param fileType the name/extension of the file
      *                 IMPORTANT: Please try to always enter the full name with extension of the file (Ex: "test.txt")
-     * @param reloadableFiles object of interface that file belongs to
+     * @param reloadableFile object of interface that file belongs to
      * @throws IOException exception thrown by watcher service
      */
-    public void registerFileDir(Path dir, String fileType, ReloadableFiles reloadableFiles) throws IOException {
+    public void registerFileDir(Path dir, String fileType, ReloadableFile reloadableFile) throws IOException {
         WatchKey key = dir.register(watcher, ENTRY_MODIFY);
-        addOnMap.put(key, new FileInfo(dir, fileType, reloadableFiles));
+        addOnMap.put(key, new FileInfo(dir, fileType, reloadableFile));
     }
 
     /**
@@ -202,8 +202,8 @@ public class FileManager implements Runnable {
                         && isFileType(event, fileInfo.getFileType())) {
                     try {
                         fileInfo.getAddOn().reloadFiles();
-                        if(fileInfo.getReloadableFiles() != null)
-                            fileInfo.getReloadableFiles().reloadFile(kind.toString());
+                        if(fileInfo.getReloadableFile() != null)
+                            fileInfo.getReloadableFile().reloadFile(kind.toString());
                     } catch (Exception e) {
                         fileLogger.warn(e);
                     }
