@@ -282,11 +282,11 @@ public class OutputManager implements Identifiable{
                    lock.wait(10000);
                } catch (InterruptedException e) {
                    interrupted = true;
-                   fileLogger.debug("OutputPlugin: " + outputPlugin.getID() + "finished");
+                   fileLogger.debug("OutputPlugin: " + outputPlugin.getID() + " finished");
                }
            }
            if (!interrupted)
-               fileLogger.debug("OutputPlugin: " + outputPlugin.getID() + "timed out");
+               fileLogger.debug("OutputPlugin: " + outputPlugin.getID() + " timed out");
        }
     }
 
