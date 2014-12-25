@@ -221,8 +221,9 @@ public class AddOnManager {
         } catch(IOException e) {
             fileLogger.error("Error while trying to register the Files for the AddOns",e);
         }
-        registerAllAddOns();
+        registerProterties();
         prepareAllAddOns();
+        registerAllAddOns();
     }
 
     /**
@@ -246,8 +247,9 @@ public class AddOnManager {
         } catch(IOException e) {
             fileLogger.error("Error while trying to register the files for the AddOns",e);
         }
-        registerAllAddOns();
+        registerProterties();
         prepareAllAddOns();
+        registerAllAddOns();
     }
 
     /**
@@ -306,7 +308,6 @@ public class AddOnManager {
      * registers all AddOns
      */
     private void registerAllAddOns() {
-        registerProterties();
         registerOutputPlugins();
         registerOutputExtensions();
         registerContentGenerators();
