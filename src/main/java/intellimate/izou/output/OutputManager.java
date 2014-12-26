@@ -12,6 +12,10 @@ import org.apache.logging.log4j.Logger;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -264,29 +268,36 @@ public class OutputManager implements Identifiable{
        for(OutputPlugin outputPlugin : outputPlugins) {
            Optional<Identification> managerID = IdentificationManager.getInstance().getIdentification(this);
 
-           if(!managerID.isPresent()) continue;
+           if (!managerID.isPresent()) continue;
            Resource<Consumer> resource = new Resource<>(outputPlugin.getID());
            resource.setProvider(managerID.get());
 
-           Object lock = new Object();
+           final Lock lock = new ReentrantLock();
+           final Condition processing = lock.newCondition();
 
-           Consumer<Boolean> consumer = noParam -> lock.notifyAll();
+           Consumer<Boolean> consumer = noParam -> {
+               lock.lock();
+               processing.signal();
+               lock.unlock();
+           };
            resource.setResource(consumer);
            event.getListResourceContainer().addResource(resource);
 
            outputPlugin.addToEventList(event);
 
-           boolean interrupted = false;
-           synchronized (lock) {
-               try {
-                   lock.wait(10000);
-               } catch (InterruptedException e) {
-                   interrupted = true;
+           try {
+               lock.lock();
+               boolean finished = processing.await(100, TimeUnit.SECONDS);
+               if(finished) {
                    fileLogger.debug("OutputPlugin: " + outputPlugin.getID() + " finished");
+               } else {
+                   fileLogger.debug("OutputPlugin: " + outputPlugin.getID() + " timed out");
                }
+           } catch (InterruptedException e) {
+               fileLogger.error("Waiting for OutputPlugins interrupted", e);
+           } finally {
+               lock.unlock();
            }
-           if (!interrupted)
-               fileLogger.debug("OutputPlugin: " + outputPlugin.getID() + " timed out");
        }
     }
 
