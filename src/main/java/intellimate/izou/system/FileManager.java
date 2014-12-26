@@ -250,10 +250,10 @@ public class FileManager implements Runnable {
                     && isFileType(event, fileInfo.getFileType())) {
                 try {
                     fileInfo.getAddOn().reloadFiles();
-                    fileLogger.debug("Reloaded file: " + fileInfo.getAddOn().getID());
+                    fileLogger.debug("Reloaded file for: " + fileInfo.getAddOn().getID());
                     if (fileInfo.getReloadableFile() != null) {
                         fileInfo.getReloadableFile().reloadFile(kind.toString());
-                        fileLogger.debug("Reloaded file: " + fileInfo.getReloadableFile().getID());
+                        fileLogger.debug("Reloaded file for: " + fileInfo.getReloadableFile().getID());
                     }
                 } catch (Exception e) {
                     fileLogger.warn(e);
