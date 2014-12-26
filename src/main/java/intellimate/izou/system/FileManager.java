@@ -6,7 +6,9 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.nio.file.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static java.nio.file.StandardWatchEventKinds.*;
@@ -24,7 +26,7 @@ public class FileManager implements Runnable {
     /**
      * Map that holds watchKeys (ID's) of the directories and the addOns using the directories
      */
-    private Map<WatchKey, FileInfo> addOnMap;
+    private Map<WatchKey, List<FileInfo>> addOnMap;
 
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
@@ -52,7 +54,15 @@ public class FileManager implements Runnable {
      */
     public void registerFileDir(Path dir, String fileType, AddOn addOn) throws IOException {
         WatchKey key = dir.register(watcher, ENTRY_MODIFY);
-        addOnMap.put(key, new FileInfo(dir, fileType, addOn));
+        List<FileInfo> fileInfos = addOnMap.get(key);
+
+        if(fileInfos != null) {
+            fileInfos.add(new FileInfo(dir, fileType, addOn));
+        } else {
+            fileInfos = new ArrayList<>();
+            fileInfos.add(new FileInfo(dir, fileType, addOn));
+            addOnMap.put(key, fileInfos);
+        }
     }
 
     /**
@@ -67,7 +77,15 @@ public class FileManager implements Runnable {
      */
     public void registerFileDir(Path dir, String fileType, AddOn addOn, ReloadableFile reloadableFile) throws IOException {
         WatchKey key = dir.register(watcher, ENTRY_MODIFY);
-        addOnMap.put(key, new FileInfo(dir, fileType, addOn, reloadableFile));
+        List<FileInfo> fileInfos = addOnMap.get(key);
+
+        if(fileInfos != null) {
+            fileInfos.add(new FileInfo(dir, fileType, addOn, reloadableFile));
+        } else {
+            fileInfos = new ArrayList<>();
+            fileInfos.add(new FileInfo(dir, fileType, addOn, reloadableFile));
+            addOnMap.put(key, fileInfos);
+        }
     }
 
     /**
@@ -81,7 +99,15 @@ public class FileManager implements Runnable {
      */
     public void registerFileDir(Path dir, String fileType, ReloadableFile reloadableFile) throws IOException {
         WatchKey key = dir.register(watcher, ENTRY_MODIFY);
-        addOnMap.put(key, new FileInfo(dir, fileType, reloadableFile));
+        List<FileInfo> fileInfos = addOnMap.get(key);
+
+        if(fileInfos != null) {
+            fileInfos.add(new FileInfo(dir, fileType, reloadableFile));
+        } else {
+            fileInfos = new ArrayList<>();
+            fileInfos.add(new FileInfo(dir, fileType, reloadableFile));
+            addOnMap.put(key, fileInfos);
+        }
     }
 
     /**
@@ -184,45 +210,58 @@ public class FileManager implements Runnable {
                 continue;
             }
 
-            FileInfo fileInfo = addOnMap.get(key);
-            if (fileInfo.getPath() == null) {
-                throw new NullPointerException("FileInfo has to be filled out and valid");
-            }
-
-            for (WatchEvent<?> event : key.pollEvents()) {
-                WatchEvent.Kind kind = event.kind();
-
-                if (kind == OVERFLOW) {
-                    try {
-                        throw new IncompletePropertyEventException();
-                    } catch (IncompletePropertyEventException e) {
-                        fileLogger.warn(e);
-                    }
-                } else if ((kind == ENTRY_CREATE || kind == ENTRY_MODIFY || kind == ENTRY_DELETE)
-                        && isFileType(event, fileInfo.getFileType())) {
-                    try {
-                        fileInfo.getAddOn().reloadFiles();
-                        if(fileInfo.getReloadableFile() != null)
-                            fileInfo.getReloadableFile().reloadFile(kind.toString());
-                    } catch (Exception e) {
-                        fileLogger.warn(e);
-                    }
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        fileLogger.warn(e);
-                    }
+            List<FileInfo> fileInfos = addOnMap.get(key);
+            for (FileInfo fileInfo : fileInfos) {
+                if (fileInfo.getPath() == null) {
+                    throw new NullPointerException("FileInfo has to be filled out and valid");
                 }
 
-                // reset key and remove from set if directory no longer accessible
-                boolean valid = key.reset();
-                if (!valid) {
-                    addOnMap.remove(key);
+                checkAndProcessFileInfo(key, fileInfo);
+            }
 
-                    // all directories are inaccessible
-                    if (addOnMap.isEmpty()) {
-                        break;
+            // reset key and remove from set if directory no longer accessible
+            boolean valid = key.reset();
+            if (!valid) {
+                addOnMap.remove(key);
+
+                // all directories are inaccessible
+                if (addOnMap.isEmpty()) {
+                    break;
+                }
+            }
+        }
+    }
+
+    private void checkAndProcessFileInfo(WatchKey key, FileInfo fileInfo) {
+        for (WatchEvent<?> event : key.pollEvents()) {
+            WatchEvent.Kind kind = event.kind();
+
+            if (!event.context().toString().contains(fileInfo.getAddOn().getID())) {
+                continue;
+            }
+
+            if (kind == OVERFLOW) {
+                try {
+                    throw new IncompleteFileEventException();
+                } catch (IncompleteFileEventException e) {
+                    fileLogger.warn(e);
+                }
+            } else if ((kind == ENTRY_CREATE || kind == ENTRY_MODIFY || kind == ENTRY_DELETE)
+                    && isFileType(event, fileInfo.getFileType())) {
+                try {
+                    fileInfo.getAddOn().reloadFiles();
+                    fileLogger.debug("Reloaded file: " + fileInfo.getAddOn().getID());
+                    if (fileInfo.getReloadableFile() != null) {
+                        fileInfo.getReloadableFile().reloadFile(kind.toString());
+                        fileLogger.debug("Reloaded file: " + fileInfo.getReloadableFile().getID());
                     }
+                } catch (Exception e) {
+                    fileLogger.warn(e);
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    fileLogger.warn(e);
                 }
             }
         }
@@ -232,9 +271,9 @@ public class FileManager implements Runnable {
     * Exception thrown if there are multiple Events fired at the same time.
     */
     @SuppressWarnings("WeakerAccess")
-    public class IncompletePropertyEventException extends Exception {
-        public IncompletePropertyEventException() {
-            super("Fired property event has been lost or discarded");
+    public class IncompleteFileEventException extends Exception {
+        public IncompleteFileEventException() {
+            super("Fired file event has been lost or discarded");
         }
     }
 }

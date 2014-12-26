@@ -261,6 +261,7 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable, Excepti
         if(resource.get().getResource() instanceof Consumer) {
             Consumer consumer = (Consumer) resource.get().getResource();
             consumer.accept(null);
+            consumer.notify();
         }
     }
 
@@ -324,6 +325,7 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable, Excepti
                 //render final output
                 renderFinalOutput();
             }
+
             //notifies output-manager when done processing
             isDone(event);
         }

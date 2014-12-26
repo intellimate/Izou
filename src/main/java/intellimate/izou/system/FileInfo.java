@@ -93,4 +93,18 @@ public class FileInfo {
     public ReloadableFile getReloadableFile() {
         return reloadableFile;
     }
+
+    /**
+     * Gets id of file-info
+     *
+     * @return the id of the file-info
+     */
+    public String getID() {
+        if (addOn != null) {
+            return addOn.getID();
+        } else if (reloadableFile != null) {
+            return reloadableFile.getID();
+        }
+        return null;
+    }
 }

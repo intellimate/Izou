@@ -11,4 +11,6 @@ public interface ReloadableFile {
      * @param eventType the Type which caused the reloading
      */
     public void reloadFile(String eventType);
+
+    public String getID();
 }
