@@ -15,11 +15,13 @@ import static java.nio.file.StandardWatchEventKinds.*;
 
 /**
  * The file manager listens for events that were caused by modifications made to property files and
- * then reloads the file
+ * then reloads the file.
+ *
+ * You can register an {@code AddOn} or a {@code ReloadableFile} with the path to the directory it is supposed to watch
  */
 public class FileManager implements Runnable {
     /**
-     * default java watching service for directories, raises events when changes happen in this directory
+     * Default java watching service for directories, raises events when changes happen in this directory
      */
     private WatchService watcher;
 
@@ -31,7 +33,7 @@ public class FileManager implements Runnable {
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     /**
-     * creates a new FileManager with a watcher and addOnMap
+     * Creates a new FileManager with a watcher and addOnMap
      *
      * @throws IOException exception is thrown by watcher service
      */
@@ -44,11 +46,15 @@ public class FileManager implements Runnable {
     }
 
     /**
-     * use this method to register a file with the watcherService
+     * Use this method to register a file with the watcherService
      *
      * @param dir directory of the file
      * @param fileType the name/extension of the file
-     *                 IMPORTANT: Please try to always enter the full name with extension of the file (Ex: "test.txt")
+     *                 IMPORTANT: Please try to always enter the full name with extension of the file (Ex: "test.txt"),
+     *                 it would be best if the fileType is the full file name, and that the file name is clearly
+     *                 distinguishable from other files.
+     *                 For example, the property files are stored with the ID of the addon they belong too. That way
+     *                 every property file is easily distinguishable.
      * @param addOn addOn the file belongs to
      * @throws IOException exception thrown by watcher service
      */
@@ -66,11 +72,15 @@ public class FileManager implements Runnable {
     }
 
     /**
-     * use this method to register a file with the watcherService
+     * Use this method to register a file with the watcherService
      *
      * @param dir directory of file
      * @param fileType the name/extension of the file
-     *                 IMPORTANT: Please try to always enter the full name with extension of the file (Ex: "test.txt")
+     *                 IMPORTANT: Please try to always enter the full name with extension of the file (Ex: "test.txt"),
+     *                 it would be best if the fileType is the full file name, and that the file name is clearly
+     *                 distinguishable from other files.
+     *                 For example, the property files are stored with the ID of the addon they belong too. That way
+     *                 every property file is easily distinguishable.
      * @param addOn addOn that file belongs to
      * @param reloadableFile object of interface that file belongs to
      * @throws IOException exception thrown by watcher service
@@ -89,11 +99,15 @@ public class FileManager implements Runnable {
     }
 
     /**
-     * use this method to register a file with the watcherService
+     * Use this method to register a file with the watcherService
      *
      * @param dir directory of file
      * @param fileType the name/extension of the file
-     *                 IMPORTANT: Please try to always enter the full name with extension of the file (Ex: "test.txt")
+     *                 IMPORTANT: Please try to always enter the full name with extension of the file (Ex: "test.txt"),
+     *                 it would be best if the fileType is the full file name, and that the file name is clearly
+     *                 distinguishable from other files.
+     *                 For example, the property files are stored with the ID of the addon they belong too. That way
+     *                 every property file is easily distinguishable.
      * @param reloadableFile object of interface that file belongs to
      * @throws IOException exception thrown by watcher service
      */
@@ -111,12 +125,13 @@ public class FileManager implements Runnable {
     }
 
     /**
-     * checks if an event belongs to the desired file type
+     * Checks if an event belongs to the desired file type
+     *
      * @param event the event to check
      * @return the boolean value corresponding to the output
      */
     private boolean isFileType(WatchEvent event, String fileType) {
-        return event.context().toString().endsWith(fileType);
+        return event.context().toString().contains(fileType);
     }
 
     /**
@@ -197,7 +212,46 @@ public class FileManager implements Runnable {
     }
 
     /**
-     * main method of fileManager, it constantly waits for new events and then processes them
+     * Checks if {@code fileInfo} and {@code key} match each other, in which case the fileInfo and key are processed
+     *
+     * @param key current key
+     * @param fileInfo current fileInfo
+     */
+    private void checkAndProcessFileInfo(WatchKey key, FileInfo fileInfo) {
+        for (WatchEvent<?> event : key.pollEvents()) {
+            WatchEvent.Kind kind = event.kind();
+
+            if (kind == OVERFLOW) {
+                try {
+                    throw new IncompleteFileEventException();
+                } catch (IncompleteFileEventException e) {
+                    fileLogger.warn(e);
+                }
+            } else if ((kind == ENTRY_CREATE || kind == ENTRY_MODIFY || kind == ENTRY_DELETE)
+                    && isFileType(event, fileInfo.getFileType())) {
+                try {
+                    if (fileInfo.getAddOn() != null) {
+                        fileInfo.getAddOn().reloadFiles();
+                        fileLogger.debug("Reloaded file for: " + fileInfo.getAddOn().getID());
+                    }
+                    if (fileInfo.getReloadableFile() != null) {
+                        fileInfo.getReloadableFile().reloadFile(kind.toString());
+                        fileLogger.debug("Reloaded file for: " + fileInfo.getReloadableFile().getID());
+                    }
+                } catch (Exception e) {
+                    fileLogger.warn(e);
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    fileLogger.warn(e);
+                }
+            }
+        }
+    }
+
+    /**
+     * Main method of fileManager, it constantly waits for new events and then processes them
      */
     @Override
     public void run() {
@@ -215,7 +269,6 @@ public class FileManager implements Runnable {
                 if (fileInfo.getPath() == null) {
                     throw new NullPointerException("FileInfo has to be filled out and valid");
                 }
-
                 checkAndProcessFileInfo(key, fileInfo);
             }
 
@@ -227,41 +280,6 @@ public class FileManager implements Runnable {
                 // all directories are inaccessible
                 if (addOnMap.isEmpty()) {
                     break;
-                }
-            }
-        }
-    }
-
-    private void checkAndProcessFileInfo(WatchKey key, FileInfo fileInfo) {
-        for (WatchEvent<?> event : key.pollEvents()) {
-            WatchEvent.Kind kind = event.kind();
-
-            if (!event.context().toString().contains(fileInfo.getAddOn().getID())) {
-                continue;
-            }
-
-            if (kind == OVERFLOW) {
-                try {
-                    throw new IncompleteFileEventException();
-                } catch (IncompleteFileEventException e) {
-                    fileLogger.warn(e);
-                }
-            } else if ((kind == ENTRY_CREATE || kind == ENTRY_MODIFY || kind == ENTRY_DELETE)
-                    && isFileType(event, fileInfo.getFileType())) {
-                try {
-                    fileInfo.getAddOn().reloadFiles();
-                    fileLogger.debug("Reloaded file for: " + fileInfo.getAddOn().getID());
-                    if (fileInfo.getReloadableFile() != null) {
-                        fileInfo.getReloadableFile().reloadFile(kind.toString());
-                        fileLogger.debug("Reloaded file for: " + fileInfo.getReloadableFile().getID());
-                    }
-                } catch (Exception e) {
-                    fileLogger.warn(e);
-                }
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    fileLogger.warn(e);
                 }
             }
         }
