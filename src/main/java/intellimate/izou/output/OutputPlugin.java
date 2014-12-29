@@ -306,8 +306,6 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable, Excepti
                     for (Future<T> cDF : futureList) {
                         if(!cDF.isDone())
                             isWorking = true;
-                        else
-                            break;
                     }
                 } while (isWorking);
 

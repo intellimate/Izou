@@ -81,7 +81,7 @@ public class Main {
         }
         fileManager = fileManagerTemp;
 
-        addOnManager = new AddOnManager(outputManager,resourceManager,activatorManager, fileManager, this);
+        addOnManager = new AddOnManager(this);
         if(addOns != null && !debug) {
             addOnManager.addAddOnsWithoutRegistering(addOns);
         } else if(addOns != null) {

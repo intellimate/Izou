@@ -147,6 +147,14 @@ public class FileManager implements Runnable {
      * @return true if operation has succeeded, else false
      */
     public boolean writeToFile(String defaultFilePath, String realFilePath) {
+        try {
+            Files.copy(Paths.get(defaultFilePath), Paths.get(realFilePath), StandardCopyOption.REPLACE_EXISTING);
+            return true;
+        } catch (IOException e) {
+            fileLogger.error("Unable to write to copy Properties-File", e);
+            return false;
+        }
+        /*
         boolean outcome = true;
 
         BufferedReader bufferedReader = null;
@@ -184,6 +192,7 @@ public class FileManager implements Runnable {
                 }
         }
         return outcome;
+        */
     }
 
     /**
