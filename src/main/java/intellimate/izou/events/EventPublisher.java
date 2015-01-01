@@ -5,7 +5,7 @@ import java.util.concurrent.BlockingQueue;
 /**
  * This class is used to pass Events to the EventDistributor
  */
-public class EventPublisher implements EventCaller{
+public class EventPublisher implements EventCallable {
     //the queue where all the Events are stored
     private final BlockingQueue<Event> events;
     protected EventPublisher(BlockingQueue<Event> events) {

@@ -130,7 +130,7 @@ public class LocalEventManager implements Runnable, Identifiable{
      * Use fire() to fire the event;
      */
     @SuppressWarnings("SameParameterValue")
-    public final class EventCaller implements intellimate.izou.events.EventCaller{
+    public final class EventCaller implements EventCallable {
         private BlockingQueue<Event> locevents;
         //private, so that this class can only constructed by EventManager
         private EventCaller(BlockingQueue<Event> events) {
@@ -140,16 +140,26 @@ public class LocalEventManager implements Runnable, Identifiable{
         /**
          * This method is used to fire the event.
          *
-         * @throws MultipleEventsException an Exception will be thrown if there are currently other events fired
+         * @throws intellimate.izou.events.MultipleEventsException an Exception will be thrown if there are currently other events fired
          */
-        public void fire(Event event) throws MultipleEventsException {
+        public void fire(Event event) throws intellimate.izou.events.MultipleEventsException {
             if(locevents == null) return;
             if(locevents.isEmpty()) {
                 locevents.add(event);
             } else {
-                throw new MultipleEventsException();
+                throw new intellimate.izou.events.MultipleEventsException();
             }
         }
     }
 
+    /**
+     * Exception thrown if there are multiple Events fired at the same time.
+     */
+    @SuppressWarnings("WeakerAccess")
+    @Deprecated
+    public static class MultipleEventsException extends Exception {
+        public MultipleEventsException() {
+            super("Multiple Events fired at the same time");
+        }
+    }
 }

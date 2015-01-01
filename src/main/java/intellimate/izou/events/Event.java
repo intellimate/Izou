@@ -210,49 +210,54 @@ public class Event implements Identifiable {
     /**
      * tries to fire the Event.
      * <p>
-     * if calling failed, it will call onError. If onError returns true, it will wait 20 milli-seconds an retries
+     * if calling failed, it will call onError. If onError returns true, it will wait 100 milli-seconds an retries
      * firing. OnError will be called with the parameters: this Event and a counter which increments for every try.
      * If onError returns false, the MultipleEventsException will be thrown.
      * </p>
-     * @param eventCaller the EventCaller used to fire
+     * @param eventCallable the EventCaller used to fire
      * @param onError this method will be called when an error occurred
      * @return this Event
      * @throws intellimate.izou.events.MultipleEventsException when the method fails to fire the event and onError
      *                              returns false
      */
-    public Event tryFire (EventCaller eventCaller, BiFunction<Event, Integer, Boolean> onError)
+    public Event tryFire (EventCallable eventCallable, BiFunction<Event, Integer, Boolean> onError)
             throws MultipleEventsException {
-        return tryFire(eventCaller, onError, null);
+        return tryFire(eventCallable, onError, null);
     }
 
     /**
      * tries to fire the Event.
      * <p>
-     * if calling failed, it will call onError. If onError returns true, it will wait 20 milli-seconds an retries
+     * if calling failed, it will call onError. If onError returns true, it will wait 100 milli-seconds an retries
      * firing. OnError will be called with the parameters: this Event and a counter which increments for every try.
      * If onError returns false, the MultipleEventsException will be thrown.
      * if calling succeeded, it will call onSuccess.
      * </p>
-     * @param eventCaller the EventCaller used to fire
+     * @param eventCallable the EventCaller used to fire
      * @param onError this method will be called when an error occurred
      * @param onSuccess this method will be called when firing succeeded
      * @return this Event
      * @throws intellimate.izou.events.MultipleEventsException when the method fails to fire the event and onError
      *                              returns false
      */
-    public Event tryFire (EventCaller eventCaller, BiFunction<Event, Integer, Boolean> onError,
+    public Event tryFire (EventCallable eventCallable, BiFunction<Event, Integer, Boolean> onError,
                                                         Consumer<Event> onSuccess) throws MultipleEventsException {
         boolean success = false;
         int count = 0;
         while (!success) {
             try {
-                eventCaller.fire(this);
+                eventCallable.fire(this);
                 success = true;
             } catch (MultipleEventsException e) {
                 count++;
                 boolean retry = onError.apply(this, count);
                 if (!retry)
                     throw e;
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e1) {
+                    Thread.currentThread().interrupt();
+                }
             }
         }
         onSuccess.accept(this);

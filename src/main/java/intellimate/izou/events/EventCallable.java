@@ -4,7 +4,7 @@ package intellimate.izou.events;
  * @author LeanderK
  * @version 1.0
  */
-public interface EventCaller {
+public interface EventCallable {
     /**
      * This method is used to fire the event.
      *
