@@ -11,6 +11,9 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * This class represents an Event.
@@ -112,17 +115,20 @@ public class Event implements Identifiable {
     /**
      * adds a Resource to the Container
      * @param resource an instance of the resource to add
+     * @return the resulting Event (which is the same instance)
      */
-    void addResource(Resource resource) {
+    Event addResource(Resource resource) {
         listResourceContainer.addResource(resource);
+        return this;
     }
 
     /**
      * adds a List of Resources to the Container
      * @param resources a list containing all the resources
      */
-    void addResources(List<Resource> resources) {
+    Event addResources(List<Resource> resources) {
         listResourceContainer.addResource(resources);
+        return this;
     }
 
     /**
@@ -146,17 +152,21 @@ public class Event implements Identifiable {
     /**
      * sets the Descriptors (but not the Event-Type).
      * @param descriptors a List containing all the Descriptors
+     * @return the resulting Event (which is the same instance)
      */
-    public void setDescriptors(List<String> descriptors) {
+    public Event setDescriptors(List<String> descriptors) {
         this.descriptors = descriptors;
+        return this;
     }
 
     /**
      * sets the Descriptors (but not the Event-Type).
-     * @param descriptor a String describing the Event
+     * @param descriptor a String describing the Event.
+     * @return the resulting Event (which is the same instance)
      */
-    public void addDescriptor(String descriptor) {
+    public Event addDescriptor(String descriptor) {
         descriptors.add(descriptor);
+        return this;
     }
 
     /**
@@ -175,5 +185,77 @@ public class Event implements Identifiable {
      */
     public EventBehaviourController getEventBehaviourController() {
         return eventBehaviourController;
+    }
+
+    /**
+     * applies the consumer to the Event
+     * @param consumer the consumer
+     * @return this Event
+     */
+    public Event peek (Consumer<Event> consumer) {
+        consumer.accept(this);
+        return this;
+    }
+
+    /**
+     * maps this event to T
+     * @param function the function to map
+     * @param <T> the return type
+     * @return T
+     */
+    public <T> T map (Function<Event, T> function) {
+        return function.apply(this);
+    }
+
+    /**
+     * tries to fire the Event.
+     * <p>
+     * if calling failed, it will call onError. If onError returns true, it will wait 20 milli-seconds an retries
+     * firing. OnError will be called with the parameters: this Event and a counter which increments for every try.
+     * If onError returns false, the MultipleEventsException will be thrown.
+     * </p>
+     * @param eventCaller the EventCaller used to fire
+     * @param onError this method will be called when an error occurred
+     * @return this Event
+     * @throws intellimate.izou.events.MultipleEventsException when the method fails to fire the event and onError
+     *                              returns false
+     */
+    public Event tryFire (EventCaller eventCaller, BiFunction<Event, Integer, Boolean> onError)
+            throws MultipleEventsException {
+        return tryFire(eventCaller, onError, null);
+    }
+
+    /**
+     * tries to fire the Event.
+     * <p>
+     * if calling failed, it will call onError. If onError returns true, it will wait 20 milli-seconds an retries
+     * firing. OnError will be called with the parameters: this Event and a counter which increments for every try.
+     * If onError returns false, the MultipleEventsException will be thrown.
+     * if calling succeeded, it will call onSuccess.
+     * </p>
+     * @param eventCaller the EventCaller used to fire
+     * @param onError this method will be called when an error occurred
+     * @param onSuccess this method will be called when firing succeeded
+     * @return this Event
+     * @throws intellimate.izou.events.MultipleEventsException when the method fails to fire the event and onError
+     *                              returns false
+     */
+    public Event tryFire (EventCaller eventCaller, BiFunction<Event, Integer, Boolean> onError,
+                                                        Consumer<Event> onSuccess) throws MultipleEventsException {
+        boolean success = false;
+        int count = 0;
+        while (!success) {
+            try {
+                eventCaller.fire(this);
+                success = true;
+            } catch (MultipleEventsException e) {
+                count++;
+                boolean retry = onError.apply(this, count);
+                if (!retry)
+                    throw e;
+            }
+        }
+        onSuccess.accept(this);
+        return this;
     }
 }

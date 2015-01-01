@@ -1,7 +1,7 @@
 package intellimate.izou.activator;
 
 import intellimate.izou.events.Event;
-import intellimate.izou.events.LocalEventManager;
+import intellimate.izou.events.MultipleEventsException;
 import intellimate.izou.testHelper.IzouTest;
 import org.junit.Test;
 
@@ -42,7 +42,7 @@ public class ActivatorManagerTest extends IzouTest{
             public void activatorStarts() throws InterruptedException {
                 try {
                     fireEvent(event.get());
-                } catch (LocalEventManager.MultipleEventsException e) {
+                } catch (MultipleEventsException e) {
                     e.printStackTrace();
                 }
             }

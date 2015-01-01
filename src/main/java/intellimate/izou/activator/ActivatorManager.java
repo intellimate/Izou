@@ -5,9 +5,7 @@ import intellimate.izou.main.Main;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.lang.reflect.Field;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadFactory;
 
 /**
  * The ActivatorManager holds all the Activator-instances and runs them parallel in Threads.
@@ -46,33 +44,5 @@ public class ActivatorManager {
      */
     public void restartActivator(Activator activator) {
         executor.submit(activator);
-    }
-
-    /**
-     * used to catch Exception in threads
-     */
-    private class CustomThreadFactory implements ThreadFactory {
-        @SuppressWarnings("NullableProblems")
-        @Override
-        public Thread newThread(Runnable r) {
-            Thread t = new Thread() {
-                public void run() {
-                    try {
-                        r.run();
-                    } catch (Exception e) {
-                        try {
-                            Field target = Thread.class.getDeclaredField("target");
-                            target.setAccessible(true);
-                            Activator activator = (Activator) target.get(this);
-                            activator.exceptionThrown(e);
-                        } catch (NoSuchFieldException | IllegalAccessException | ClassCastException ecp ) {
-                            fileLogger.fatal(e.getMessage());
-                        }
-                    }
-                }
-            };
-            t.setPriority(Thread.MIN_PRIORITY);
-            return t;
-        }
     }
 }

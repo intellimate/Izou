@@ -64,7 +64,7 @@ public class ThreadPoolManager {
                     try {
                         r.run();
                     } catch (Exception | NoClassDefFoundError e) {
-                        fileLogger.fatal("Something crashed!",e.getMessage());
+                        fileLogger.fatal("Something crashed!", e.getMessage());
                     }
                 }
             };

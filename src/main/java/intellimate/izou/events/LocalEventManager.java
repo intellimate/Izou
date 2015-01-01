@@ -73,7 +73,7 @@ public class LocalEventManager implements Runnable, Identifiable{
      * @param event the fired Event
      */
     private void fireEvent(Event event) throws InterruptedException {
-        if(eventPublisher.isPresent()) eventPublisher.get().fireEvent(event);
+        if(eventPublisher.isPresent()) eventPublisher.get().fire(event);
     }
 
     @Override
@@ -130,7 +130,7 @@ public class LocalEventManager implements Runnable, Identifiable{
      * Use fire() to fire the event;
      */
     @SuppressWarnings("SameParameterValue")
-    public final class EventCaller {
+    public final class EventCaller implements intellimate.izou.events.EventCaller{
         private BlockingQueue<Event> locevents;
         //private, so that this class can only constructed by EventManager
         private EventCaller(BlockingQueue<Event> events) {
@@ -152,13 +152,4 @@ public class LocalEventManager implements Runnable, Identifiable{
         }
     }
 
-    /**
-     * Exception thrown if there are multiple Events fired at the same time.
-     */
-    @SuppressWarnings("WeakerAccess")
-    public class MultipleEventsException extends Exception {
-        public MultipleEventsException() {
-            super("Multiple Events fired at the same time");
-        }
-    }
 }

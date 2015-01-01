@@ -1,7 +1,7 @@
 package intellimate.izou.testHelper;
 
 import intellimate.izou.events.Event;
-import intellimate.izou.events.LocalEventManager;
+import intellimate.izou.events.MultipleEventsException;
 import intellimate.izou.fullplugintesting.TestAddOn;
 import intellimate.izou.main.Main;
 import intellimate.izou.system.Context;
@@ -9,7 +9,13 @@ import intellimate.izou.system.Identifiable;
 import intellimate.izou.system.Identification;
 import intellimate.izou.system.IdentificationManager;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
 
 import static org.junit.Assert.*;
 
@@ -76,7 +82,7 @@ public class IzouTest implements Identifiable{
         try {
             Identification id = IdentificationManager.getInstance().getIdentification(this).get();
             main.getLocalEventManager().registerCaller(id).get().fire(event);
-        } catch (LocalEventManager.MultipleEventsException e) {
+        } catch (MultipleEventsException e) {
             fail();
         }
 
@@ -103,7 +109,7 @@ public class IzouTest implements Identifiable{
         try {
             Identification id = IdentificationManager.getInstance().getIdentification(this).get();
             main.getLocalEventManager().registerCaller(id).get().fire(eventId);
-        } catch (LocalEventManager.MultipleEventsException e) {
+        } catch (MultipleEventsException e) {
             fail();
         }
 
@@ -130,7 +136,7 @@ public class IzouTest implements Identifiable{
         try {
             Identification id = IdentificationManager.getInstance().getIdentification(this).get();
             main.getLocalEventManager().registerCaller(id).get().fire(event);
-        } catch (LocalEventManager.MultipleEventsException e) {
+        } catch (MultipleEventsException e) {
             fail();
         }
     }
@@ -139,15 +145,27 @@ public class IzouTest implements Identifiable{
      * waits for multitasking
      * @throws InterruptedException
      */
-    public void waitForMultith() throws InterruptedException {
+    public void waitForMultith(Event event) throws InterruptedException {
         synchronized (lock) {
+            lock.wait(10);
 
-            synchronized (lock) {
-                lock.wait(10);
-                while(!main.getLocalEventManager().getEvents().isEmpty())
-                {
-                    lock.wait(2);
-                }
+            final java.util.concurrent.locks.Lock lock = new ReentrantLock();
+            final Condition processing = lock.newCondition();
+
+            Consumer<List<Identification>> consumer = noParam -> {
+                lock.lock();
+                processing.signal();
+                lock.unlock();
+            };
+            event.getEventBehaviourController().controlOutputPluginBehaviour(identifications -> {
+                consumer.accept(identifications);
+                return new HashMap<>();
+            });
+            while(!main.getLocalEventManager().getEvents().isEmpty())
+            {
+                lock.lock();
+                processing.await(10, TimeUnit.SECONDS);
+                lock.unlock();
             }
         }
     }

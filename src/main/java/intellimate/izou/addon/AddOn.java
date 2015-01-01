@@ -75,8 +75,8 @@ public abstract class AddOn implements ExtensionPoint, Identifiable, ExceptionCa
         InputStream inputStream;
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(propertiesFile),
-                    //"UTF8"));
-                    "Windows-1252"));
+                    "UTF8"));
+                    //"Windows-1252"));
             //inputStream = new FileInputStream(propertiesFile);
             try {
                 //properties.load(inputStream);
@@ -148,7 +148,8 @@ public abstract class AddOn implements ExtensionPoint, Identifiable, ExceptionCa
 
             //Reader reader = new FileReader(properties);
             BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(properties),
-                    "Windows-1252"));
+            //        "Windows-1252"));
+                    "UTF8"));
             temp.load(in);
             //inputStream = new FileInputStream(properties);
             //temp.load(inputStream);

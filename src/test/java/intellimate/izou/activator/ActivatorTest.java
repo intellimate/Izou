@@ -1,20 +1,13 @@
 package intellimate.izou.activator;
 
-import intellimate.izou.addon.AddOn;
-import intellimate.izou.fullplugintesting.TestAddOn;
-import intellimate.izou.main.Main;
-import intellimate.izou.system.Context;
 import intellimate.izou.events.Event;
+import intellimate.izou.system.Context;
 import intellimate.izou.system.Identification;
 import intellimate.izou.system.IdentificationManager;
 import intellimate.izou.testHelper.IzouTest;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.*;
 
 public class ActivatorTest extends IzouTest{
     static Activator activator;
@@ -45,7 +38,7 @@ public class ActivatorTest extends IzouTest{
         final boolean[] isWorking = {false};
         main.getEventDistributor().registerEventListener(event2, id -> isWorking[0] = true);
         activator.fireEvent(event2);
-        waitForMultith();
+        waitForMultith(event2);
         assertTrue(isWorking[0]);
     }
 

@@ -2,7 +2,7 @@ package intellimate.izou.fullplugintesting;
 
 import intellimate.izou.activator.Activator;
 import intellimate.izou.events.Event;
-import intellimate.izou.events.LocalEventManager;
+import intellimate.izou.events.MultipleEventsException;
 import intellimate.izou.system.Identification;
 import intellimate.izou.system.IdentificationManager;
 import intellimate.izou.system.Context;
@@ -39,7 +39,7 @@ public class TestAct extends Activator {
                 try {
                     this.fireEvent(event.get());
                     firedEvent = true;
-                } catch (LocalEventManager.MultipleEventsException e) {
+                } catch (MultipleEventsException e) {
                     e.printStackTrace();
                 }
                 start = false;

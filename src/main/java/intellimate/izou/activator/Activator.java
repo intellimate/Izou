@@ -2,6 +2,7 @@ package intellimate.izou.activator;
 
 import intellimate.izou.events.Event;
 import intellimate.izou.events.LocalEventManager;
+import intellimate.izou.events.MultipleEventsException;
 import intellimate.izou.system.Context;
 import intellimate.izou.system.Identifiable;
 import intellimate.izou.system.Identification;
@@ -55,7 +56,7 @@ public abstract class Activator implements Runnable, Identifiable, ExceptionCall
     /**
      * Starting an Activator causes this method to be called.
      *
-     * @throws InterruptedException will be caught by the Activator implementation, used to stop the Activator Thread
+     * @throws InterruptedException will be caught by the Activator implementation, doesn't restart the activator
      */
     public abstract void activatorStarts() throws InterruptedException;
 
@@ -109,13 +110,21 @@ public abstract class Activator implements Runnable, Identifiable, ExceptionCall
      *
      * @param event the event to fire
      * @throws IllegalArgumentException             thrown if the event is null or empty
-     * @throws LocalEventManager.MultipleEventsException if there are other addons firing events
+     * @throws intellimate.izou.events.MultipleEventsException if there are other addons firing events
      */
-    public void fireEvent(Event event) throws IllegalArgumentException, LocalEventManager.MultipleEventsException {
+    public void fireEvent(Event event) throws IllegalArgumentException, MultipleEventsException {
         if (event == null) {
             throw new IllegalArgumentException();
         }
         caller.fire(event);
+    }
+
+    /**
+     * returns the associated EventCaller
+     * @return the EventCaller
+     */
+    public LocalEventManager.EventCaller getCaller() {
+        return caller;
     }
 
     /**
