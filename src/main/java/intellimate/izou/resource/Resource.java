@@ -48,14 +48,16 @@ public class Resource <T> {
      * sets the Resource data.
      * This method is thread-safe.
      * @param resource the data to set
+     * @return the Resource
      */
-    public void setResource(T resource) {
+    public Resource<T> setResource(T resource) {
         resourceLock.lock();
         try {
             this.resource = resource;
         } finally {
             resourceLock.unlock();
         }
+        return this;
     }
 
     /**
@@ -98,14 +100,16 @@ public class Resource <T> {
      * sets who should or has provided the Resource Object.
      * This method is thread-safe.
      * @param provider an Identification describing the provider of the Resource
+     * @return the Resource
      */
-    public void setProvider(Identification provider) {
+    public Resource<T> setProvider(Identification provider) {
         providerLock.lock();
         try {
             this.provider = provider;
         } finally {
             providerLock.unlock();
         }
+        return this;
     }
 
     /**
@@ -126,13 +130,15 @@ public class Resource <T> {
      * sets who should or has consumed the Resource Object.
      * This method is thread-safe.
      * @param consumer an Identification describing the consumer of the Resource
+     * @return the Resource
      */
-    public void setConsumer(Identification consumer) {
+    public Resource<T> setConsumer(Identification consumer) {
         consumerLock.lock();
         try {
             this.consumer = consumer;
         } finally {
             consumerLock.unlock();
         }
+        return this;
     }
 }
