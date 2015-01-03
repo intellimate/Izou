@@ -11,6 +11,7 @@ import org.apache.logging.log4j.spi.ExtendedLogger;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
@@ -242,8 +243,22 @@ public class Context {
          * @param resource the resource to request
          * @param consumer the callback when the ResourceBuilder finishes
          */
+        @Deprecated
         public void generateResource(Resource resource, Consumer<List<Resource>> consumer) {
             main.getResourceManager().generatedResource(resource, consumer);
+        }
+
+        /**
+         * generates a resources
+         * <p>
+         * It will use the first matching resource! So if you really want to be sure, set the provider
+         * Identification
+         * </p>
+         * @param resource the resource to request
+         * @return an optional of an CompletableFuture
+         */
+        public Optional<CompletableFuture<List<Resource>>> generateResource(Resource resource) {
+            return main.getResourceManager().generateResource(resource);
         }
     }
 

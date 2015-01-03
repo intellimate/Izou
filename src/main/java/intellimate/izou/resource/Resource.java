@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Function;
 
 /**
  * An Resource is an object which is used to pass data from one part of the application to another.
@@ -14,9 +15,9 @@ public class Resource <T> {
     private final Lock resourceIDLock = new ReentrantLock();
     private final String resourceID;
     private final Lock providerLock = new ReentrantLock();
-    private Identification provider;
+    private Identification provider = null;
     private final Lock consumerLock = new ReentrantLock();
-    private Identification consumer;
+    private Identification consumer = null;
     private final Lock resourceLock = new ReentrantLock();
     private T resource;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
@@ -28,6 +29,17 @@ public class Resource <T> {
      */
     public Resource(String resourceID) {
         this.resourceID = resourceID;
+    }
+
+    /**
+     * creates a new Resource.
+     * This method is thread-safe.
+     * @param resourceID the ID of the Resource
+     * @param provider the Provider of the Resource
+     */
+    public Resource(String resourceID, Identification provider) {
+        this.resourceID = resourceID;
+        this.provider = provider;
     }
 
     /**
@@ -140,5 +152,15 @@ public class Resource <T> {
             consumerLock.unlock();
         }
         return this;
+    }
+
+    /**
+     * maps this resource to another type
+     * @param function the mapping function
+     * @param <R> the return type
+     * @return R
+     */
+    public <R> R map (Function<Resource<T>, R> function) {
+        return function.apply(this);
     }
 }

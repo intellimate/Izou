@@ -98,20 +98,38 @@ public class ResourceManager {
 
     /**
      * generates a resources
+     * <p>
+     * It will use the first matching resource! So if you really want to be sure, set the provider
+     * Identification
+     * </p>
      * @param resource the resource to request
      * @param consumer the callback when the ResourceBuilder finishes
      */
+    @Deprecated
     public void generatedResource(Resource resource, Consumer<List<Resource>> consumer) {
-        if(resourceIDs.get(resource.getResourceID()) == null) return;
-        Optional<ResourceBuilder> resourceBuilder = resourceIDs.get(resource.getResourceID()).stream()
+        generateResource(resource)
+                .ifPresent(completableFuture -> completableFuture.thenAccept(consumer));
+    }
+
+    /**
+     * generates a resources
+     * <p>
+     * It will use the first matching resource! So if you really want to be sure, set the provider
+     * Identification
+     * </p>
+     * @param resource the resource to request
+     * @return an optional of an CompletableFuture
+     */
+    public Optional<CompletableFuture<List<Resource>>> generateResource (Resource resource) {
+        if(resourceIDs.get(resource.getResourceID()) == null) return Optional.empty();
+        return resourceIDs.get(resource.getResourceID()).stream()
                 //return true if resource has no provider, if not check provider
                 .filter(resourceS -> !resource.hasProvider() || resourceS.isOwner(resource.getProvider()))
-                .findFirst();
-        if(!resourceBuilder.isPresent()) consumer.accept(new LinkedList<>());
-        CompletableFuture
-                .supplyAsync(() -> resourceBuilder.get().provideResource(Arrays.<Resource>asList(resource),
-                        Optional.<Event>empty()), executor)
-                .thenAccept(consumer);
+                .findFirst()
+                .map(resourceBuilder -> CompletableFuture.supplyAsync(
+                        () -> resourceBuilder.provideResource(Arrays.asList(resource), Optional.<Event>empty()),
+                        executor
+                ));
     }
 
     /**
