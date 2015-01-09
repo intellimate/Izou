@@ -177,6 +177,15 @@ public class Event implements Identifiable {
     }
 
     /**
+     * replaces the Descriptors
+     * @param descriptors a list containing the Descriptors.
+     * @return the resulting Event (which is the same instance)
+     */
+    public Event replaceDescriptors(List<String> descriptors) {
+        return new Event(getType(), getSource(), descriptors);
+    }
+
+    /**
      * returns whether the event contains the specific descriptor.
      * this method also checks whether it matches the type.
      * @param descriptor a String with the ID of the Descriptor
