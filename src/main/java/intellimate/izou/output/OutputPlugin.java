@@ -251,7 +251,7 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable, Excepti
     }
 
     /**
-     *@param event the current processed Event
+     * @param event the current processed Event
      */
     public void isDone(Event event) {
         Optional<Resource> resource = event.getListResourceContainer().provideResource(getID()).stream()
@@ -267,7 +267,7 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable, Excepti
     /**
      * this method gets called when the task submitted to the ThreadPool crashes
      *
-     * @param e the exception catched
+     * @param e the exception caught
      */
     @Override
     public void exceptionThrown(Exception e) {

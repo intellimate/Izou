@@ -61,6 +61,7 @@ public abstract class OutputExtension<T> implements Callable<T>, Identifiable {
 
     /**
      * returns its resourceIdWishList
+     *
      * @return a List containing the resourceIDs
      */
     public List<String> getResourceIdWishList() {
@@ -124,6 +125,7 @@ public abstract class OutputExtension<T> implements Callable<T>, Identifiable {
 
     /**
      * gets the id of the output-plugin the outputExtension belongs to
+     *
      * @return id of the output-plugin the outputExtension belongs to
      */
     public String getPluginId() {
@@ -132,6 +134,7 @@ public abstract class OutputExtension<T> implements Callable<T>, Identifiable {
 
     /**
      * sets the id of the output-plugin the outputExtension belongs to
+     *
      * @param pluginId the id of the output-plugin the outputExtension belongs to that is to be set
      */
     public void setPluginId(String pluginId) {
@@ -146,6 +149,7 @@ public abstract class OutputExtension<T> implements Callable<T>, Identifiable {
     /**
      * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
      * to the outputPlugin
+     *
      * @param event the Event to generate for
      */
     public abstract T generate(Event event);
