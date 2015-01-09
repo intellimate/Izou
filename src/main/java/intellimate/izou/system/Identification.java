@@ -5,7 +5,8 @@ import org.apache.logging.log4j.Logger;
 
 /**
  * Used to provide identification.
- * You can obtain an Instance through IdentificationManager
+ * You can obtain an Instance through IdentificationManager.
+ * This object is Immutable.
  */
 public final class Identification {
     private final Identifiable identifiable;

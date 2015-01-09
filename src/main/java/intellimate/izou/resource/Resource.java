@@ -4,22 +4,19 @@ import intellimate.izou.system.Identification;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
 
 /**
  * An Resource is an object which is used to pass data from one part of the application to another.
+ * Note! This Object is immutable!
  */
 public class Resource <T> {
-    private final Lock resourceIDLock = new ReentrantLock();
     private final String resourceID;
-    private final Lock providerLock = new ReentrantLock();
-    private Identification provider = null;
-    private final Lock consumerLock = new ReentrantLock();
-    private Identification consumer = null;
-    private final Lock resourceLock = new ReentrantLock();
-    private T resource;
+    private final Identification provider;
+    private final Identification consumer;
+    private final T resource;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     /**
@@ -28,7 +25,7 @@ public class Resource <T> {
      * @param resourceID the ID of the Resource
      */
     public Resource(String resourceID) {
-        this.resourceID = resourceID;
+        this(resourceID, null, null);
     }
 
     /**
@@ -38,8 +35,7 @@ public class Resource <T> {
      * @param provider the Provider of the Resource
      */
     public Resource(String resourceID, Identification provider) {
-        this.resourceID = resourceID;
-        this.provider = provider;
+        this(resourceID, provider, null);
     }
 
     /**
@@ -49,9 +45,22 @@ public class Resource <T> {
      * @param provider the Provider of the Resource
      */
     public Resource(String resourceID, Identification provider, T t) {
+        this(resourceID, provider, t, null);
+    }
+
+    /**
+     * creates a new Resource.
+     * This method is thread-safe.
+     * @param resourceID the ID of the Resource
+     * @param provider the Provider of the Resource
+     * @param t the resource
+     * @param consumer the ID of the Consumer
+     */
+    public Resource(String resourceID, Identification provider, T t, Identification consumer) {
         this.resourceID = resourceID;
         this.provider = provider;
         this.resource = t;
+        this.consumer = consumer;
     }
 
     /**
@@ -60,28 +69,19 @@ public class Resource <T> {
      * @return null or resource data
      */
     public T getResource() {
-        resourceLock.lock();
-        try {
-            return resource;
-        } finally {
-            resourceLock.unlock();
-        }
+        return resource;
     }
 
     /**
      * sets the Resource data.
-     * This method is thread-safe.
+     * <p>
+     * Note! this Object is immutable!
+     * </p>
      * @param resource the data to set
      * @return the Resource
      */
     public Resource<T> setResource(T resource) {
-        resourceLock.lock();
-        try {
-            this.resource = resource;
-        } finally {
-            resourceLock.unlock();
-        }
-        return this;
+        return new Resource<T>(resourceID, provider, resource, consumer);
     }
 
     /**
@@ -90,12 +90,7 @@ public class Resource <T> {
      * @return a String containing the ID of the resource
      */
     public String getResourceID() {
-        resourceIDLock.lock();
-        try {
-            return resourceID;
-        } finally {
-            resourceIDLock.unlock();
-        }
+        return resourceID;
     }
 
     /**
@@ -104,12 +99,7 @@ public class Resource <T> {
      * @return an Identification describing the provider of the Resource or null if not set
      */
     public Identification getProvider() {
-        providerLock.lock();
-        try {
-            return provider;
-        } finally {
-            providerLock.unlock();
-        }
+        return provider;
     }
 
     /**
@@ -122,48 +112,34 @@ public class Resource <T> {
 
     /**
      * sets who should or has provided the Resource Object.
-     * This method is thread-safe.
+     * <p>
+     * Note! this Object is immutable!
+     * </p>
      * @param provider an Identification describing the provider of the Resource
      * @return the Resource
      */
     public Resource<T> setProvider(Identification provider) {
-        providerLock.lock();
-        try {
-            this.provider = provider;
-        } finally {
-            providerLock.unlock();
-        }
-        return this;
+        return new Resource<T>(resourceID, provider, resource, consumer);
     }
 
     /**
      * returns the consumer of the object (if set).
-     * This method is thread-safe.
      * @return null or an Identification describing the consumer of the Resource
      */
     public Identification getConsumer() {
-        consumerLock.lock();
-        try {
-            return consumer;
-        } finally {
-            consumerLock.unlock();
-        }
+        return consumer;
     }
 
     /**
      * sets who should or has consumed the Resource Object.
-     * This method is thread-safe.
+     * <p>
+     * Note! this Object is immutable!
+     * </p>
      * @param consumer an Identification describing the consumer of the Resource
-     * @return the Resource
+     * @return new Resource
      */
     public Resource<T> setConsumer(Identification consumer) {
-        consumerLock.lock();
-        try {
-            this.consumer = consumer;
-        } finally {
-            consumerLock.unlock();
-        }
-        return this;
+        return new Resource<T>(resourceID, provider, resource, consumer);
     }
 
     /**
@@ -174,5 +150,13 @@ public class Resource <T> {
      */
     public <R> R map (Function<Resource<T>, R> function) {
         return function.apply(this);
+    }
+
+    /**
+     * creates a list with this Element in it.
+     * @return a list
+     */
+    public List<Resource<T>> toList() {
+        return Arrays.asList(this);
     }
 }
