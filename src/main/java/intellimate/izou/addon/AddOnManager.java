@@ -260,7 +260,8 @@ public class AddOnManager {
                     try {
                         return function.apply(addOn);
                     } catch (LinkageError e) {
-                        throw new RuntimeException("An linkage Error caused by " + addOn.getID() + "occured", e);
+                        throw new RuntimeException("An linkage Error occured while trying to register a module from "
+                                + addOn.getID(), e);
                     }
                 })
                 .map(supplier -> CompletableFuture.supplyAsync(supplier, addOnThreadPool))
