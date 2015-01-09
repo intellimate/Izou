@@ -43,6 +43,18 @@ public class Resource <T> {
     }
 
     /**
+     * creates a new Resource.
+     * This method is thread-safe.
+     * @param resourceID the ID of the Resource
+     * @param provider the Provider of the Resource
+     */
+    public Resource(String resourceID, Identification provider, T t) {
+        this.resourceID = resourceID;
+        this.provider = provider;
+        this.resource = t;
+    }
+
+    /**
      * returns the associated Resource data if set.
      * This method is thread-safe.
      * @return null or resource data
