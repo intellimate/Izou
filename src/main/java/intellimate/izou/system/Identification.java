@@ -8,8 +8,8 @@ import org.apache.logging.log4j.Logger;
  * You can obtain an Instance through IdentificationManager
  */
 public final class Identification {
-    private Identifiable identifiable;
-    private boolean createdFromInstance;
+    private final Identifiable identifiable;
+    private final boolean createdFromInstance;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     private Identification(Identifiable identifiable, boolean createdFromInstance) {
@@ -17,12 +17,12 @@ public final class Identification {
         this.createdFromInstance = createdFromInstance;
     }
 
-    protected static Identification createIdentification(Identifiable identifiable) {
+    protected static Identification createIdentification (Identifiable identifiable) {
         if(identifiable == null) return null;
         return new Identification(identifiable, false);
     }
 
-    protected static Identification createIdentification(Identifiable identifiable, boolean createdFromInstance) {
+    protected static Identification createIdentification (Identifiable identifiable, boolean createdFromInstance) {
         if(identifiable == null) return null;
         return new Identification(identifiable, createdFromInstance);
     }

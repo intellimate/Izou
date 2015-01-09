@@ -38,65 +38,41 @@ public class AddOnManager {
      * loops through all AddOns and lets them register all their Activators
      */
     private void registerActivators() {
-        registerIzouModule(AddOn::registerActivator, activator -> {
-            try {
-                main.getActivatorManager().addActivator(activator);
-            } catch (Exception e) {
-                fileLogger.error("Error while trying to add the activator: " + activator.getID(), e);
-            }
-        });
+        registerIzouModule(AddOn::registerActivator,
+                activator -> main.getActivatorManager().addActivator(activator));
     }
 
     /**
      * loops through all AddOns and lets them register all their ContentGenerators
      */
     private void registerContentGenerators() {
-        registerIzouModule(AddOn::registerContentGenerator, contentGenerator -> {
-            try {
-                main.getResourceManager().registerResourceBuilder(contentGenerator);
-            } catch (Exception e) {
-                fileLogger.error("Error while registering ContentGenerator: " + contentGenerator.getID(), e);
-            }
-        });
+        registerIzouModule(AddOn::registerContentGenerator,
+                contentGenerator -> main.getResourceManager().registerResourceBuilder(contentGenerator));
     }
 
     /**
      * loops through all AddOns and lets them register all their EventController
      */
     private void registerEventControllers() {
-        registerIzouModule(AddOn::registerEventController, eventsController -> {
-            try {
-                main.getEventDistributor().registerEventsController(eventsController);
-            } catch (IllegalArgumentException e) {
-                fileLogger.error("Error while registering EventsController:" + eventsController.getID(), e);
-            }
-        });
+        registerIzouModule(AddOn::registerEventController,
+                eventsController -> main.getEventDistributor().registerEventsController(eventsController));
     }
 
     /**
      * loops through all AddOns and lets them register all their OutputsPlugins
      */
     private void registerOutputPlugins() {
-        registerIzouModule(AddOn::registerOutputPlugin, outputPlugin -> {
-            try {
-                main.getOutputManager().addOutputPlugin(outputPlugin);
-            } catch (Exception e) {
-                fileLogger.error("Error while registering the OutputExtension: " + outputPlugin.getID(), e);
-            }
-        });
+        registerIzouModule(AddOn::registerOutputPlugin,
+                outputPlugin -> main.getOutputManager().addOutputPlugin(outputPlugin));
     }
 
     /**
      * loops through all AddOns and lets them register all their OutputsExtensions
      */
     private void registerOutputExtensions() {
-        registerIzouModule(AddOn::registerOutputExtension, outputExtension -> {
-            try {
-                main.getOutputManager().addOutputExtension(outputExtension, outputExtension.getPluginId());
-            } catch (Exception e) {
-                fileLogger.error("Error while registering the OutputExtension: " + outputExtension.getID(), e);
-            }
-        });
+        registerIzouModule(AddOn::registerOutputExtension,
+                outputExtension ->
+                        main.getOutputManager().addOutputExtension(outputExtension, outputExtension.getPluginId()));
         /*
         for (AddOn addOn : addOnList) {
             try {
@@ -132,7 +108,15 @@ public class AddOnManager {
                 .flatMap(List::stream)
                 .filter(Objects::nonNull)
                 .peek(module -> fileLogger.debug("registering Module: " + module.getID()))
-                .forEach(consumer);
+                .forEach(module -> {
+                    try {
+                        consumer.accept(module);
+                    } catch (Exception e) {
+                        fileLogger.debug("Exception while trying to register Module: " + module.getID(), e);
+                    } catch (LinkageError e) {
+                        fileLogger.debug("Error while trying to register Module: " + module.getID(), e);
+                    }
+                });
     }
 
     /**
@@ -272,7 +256,13 @@ public class AddOnManager {
         ExecutorService addOnThreadPool = main.getThreadPoolManager().getAddOnsThreadPool();
 
         return addOnList.stream()
-                .map(addOn -> (Supplier<T>) () -> function.apply(addOn))
+                .map(addOn -> (Supplier<T>) () -> {
+                    try {
+                        return function.apply(addOn);
+                    } catch (LinkageError e) {
+                        throw new RuntimeException(e);
+                    }
+                })
                 .map(supplier -> CompletableFuture.supplyAsync(supplier, addOnThreadPool))
                 .map(future -> {
                     try {

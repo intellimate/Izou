@@ -1,9 +1,9 @@
 package intellimate.izou.events;
 
-import intellimate.izou.system.Identifiable;
-import intellimate.izou.system.Identification;
 import intellimate.izou.resource.ListResourceProvider;
 import intellimate.izou.resource.Resource;
+import intellimate.izou.system.Identifiable;
+import intellimate.izou.system.Identification;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,6 +17,7 @@ import java.util.function.Function;
 
 /**
  * This class represents an Event.
+ * This class is immutable! for every change it will return an new instance!
  */
 public class Event implements Identifiable {
     /**
@@ -50,8 +51,8 @@ public class Event implements Identifiable {
     public static final String MINOR_WELCOME_EVENT = LocalEventManager.class.getCanonicalName() + ".MinorWelcomeEvent";
     private final String type;
     private final Identification source;
-    private List<String> descriptors = new ArrayList<>();
-    private ListResourceProvider listResourceContainer = new ListResourceProvider();
+    private final List<String> descriptors;
+    private final ListResourceProvider listResourceContainer = new ListResourceProvider();
     private final EventBehaviourController eventBehaviourController = new EventBehaviourController(this);
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
@@ -60,9 +61,10 @@ public class Event implements Identifiable {
      * @param type the Type of the Event, try to use the predefined Event types
      * @param source the source of the Event, most likely a this reference.
      */
-    private Event(String type, Identification source) {
+    private Event(String type, Identification source, List<String> descriptors) {
         this.type = type;
         this.source = source;
+        this.descriptors = descriptors;
     }
 
     /**
@@ -74,7 +76,7 @@ public class Event implements Identifiable {
     public static Optional<Event> createEvent(String type, Identification source) {
         if(type == null || type.isEmpty()) return Optional.empty();
         if(source == null) return Optional.empty();
-        return Optional.of(new Event(type, source));
+        return Optional.of(new Event(type, source, new ArrayList<String>()));
     }
 
     /**
@@ -151,12 +153,15 @@ public class Event implements Identifiable {
 
     /**
      * sets the Descriptors (but not the Event-Type).
+     * <p>
+     * Replaces all existing descriptors.
+     * Since Event is immutable, it will create a new Instance.
+     * </p>
      * @param descriptors a List containing all the Descriptors
      * @return the resulting Event (which is the same instance)
      */
     public Event setDescriptors(List<String> descriptors) {
-        this.descriptors = descriptors;
-        return this;
+        return new Event(getType(), getSource(), descriptors);
     }
 
     /**
@@ -165,8 +170,10 @@ public class Event implements Identifiable {
      * @return the resulting Event (which is the same instance)
      */
     public Event addDescriptor(String descriptor) {
-        descriptors.add(descriptor);
-        return this;
+        List<String> newDescriptors = new ArrayList<>();
+        newDescriptors.addAll(descriptors);
+        newDescriptors.add(descriptor);
+        return new Event(getType(), getSource(), newDescriptors);
     }
 
     /**
@@ -189,6 +196,9 @@ public class Event implements Identifiable {
 
     /**
      * applies the consumer to the Event
+     * <p>
+     * can be used for logging.
+     * </p>
      * @param consumer the consumer
      * @return this Event
      */
@@ -216,13 +226,12 @@ public class Event implements Identifiable {
      * </p>
      * @param eventCallable the EventCaller used to fire
      * @param onError this method will be called when an error occurred
-     * @return this Event
      * @throws intellimate.izou.events.MultipleEventsException when the method fails to fire the event and onError
      *                              returns false
      */
-    public Event tryFire (EventCallable eventCallable, BiFunction<Event, Integer, Boolean> onError)
+    public void tryFire (EventCallable eventCallable, BiFunction<Event, Integer, Boolean> onError)
             throws MultipleEventsException {
-        return tryFire(eventCallable, onError, null);
+        tryFire(eventCallable, onError, null);
     }
 
     /**
@@ -236,11 +245,10 @@ public class Event implements Identifiable {
      * @param eventCallable the EventCaller used to fire
      * @param onError this method will be called when an error occurred
      * @param onSuccess this method will be called when firing succeeded
-     * @return this Event
      * @throws intellimate.izou.events.MultipleEventsException when the method fails to fire the event and onError
      *                              returns false
      */
-    public Event tryFire (EventCallable eventCallable, BiFunction<Event, Integer, Boolean> onError,
+    public void tryFire (EventCallable eventCallable, BiFunction<Event, Integer, Boolean> onError,
                                                         Consumer<Event> onSuccess) throws MultipleEventsException {
         boolean success = false;
         int count = 0;
@@ -261,6 +269,5 @@ public class Event implements Identifiable {
             }
         }
         onSuccess.accept(this);
-        return this;
     }
 }

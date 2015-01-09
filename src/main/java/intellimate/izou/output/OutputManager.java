@@ -285,18 +285,19 @@ public class OutputManager implements Identifiable{
 
            outputPlugin.addToEventList(event);
 
+           boolean finished = false;
            try {
                lock.lock();
-               boolean finished = processing.await(100, TimeUnit.SECONDS);
-               if(finished) {
-                   fileLogger.debug("OutputPlugin: " + outputPlugin.getID() + " finished");
-               } else {
-                   fileLogger.debug("OutputPlugin: " + outputPlugin.getID() + " timed out");
-               }
+               finished = processing.await(100, TimeUnit.SECONDS);
            } catch (InterruptedException e) {
                fileLogger.error("Waiting for OutputPlugins interrupted", e);
            } finally {
                lock.unlock();
+           }
+           if(finished) {
+               fileLogger.debug("OutputPlugin: " + outputPlugin.getID() + " finished");
+           } else {
+               fileLogger.debug("OutputPlugin: " + outputPlugin.getID() + " timed out");
            }
        }
     }
