@@ -64,33 +64,16 @@ public class ThreadPoolManager {
                     try {
                         r.run();
                     } catch (Exception | NoClassDefFoundError e) {
-                        fileLogger.fatal("Something crashed!", e.getMessage());
-                    }
-                }
-            };
-            t.setPriority(Thread.MIN_PRIORITY);
-            return t;
-        }
-    }
-
-    /**
-     * used to catch Exception in threads
-     */
-    private class CallbackThreadFactory implements ThreadFactory {
-        @SuppressWarnings("NullableProblems")
-        @Override
-        public Thread newThread(Runnable r) {
-            Thread t = new Thread() {
-                public void run() {
-                    try {
-                        r.run();
-                    } catch (Exception e) {
                         try {
                             Field target = Thread.class.getDeclaredField("target");
                             target.setAccessible(true);
                             try {
                                 ExceptionCallback exceptionCallback = (ExceptionCallback) target.get(this);
-                                exceptionCallback.exceptionThrown(e);
+                                if (e instanceof Exception) {
+                                    exceptionCallback.exceptionThrown((Exception) e);
+                                } else {
+                                    exceptionCallback.exceptionThrown(new RuntimeException(e));
+                                }
                             } catch (IllegalArgumentException | IllegalAccessException e1) {
                                 fileLogger.debug("unable to provide callback", e);
                             }
