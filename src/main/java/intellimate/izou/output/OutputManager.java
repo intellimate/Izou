@@ -268,12 +268,6 @@ public class OutputManager implements Identifiable{
 
     private void processOutputPlugins(Event event, List<OutputPlugin> outputPlugins) {
        for(OutputPlugin outputPlugin : outputPlugins) {
-           Optional<Identification> managerID = IdentificationManager.getInstance().getIdentification(this);
-
-           if (!managerID.isPresent()) continue;
-           Resource<Consumer> resource = new Resource<>(outputPlugin.getID());
-           resource.setProvider(managerID.get());
-
            final Lock lock = new ReentrantLock();
            final Condition processing = lock.newCondition();
 
@@ -282,7 +276,10 @@ public class OutputManager implements Identifiable{
                processing.signal();
                lock.unlock();
            };
-           resource.setResource(consumer);
+           Resource<Consumer> resource = IdentificationManager.getInstance().getIdentification(this)
+                   .map(id -> new Resource<Consumer>(outputPlugin.getID(), id, consumer))
+                   .orElse(new Resource<Consumer>(outputPlugin.getID())
+                           .setResource(consumer));
            event.getListResourceContainer().addResource(resource);
 
            outputPlugin.addToEventList(event);
