@@ -315,7 +315,7 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable, Excepti
                         outputDataIsDone(tF);
                         tDoneList.add(tF.get());
                     } catch (InterruptedException | ExecutionException e) {
-                        context.logger.getLogger().warn(e);
+                        context.logger.getLogger().warn("An Error occured while trying to run the OutputPlugin", e);
                     }
                 }
 

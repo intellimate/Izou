@@ -196,12 +196,14 @@ public class OutputManager implements Identifiable{
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());
+
         HashMap<Integer, List<Identification>> outputPluginBehaviour = event.getEventBehaviourController()
                 .getOutputPluginBehaviour(ids);
 
+        Comparator<Integer> reversed = Comparator.<Integer>naturalOrder().reversed();
+
         Set<Integer> keySet = outputPluginBehaviour.keySet();
 
-        Comparator<Integer> reversed = Comparator.<Integer>naturalOrder().reversed();
 
         List<OutputPlugin> orderedPositive = keySet.stream()
                 .sorted(reversed)
