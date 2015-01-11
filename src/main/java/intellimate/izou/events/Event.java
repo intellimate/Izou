@@ -279,4 +279,57 @@ public class Event implements Identifiable {
         }
         onSuccess.accept(this);
     }
+
+    /**
+     * tries to fire the Event.
+     * <p>
+     * if calling failed, it will call onError. If onError returns true, it will wait 100 milli-seconds an retries
+     * firing. OnError will be called with the parameters: this Event and a counter which increments for every try.
+     * If onError returns false, the method will return.
+     * if calling succeeded, it will call onSuccess.
+     * </p>
+     * @param eventCallable the EventCaller used to fire
+     * @param onError this method will be called when an error occurred
+     * @param onSuccess this method will be called when firing succeeded
+     */
+    public void fire (EventCallable eventCallable, BiFunction<Event, Integer, Boolean> onError,
+                      Consumer<Event> onSuccess) {
+        boolean success = false;
+        int count = 0;
+        while (!success) {
+            try {
+                eventCallable.fire(this);
+                success = true;
+            } catch (MultipleEventsException e) {
+                count++;
+                boolean retry = false;
+                if(onError != null)
+                 retry = onError.apply(this, count);
+                if (!retry)
+                    return;
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e1) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
+        if (onSuccess != null)
+            onSuccess.accept(this);
+    }
+
+    /**
+     * tries to fire the Event.
+     * <p>
+     * if calling failed, it will call onError. If onError returns true, it will wait 100 milli-seconds an retries
+     * firing. OnError will be called with the parameters: this Event and a counter which increments for every try.
+     * If onError returns false, the method will return.
+     * if calling succeeded, it will call onSuccess.
+     * </p>
+     * @param eventCallable the EventCaller used to fire
+     * @param onError this method will be called when an error occurred
+     */
+    public void fire (EventCallable eventCallable, BiFunction<Event, Integer, Boolean> onError) {
+        fire(eventCallable, onError, null);
+    }
 }
