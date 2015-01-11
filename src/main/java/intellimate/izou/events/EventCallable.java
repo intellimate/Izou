@@ -1,6 +1,7 @@
 package intellimate.izou.events;
 
 /**
+ * Interface to fire events
  * @author LeanderK
  * @version 1.0
  */

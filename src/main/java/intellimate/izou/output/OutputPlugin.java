@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * The OutputPlugin class gets Event and then starts threads filled with output-extension tasks to create the final
@@ -275,6 +276,37 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable, Excepti
     }
 
     /**
+     * creates a 1 sec. timeout for the OutputExtension
+     * you can overwrite this method to create a different timeout behaviour
+     * @param futures a List of futures running
+     * @return list with all elements removed, who aren't finished after 1 sec
+     */
+    public LinkedList<Future<T>> timeOut(LinkedList<Future<T>> futures) {
+        //Timeout
+        int start = 0;
+        boolean notFinished = true;
+        while ( (start < 100) && notFinished) {
+            notFinished = futures.stream()
+                    .anyMatch(future -> !future.isDone());
+            start++;
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                context.logger.getLogger().warn("interrupted!", e);
+            }
+        }
+        return futures.stream()
+                .peek(future -> {
+                    if (!future.isDone()) {
+                        context.logger.getLogger().error(future.toString() + " timed out");
+                        future.cancel(true);
+                    }
+                })
+                .filter(Future::isDone)
+                .collect(Collectors.toCollection(LinkedList::new));
+    }
+
+    /**
      * main method for outputPlugin, runs the data-conversion and output-renderer
      *
      * when the outputExtensions are done processing the Event object, they add their finished objects into tDoneList,
@@ -299,15 +331,7 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable, Excepti
                         futureList.add(executor.submit(ext));
                 }
 
-                //waits until all the outputExtensions have finished processing
-                boolean isWorking;
-                do {
-                    isWorking = false;
-                    for (Future<T> cDF : futureList) {
-                        if(!cDF.isDone())
-                            isWorking = true;
-                    }
-                } while (isWorking);
+                futureList = timeOut(futureList);
 
                 //copies the finished future objects into a tDoneList
                 for (Future<T> tF : futureList) {
