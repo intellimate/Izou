@@ -19,6 +19,7 @@ import java.util.function.Function;
  * This class represents an Event.
  * This class is immutable! for every change it will return an new instance!
  */
+@SuppressWarnings("UnusedDeclaration")
 public class Event implements Identifiable {
     /**
      * Use this type when other AddOns should react to this Event.
@@ -235,9 +236,11 @@ public class Event implements Identifiable {
      * </p>
      * @param eventCallable the EventCaller used to fire
      * @param onError this method will be called when an error occurred
+     * @deprecated use {@link #fire(EventCallable, java.util.function.BiFunction)} instead
      * @throws intellimate.izou.events.MultipleEventsException when the method fails to fire the event and onError
      *                              returns false
      */
+    @Deprecated
     public void tryFire (EventCallable eventCallable, BiFunction<Event, Integer, Boolean> onError)
             throws MultipleEventsException {
         tryFire(eventCallable, onError, null);
@@ -254,9 +257,11 @@ public class Event implements Identifiable {
      * @param eventCallable the EventCaller used to fire
      * @param onError this method will be called when an error occurred
      * @param onSuccess this method will be called when firing succeeded
+     * @deprecated use {@link #fire(EventCallable, java.util.function.BiFunction, java.util.function.Consumer)} instead
      * @throws intellimate.izou.events.MultipleEventsException when the method fails to fire the event and onError
      *                              returns false
      */
+    @Deprecated
     public void tryFire (EventCallable eventCallable, BiFunction<Event, Integer, Boolean> onError,
                                                         Consumer<Event> onSuccess) throws MultipleEventsException {
         boolean success = false;
@@ -303,14 +308,14 @@ public class Event implements Identifiable {
             } catch (MultipleEventsException e) {
                 count++;
                 boolean retry = false;
-                if(onError != null)
-                 retry = onError.apply(this, count);
+                if (onError != null)
+                    retry = onError.apply(this, count);
                 if (!retry)
                     return;
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e1) {
-                    Thread.currentThread().interrupt();
+                    fileLogger.error("interrupted while trying to fire event", e);
                 }
             }
         }
@@ -331,5 +336,20 @@ public class Event implements Identifiable {
      */
     public void fire (EventCallable eventCallable, BiFunction<Event, Integer, Boolean> onError) {
         fire(eventCallable, onError, null);
+    }
+
+    /**
+     * tries to fire the Event.
+     * <p>
+     * if calling failed, it will call onError.
+     * </p>
+     * @param eventCallable the EventCaller used to fire
+     * @param onError this method will be called when an error occurred
+     */
+    public void fire (EventCallable eventCallable, Consumer<Event> onError) {
+        fire(eventCallable, (event, counter) -> {
+            onError.accept(event);
+            return false;
+        }, null);
     }
 }

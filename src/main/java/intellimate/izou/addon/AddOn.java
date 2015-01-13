@@ -9,6 +9,7 @@ import intellimate.izou.system.Context;
 import intellimate.izou.system.Identifiable;
 import intellimate.izou.threadpool.ExceptionCallback;
 import ro.fortsoft.pf4j.ExtensionPoint;
+import ro.fortsoft.pf4j.PluginWrapper;
 
 import java.io.*;
 import java.util.Enumeration;
@@ -28,6 +29,7 @@ public abstract class AddOn implements ExtensionPoint, Identifiable, ExceptionCa
     private String propertiesPath;
     private String defaultPropertiesPath;
     private Context context;
+    private PluginWrapper plugin;
 
     /**
      * the default constructor for AddOns
@@ -37,6 +39,8 @@ public abstract class AddOn implements ExtensionPoint, Identifiable, ExceptionCa
         this.addOnID = addOnID;
         this.propertiesContainer = new PropertiesContainer();
     }
+
+
 
     /**
      * internal initiation of addOn
@@ -268,6 +272,22 @@ public abstract class AddOn implements ExtensionPoint, Identifiable, ExceptionCa
      */
     public String getDefaultPropertiesPath() {
         return defaultPropertiesPath;
+    }
+
+    /**
+     * gets the associated Plugin.
+     * @return the Plugin.
+     */
+    public PluginWrapper getPlugin() {
+        return plugin;
+    }
+
+    /**
+     * sets the Plugin IF it is not already set.
+     * @param plugin the plugin
+     */
+    protected void setPlugin(PluginWrapper plugin) {
+        this.plugin = plugin;
     }
 
     /**

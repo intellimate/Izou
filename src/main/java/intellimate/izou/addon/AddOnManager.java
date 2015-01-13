@@ -5,7 +5,7 @@ import intellimate.izou.system.Context;
 import intellimate.izou.system.Identifiable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import ro.fortsoft.pf4j.PluginManager;
+import ro.fortsoft.pf4j.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -212,7 +212,7 @@ public class AddOnManager {
             return;
         }
 
-        PluginManager pluginManager = new IzouPluginManager(libFile);
+        PluginManager pluginManager = new DefaultPluginManager(libFile);
         // load the plugins
         pluginManager.loadPlugins();
 
@@ -227,6 +227,13 @@ public class AddOnManager {
         }
         try {
             List<AddOn> addOns = pluginManager.getExtensions(AddOn.class);
+            for (AddOn addOn : addOns) {
+                if (addOn.getClass().getClassLoader() instanceof IzouPluginClassLoader) {
+                    IzouPluginClassLoader izouPluginClassLoader = (IzouPluginClassLoader) addOn.getClass().getClassLoader();
+                    PluginWrapper plugin = pluginManager.getPlugin(izouPluginClassLoader.getPluginDescriptor().getPluginId());
+                    addOn.setPlugin(plugin);
+                }
+            }
             addOnList.addAll(addOns);
         } catch (Exception e) {
             fileLogger.fatal("Error while trying to start the AddOns", e);

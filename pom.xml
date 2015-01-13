@@ -39,11 +39,22 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>ro.fortsoft.pf4j</groupId>
+            <groupId>intellimate.izou</groupId>
             <artifactId>pf4j</artifactId>
-            <version>0.9.0</version>
+            <version>0.8-SNAPSHOT</version>
         </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>pf4j</id>
+            <url>https://raw.github.com/intellimate/izou-pf4/mvn-repo/</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+        </repository>
+    </repositories>
 
     <distributionManagement>
         <repository>
