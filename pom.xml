@@ -41,14 +41,14 @@
         <dependency>
             <groupId>intellimate.izou</groupId>
             <artifactId>pf4j</artifactId>
-            <version>0.8-SNAPSHOT</version>
+            <version>0.9.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
     <repositories>
         <repository>
             <id>pf4j</id>
-            <url>https://raw.github.com/intellimate/izou-pf4/mvn-repo/</url>
+            <url>https://raw.github.com/intellimate/izou-pf4j/mvn-repo/</url>
             <snapshots>
                 <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>
