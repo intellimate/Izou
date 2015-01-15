@@ -1,4 +1,4 @@
-package intellimate.izou.addon;
+package intellimate.izou.properties;
 
 import intellimate.izou.system.Context;
 

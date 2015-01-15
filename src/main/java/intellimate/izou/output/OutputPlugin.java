@@ -76,11 +76,25 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable, Excepti
     }
 
     /**
-     * gets list of finished future objects
+     * Gets a copy of the list of finished future objects
+     *
+     * @deprecated since 0.9.9.9, use {@link #pollTDoneList()}
      * @return list of finished future objects
      */
+    @Deprecated
     public List<T> getTDoneList() {
-        return tDoneList;
+        return pollTDoneList();
+    }
+
+    /**
+     * Gets a copy of the list of finished future objects and then clears the list
+     *
+     * @return a copy of the tDoneList
+     */
+    public List<T> pollTDoneList() {
+        List<T> temp = tDoneList;
+        tDoneList = new ArrayList<>();
+        return temp;
     }
 
     /**
@@ -345,6 +359,7 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable, Excepti
 
                 //render final output
                 renderFinalOutput();
+                futureList.clear();
             }
 
             //notifies output-manager when done processing

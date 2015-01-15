@@ -1,6 +1,8 @@
 package intellimate.izou.system;
 
 import intellimate.izou.addon.AddOn;
+import intellimate.izou.properties.PropertiesContainer;
+import intellimate.izou.properties.PropertiesManager;
 import intellimate.izou.events.*;
 import intellimate.izou.main.Main;
 import intellimate.izou.resource.Resource;
@@ -28,6 +30,7 @@ public class Context {
     public Events events = new Events();
     public Resources resources = new Resources();
     public FileManager fileManager;
+    public Properties properties;
     public Logger logger;
     public ThreadPool threadPool;
 
@@ -45,6 +48,7 @@ public class Context {
         this.addOn = addOn;
         this.main = main;
         this.fileManager = new FileManager();
+        this.properties = new Properties();
         this.threadPool = new ThreadPool();
 
         IzouLogger izouLogger = main.getIzouLogger();
@@ -79,6 +83,111 @@ public class Context {
          */
         public intellimate.izou.system.FileManager getFileManager() {
             return main.getFileManager();
+        }
+    }
+
+    public class Properties {
+        private PropertiesManager propertiesManager;
+
+        /**
+         * You should probably use getPropertiesContainer() unless you have a very good reason not to.
+         *
+         * Searches for the property with the specified key in this property list.
+         *
+         * If the key is not found in this property list, the default property list, and its defaults, recursively, are
+         * then checked. The method returns null if the property is not found.
+         *
+         * @param key the property key.
+         * @return the value in this property list with the specified key value.
+         */
+        public String getProperties(String key) {
+            return propertiesManager.getPropertiesContainer().getProperties().getProperty(key);
+        }
+
+        /**
+         * Returns an Instance of Properties, if found
+         *
+         * @return an Instance of Properties or null;
+         */
+        public PropertiesContainer getPropertiesContainer() {
+            return propertiesManager.getPropertiesContainer();
+        }
+
+        /**
+         * Creates a new properties object within the context
+         *
+         */
+        public Properties() {
+            this.propertiesManager = new PropertiesManager(addOn.getContext(), addOn.getID());
+        }
+
+        /**
+         * Gets the {@code propertiesManger}
+         *
+         * @return the {@code propertiesManger}
+         */
+        public PropertiesManager getPropertiesManger() {
+            return propertiesManager;
+        }
+
+        /**
+         * Calls the HashTable method put.
+         *
+         * Provided for parallelism with the getProperty method. Enforces use of strings for
+         *     * property keys and values. The value returned is the result of the HashTable call to put.
+
+         * @param key the key to be placed into this property list.
+         * @param value the value corresponding to key.
+         */
+        public void setProperties(String key, String value) {
+            this.propertiesManager.getPropertiesContainer().getProperties().setProperty(key, value);
+        }
+
+        /**
+         * Sets properties
+         *
+         * @param properties instance of properties, not null
+         */
+        public void setProperties(java.util.Properties properties) {
+            if(properties == null) return;
+            this.propertiesManager.setProperties(properties);
+        }
+
+        /**
+         * Sets properties-container
+         *
+         * @param propertiesContainer the properties-container
+         */
+        public void setPropertiesContainer(PropertiesContainer propertiesContainer) {
+            if(propertiesContainer == null) return;
+            this.propertiesManager.setPropertiesContainer(propertiesContainer);
+        }
+
+        /**
+         * Gets the path to properties file (the real properties file - as opposed to the {@code defaultProperties.txt} file)
+         *
+         * @return path to properties file
+         */
+        public String getPropertiesPath() {
+            return propertiesManager.getPropertiesPath();
+        }
+
+        /**
+         * Sets the path to properties file (the real properties file - as opposed to the {@code defaultProperties.txt} file)
+         *
+         * @param propertiesPath to properties file
+         */
+        public void setPropertiesPath(String propertiesPath) {
+            this.propertiesManager.setPropertiesPath(propertiesPath);
+        }
+
+        /**
+         * Gets the path to default properties file (the file which is copied into the real properties on start)
+         *
+         * @return path to default properties file
+         */
+        public String getDefaultPropertiesPath() {
+            return propertiesManager.getDefaultPropertiesPath();
         }
     }
 

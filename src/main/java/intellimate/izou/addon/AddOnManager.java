@@ -1,6 +1,7 @@
 package intellimate.izou.addon;
 
 import intellimate.izou.main.Main;
+import intellimate.izou.properties.PropertiesManager;
 import intellimate.izou.system.Context;
 import intellimate.izou.system.Identifiable;
 import org.apache.logging.log4j.LogManager;
@@ -120,18 +121,22 @@ public class AddOnManager {
     }
 
     /**
-     * registers all property files with the PropertyManager
+     * Registers all property files with the FileManager
      */
     private void registerFiles() {
         String dir = "." + File.separator + "properties";
         runOnAddOnsAsync(addOn -> {
-            if(!(getFolder(addOn) == null)) {
+            if(!(PropertiesManager.getFolder(addOn) == null)) {
                 try {
                     main.getFileManager().registerFileDir(Paths.get(dir), addOn.getID(), addOn);
                 } catch (IOException e) {
                     fileLogger.error("error while trying to register Files for addon" + addOn.getID(), e);
                 }
-                addOn.setDefaultPropertiesPath(getFolder(addOn));
+
+                if (addOn.setUnusualDefaultPropertiesPath() == null) {
+                    addOn.getContext().properties.getPropertiesManger().
+                            setDefaultPropertiesPath(PropertiesManager.getFolder(addOn));
+                }
             } else {
                 fileLogger.debug("no property file was found for AddOn: " + addOn.getID());
             }
@@ -142,27 +147,8 @@ public class AddOnManager {
      * registers all the properties-Files for the AddOns
      */
     private void registerProperties() {
-        runOnAddOnsAsync(AddOn::initProperties);
-    }
-
-    /**
-     * gets folder of addOn
-     *
-     * @param addOn the addOn for which to get the folder
-     * @return the folder as a String or null if it was not found
-     */
-    private String getFolder(AddOn addOn) {
-        String addOnName = addOn.getClass().getPackage().getName();
-        String[] nameParts = addOnName.split("\\.");
-
-        File file = new File("." + File.separator + "lib");
-        String[] directories = file.list((current, name) -> new File(current, name).isDirectory());
-
-        for(String fileName : directories) {
-            if(nameParts.length - 1 >= 0 && fileName.contains(nameParts[nameParts.length - 1]))
-                return fileName;
-        }
-        return null;
+        runOnAddOnsAsync((Consumer<AddOn>) addon ->
+                        addon.getContext().properties.getPropertiesManger().initProperties());
     }
 
     /**

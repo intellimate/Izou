@@ -92,6 +92,16 @@ public class Main {
 
     public static void main(String[] args) {
         @SuppressWarnings("UnusedAssignment") Main main = new Main(false);
+
+        /*
+        try {
+            AudioInputStream inputStream = AudioSystem.getAudioInputStream(new File("./resources/IzouClock/mama-geb.mp3"));
+        } catch (UnsupportedAudioFileException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        */
     }
 
     public OutputManager getOutputManager() {
