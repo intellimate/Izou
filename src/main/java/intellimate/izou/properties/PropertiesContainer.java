@@ -12,14 +12,8 @@ public class PropertiesContainer {
     private Context context;
 
     /**
-     * creates a new properties-container
-     */
-    public PropertiesContainer() {
-        this.properties = new Properties();
-    }
-
-    /**
-     * creates a new properties-container
+     * Creates a new properties-container
+     *
      * @param context instance of Context
      */
     public PropertiesContainer(Context context) {
@@ -28,7 +22,8 @@ public class PropertiesContainer {
     }
 
     /**
-     * gets the properties-container
+     * Gets the properties-container
+     *
      * @return the properties-container
      */
     public Properties getProperties() {
@@ -36,13 +31,19 @@ public class PropertiesContainer {
     }
 
     /**
-     * sets the properties-container
+     * Sets the properties-container
+     *
      * @param properties the properties-container
      */
     public void setProperties(Properties properties) {
         this.properties = properties;
     }
 
+    /**
+     * Gets the context of the current addOn
+     *
+     * @return context of the current addOn
+     */
     public Context getContext() {
         return context;
     }

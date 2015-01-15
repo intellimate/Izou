@@ -23,7 +23,7 @@ public class PropertiesManager {
     public PropertiesManager(Context context, String addOnID) {
         this.context = context;
         this.addOnID = addOnID;
-        this.propertiesContainer = new PropertiesContainer();
+        this.propertiesContainer = new PropertiesContainer(context);
         this.propertiesPath = null;
         this.defaultPropertiesPath = null;
     }
@@ -134,7 +134,7 @@ public class PropertiesManager {
             context.logger.getLogger().error("Error while trying to create the new Properties file", e);
         }
 
-        InputStream inputStream;
+        //InputStream inputStream;
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(propertiesFile),
                     "UTF8"));
