@@ -224,6 +224,20 @@ public abstract class AddOn implements ExtensionPoint, Identifiable, ExceptionCa
         context.logger.getLogger().fatal("Addon: " + getID() + " crashed", e);
     }
 
+    /**
+     * Overwrite this method if you would like to change the location of the <i>defaultProperties.txt</i> file.
+     * <p>
+     *  All you have to do if you would like to change the location of the <i>defaultProperties.txt</i> file, is have
+     *  this method return the desired path.
+     * </p>
+     * <p>
+     *  If nothing should be changed, you can leave this method be; it will return null to indicate that the default
+     *  location should be used, in which case your <i>defaultProperties.txt</i> file HAS to be in the resource folder
+     *  of your project.
+     * </p>
+     * @return the new path to the <i>defaultProperties.txt</i> location, or null if nothing should be changed
+     * (in which case you should ignore this method)
+     */
     public String setUnusualDefaultPropertiesPath() {
         return null;
     }

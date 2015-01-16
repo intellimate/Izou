@@ -8,6 +8,7 @@ import intellimate.izou.events.LocalEventManager;
 import intellimate.izou.output.OutputManager;
 import intellimate.izou.resource.ResourceManager;
 import intellimate.izou.system.FileManager;
+import intellimate.izou.system.FilePublisher;
 import intellimate.izou.system.FileSystemManager;
 import intellimate.izou.system.IzouLogger;
 import intellimate.izou.threadpool.ThreadPoolManager;
@@ -31,6 +32,7 @@ public class Main {
     private final ActivatorManager activatorManager;
     private final AddOnManager addOnManager;
     private final FileManager fileManager;
+    private final FilePublisher filePublisher;
     private final IzouLogger izouLogger;
     private final ThreadPoolManager threadPoolManager;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
@@ -71,10 +73,11 @@ public class Main {
         localEventManager = new LocalEventManager(eventDistributor);
         threadPoolManager.getIzouThreadPool().submit(localEventManager);
         activatorManager = new ActivatorManager(this);
+        filePublisher = new FilePublisher();
 
         FileManager fileManagerTemp;
         try {
-            fileManagerTemp = new FileManager();
+            fileManagerTemp = new FileManager(filePublisher);
         } catch (IOException e) {
             fileManagerTemp = null;
             fileLogger.fatal("Failed to create the FileManager", e);
@@ -132,11 +135,15 @@ public class Main {
         return threadPoolManager;
     }
 
-    public synchronized FileManager getFileManager() {
+    public FileManager getFileManager() {
         return fileManager;
     }
 
-    public synchronized IzouLogger getIzouLogger() {
+    public FilePublisher getFilePublisher() {
+        return filePublisher;
+    }
+
+    public IzouLogger getIzouLogger() {
         return izouLogger;
     }
 }

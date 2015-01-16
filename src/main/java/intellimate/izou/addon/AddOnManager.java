@@ -128,7 +128,8 @@ public class AddOnManager {
         runOnAddOnsAsync(addOn -> {
             if(!(PropertiesManager.getFolder(addOn) == null)) {
                 try {
-                    main.getFileManager().registerFileDir(Paths.get(dir), addOn.getID(), addOn);
+                    main.getFileManager().registerFileDir(Paths.get(dir), addOn.getID(),
+                            addOn.getContext().properties.getPropertiesManger());
                 } catch (IOException e) {
                     fileLogger.error("error while trying to register Files for addon" + addOn.getID(), e);
                 }

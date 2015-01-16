@@ -2,6 +2,7 @@ package intellimate.izou.properties;
 
 import intellimate.izou.addon.AddOn;
 import intellimate.izou.system.Context;
+import intellimate.izou.system.ReloadableFile;
 
 import java.io.*;
 import java.util.Enumeration;
@@ -10,10 +11,14 @@ import java.util.Properties;
 /**
  * Manages property files
  *
+ * <p>
+ *  Unlike most manager classes in Izou, the PropertiesManager is included in every {@code AddOn} instance
+ * </p>
+ *
  * @author Julian Brendl
  * @version 1.0
  */
-public class PropertiesManager {
+public class PropertiesManager implements ReloadableFile {
     private Context context;
     private String addOnID;
     private String propertiesPath;
@@ -202,7 +207,7 @@ public class PropertiesManager {
      *
      * @throws IOException thrown by inputStream
      */
-    public void reloadProperties() throws IOException {
+    private void reloadProperties() throws IOException {
         Properties temp = new Properties();
         InputStream inputStream = null;
         try {
@@ -281,5 +286,19 @@ public class PropertiesManager {
                 return fileName;
         }
         return null;
+    }
+
+    @Override
+    public void reloadFile(String eventType) {
+        try {
+            reloadProperties();
+        } catch (IOException e) {
+            context.logger.getLogger().error("Error reloading property file for" + addOnID, e);
+        }
+    }
+
+    @Override
+    public String getID() {
+        return addOnID;
     }
 }

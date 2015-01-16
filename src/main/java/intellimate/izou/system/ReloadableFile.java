@@ -12,5 +12,10 @@ public interface ReloadableFile {
      */
     public void reloadFile(String eventType);
 
+    /**
+     * Get ID of reloadableFile object
+     *
+     * @return the ID of reloadableFile object
+     */
     public String getID();
 }

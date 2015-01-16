@@ -29,7 +29,7 @@ public class Context {
     private Main main;
     public Events events = new Events();
     public Resources resources = new Resources();
-    public FileManager fileManager;
+    public Files files;
     public Properties properties;
     public Logger logger;
     public ThreadPool threadPool;
@@ -47,7 +47,7 @@ public class Context {
     public Context(AddOn addOn, Main main, String logLevel) {
         this.addOn = addOn;
         this.main = main;
-        this.fileManager = new FileManager();
+        this.files = new Files();
         this.properties = new Properties();
         this.threadPool = new ThreadPool();
 
@@ -72,22 +72,39 @@ public class Context {
         return addOn;
     }
 
-    public class FileManager {
+    public class Files {
         /**
-         * returns a FileManager-Instance
+         * Returns a FileManager-Instance
          * <p>
-         * The file manager listens for events that were caused by modifications made to property files and
-         * then reloads the file
+         *  The file manager listens for events that were caused by modifications made to property files and
+         *  then reloads the file
          * </p>
          * @return an instance of FileManager
          */
         public intellimate.izou.system.FileManager getFileManager() {
             return main.getFileManager();
         }
+
+        /**
+         * Gets the FilePublisher
+         *
+         * @return
+         */
+        public FilePublisher getFilePublisher() {
+            return main.getFilePublisher();
+        }
     }
 
     public class Properties {
         private PropertiesManager propertiesManager;
+
+        /**
+         * Creates a new properties object within the context
+         *
+         */
+        public Properties() {
+            this.propertiesManager = new PropertiesManager(addOn.getContext(), addOn.getID());
+        }
 
         /**
          * You should probably use getPropertiesContainer() unless you have a very good reason not to.
@@ -111,14 +128,6 @@ public class Context {
          */
         public PropertiesContainer getPropertiesContainer() {
             return propertiesManager.getPropertiesContainer();
-        }
-
-        /**
-         * Creates a new properties object within the context
-         *
-         */
-        public Properties() {
-            this.propertiesManager = new PropertiesManager(addOn.getContext(), addOn.getID());
         }
 
         /**

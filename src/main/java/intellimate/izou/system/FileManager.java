@@ -1,10 +1,12 @@
 package intellimate.izou.system;
 
-import intellimate.izou.addon.AddOn;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,7 +31,7 @@ public class FileManager implements Runnable {
      * Map that holds watchKeys (ID's) of the directories and the addOns using the directories
      */
     private Map<WatchKey, List<FileInfo>> addOnMap;
-
+    private FilePublisher filePublisher;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     /**
@@ -37,65 +39,12 @@ public class FileManager implements Runnable {
      *
      * @throws IOException exception is thrown by watcher service
      */
-    public FileManager() throws IOException {
+    public FileManager(FilePublisher filePublisher) throws IOException {
         watcher = FileSystems.getDefault().newWatchService();
         addOnMap = new HashMap<>();
-
+        this.filePublisher =  filePublisher;
         Thread thread = new Thread(this);
         thread.start();
-    }
-
-    /**
-     * Use this method to register a file with the watcherService
-     *
-     * @param dir directory of the file
-     * @param fileType the name/extension of the file
-     *                 IMPORTANT: Please try to always enter the full name with extension of the file (Ex: "test.txt"),
-     *                 it would be best if the fileType is the full file name, and that the file name is clearly
-     *                 distinguishable from other files.
-     *                 For example, the property files are stored with the ID of the addon they belong too. That way
-     *                 every property file is easily distinguishable.
-     * @param addOn addOn the file belongs to
-     * @throws IOException exception thrown by watcher service
-     */
-    public void registerFileDir(Path dir, String fileType, AddOn addOn) throws IOException {
-        WatchKey key = dir.register(watcher, ENTRY_MODIFY);
-        List<FileInfo> fileInfos = addOnMap.get(key);
-
-        if(fileInfos != null) {
-            fileInfos.add(new FileInfo(dir, fileType, addOn));
-        } else {
-            fileInfos = new ArrayList<>();
-            fileInfos.add(new FileInfo(dir, fileType, addOn));
-            addOnMap.put(key, fileInfos);
-        }
-    }
-
-    /**
-     * Use this method to register a file with the watcherService
-     *
-     * @param dir directory of file
-     * @param fileType the name/extension of the file
-     *                 IMPORTANT: Please try to always enter the full name with extension of the file (Ex: "test.txt"),
-     *                 it would be best if the fileType is the full file name, and that the file name is clearly
-     *                 distinguishable from other files.
-     *                 For example, the property files are stored with the ID of the addon they belong too. That way
-     *                 every property file is easily distinguishable.
-     * @param addOn addOn that file belongs to
-     * @param reloadableFile object of interface that file belongs to
-     * @throws IOException exception thrown by watcher service
-     */
-    public void registerFileDir(Path dir, String fileType, AddOn addOn, ReloadableFile reloadableFile) throws IOException {
-        WatchKey key = dir.register(watcher, ENTRY_MODIFY);
-        List<FileInfo> fileInfos = addOnMap.get(key);
-
-        if(fileInfos != null) {
-            fileInfos.add(new FileInfo(dir, fileType, addOn, reloadableFile));
-        } else {
-            fileInfos = new ArrayList<>();
-            fileInfos.add(new FileInfo(dir, fileType, addOn, reloadableFile));
-            addOnMap.put(key, fileInfos);
-        }
     }
 
     /**
@@ -239,13 +188,10 @@ public class FileManager implements Runnable {
             } else if ((kind == ENTRY_CREATE || kind == ENTRY_MODIFY || kind == ENTRY_DELETE)
                     && isFileType(event, fileInfo.getFileType())) {
                 try {
-                    if (fileInfo.getAddOn() != null) {
-                        fileInfo.getAddOn().reloadFiles();
-                        fileLogger.debug("Reloaded file for: " + fileInfo.getAddOn().getID());
-                    }
                     if (fileInfo.getReloadableFile() != null) {
                         fileInfo.getReloadableFile().reloadFile(kind.toString());
-                        fileLogger.debug("Reloaded file for: " + fileInfo.getReloadableFile().getID());
+                        fileLogger.debug("Reloaded file: " + event.context().toString());
+                        filePublisher.notifyFileSubcribers(fileInfo.getReloadableFile());
                     }
                 } catch (Exception e) {
                     fileLogger.warn(e);
