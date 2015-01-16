@@ -183,7 +183,7 @@ public class PropertiesManager implements ReloadableFile {
      * @return true if operation has succeeded, else false
      */
     private boolean writeToPropertiesFile(String defaultPropsPath) {
-        return context.fileManager.getFileManager().writeToFile(defaultPropsPath, context.properties.
+        return context.files.writeToFile(defaultPropsPath, context.properties.
                 getPropertiesPath());
     }
 
@@ -198,7 +198,7 @@ public class PropertiesManager implements ReloadableFile {
      * @throws IOException is thrown by bufferedWriter
      */
     private void createDefaultPropertyFile(String defaultPropsPath) throws IOException {
-        context.fileManager.getFileManager().createDefaultFile(defaultPropsPath, "# Properties should always be in the "
+        context.files.createDefaultFile(defaultPropsPath, "# Properties should always be in the "
                 + "form of: \"key = value\"");
     }
 
