@@ -158,7 +158,7 @@ public class Context {
          *
          */
         public Properties() {
-            this.propertiesManager = new PropertiesManager(addOn.getContext(), addOn.getID());
+            this.propertiesManager = new PropertiesManager(Context.this, addOn.getID());
         }
 
         /**

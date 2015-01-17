@@ -8,9 +8,6 @@ import java.util.List;
  * FilePublisher that notifies {@link FileSubscriber} objects. It is triggered when a file is reloaded. Particularly
  * file subscribers are mapped to {@link ReloadableFile} objects. When a reloadable file is reloaded, all file
  * subscribers belonging to it are notified. All file subscribers in general can also be notified.
- *
- * @author Julian Brendl
- * @version 1.0
  */
 public class FilePublisher {
     private HashMap<ReloadableFile, List<FileSubscriber>> fileSubscribers;
@@ -33,7 +30,14 @@ public class FilePublisher {
      */
     public void register(ReloadableFile reloadableFile, FileSubscriber fileSubscriber) {
         List<FileSubscriber> subscribers = fileSubscribers.get(reloadableFile);
-        subscribers.add(fileSubscriber);
+
+        if (subscribers == null) {
+            List<FileSubscriber> subList = new ArrayList<>();
+            subList.add(fileSubscriber);
+            fileSubscribers.put(reloadableFile, subList);
+        } else {
+            subscribers.add(fileSubscriber);
+        }
     }
 
     /**

@@ -9,14 +9,9 @@ import java.util.Enumeration;
 import java.util.Properties;
 
 /**
- * Manages property files
+ * Manages property files.
  *
- * <p>
- *  Unlike most manager classes in Izou, the PropertiesManager is included in every {@code AddOn} instance
- * </p>
- *
- * @author Julian Brendl
- * @version 1.0
+ * <p>Unlike most manager classes in Izou, the PropertiesManager is included in every {@code AddOn} instance</p>
  */
 public class PropertiesManager implements ReloadableFile {
     private Context context;
@@ -132,7 +127,7 @@ public class PropertiesManager implements ReloadableFile {
         }
 
         propertiesPath = propertiesPathTemp;
-        File propertiesFile = new File(defaultPropertiesPath);
+        File propertiesFile = new File(propertiesPath);
         if (!propertiesFile.exists()) try {
             propertiesFile.createNewFile();
         } catch (IOException e) {
@@ -165,12 +160,12 @@ public class PropertiesManager implements ReloadableFile {
                 } catch (IOException e) {
                     context.logger.getLogger().error("Error while trying to copy the Default-Properties File", e);
                 }
-                if (new File(defaultPropertiesPath).exists() && !writeToPropertiesFile(defaultPropertiesPath)) return;
-                try {
-                    reloadProperties();
-                } catch (IOException e) {
-                    context.logger.getLogger().error("Error while trying to reload the Properties-Files", e);
-                }
+            }
+            if (new File(defaultPropertiesPath).exists() && !writeToPropertiesFile(defaultPropertiesPath)) return;
+            try {
+                reloadProperties();
+            } catch (IOException e) {
+                context.logger.getLogger().error("Error while trying to reload the Properties-Files", e);
             }
         }
     }
@@ -251,7 +246,7 @@ public class PropertiesManager implements ReloadableFile {
     public void setDefaultPropertiesPath(String addOnName) throws NullPointerException {
         String[] parts = addOnName.split(File.separator);
 
-        if (parts.length == 0) {
+        if (parts.length == 1) {
             String tempPath = "." + File.separator + "lib" + File.separator + addOnName + File.separator +
                     "classes" + File.separator;
             if (new File(tempPath).exists()) {
