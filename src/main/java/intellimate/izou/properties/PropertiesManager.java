@@ -277,7 +277,7 @@ public class PropertiesManager implements ReloadableFile {
         String[] directories = file.list((current, name) -> new File(current, name).isDirectory());
 
         for(String fileName : directories) {
-            if(nameParts.length - 1 >= 0 && fileName.contains(nameParts[nameParts.length - 1]))
+            if(nameParts.length > 0 && fileName.contains(nameParts[nameParts.length - 1]))
                 return fileName;
         }
         return null;
