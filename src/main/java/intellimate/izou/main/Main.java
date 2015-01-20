@@ -73,7 +73,7 @@ public class Main {
         localEventManager = new LocalEventManager(eventDistributor);
         threadPoolManager.getIzouThreadPool().submit(localEventManager);
         activatorManager = new ActivatorManager(this);
-        filePublisher = new FilePublisher();
+        filePublisher = new FilePublisher(this);
 
         FileManager fileManagerTemp;
         try {

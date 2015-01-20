@@ -121,8 +121,14 @@ public class Context {
         }
 
         /**
-         * Registers a {@link FileSubscriber} with a {@link ReloadableFile}. So when the {@code reloadableFile} is reloaded,
-         * the fileSubscriber will be notified. Multiple file subscribers can be registered with the same reloadable file.
+         * Registers a {@link FileSubscriber} with a {@link ReloadableFile}. So when the {@code reloadableFile} is
+         * reloaded, the fileSubscriber will be notified. Multiple file subscribers can be registered with the same
+         * reloadable file.
+         *
+         * <p>
+         *     The {@link PropertiesManager}, that is included in every addOn is a FileSubscriber for example, so it
+         *     can be used to get notified when property files are reloaded.
+         * </p>
          *
          * @param reloadableFile the reloadable file that should be observed
          * @param fileSubscriber the fileSubscriber that should be notified when the reloadable file is reloaded

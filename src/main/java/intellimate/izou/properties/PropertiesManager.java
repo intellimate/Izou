@@ -9,7 +9,7 @@ import java.util.Enumeration;
 import java.util.Properties;
 
 /**
- * Manages property files.
+ * Manages property files, and is also a {@link ReloadableFile}
  *
  * <p>Unlike most manager classes in Izou, the PropertiesManager is included in every {@code AddOn} instance</p>
  */
@@ -160,12 +160,13 @@ public class PropertiesManager implements ReloadableFile {
                 } catch (IOException e) {
                     context.logger.getLogger().error("Error while trying to copy the Default-Properties File", e);
                 }
-            }
-            if (new File(defaultPropertiesPath).exists() && !writeToPropertiesFile(defaultPropertiesPath)) return;
-            try {
-                reloadProperties();
-            } catch (IOException e) {
-                context.logger.getLogger().error("Error while trying to reload the Properties-Files", e);
+
+                if (new File(defaultPropertiesPath).exists() && !writeToPropertiesFile(defaultPropertiesPath)) return;
+                try {
+                    reloadProperties();
+                } catch (IOException e) {
+                    context.logger.getLogger().error("Error while trying to reload the Properties-Files", e);
+                }
             }
         }
     }

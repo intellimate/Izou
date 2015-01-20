@@ -296,7 +296,7 @@ public class OutputManager implements Identifiable{
            if(finished) {
                fileLogger.debug("OutputPlugin: " + outputPlugin.getID() + " finished");
            } else {
-               fileLogger.debug("OutputPlugin: " + outputPlugin.getID() + " timed out");
+               fileLogger.error("OutputPlugin: " + outputPlugin.getID() + " timed out");
            }
        }
     }

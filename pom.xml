@@ -41,7 +41,7 @@
         <dependency>
             <groupId>intellimate.izou</groupId>
             <artifactId>pf4j</artifactId>
-            <version>0.9.1-SNAPSHOT</version>
+            <version>0.9.5-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

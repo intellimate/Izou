@@ -1,8 +1,11 @@
 package intellimate.izou.system;
 
+import intellimate.izou.main.Main;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * FilePublisher that notifies {@link FileSubscriber} objects. It is triggered when a file is reloaded. Particularly
@@ -12,13 +15,15 @@ import java.util.List;
 public class FilePublisher {
     private HashMap<ReloadableFile, List<FileSubscriber>> fileSubscribers;
     private List<FileSubscriber> defaultFileSubscribers;
+    private Main main;
 
     /**
      * Creates a new FilePublisher object. There should only be one in Izou
      */
-    public FilePublisher() {
+    public FilePublisher(Main main) {
         this.fileSubscribers = new HashMap<>();
         this.defaultFileSubscribers = new ArrayList<>();
+        this.main = main;
     }
 
     /**
@@ -70,7 +75,7 @@ public class FilePublisher {
         List<FileSubscriber> subList = fileSubscribers.get(reloadableFile);
 
         for (FileSubscriber sub : subList) {
-            sub.update();
+            CompletableFuture.runAsync(sub::update, main.getThreadPoolManager().getAddOnsThreadPool());
         }
 
         notifyDefaultFileSubscribers();
@@ -82,7 +87,7 @@ public class FilePublisher {
     public synchronized void notifyAllFileSubcribers() {
         for (List<FileSubscriber> subList : fileSubscribers.values()) {
             for (FileSubscriber sub : subList) {
-                sub.update();
+                CompletableFuture.runAsync(sub::update, main.getThreadPoolManager().getAddOnsThreadPool());
             }
         }
 
@@ -94,7 +99,7 @@ public class FilePublisher {
      */
     public synchronized void notifyDefaultFileSubscribers() {
         for (FileSubscriber sub : defaultFileSubscribers) {
-            sub.update();
+            CompletableFuture.runAsync(sub::update, main.getThreadPoolManager().getAddOnsThreadPool());
         }
     }
 

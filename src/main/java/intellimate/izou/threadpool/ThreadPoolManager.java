@@ -63,7 +63,7 @@ public class ThreadPoolManager {
                 public void run() {
                     try {
                         r.run();
-                    } catch (Exception | NoClassDefFoundError e) {
+                    } catch (Exception | LinkageError e) {
                         try {
                             Field target = Thread.class.getDeclaredField("target");
                             target.setAccessible(true);
