@@ -164,8 +164,13 @@ public class FileManager implements Runnable {
         } catch (IOException e) {
             fileLogger.error("unable to create the Default-File", e);
         } finally {
-            if(bufferedWriterInit != null)
-                bufferedWriterInit.close();
+            if(bufferedWriterInit != null) {
+                try {
+                    bufferedWriterInit.close();
+                } catch (IOException e) {
+                    fileLogger.error("Unable to close input stream", e);
+                }
+            }
         }
     }
 

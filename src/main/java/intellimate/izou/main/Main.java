@@ -4,6 +4,7 @@ import intellimate.izou.activator.ActivatorManager;
 import intellimate.izou.addon.AddOn;
 import intellimate.izou.addon.AddOnManager;
 import intellimate.izou.events.EventDistributor;
+import intellimate.izou.events.EventPropertiesManager;
 import intellimate.izou.events.LocalEventManager;
 import intellimate.izou.output.OutputManager;
 import intellimate.izou.resource.ResourceManager;
@@ -16,6 +17,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
 
 /**
@@ -35,6 +37,7 @@ public class Main {
     private final FilePublisher filePublisher;
     private final IzouLogger izouLogger;
     private final ThreadPoolManager threadPoolManager;
+    private final EventPropertiesManager eventPropertiesManager;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     /**
@@ -74,6 +77,7 @@ public class Main {
         threadPoolManager.getIzouThreadPool().submit(localEventManager);
         activatorManager = new ActivatorManager(this);
         filePublisher = new FilePublisher(this);
+        eventPropertiesManager = new EventPropertiesManager();
 
         FileManager fileManagerTemp;
         try {
@@ -91,6 +95,15 @@ public class Main {
             addOnManager.addAndRegisterAddOns(addOns);
         }
         if(!debug) addOnManager.retrieveAndRegisterAddOns();
+
+        try {
+            if (fileManager != null) {
+                fileManager.registerFileDir(Paths.get(EventPropertiesManager.EVENTS_PROPERTIES_PATH),
+                        "PopularEvents.properties", eventPropertiesManager);
+            }
+        } catch (IOException e) {
+            fileLogger.error("Unable to register the eventPropertiesManager", e);
+        }
     }
 
     public static void main(String[] args) {
@@ -129,6 +142,10 @@ public class Main {
 
     public EventDistributor getEventDistributor() {
         return eventDistributor;
+    }
+
+    public EventPropertiesManager getEventPropertiesManager() {
+        return eventPropertiesManager;
     }
 
     public ThreadPoolManager getThreadPoolManager() {

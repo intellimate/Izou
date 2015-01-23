@@ -219,12 +219,16 @@ public class PropertiesManager implements ReloadableFile {
         } catch(IOException e) {
             context.logger.getLogger().error("Error while trying to load the Properties-File: "
                     + context.properties.getPropertiesPath(), e);
-            return;
+            propertiesContainer.setProperties(temp);
         } finally {
-            if (inputStream != null)
-                inputStream.close();
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    context.logger.getLogger().error("Unable to close input stream", e);
+                }
+            }
         }
-        propertiesContainer.setProperties(temp);
     }
 
     /**

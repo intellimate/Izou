@@ -3,16 +3,25 @@ package intellimate.izou.system;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 
 /**
  * FileSystemManager is responsible for creating all the files and folders Izou needs to operate
  */
 public class FileSystemManager {
+    /**
+     * Path to log files
+     */
     public static final String LOG_PATH = "." + File.separator + "logs" + File.separator;
+
+    /**
+     *
+     */
+    public static final String PROPERTIES_PATH = "." + File.separator + "properties" + File.separator;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     /**
@@ -67,6 +76,7 @@ public class FileSystemManager {
         File propertiesDir = new File(propertiesPath);
         if(!Files.exists(propertiesDir.toPath()))
             Files.createDirectories(propertiesDir.toPath());
+        createIzouPropertiesFiles();
     }
 
     /**
@@ -79,5 +89,26 @@ public class FileSystemManager {
         File logFile = new File(logPath);
         if(!Files.exists(logFile.toPath()))
             Files.createDirectories(logFile.toPath());
+    }
+
+    private void createIzouPropertiesFiles() throws IOException {
+        String propertiesPath = new File(".").getCanonicalPath() + File.separator + "properties" + File.separator +
+                "PopularEvents.properties";
+
+        File file = new File(propertiesPath);
+        BufferedWriter bufferedWriterInit = null;
+        try {
+            if (!file.exists()) {
+                file.createNewFile();
+                bufferedWriterInit = new BufferedWriter(new FileWriter(propertiesPath));
+                bufferedWriterInit.write("# You can use this file to store an event ID with a key, or shortcut, " +
+                        " so that others can easily access and\n# fire it using the key");
+            }
+        } catch (IOException e) {
+            fileLogger.error("unable to create the Default-File", e);
+        } finally {
+            if(bufferedWriterInit != null)
+                bufferedWriterInit.close();
+        }
     }
 }
