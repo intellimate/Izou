@@ -98,7 +98,7 @@ public class Main {
 
         try {
             if (fileManager != null) {
-                fileManager.registerFileDir(Paths.get(EventPropertiesManager.EVENTS_PROPERTIES_PATH),
+                fileManager.registerFileDir(Paths.get(FileSystemManager.PROPERTIES_PATH),
                         "PopularEvents.properties", eventPropertiesManager);
             }
         } catch (IOException e) {
