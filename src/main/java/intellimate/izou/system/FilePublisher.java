@@ -75,7 +75,6 @@ public class FilePublisher {
         notifyDefaultFileSubscribers();
 
         List<FileSubscriber> subList = fileSubscribers.get(reloadableFile);
-
         if (subList == null) {
             return;
         }
