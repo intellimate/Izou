@@ -78,7 +78,7 @@ public class ThreadPoolManager {
                                 fileLogger.debug("unable to provide callback", e);
                             }
                         } catch (NoSuchFieldException ecp ) {
-                            fileLogger.fatal(e.getMessage());
+                            fileLogger.fatal(e);
                         }
                     }
                 }
