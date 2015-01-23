@@ -257,7 +257,8 @@ public class Event implements Identifiable {
      * @param eventCallable the EventCaller used to fire
      * @param onError this method will be called when an error occurred
      * @param onSuccess this method will be called when firing succeeded
-     * @deprecated use {@link #fire(EventCallable, java.util.function.BiFunction, java.util.function.Consumer)} instead
+     * @deprecated use {@link #fire(EventCallable, java.util.function.BiFunction, java.util.function.Consumer, java.util.function.Consumer)}
+     *              instead
      * @throws intellimate.izou.events.MultipleEventsException when the method fails to fire the event and onError
      *                              returns false
      */
@@ -291,14 +292,32 @@ public class Event implements Identifiable {
      * if calling failed, it will call onError. If onError returns true, it will wait 100 milli-seconds an retries
      * firing. OnError will be called with the parameters: this Event and a counter which increments for every try.
      * If onError returns false, the method will return.
+     * if calling failed (onError returns false), it will call onFailure.
+     * </p>
+     * @param eventCallable the EventCaller used to fire
+     * @param onError this method will be called when an error occurred
+     * @param onFailure this method will be called when onError returned false
+     */
+    public void fire (EventCallable eventCallable, BiFunction<Event, Integer, Boolean> onError,
+                      Consumer<Event> onFailure) {
+        fire(eventCallable, onError, onFailure, null);
+    }
+
+    /**
+     * tries to fire the Event.
+     * <p>
+     * if calling failed, it will call onError. If onError returns true, it will wait 100 milli-seconds an retries
+     * firing. OnError will be called with the parameters: this Event and a counter which increments for every try.
+     * If onError returns false, the method will return.
      * if calling succeeded, it will call onSuccess.
      * </p>
      * @param eventCallable the EventCaller used to fire
      * @param onError this method will be called when an error occurred
+     * @param onFailure this method will be called when onError returned false
      * @param onSuccess this method will be called when firing succeeded
      */
     public void fire (EventCallable eventCallable, BiFunction<Event, Integer, Boolean> onError,
-                      Consumer<Event> onSuccess) {
+                      Consumer<Event> onFailure, Consumer<Event> onSuccess) {
         boolean success = false;
         int count = 0;
         while (!success) {
@@ -310,8 +329,11 @@ public class Event implements Identifiable {
                 boolean retry = false;
                 if (onError != null)
                     retry = onError.apply(this, count);
-                if (!retry)
+                if (!retry) {
+                    if (onFailure != null)
+                        onFailure.accept(this);
                     return;
+                }
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e1) {
@@ -335,7 +357,7 @@ public class Event implements Identifiable {
      * @param onError this method will be called when an error occurred
      */
     public void fire (EventCallable eventCallable, BiFunction<Event, Integer, Boolean> onError) {
-        fire(eventCallable, onError, null);
+        fire(eventCallable, onError, null, null);
     }
 
     /**
@@ -344,12 +366,9 @@ public class Event implements Identifiable {
      * if calling failed, it will call onError.
      * </p>
      * @param eventCallable the EventCaller used to fire
-     * @param onError this method will be called when an error occurred
+     * @param onFailure this method will be called when an error occurred
      */
-    public void fire (EventCallable eventCallable, Consumer<Event> onError) {
-        fire(eventCallable, (event, counter) -> {
-            onError.accept(event);
-            return false;
-        }, null);
+    public void fire (EventCallable eventCallable, Consumer<Event> onFailure) {
+        fire(eventCallable, null, onFailure, null);
     }
 }
