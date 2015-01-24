@@ -88,14 +88,6 @@ public class Main {
         }
         fileManager = fileManagerTemp;
 
-        addOnManager = new AddOnManager(this);
-        if(addOns != null && !debug) {
-            addOnManager.addAddOnsWithoutRegistering(addOns);
-        } else if(addOns != null) {
-            addOnManager.addAndRegisterAddOns(addOns);
-        }
-        if(!debug) addOnManager.retrieveAndRegisterAddOns();
-
         try {
             if (fileManager != null) {
                 fileManager.registerFileDir(Paths.get(FileSystemManager.PROPERTIES_PATH),
@@ -104,6 +96,14 @@ public class Main {
         } catch (IOException e) {
             fileLogger.error("Unable to register the eventPropertiesManager", e);
         }
+
+        addOnManager = new AddOnManager(this);
+        if(addOns != null && !debug) {
+            addOnManager.addAddOnsWithoutRegistering(addOns);
+        } else if(addOns != null) {
+            addOnManager.addAndRegisterAddOns(addOns);
+        }
+        if(!debug) addOnManager.retrieveAndRegisterAddOns();
     }
 
     public static void main(String[] args) {

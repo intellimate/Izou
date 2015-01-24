@@ -26,6 +26,7 @@ public class EventPropertiesManager implements ReloadableFile {
      */
     public EventPropertiesManager() {
         properties = new Properties();
+        reloadFile(null);
     }
 
     /**
@@ -45,18 +46,31 @@ public class EventPropertiesManager implements ReloadableFile {
      * @param value the complete event ID
      */
     public void registerEventID(String description, String key, String value) {
+        if (getEventID(key) != null) {
+            fileLogger.debug("Did not add " + key + " event ID to PopularEvents.properties because it already exists");
+            return;
+        }
+
         BufferedWriter bufferedWriterInit = null;
         try {
-            bufferedWriterInit = new BufferedWriter(new FileWriter(EVENTS_PROPERTIES_PATH));
+            bufferedWriterInit = new BufferedWriter(new FileWriter(EVENTS_PROPERTIES_PATH, true));
         } catch (IOException e) {
             fileLogger.error("Unable to create buffered writer", e);
         }
         try {
             if (bufferedWriterInit != null) {
-                bufferedWriterInit.write("\n\n# " + description + "\n" + key + ":" + value);
+                bufferedWriterInit.write("\n\n# " + description + "\n" + key + " = " + value);
             }
         } catch (IOException e) {
             fileLogger.error("Unable to write to PopularEvents.properties file", e);
+        } finally {
+            try {
+                if (bufferedWriterInit != null) {
+                    bufferedWriterInit.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

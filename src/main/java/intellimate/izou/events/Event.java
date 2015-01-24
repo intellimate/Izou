@@ -228,7 +228,7 @@ public class Event implements Identifiable {
     }
 
     /**
-     * tries to fire the Event.
+     * Tries to fire the Event.
      * <p>
      * if calling failed, it will call onError. If onError returns true, it will wait 100 milli-seconds an retries
      * firing. OnError will be called with the parameters: this Event and a counter which increments for every try.
