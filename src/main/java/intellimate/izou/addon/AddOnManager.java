@@ -275,7 +275,8 @@ public class AddOnManager {
     }
 
     /**
-     * like {@link #runOnAddOnsAsync(java.util.function.Function)}, but without return type
+     * Like {@link #runOnAddOnsAsync(java.util.function.Function)}, but without return type
+     *
      * @param consumer the consumer to execute
      */
     public void runOnAddOnsAsync(Consumer<AddOn> consumer) {
