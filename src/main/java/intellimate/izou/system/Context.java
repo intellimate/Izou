@@ -349,11 +349,12 @@ public class Context {
         /**
          * Adds the event ID of {@code value} to the PopularEvents.properties file with a key of {@code key}
          *
-         * @param key the key with which to store the event ID
-         * @param value the complete event ID
+         * @param description a short description of what the event ID is for, should not be null
+         * @param key the key with which to store the event ID, should not be null
+         * @param value the complete event ID, should not be null
          */
-        public void addEventIDToPropertiesFile(String key, String value) {
-            main.getEventPropertiesManager().registerEventID(key, value);
+        public void addEventIDToPropertiesFile(String description, String key, String value) {
+            main.getEventPropertiesManager().registerEventID(description, key, value);
         }
 
         /**

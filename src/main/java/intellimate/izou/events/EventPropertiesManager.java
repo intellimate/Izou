@@ -44,7 +44,7 @@ public class EventPropertiesManager implements ReloadableFile {
      * @param key the key with which to store the event ID
      * @param value the complete event ID
      */
-    public void registerEventID(String key, String value) {
+    public void registerEventID(String description, String key, String value) {
         BufferedWriter bufferedWriterInit = null;
         try {
             bufferedWriterInit = new BufferedWriter(new FileWriter(EVENTS_PROPERTIES_PATH));
@@ -53,7 +53,7 @@ public class EventPropertiesManager implements ReloadableFile {
         }
         try {
             if (bufferedWriterInit != null) {
-                bufferedWriterInit.write("\n" + key + ":" + value);
+                bufferedWriterInit.write("\n\n# " + description + "\n" + key + ":" + value);
             }
         } catch (IOException e) {
             fileLogger.error("Unable to write to PopularEvents.properties file", e);

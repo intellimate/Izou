@@ -38,8 +38,8 @@ public class IzouLogger {
                     false, null, null);
 
             //creates a file appender for the logger (so that it knows what file to log to)
-            Appender fileAppender = FileAppender.createAppender("logs" + File.separator + addOnId + ".log", "true", "false", "file", "true",
-                    "false", "false", "4000", layout, null, "false", null, config);
+            Appender fileAppender = FileAppender.createAppender("logs" + File.separator + addOnId + ".log", "true",
+                    "false", "file", "true", "false", "false", "4000", layout, null, "false", null, config);
             fileAppender.start();
             config.addAppender(fileAppender);
 
@@ -47,8 +47,9 @@ public class IzouLogger {
             Appender consoleAppender = ConsoleAppender.createAppender(layout, null, "SYSTEM_OUT", "console", null, null);
             consoleAppender.start();
             config.addAppender(consoleAppender);
-            //adds appenders to an array called refs. It will later serve as references to the logger as to what appenders
-            //it has
+
+            //adds appenders to an array called refs. It will later serve as references to the logger as to what
+            // appenders it has
             AppenderRef fileRef = AppenderRef.createAppenderRef("file", Level.WARN, null);
             AppenderRef consoleRef = AppenderRef.createAppenderRef("console", Level.DEBUG, null);
             AppenderRef[] refs = new AppenderRef[]{fileRef, consoleRef};
