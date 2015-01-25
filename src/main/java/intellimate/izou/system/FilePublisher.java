@@ -19,6 +19,7 @@ public class FilePublisher {
 
     /**
      * Creates a new FilePublisher object. There should only be one in Izou
+     * @param main an Instance of main, used to get all the other classes
      */
     public FilePublisher(Main main) {
         this.fileSubscribers = new HashMap<>();

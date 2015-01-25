@@ -42,6 +42,7 @@ public class Main {
 
     /**
      * creates a new Main instance with debugging enabled (doesn't search the lib-folder)
+     * @param debug if true, izou will not load plugin from the lib-folder
      */
     private Main(boolean debug) {
         this(null, debug);
@@ -59,6 +60,7 @@ public class Main {
     /**
      * If you want to debug your Plugin, you can get an Main instance with this Method
      *
+     * @param debug if true, izou will not load plugin from the lib-folder
      * @param addOns a List of AddOns to run
      */
     public Main(List<AddOn> addOns, boolean debug) {

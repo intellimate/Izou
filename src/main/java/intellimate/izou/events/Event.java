@@ -34,7 +34,7 @@ public class Event implements Identifiable {
      * Event for a Welcome with maximum response.
      *
      * Every component that can contribute should contribute to this Event.
-     * @deprecated see <a href="new online documentation">https://github.com/intellimate/Izou/wiki/Common-IDs</a>
+     * @deprecated see <a href="https://github.com/intellimate/Izou/wiki/Common-IDs">new online documentation</a>
      */
     @Deprecated
     public static final String FULL_WELCOME_EVENT = "izou.FullResponse";
@@ -42,7 +42,7 @@ public class Event implements Identifiable {
      * Event for a Welcome with major response.
      *
      * Every component that is import should contribute to this Event.
-     * @deprecated see <a href="new online documentation">https://github.com/intellimate/Izou/wiki/Common-IDs</a>
+     * @deprecated see <a href="https://github.com/intellimate/Izou/wiki/Common-IDs">new online documentation</a>
      */
     @Deprecated
     @SuppressWarnings("UnusedDeclaration")
@@ -51,7 +51,7 @@ public class Event implements Identifiable {
      * Event for a Welcome with minor response.
      *
      * Only components that have information of great importance should contribute to this event.
-     * @deprecated see <a href="new online documentation">https://github.com/intellimate/Izou/wiki/Common-IDs</a>
+     * @deprecated see <a href="https://github.com/intellimate/Izou/wiki/Common-IDs">new online documentation</a>
      */
     @Deprecated
     @SuppressWarnings("UnusedDeclaration")

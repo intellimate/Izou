@@ -245,6 +245,7 @@ public class AddOnManager {
      * a blocking operation which runs in the addonThread pool, blocking and returning all the results
      * @param function the function to execute
      * @param <T> a list containing all the objects returned by the addons
+     * @return a list of Results when the funktion was applied to all AddOns
      */
     public <T> List<T> runOnAddOnsAsync(Function<AddOn, T> function) {
         ExecutorService addOnThreadPool = main.getThreadPoolManager().getAddOnsThreadPool();

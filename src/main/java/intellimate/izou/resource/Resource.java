@@ -43,6 +43,7 @@ public class Resource <T> {
      * This method is thread-safe.
      * @param resourceID the ID of the Resource
      * @param provider the Provider of the Resource
+     * @param t the resource
      */
     public Resource(String resourceID, Identification provider, T t) {
         this(resourceID, provider, t, null);

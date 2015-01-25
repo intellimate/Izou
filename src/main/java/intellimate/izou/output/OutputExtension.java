@@ -151,6 +151,7 @@ public abstract class OutputExtension<T> implements Callable<T>, Identifiable {
      * to the outputPlugin
      *
      * @param event the Event to generate for
+     * @return the result of the computation
      */
     public abstract T generate(Event event);
 

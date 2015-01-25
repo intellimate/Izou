@@ -42,6 +42,7 @@ public class EventPropertiesManager implements ReloadableFile {
     /**
      * Registers or adds an event to the PopularEvents.properties file
      *
+     * @param description a simple description of the Event
      * @param key the key with which to store the event ID
      * @param value the complete event ID
      */
