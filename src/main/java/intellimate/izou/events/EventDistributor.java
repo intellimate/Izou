@@ -172,6 +172,8 @@ public class EventDistributor implements Runnable{
      * @return true if the event should be fired
      */
     private boolean checkEventsControllers(Event event) {
+        if (event.getID().equals(Event.NOTIFICATION))
+            return true;
         boolean shouldExecute = true;
         for (EventsController controller : eventsControllers) {
             if (!controller.controlEventDispatcher(event)) {
