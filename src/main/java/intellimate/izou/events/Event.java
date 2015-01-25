@@ -34,22 +34,28 @@ public class Event implements Identifiable {
      * Event for a Welcome with maximum response.
      *
      * Every component that can contribute should contribute to this Event.
+     * @deprecated see <a href="new online documentation">https://github.com/intellimate/Izou/wiki/Common-IDs</a>
      */
-    public static final String FULL_WELCOME_EVENT = LocalEventManager.class.getCanonicalName() + ".FullWelcomeEvent";
+    @Deprecated
+    public static final String FULL_WELCOME_EVENT = "izou.FullResponse";
     /**
      * Event for a Welcome with major response.
      *
      * Every component that is import should contribute to this Event.
+     * @deprecated see <a href="new online documentation">https://github.com/intellimate/Izou/wiki/Common-IDs</a>
      */
+    @Deprecated
     @SuppressWarnings("UnusedDeclaration")
-    public static final String MAJOR_WELCOME_EVENT = LocalEventManager.class.getCanonicalName() + ".MajorWelcomeEvent";
+    public static final String MAJOR_WELCOME_EVENT = "izou.MajorResponse";
     /**
-     * Event for a Welcome with major response.
+     * Event for a Welcome with minor response.
      *
      * Only components that have information of great importance should contribute to this event.
+     * @deprecated see <a href="new online documentation">https://github.com/intellimate/Izou/wiki/Common-IDs</a>
      */
+    @Deprecated
     @SuppressWarnings("UnusedDeclaration")
-    public static final String MINOR_WELCOME_EVENT = LocalEventManager.class.getCanonicalName() + ".MinorWelcomeEvent";
+    public static final String MINOR_WELCOME_EVENT = "izou.MinorResponse";
     private final String type;
     private final Identification source;
     private final List<String> descriptors;
