@@ -72,13 +72,16 @@ public class FilePublisher {
      * @param reloadableFile the ReloadableFile object for which to notify all pertaining file subscribers
      */
     public synchronized void notifyFileSubcribers(ReloadableFile reloadableFile) {
+        notifyDefaultFileSubscribers();
+
         List<FileSubscriber> subList = fileSubscribers.get(reloadableFile);
+        if (subList == null) {
+            return;
+        }
 
         for (FileSubscriber sub : subList) {
             CompletableFuture.runAsync(sub::update, main.getThreadPoolManager().getAddOnsThreadPool());
         }
-
-        notifyDefaultFileSubscribers();
     }
 
     /**

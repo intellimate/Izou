@@ -346,6 +346,27 @@ public class Context {
             main.getLocalEventManager().unregisterCaller(identification);
         }
 
+        /**
+         * Adds the event ID of {@code value} to the PopularEvents.properties file with a key of {@code key}
+         *
+         * @param description a short description of what the event ID is for, should not be null
+         * @param key the key with which to store the event ID, should not be null
+         * @param value the complete event ID, should not be null
+         */
+        public void addEventIDToPropertiesFile(String description, String key, String value) {
+            main.getEventPropertiesManager().registerEventID(description, key, value);
+        }
+
+        /**
+         * Gets the full event ID associated with the key {@code key}
+         *
+         * @param key the key of the full event ID
+         * @return the complete the event ID, or null if none is found
+         */
+        public String getEventsID(String key) {
+            return main.getEventPropertiesManager().getEventID(key);
+        }
+
         public class Distributor {
             /**
              * with this method you can register EventPublisher add a Source of Events to the System.

@@ -45,10 +45,11 @@ public abstract class Activator implements Runnable, Identifiable, ExceptionCall
         try {
             activatorStarts();
         } catch (InterruptedException e) {
-            context.logger.getLogger().warn(e);
+            context.logger.getLogger().warn("Unable to start activator", e);
             //noinspection UnnecessaryReturnStatement
             return;
         } catch (Exception e) {
+            context.logger.getLogger().warn("Unable to start activator - trying again", e);
             this.exceptionThrown(e);
         }
     }

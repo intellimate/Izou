@@ -164,8 +164,13 @@ public class FileManager implements Runnable {
         } catch (IOException e) {
             fileLogger.error("unable to create the Default-File", e);
         } finally {
-            if(bufferedWriterInit != null)
-                bufferedWriterInit.close();
+            if(bufferedWriterInit != null) {
+                try {
+                    bufferedWriterInit.close();
+                } catch (IOException e) {
+                    fileLogger.error("Unable to close input stream", e);
+                }
+            }
         }
     }
 
@@ -173,33 +178,35 @@ public class FileManager implements Runnable {
      * Checks if {@code fileInfo} and {@code key} match each other, in which case the fileInfo and key are processed
      *
      * @param key current key
-     * @param fileInfo current fileInfo
+     * @param fileInfos all fileInfos that match key
      */
-    private void checkAndProcessFileInfo(WatchKey key, FileInfo fileInfo) {
+    private void checkAndProcessFileInfo(WatchKey key, List<FileInfo> fileInfos) {
         for (WatchEvent<?> event : key.pollEvents()) {
             WatchEvent.Kind kind = event.kind();
 
-            if (kind == OVERFLOW) {
-                try {
-                    throw new IncompleteFileEventException();
-                } catch (IncompleteFileEventException e) {
-                    fileLogger.warn(e);
-                }
-            } else if ((kind == ENTRY_CREATE || kind == ENTRY_MODIFY || kind == ENTRY_DELETE)
-                    && isFileType(event, fileInfo.getFileType())) {
-                try {
-                    if (fileInfo.getReloadableFile() != null) {
-                        fileInfo.getReloadableFile().reloadFile(kind.toString());
-                        fileLogger.debug("Reloaded file: " + event.context().toString());
-                        filePublisher.notifyFileSubcribers(fileInfo.getReloadableFile());
+            for (FileInfo fileInfo : fileInfos) {
+                if (kind == OVERFLOW) {
+                    try {
+                        throw new IncompleteFileEventException();
+                    } catch (IncompleteFileEventException e) {
+                        fileLogger.warn(e);
                     }
-                } catch (Exception e) {
-                    fileLogger.warn(e);
-                }
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    fileLogger.warn(e);
+                } else if ((kind == ENTRY_CREATE || kind == ENTRY_MODIFY || kind == ENTRY_DELETE)
+                        && isFileType(event, fileInfo.getFileType())) {
+                    try {
+                        if (fileInfo.getReloadableFile() != null) {
+                            fileInfo.getReloadableFile().reloadFile(kind.toString());
+                            fileLogger.debug("Reloaded file: " + event.context().toString());
+                            filePublisher.notifyFileSubcribers(fileInfo.getReloadableFile());
+                        }
+                    } catch (Exception e) {
+                        fileLogger.warn(e);
+                    }
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        fileLogger.warn(e);
+                    }
                 }
             }
         }
@@ -220,12 +227,7 @@ public class FileManager implements Runnable {
             }
 
             List<FileInfo> fileInfos = addOnMap.get(key);
-            for (FileInfo fileInfo : fileInfos) {
-                if (fileInfo.getPath() == null) {
-                    throw new NullPointerException("FileInfo has to be filled out and valid");
-                }
-                checkAndProcessFileInfo(key, fileInfo);
-            }
+            checkAndProcessFileInfo(key, fileInfos);
 
             // reset key and remove from set if directory no longer accessible
             boolean valid = key.reset();

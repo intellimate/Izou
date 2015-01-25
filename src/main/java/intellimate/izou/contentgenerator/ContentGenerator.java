@@ -13,8 +13,9 @@ import java.util.Optional;
 /**
  * The Task of an ContentGenerator is to generate a Resources-Object when a Event it subscribed to was fired.
  * <p>
- * When an Event this ContentGenerator subscribed to was fired, the ContentGeneratorManager will run the instance of it
- * in a ThreadPool and generate(String eventID) will be called.
+ *     When an Event this ContentGenerator subscribed to was fired, the ContentGeneratorManager will run the instance
+ *     of it in a ThreadPool and generate(String eventID) will be called.
+ * </p>
  */
 public abstract class ContentGenerator implements ResourceBuilder, ExceptionCallback {
     //stores the ID of the ContentGenerator
@@ -27,6 +28,7 @@ public abstract class ContentGenerator implements ResourceBuilder, ExceptionCall
         this.context = context;
         identificationManager.registerIdentification(this);
     }
+
     /**
      * this method is called to register what resources the object provides.
      * just pass a List of Resources without Data in it.
@@ -58,7 +60,7 @@ public abstract class ContentGenerator implements ResourceBuilder, ExceptionCall
     /**
      * this method gets called when the task submitted to the ThreadPool crashes
      *
-     * @param e the exception catched
+     * @param e the exception caught
      */
     @Override
     public void exceptionThrown(Exception e) {
