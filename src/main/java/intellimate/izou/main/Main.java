@@ -8,10 +8,7 @@ import intellimate.izou.events.EventPropertiesManager;
 import intellimate.izou.events.LocalEventManager;
 import intellimate.izou.output.OutputManager;
 import intellimate.izou.resource.ResourceManager;
-import intellimate.izou.system.FileManager;
-import intellimate.izou.system.FilePublisher;
-import intellimate.izou.system.FileSystemManager;
-import intellimate.izou.system.IzouLogger;
+import intellimate.izou.system.*;
 import intellimate.izou.threadpool.ThreadPoolManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Main Class.
@@ -27,6 +25,8 @@ import java.util.List;
  */
 @SuppressWarnings("FieldCanBeLocal")
 public class Main {
+    public static AtomicBoolean jfxToolKitInit;
+    private static final long INIT_TIME_LIMIT = 10000;
     private final OutputManager outputManager;
     private final ResourceManager resourceManager;
     private final EventDistributor eventDistributor;
@@ -64,6 +64,26 @@ public class Main {
      * @param addOns a List of AddOns to run
      */
     public Main(List<AddOn> addOns, boolean debug) {
+        jfxToolKitInit = new AtomicBoolean(false);
+        JavaFXInitializer.initToolKit();
+        fileLogger.debug("Initializing JavaFX ToolKit");
+
+        long startTime = System.currentTimeMillis();
+        long duration = 0;
+        while (!jfxToolKitInit.get() && duration < INIT_TIME_LIMIT) {
+            duration = System.currentTimeMillis() - startTime;
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                fileLogger.error("Error happened while thread was sleeping", e);
+            }
+        }
+
+        if (!jfxToolKitInit.get()) {
+            fileLogger.error("Unable to Initialize JavaFX ToolKit");
+        }
+        fileLogger.debug("Done initializing JavaFX ToolKit");
+
         FileSystemManager fileSystemManager = new FileSystemManager();
         try {
             fileSystemManager.createIzouFileSystem();

@@ -262,7 +262,7 @@ public class AddOnManager {
                 .map(supplier -> CompletableFuture.supplyAsync(supplier, addOnThreadPool))
                 .map(future -> {
                     try {
-                        return future.get(2, TimeUnit.SECONDS);
+                        return future.get(5, TimeUnit.SECONDS);
                     } catch (InterruptedException | ExecutionException e) {
                         fileLogger.error("Addon crashed while trying to initialize some part", e);
                     } catch (TimeoutException e) {
