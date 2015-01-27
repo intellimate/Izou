@@ -12,7 +12,7 @@ import java.util.concurrent.Future;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-public class ActivatorManagerTest extends IzouTest{
+public class ActivatorManagerTest extends IzouTest {
     private static final class Lock { }
     private final Object lock = new Lock();
 

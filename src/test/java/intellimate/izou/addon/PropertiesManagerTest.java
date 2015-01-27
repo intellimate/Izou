@@ -16,7 +16,7 @@ public class PropertiesManagerTest extends TestCase {
         LinkedList<AddOn> addOns = new LinkedList<>();
         TestAddOn testAddOn = new TestAddOn("TestID");
         addOns.add(testAddOn);
-        Main main = new Main(addOns, true);
+        Main main = new Main(addOns, false, true);
         //for(;;){}
         //assertTrue(Files.exists(Paths.get("." + File.separator + "properties" + File.separator + "TestID.properties")));
         assertTrue(true);

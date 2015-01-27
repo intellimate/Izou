@@ -41,48 +41,54 @@ public class Main {
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     /**
-     * creates a new Main instance with debugging enabled (doesn't search the lib-folder)
+     * Creates a new Main instance with debugging enabled (doesn't search the lib-folder)
+     *
+     * @param javaFX true if javaFX should be started, false otherwise
      * @param debug if true, izou will not load plugin from the lib-folder
      */
-    private Main(boolean debug) {
-        this(null, debug);
+    private Main(boolean javaFX, boolean debug) {
+        this(null, javaFX, debug);
     }
 
     /**
      * If you want to debug your Plugin, you can get an Main instance with this Method
      *
+     * @param javaFX true if javaFX should be started, false otherwise
      * @param addOns a List of AddOns to run
      */
-    public Main(List<AddOn> addOns) {
-        this(addOns, false);
+    public Main(List<AddOn> addOns, boolean javaFX) {
+        this(addOns, javaFX, false);
     }
 
     /**
      * If you want to debug your Plugin, you can get an Main instance with this Method
      *
+     * @param javaFX true if javaFX should be started, false otherwise
      * @param debug if true, izou will not load plugin from the lib-folder
      * @param addOns a List of AddOns to run
      */
-    public Main(List<AddOn> addOns, boolean debug) {
-        jfxToolKitInit = new AtomicBoolean(false);
-        JavaFXInitializer.initToolKit();
-        fileLogger.debug("Initializing JavaFX ToolKit");
+    public Main(List<AddOn> addOns, boolean javaFX, boolean debug) {
+         if (javaFX) {
+             jfxToolKitInit = new AtomicBoolean(false);
+             JavaFXInitializer.initToolKit();
+             fileLogger.debug("Initializing JavaFX ToolKit");
 
-        long startTime = System.currentTimeMillis();
-        long duration = 0;
-        while (!jfxToolKitInit.get() && duration < INIT_TIME_LIMIT) {
-            duration = System.currentTimeMillis() - startTime;
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                fileLogger.error("Error happened while thread was sleeping", e);
-            }
-        }
+             long startTime = System.currentTimeMillis();
+             long duration = 0;
+             while (!jfxToolKitInit.get() && duration < INIT_TIME_LIMIT) {
+                 duration = System.currentTimeMillis() - startTime;
+                 try {
+                     Thread.sleep(5000);
+                 } catch (InterruptedException e) {
+                     fileLogger.error("Error happened while thread was sleeping", e);
+                 }
+             }
 
-        if (!jfxToolKitInit.get()) {
-            fileLogger.error("Unable to Initialize JavaFX ToolKit");
-        }
-        fileLogger.debug("Done initializing JavaFX ToolKit");
+             if (!jfxToolKitInit.get()) {
+                 fileLogger.error("Unable to Initialize JavaFX ToolKit");
+             }
+             fileLogger.debug("Done initializing JavaFX ToolKit");
+         }
 
         FileSystemManager fileSystemManager = new FileSystemManager();
         try {
@@ -129,17 +135,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        @SuppressWarnings("UnusedAssignment") Main main = new Main(false);
-
-        /*
-        try {
-            AudioInputStream inputStream = AudioSystem.getAudioInputStream(new File("./resources/IzouClock/mama-geb.mp3"));
-        } catch (UnsupportedAudioFileException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        */
+        @SuppressWarnings("UnusedAssignment") Main main = new Main(true, false);
     }
 
     public OutputManager getOutputManager() {

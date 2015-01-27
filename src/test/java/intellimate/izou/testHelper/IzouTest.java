@@ -1,13 +1,11 @@
 package intellimate.izou.testHelper;
 
+import intellimate.izou.addon.AddOn;
 import intellimate.izou.events.Event;
 import intellimate.izou.events.MultipleEventsException;
 import intellimate.izou.fullplugintesting.TestAddOn;
 import intellimate.izou.main.Main;
-import intellimate.izou.system.Context;
-import intellimate.izou.system.Identifiable;
-import intellimate.izou.system.Identification;
-import intellimate.izou.system.IdentificationManager;
+import intellimate.izou.system.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -40,10 +38,10 @@ public class IzouTest implements Identifiable{
      */
     public IzouTest(boolean isolated, String id) {
         if(isolated) {
-            main = new Main(null, true);
+            main = new Main(null, false, true);
         } else {
             if(staticMain == null) {
-                staticMain = new Main(null, true);
+                staticMain = new Main(null, false, true);
             }
             this.main = staticMain;
         }
@@ -194,5 +192,22 @@ public class IzouTest implements Identifiable{
 
     public Main getMain() {
         return main;
+    }
+
+    public static synchronized  Main getNewMain(List<AddOn> list) {
+        JavaFXInitializer jfx = new JavaFXInitializer();
+        try {
+            jfx.stop();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return new Main(list, true);
     }
 }
