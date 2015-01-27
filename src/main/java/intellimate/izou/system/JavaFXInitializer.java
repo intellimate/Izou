@@ -16,7 +16,7 @@ public class JavaFXInitializer extends Application {
     }
 
     /**
-     * Initializes the JavaFX by starting the JavaFX ToolKit
+     * Initializes JavaFX by starting the JavaFX ToolKit
      */
     public static void initToolKit() {
         Thread t = new Thread(Application::launch);
