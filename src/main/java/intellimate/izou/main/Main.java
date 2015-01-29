@@ -51,13 +51,22 @@ public class Main {
     }
 
     /**
-     * If you want to debug your Plugin, you can get an Main instance with this Method
+     * If you want to debug your Plugin, you can get an Main instance with this Method, JavaFX is disabled
      *
-     * @param javaFX true if javaFX should be started, false otherwise
      * @param addOns a List of AddOns to run
      */
-    public Main(List<AddOn> addOns, boolean javaFX) {
-        this(addOns, javaFX, false);
+    public Main(List<AddOn> addOns) {
+        this(addOns, false, false);
+    }
+
+    /**
+     * If you want to debug your Plugin, you can get an Main instance with this Method
+     *
+     * @param debug if true, izou will not load plugin from the lib-folder
+     * @param addOns a List of AddOns to run
+     */
+    public Main(List<AddOn> addOns, boolean debug) {
+        this(addOns, false, debug);
     }
 
     /**
