@@ -211,7 +211,9 @@ public class ResourceManager {
         if(resources == null) return;
         for(Resource resource : resources) {
             if(resourceIDs.containsKey(resource.getResourceID())) {
-                resourceIDs.get(resource.getResourceID()).add(resourceBuilder);
+                LinkedList<ResourceBuilder> resourceBuilders = resourceIDs.get(resource.getResourceID());
+                if (!resourceBuilders.contains(resourceBuilder))
+                    resourceBuilders.add(resourceBuilder);
             } else {
                 LinkedList<ResourceBuilder> tempList = new LinkedList<>();
                 tempList.add(resourceBuilder);
@@ -229,7 +231,9 @@ public class ResourceManager {
         if(events == null) return;
         for(String event : events) {
             if(eventSubscribers.containsKey(event)) {
-                eventSubscribers.get(event).add(resourceBuilder);
+                LinkedList<ResourceBuilder> resourceBuilders = eventSubscribers.get(event);
+                if (!resourceBuilders.contains(resourceBuilder))
+                    resourceBuilders.add(resourceBuilder);
             } else {
                 LinkedList<ResourceBuilder> tempList = new LinkedList<>();
                 tempList.add(resourceBuilder);
