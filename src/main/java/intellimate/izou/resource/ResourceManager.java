@@ -169,12 +169,12 @@ public class ResourceManager {
         //Timeout
         int start = 0;
         boolean notFinished = true;
-        while ( (start < 60) && notFinished) {
+        while ( (start < 600) && notFinished) {
             notFinished = futures.stream()
                     .anyMatch(future -> !future.isDone());
             start++;
             try {
-                Thread.sleep(1000);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 fileLogger.warn(e);
             }
