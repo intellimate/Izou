@@ -75,7 +75,7 @@ public class ThreadPoolManager {
                                     exceptionCallback.exceptionThrown(new RuntimeException(e));
                                 }
                             } catch (IllegalArgumentException | IllegalAccessException e1) {
-                                fileLogger.debug("unable to provide callback", e);
+                                fileLogger.fatal("unable to provide callback", e);
                             }
                         } catch (NoSuchFieldException ecp ) {
                             fileLogger.fatal(e);

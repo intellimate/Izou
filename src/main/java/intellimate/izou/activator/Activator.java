@@ -75,7 +75,7 @@ public abstract class Activator implements Runnable, Identifiable, ExceptionCall
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException e1) {
-                    context.logger.getLogger().warn(e);
+                    context.logger.getLogger().fatal(e);
                 }
                 activatorManager.restartActivator(this);
             }
