@@ -15,13 +15,15 @@ import org.apache.logging.log4j.spi.LoggerContext;
 
 import java.io.File;
 
+/**
+ * Class that manages logging in izou. Can create a new logger for every addOn
+ */
 public class IzouLogger {
     private static final Logger rootLogger = LogManager.getRootLogger();
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
-    //private final Logger fileLogger = LogManager.getRootLogger();
 
     /**
-     * creates a new file-logger for an addOn. The logger will log to a file with the addOnId as name in the logs folder
+     * Creates a new file-logger for an addOn. The logger will log to a file with the addOnId as name in the logs folder
      * of Izou
      *
      * @param addOnId the Id of the addOn the logger is created for
