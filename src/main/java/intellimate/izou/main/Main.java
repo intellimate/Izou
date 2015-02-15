@@ -144,7 +144,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        if (args[0] == null) {
+        if (args.length > 0) {
             @SuppressWarnings("UnusedAssignment") Main main = new Main(Boolean.getBoolean(args[0]), false);
         }
         else {

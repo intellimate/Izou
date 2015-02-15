@@ -48,11 +48,6 @@
             <!--<artifactId>javafxhack</artifactId>-->
             <!--<version>1.8.0</version>-->
         <!--</dependency>-->
-        <dependency>
-            <groupId>javafx.for.rpi</groupId>
-            <artifactId>jfx4rpi</artifactId>
-            <version>1.8.0.1</version>
-        </dependency>
     </dependencies>
 
     <repositories>
