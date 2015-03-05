@@ -4,7 +4,7 @@ import intellimate.izou.main.Main;
 import intellimate.izou.output.OutputManager;
 import intellimate.izou.resource.Resource;
 import intellimate.izou.resource.ResourceManager;
-import intellimate.izou.system.Identification;
+import intellimate.izou.identification.Identification;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

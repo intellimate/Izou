@@ -1,6 +1,6 @@
 package intellimate.izou.events;
 
-import intellimate.izou.system.Identification;
+import intellimate.izou.identification.Identification;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

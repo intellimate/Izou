@@ -2,8 +2,8 @@ package intellimate.izou.events;
 
 import intellimate.izou.resource.ListResourceProvider;
 import intellimate.izou.resource.Resource;
-import intellimate.izou.system.Identifiable;
-import intellimate.izou.system.Identification;
+import intellimate.izou.identification.Identifiable;
+import intellimate.izou.identification.Identification;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

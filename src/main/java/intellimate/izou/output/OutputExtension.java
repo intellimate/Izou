@@ -2,7 +2,7 @@ package intellimate.izou.output;
 
 import intellimate.izou.events.Event;
 import intellimate.izou.system.Context;
-import intellimate.izou.system.Identifiable;
+import intellimate.izou.identification.Identifiable;
 
 import java.util.ArrayList;
 import java.util.LinkedList;

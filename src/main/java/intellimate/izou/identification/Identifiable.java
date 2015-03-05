@@ -1,4 +1,4 @@
-package intellimate.izou.system;
+package intellimate.izou.identification;
 
 /**
  * Makes a class identifiable by forcing implementations to set an ID.

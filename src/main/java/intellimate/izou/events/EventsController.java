@@ -1,6 +1,6 @@
 package intellimate.izou.events;
 
-import intellimate.izou.system.Identifiable;
+import intellimate.izou.identification.Identifiable;
 import intellimate.izou.threadpool.ExceptionCallback;
 
 /**

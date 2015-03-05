@@ -7,7 +7,7 @@ import intellimate.izou.output.OutputExtension;
 import intellimate.izou.output.OutputPlugin;
 import intellimate.izou.properties.PropertiesContainer;
 import intellimate.izou.system.Context;
-import intellimate.izou.system.Identifiable;
+import intellimate.izou.identification.Identifiable;
 import intellimate.izou.threadpool.ExceptionCallback;
 import ro.fortsoft.pf4j.ExtensionPoint;
 import ro.fortsoft.pf4j.PluginWrapper;

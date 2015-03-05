@@ -4,7 +4,7 @@ import intellimate.izou.events.Event;
 import intellimate.izou.resource.Resource;
 import intellimate.izou.resource.ResourceBuilder;
 import intellimate.izou.system.Context;
-import intellimate.izou.system.IdentificationManager;
+import intellimate.izou.identification.IdentificationManager;
 import intellimate.izou.threadpool.ExceptionCallback;
 
 import java.util.List;

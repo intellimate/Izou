@@ -4,6 +4,9 @@ import intellimate.izou.addon.AddOn;
 import intellimate.izou.events.Event;
 import intellimate.izou.events.MultipleEventsException;
 import intellimate.izou.fullplugintesting.TestAddOn;
+import intellimate.izou.identification.Identifiable;
+import intellimate.izou.identification.Identification;
+import intellimate.izou.identification.IdentificationManager;
 import intellimate.izou.main.Main;
 import intellimate.izou.system.*;
 
@@ -20,7 +23,7 @@ import static org.junit.Assert.*;
 /**
  * Helper class for Unit-testing
  */
-public class IzouTest implements Identifiable{
+public class IzouTest implements Identifiable {
     private static Main staticMain;
     public Main main;
     public final String id;
@@ -145,8 +148,6 @@ public class IzouTest implements Identifiable{
      */
     public void waitForMultith(Event event) throws InterruptedException {
         synchronized (lock) {
-            lock.wait(10);
-
             final java.util.concurrent.locks.Lock lock = new ReentrantLock();
             final Condition processing = lock.newCondition();
 
@@ -159,12 +160,13 @@ public class IzouTest implements Identifiable{
                 consumer.accept(identifications);
                 return new HashMap<>();
             });
-            while(!main.getLocalEventManager().getEvents().isEmpty())
+            while(!main.getEventDistributor().getEvents().isEmpty())
             {
                 lock.lock();
                 processing.await(10, TimeUnit.SECONDS);
                 lock.unlock();
             }
+            this.lock.wait(10);
         }
     }
 

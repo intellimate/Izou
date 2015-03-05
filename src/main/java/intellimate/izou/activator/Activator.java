@@ -4,9 +4,9 @@ import intellimate.izou.events.Event;
 import intellimate.izou.events.LocalEventManager;
 import intellimate.izou.events.MultipleEventsException;
 import intellimate.izou.system.Context;
-import intellimate.izou.system.Identifiable;
-import intellimate.izou.system.Identification;
-import intellimate.izou.system.IdentificationManager;
+import intellimate.izou.identification.Identifiable;
+import intellimate.izou.identification.Identification;
+import intellimate.izou.identification.IdentificationManager;
 import intellimate.izou.threadpool.ExceptionCallback;
 
 import java.util.Optional;
@@ -17,7 +17,7 @@ import java.util.Optional;
  * The Activator always runs in the Background, just overwrite activatorStarts(). To use Activator simply extend from it
  * and hand an instance over to the ActivatorManager.
  */
-public abstract class Activator implements Runnable, Identifiable, ExceptionCallback{
+public abstract class Activator implements Runnable, Identifiable, ExceptionCallback {
 
     private LocalEventManager.EventCaller caller;
     private LocalEventManager localEventManager;

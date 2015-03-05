@@ -1,7 +1,7 @@
 package intellimate.izou.resource;
 
 import intellimate.izou.events.Event;
-import intellimate.izou.system.Identifiable;
+import intellimate.izou.identification.Identifiable;
 
 import java.util.List;
 import java.util.Optional;

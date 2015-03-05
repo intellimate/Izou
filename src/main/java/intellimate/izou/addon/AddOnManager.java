@@ -3,7 +3,7 @@ package intellimate.izou.addon;
 import intellimate.izou.main.Main;
 import intellimate.izou.properties.PropertiesManager;
 import intellimate.izou.system.Context;
-import intellimate.izou.system.Identifiable;
+import intellimate.izou.identification.Identifiable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ro.fortsoft.pf4j.*;

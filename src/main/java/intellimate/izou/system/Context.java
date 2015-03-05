@@ -2,6 +2,7 @@ package intellimate.izou.system;
 
 import intellimate.izou.addon.AddOn;
 import intellimate.izou.events.*;
+import intellimate.izou.identification.Identification;
 import intellimate.izou.main.Main;
 import intellimate.izou.properties.PropertiesContainer;
 import intellimate.izou.properties.PropertiesManager;

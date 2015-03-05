@@ -2,8 +2,8 @@ package intellimate.izou.activator;
 
 import intellimate.izou.events.Event;
 import intellimate.izou.system.Context;
-import intellimate.izou.system.Identification;
-import intellimate.izou.system.IdentificationManager;
+import intellimate.izou.identification.Identification;
+import intellimate.izou.identification.IdentificationManager;
 import intellimate.izou.testHelper.IzouTest;
 import org.junit.Test;
 
@@ -39,7 +39,7 @@ public class ActivatorTest extends IzouTest{
         main.getEventDistributor().registerEventListener(event2, id -> isWorking[0] = true);
         activator.fireEvent(event2);
         waitForMultith(event2);
-        assertTrue(/*isWorking[0]*/true); //TODO: fix this unit test - it is not working!
+        assertTrue(isWorking[0]);
     }
 
 
