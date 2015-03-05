@@ -9,7 +9,7 @@ import org.apache.logging.log4j.Logger;
  * @author Leander Kurscheidt
  * @version 1.0
  */
-abstract class IzouModule implements MainProvider {
+public abstract class IzouModule implements MainProvider {
     protected Main main;
     protected final Logger log = LogManager.getLogger(this.getClass());
 

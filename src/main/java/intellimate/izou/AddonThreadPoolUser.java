@@ -10,7 +10,7 @@ import java.util.function.Supplier;
  * @author Leander Kurscheidt
  * @version 1.0
  */
-interface AddonThreadPoolUser extends MainProvider {
+public interface AddonThreadPoolUser extends MainProvider {
 
     /**
      * submits the Runnable to the AddOns Thread-Pool

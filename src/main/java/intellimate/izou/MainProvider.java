@@ -7,7 +7,7 @@ import intellimate.izou.main.Main;
  * @author Leander Kurscheidt
  * @version 1.0
  */
-interface MainProvider {
+public interface MainProvider {
     /**
      * returns the instance of Main
      * @return Main
