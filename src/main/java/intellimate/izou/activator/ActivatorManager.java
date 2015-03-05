@@ -34,7 +34,6 @@ public class ActivatorManager {
      * interruption) cancel the activator
      */
     public java.util.concurrent.Future<?> addActivator(Activator activator) {
-        activator.registerAllNeededDependencies(localEventManager, this);
         return executor.submit(activator);
     }
 
@@ -44,5 +43,5 @@ public class ActivatorManager {
      */
     public void restartActivator(Activator activator) {
         executor.submit(activator);
-    }
+    };
 }
