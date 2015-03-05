@@ -93,7 +93,7 @@ public class FileSystemManager {
 
     private void createIzouPropertiesFiles() throws IOException {
         String propertiesPath = new File(".").getCanonicalPath() + File.separator + "properties" + File.separator +
-                "PopularEvents.properties";
+                "local_events.properties";
 
         File file = new File(propertiesPath);
         BufferedWriter bufferedWriterInit = null;
@@ -105,7 +105,7 @@ public class FileSystemManager {
                         " so that others can easily access and\n# fire it using the key");
             }
         } catch (IOException e) {
-            fileLogger.error("unable to create the Default-File", e);
+            fileLogger.error("unable to create the local_events file", e);
         } finally {
             if(bufferedWriterInit != null)
                 bufferedWriterInit.close();

@@ -9,15 +9,15 @@ import java.io.*;
 import java.util.Properties;
 
 /**
- * EventPropertiesManager manages all events written in the PopularEvents.properties file. You can register (add)
+ * EventPropertiesManager manages all events written in the local_events.properties file. You can register (add)
  * events to the file, and get events from the file. The file pretty much serves as a hub for event IDs.
  */
 public class EventPropertiesManager implements ReloadableFile {
     /**
-     * The path to the PopularEvents.properties file
+     * The path to the local_events.properties file
      */
     public static final String EVENTS_PROPERTIES_PATH = FileSystemManager.PROPERTIES_PATH + File.separator +
-            "PopularEvents.properties";
+            "local_events.properties";
     private Properties properties;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
@@ -40,7 +40,7 @@ public class EventPropertiesManager implements ReloadableFile {
     }
 
     /**
-     * Registers or adds an event to the PopularEvents.properties file
+     * Registers or adds an event to the local_events.properties file
      *
      * @param description a simple description of the Event
      * @param key the key with which to store the event ID
@@ -48,7 +48,7 @@ public class EventPropertiesManager implements ReloadableFile {
      */
     public void registerEventID(String description, String key, String value) {
         if (getEventID(key) != null) {
-            fileLogger.debug("Did not add " + key + " event ID to PopularEvents.properties because it already exists");
+            fileLogger.debug("Did not add " + key + " event ID to local_events.properties because it already exists");
             return;
         }
 
@@ -63,7 +63,7 @@ public class EventPropertiesManager implements ReloadableFile {
                 bufferedWriterInit.write("\n\n# " + description + "\n" + key + " = " + value);
             }
         } catch (IOException e) {
-            fileLogger.error("Unable to write to PopularEvents.properties file", e);
+            fileLogger.error("Unable to write to local_events.properties file", e);
         } finally {
             try {
                 if (bufferedWriterInit != null) {
@@ -85,7 +85,7 @@ public class EventPropertiesManager implements ReloadableFile {
             temp.load(in);
             this.properties = temp;
         } catch(IOException e) {
-            fileLogger.error("Error while trying to load PopularEvents.properties", e);
+            fileLogger.error("Error while trying to load local_events.properties", e);
         } finally {
             if (inputStream != null) {
                 try {

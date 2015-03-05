@@ -128,7 +128,7 @@ public class Main {
         try {
             if (fileManager != null) {
                 fileManager.registerFileDir(Paths.get(FileSystemManager.PROPERTIES_PATH),
-                        "PopularEvents.properties", eventPropertiesManager);
+                        "local_events.properties", eventPropertiesManager);
             }
         } catch (IOException e) {
             fileLogger.error("Unable to register the eventPropertiesManager", e);
