@@ -1,7 +1,7 @@
 package intellimate.izou.addon;
 
 import intellimate.izou.main.Main;
-import intellimate.izou.properties.PropertiesManager;
+import intellimate.izou.properties.PropertiesAssistant;
 import intellimate.izou.system.Context;
 import intellimate.izou.system.Identifiable;
 import org.apache.logging.log4j.LogManager;
@@ -126,7 +126,7 @@ public class AddOnManager {
     private void registerFiles() {
         String dir = "." + File.separator + "properties";
         runOnAddOnsAsync(addOn -> {
-            if(!(PropertiesManager.getFolder(addOn) == null)) {
+            if(!(PropertiesAssistant.getFolder(addOn) == null)) {
                 try {
                     main.getFileManager().registerFileDir(Paths.get(dir), addOn.getID(),
                             addOn.getContext().properties.getPropertiesManger());
@@ -136,7 +136,7 @@ public class AddOnManager {
 
                 if (addOn.setUnusualDefaultPropertiesPath() == null) {
                     addOn.getContext().properties.getPropertiesManger().
-                            setDefaultPropertiesPath(PropertiesManager.getFolder(addOn));
+                            setDefaultPropertiesPath(PropertiesAssistant.getFolder(addOn));
                 }
             } else {
                 fileLogger.debug("no property file was found for AddOn: " + addOn.getID());

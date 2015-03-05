@@ -4,7 +4,7 @@ import intellimate.izou.addon.AddOn;
 import intellimate.izou.events.*;
 import intellimate.izou.main.Main;
 import intellimate.izou.properties.PropertiesContainer;
-import intellimate.izou.properties.PropertiesManager;
+import intellimate.izou.properties.PropertiesAssistant;
 import intellimate.izou.resource.Resource;
 import intellimate.izou.resource.ResourceBuilder;
 import org.apache.logging.log4j.LogManager;
@@ -126,7 +126,7 @@ public class Context {
          * reloadable file.
          *
          * <p>
-         *     The {@link PropertiesManager}, that is included in every addOn is a FileSubscriber for example, so it
+         *     The {@link intellimate.izou.properties.PropertiesAssistant}, that is included in every addOn is a FileSubscriber for example, so it
          *     can be used to get notified when property files are reloaded.
          * </p>
          *
@@ -157,14 +157,14 @@ public class Context {
     }
 
     public class Properties {
-        private PropertiesManager propertiesManager;
+        private PropertiesAssistant propertiesManager;
 
         /**
          * Creates a new properties object within the context
          *
          */
         public Properties() {
-            this.propertiesManager = new PropertiesManager(Context.this, addOn.getID());
+            this.propertiesManager = new PropertiesAssistant(Context.this, addOn.getID());
         }
 
         /**
@@ -196,7 +196,7 @@ public class Context {
          *
          * @return the {@code propertiesManger}
          */
-        public PropertiesManager getPropertiesManger() {
+        public PropertiesAssistant getPropertiesManger() {
             return propertiesManager;
         }
 

@@ -108,7 +108,7 @@ public abstract class AddOn implements ExtensionPoint, Identifiable, ExceptionCa
     /**
      * Initializes properties in the addOn. Creates new properties file with default properties.
      *
-     * @deprecated since version 0.9.9.9 - use {@link intellimate.izou.properties.PropertiesManager#initProperties()}
+     * @deprecated since version 0.9.9.9 - use {@link intellimate.izou.properties.PropertiesAssistant#initProperties()}
      */
     @Deprecated
     public void initPoperties() {

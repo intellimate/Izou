@@ -1,4 +1,4 @@
-package intellimate.izou.properties;
+package intellimate.izouSDK.properties;
 
 import intellimate.izou.addon.AddOn;
 import intellimate.izou.system.Context;
@@ -13,14 +13,14 @@ import java.util.Properties;
  *
  * <p>Unlike most manager classes in Izou, the PropertiesManager is included in every {@code AddOn} instance</p>
  */
-public class PropertiesManager implements ReloadableFile {
+public class PropertiesAssistant implements ReloadableFile {
     private Context context;
     private String addOnID;
     private String propertiesPath;
     private String defaultPropertiesPath;
     private PropertiesContainer propertiesContainer;
 
-    public PropertiesManager(Context context, String addOnID) {
+    public PropertiesAssistant(Context context, String addOnID) {
         this.context = context;
         this.addOnID = addOnID;
         this.propertiesContainer = new PropertiesContainer(context);
