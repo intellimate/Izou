@@ -1,5 +1,6 @@
 package intellimate.izou;
 
+import intellimate.izou.identification.Identifiable;
 import intellimate.izou.main.Main;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -9,7 +10,8 @@ import org.apache.logging.log4j.Logger;
  * @author Leander Kurscheidt
  * @version 1.0
  */
-public abstract class IzouModule implements MainProvider {
+public abstract class IzouModule implements MainProvider, Identifiable {
+    private String ID = this.getClass().getCanonicalName();
     protected Main main;
     protected final Logger log = LogManager.getLogger(this.getClass());
 
@@ -67,5 +69,18 @@ public abstract class IzouModule implements MainProvider {
     @Override
     public void error(String msg) {
         log.error(msg);
+    }
+
+    /**
+     * An ID must always be unique.
+     * A Class like Activator or OutputPlugin can just provide their .class.getCanonicalName()
+     * If you have to implement this interface multiple times, just concatenate unique Strings to
+     * .class.getCanonicalName()
+     *
+     * @return A String containing an ID
+     */
+    @Override
+    public String getID() {
+        return ID;
     }
 }

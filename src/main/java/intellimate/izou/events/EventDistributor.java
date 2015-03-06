@@ -1,13 +1,11 @@
 package intellimate.izou.events;
 
-import intellimate.izou.main.Main;
-import intellimate.izou.output.OutputManager;
-import intellimate.izou.resource.Resource;
-import intellimate.izou.resource.ResourceManager;
+import intellimate.izou.AddonThreadPoolUser;
+import intellimate.izou.IzouModule;
 import intellimate.izou.identification.Identification;
+import intellimate.izou.main.Main;
+import intellimate.izou.resource.Resource;
 import intellimate.izouSDK.events.EventImpl;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -17,23 +15,17 @@ import java.util.stream.Collectors;
  * This class gets all the Events from all registered EventPublisher, generates Resources and passes them to the
  * OutputManager
  */
-public class EventDistributor implements Runnable {
+public class EventDistributor extends IzouModule implements Runnable, AddonThreadPoolUser {
     private BlockingQueue<Event> events = new LinkedBlockingQueue<>();
     private ConcurrentHashMap<Identification, EventPublisher> registered = new ConcurrentHashMap<>();
-    private final ResourceManager resourceManager;
-    private final OutputManager outputManager;
     //here are all the Instances to to control the Event-dispatching stored
     private final ConcurrentLinkedQueue<EventsController> eventsControllers = new ConcurrentLinkedQueue<>();
     //here are all the Listeners stored
     private final ConcurrentHashMap<String, ArrayList<EventListener>> listeners = new ConcurrentHashMap<>();
-    //ThreadPool where all the Listeners are executed
-    private final ExecutorService executor;
-    private final Logger fileLogger = LogManager.getLogger(this.getClass());
+    private boolean stop = false;
 
     public EventDistributor(Main main) {
-        this.resourceManager = main.getResourceManager();
-        this.outputManager = main.getOutputManager();
-        executor = main.getThreadPoolManager().getAddOnsThreadPool();
+        super(main);
         main.getThreadPoolManager().getIzouThreadPool().submit(this);
     }
 
@@ -102,18 +94,7 @@ public class EventDistributor implements Runnable {
      */
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     public void registerEventListener(Event event, EventListener eventListener) {
-        for(String id : event.getAllIformations()) {
-            ArrayList<EventListener> listenersList = listeners.get(id);
-            if (listenersList == null) {
-                listeners.put(id, new ArrayList<>());
-                listenersList = listeners.get(id);
-            }
-            if (!listenersList.contains(eventListener)) {
-                synchronized (listenersList) {
-                    listenersList.add(eventListener);
-                }
-            }
-        }
+        registerEventListener(event.getAllIformations(), eventListener);
     }
 
     /**
@@ -202,14 +183,12 @@ public class EventDistributor implements Runnable {
      */
     @Override
     public void run() {
-        boolean stop = false;
-        //noinspection ConstantConditions
         while(!stop) {
             try {
                 Event event = events.take();
-                fileLogger.debug("EventFired: " + event.getID() + " from " + event.getSource().getID());
+                debug("EventFired: " + event.getID() + " from " + event.getSource().getID());
                 if (checkEventsControllers(event)) {
-                    List<Resource> resourceList = resourceManager.generateResources(event);
+                    List<Resource> resourceList = getMain().getResourceManager().generateResources(event);
                     event.addResources(resourceList);
                     List<EventListener> listenersTemp = event.getAllIformations().parallelStream()
                             .map(listeners::get)
@@ -219,54 +198,29 @@ public class EventDistributor implements Runnable {
                             .collect(Collectors.toList());
 
                     List<CompletableFuture> futures = listenersTemp.stream()
-                            .map(eventListener -> CompletableFuture.runAsync(() -> eventListener.eventFired(event)
-                                    , executor))
+                            .map(eventListener -> submit(() -> eventListener.eventFired(event)))
                             .collect(Collectors.toList());
 
-                    timeOut(futures);
-                    outputManager.passDataToOutputPlugins(event);
+                    timeOut(futures, 1000);
+                    getMain().getOutputManager().passDataToOutputPlugins(event);
                 }
             } catch (InterruptedException e) {
-                fileLogger.warn(e);
+                log.warn(e);
             }
         }
     }
 
     /**
-     * creates a 1 sec. timeout for the resource-generation
-     * @param futures a List of futures running
-     * @return list with all elements removed, who aren't finished after 1 sec
+     * stops the EventDistributor
      */
-    public List<CompletableFuture> timeOut(List<CompletableFuture> futures) {
-        //Timeout
-        int start = 0;
-        boolean notFinished = true;
-        while ( (start < 100) && notFinished) {
-            notFinished = futures.stream()
-                    .anyMatch(future -> !future.isDone());
-            start++;
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                fileLogger.warn(e);
-            }
-        }
-        //cancel all running tasks
-        if(notFinished) {
-            futures.stream()
-                    .filter(future -> !future.isDone())
-                    .peek(future -> fileLogger.error(future.toString() + " timed out"))
-                    .forEach(future -> future.cancel(true));
-        }
-        return futures.stream()
-                .filter(Future::isDone)
-                .collect(Collectors.toList());
+    public void stop() {
+        stop = true;
     }
 
     /**
      * This class is used to pass Events to the EventDistributor
      */
-    public static class EventPublisher implements EventCallable {
+    private class EventPublisher implements EventCallable {
         //the queue where all the Events are stored
         private final BlockingQueue<Event> events;
         protected EventPublisher(BlockingQueue<Event> events) {

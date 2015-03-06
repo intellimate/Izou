@@ -1,10 +1,9 @@
 package intellimate.izou.events;
 
-import intellimate.izou.identification.Identifiable;
+import intellimate.izou.IzouModule;
 import intellimate.izou.identification.Identification;
 import intellimate.izou.identification.IdentificationManager;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import intellimate.izou.main.Main;
 
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
@@ -14,23 +13,23 @@ import java.util.concurrent.LinkedBlockingQueue;
 /**
  * This class is used to manage local events.
  */
-public class LocalEventManager implements Runnable, Identifiable{
+public class LocalEventManager extends IzouModule implements Runnable {
     //here are all the Instances which fire events stored
     private final ConcurrentHashMap<Identification, EventCaller> callers = new ConcurrentHashMap<>();
     //the queue where all the Events are stored
-    private final BlockingQueue<Event> events = new LinkedBlockingQueue<>(1);
+    final BlockingQueue<Event> events = new LinkedBlockingQueue<>(1);
     //if false, run() will stop
     private boolean stop = false;
     private final EventCallable eventCallable;
-    private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
-    public LocalEventManager(EventDistributor eventDistributor) {
+    public LocalEventManager(Main main) {
+        super(main);
         IdentificationManager identificationManager = IdentificationManager.getInstance();
         identificationManager.registerIdentification(this);
         Optional<EventCallable> eventCallable = identificationManager.getIdentification(this)
-                .flatMap(eventDistributor::registerEventPublisher);
+                .flatMap(getMain().getEventDistributor()::registerEventPublisher);
         if (!eventCallable.isPresent()) {
-            fileLogger.fatal("Unable to obtain EventCallable for " + getID());
+            log.fatal("Unable to obtain EventCallable for " + getID());
             System.exit(1);
             this.eventCallable = null;
         } else {
@@ -66,7 +65,7 @@ public class LocalEventManager implements Runnable, Identifiable{
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     public void unregisterCaller(Identification identification) {
         if(!callers.containsKey(identification)) return;
-        callers.get(identification).locevents = null;
+        callers.get(identification).localEvents = null;
         callers.remove(identification);
     }
 
@@ -79,7 +78,7 @@ public class LocalEventManager implements Runnable, Identifiable{
         try {
             eventCallable.fire(event);
         } catch (intellimate.izou.events.MultipleEventsException e) {
-            fileLogger.error("unable to fire Event", e);
+            log.error("unable to fire Event", e);
         }
     }
 
@@ -90,19 +89,9 @@ public class LocalEventManager implements Runnable, Identifiable{
             try {
                 fireEvent(events.take());
             } catch (InterruptedException e) {
-                fileLogger.warn(e);
-                continue;
+                log.warn(e);
             }
         }
-    }
-
-    /**
-     * returns the BlockingQueue containing the events.
-     *
-     * @return an instance of BlockingQueue
-     */
-    public BlockingQueue<Event> getEvents() {
-        return events;
     }
 
     /**
@@ -118,19 +107,6 @@ public class LocalEventManager implements Runnable, Identifiable{
     }
 
     /**
-     * An ID must always be unique.
-     * A Class like Activator or OutputPlugin can just provide their .class.getCanonicalName()
-     * If you have to implement this interface multiple times, just concatenate unique Strings to
-     * .class.getCanonicalName()
-     *
-     * @return A String containing an ID
-     */
-    @Override
-    public String getID() {
-        return LocalEventManager.class.getCanonicalName();
-    }
-
-    /**
      * Class used to fire events.
      *
      * To fire events a class must register with registerCaller, then this class will be returned.
@@ -138,10 +114,10 @@ public class LocalEventManager implements Runnable, Identifiable{
      */
     @SuppressWarnings("SameParameterValue")
     public final class EventCaller implements EventCallable {
-        private BlockingQueue<Event> locevents;
+        private BlockingQueue<Event> localEvents;
         //private, so that this class can only constructed by EventManager
         private EventCaller(BlockingQueue<Event> events) {
-            this.locevents  = events;
+            this.localEvents = events;
         }
 
         /**
@@ -150,9 +126,9 @@ public class LocalEventManager implements Runnable, Identifiable{
          * @throws intellimate.izou.events.MultipleEventsException an Exception will be thrown if there are currently other events fired
          */
         public void fire(Event event) throws intellimate.izou.events.MultipleEventsException {
-            if(locevents == null) return;
-            if(locevents.isEmpty()) {
-                locevents.add(event);
+            if(localEvents == null) return;
+            if(localEvents.isEmpty()) {
+                localEvents.add(event);
             } else {
                 throw new intellimate.izou.events.MultipleEventsException();
             }

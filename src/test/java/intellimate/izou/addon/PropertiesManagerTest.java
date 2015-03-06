@@ -1,7 +1,7 @@
 package intellimate.izou.addon;
 
 import intellimate.izou.activator.Activator;
-import intellimate.izou.contentgenerator.ContentGenerator;
+import intellimate.izouSDK.contentgenerator.ContentGenerator;
 import intellimate.izou.events.EventsController;
 import intellimate.izou.main.Main;
 import intellimate.izou.output.OutputExtension;

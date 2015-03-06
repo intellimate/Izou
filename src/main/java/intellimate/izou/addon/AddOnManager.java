@@ -81,9 +81,6 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
         // load the plugins
         pluginManager.loadPlugins();
 
-        // enable a disabled plugin
-        //pluginManager.enablePlugin("welcome-plugin");
-
         // start (active/resolved) the plugins
         try {
             pluginManager.startPlugins();

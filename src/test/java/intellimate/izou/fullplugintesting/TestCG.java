@@ -1,7 +1,7 @@
 package intellimate.izou.fullplugintesting;
 
 import intellimate.izouSDK.resource.ResourceImpl;
-import intellimate.izouSDK.contentgenerator.ContentGenerator;
+import intellimate.izouSDK.contentgenerator.ContentGeneratorImpl;
 import intellimate.izou.system.Context;
 import intellimate.izou.events.Event;
 import intellimate.izou.resource.Resource;
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @SuppressWarnings("SameParameterValue")
-public class TestCG extends ContentGenerator {
+public class TestCG extends ContentGeneratorImpl {
 
     public TestCG(Context context) {
         super(TestCG.class.getCanonicalName(), context);
