@@ -1,7 +1,6 @@
 package intellimate.izou.resource;
 
 import intellimate.izou.events.Event;
-import intellimate.izouSDK.events.EventImpl;
 import intellimate.izou.main.Main;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -128,7 +127,7 @@ public class ResourceManager {
                 .filter(resourceS -> !resource.hasProvider() || resourceS.isOwner(resource.getProvider()))
                 .findFirst()
                 .map(resourceBuilder -> CompletableFuture.supplyAsync(
-                        () -> resourceBuilder.provideResource(Arrays.asList(resource), Optional.<EventImpl>empty()),
+                        () -> resourceBuilder.provideResource(Arrays.asList(resource), Optional.<Event>empty()),
                         executor
                 ));
     }
