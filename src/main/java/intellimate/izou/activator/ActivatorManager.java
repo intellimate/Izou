@@ -1,49 +1,62 @@
 package intellimate.izou.activator;
 
 import intellimate.izou.AddOnsCollection;
+import intellimate.izou.AddonThreadPoolUser;
 import intellimate.izou.IzouModule;
 import intellimate.izou.main.Main;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
+
 /**
  * The ActivatorManager holds all the Activator-instances and runs them parallel in Threads.
+ * It automatically restarts Activators, which did finish exceptionally, up to 100 times.
  */
 @SuppressWarnings("WeakerAccess")
-public class ActivatorManager extends IzouModule{
-    AddOnsCollection<Activator>
+public class ActivatorManager extends IzouModule implements AddonThreadPoolUser {
+    AddOnsCollection<Activator> activators = new AddOnsCollection<>();
+    ConcurrentHashMap<Activator, CompletableFuture> futures = new ConcurrentHashMap<>();
+    ConcurrentHashMap<Activator, AtomicInteger> crashCounter = new ConcurrentHashMap<>();
+    
     public ActivatorManager(Main main) {
         super(main);
     }
-//    private final Main main;
-//    private final ExecutorService executor;
-//    private final LocalEventManager localEventManager;
-//    private final Logger fileLogger = LogManager.getLogger(this.getClass());
-//
-//    public ActivatorManager(Main main) {
-//        this.main = main;
-//        this.executor = main.getThreadPoolManager().getAddOnsThreadPool();
-//        this.localEventManager = main.getLocalEventManager();
-//    }
-//
-//    /**
-//     * Adds an activator-Instance
-//     *
-//     * The function activator.activatorStarts() will be called asynchronously.
-//     * Assuming no error happens, the activator will run indefinitely in his own Thread.
-//     *
-//     * @param activator the activator instance to be called
-//     * @return a Future object, Future. Future.cancel(true) will (if the activator is coded that it honors the
-//     * interruption) cancel the activator
-//     */
-//    public java.util.concurrent.Future<?> addActivator(Activator activator) {
-//        return executor.submit(activator);
-//    }
-//
-//    /**
-//     * restarts an activator
-//     * @param activator the activator to restart
-//     */
-//    public void restartActivator(Activator activator) {
-//        executor.submit(activator);
-//    }
+    
+    public void addActivator(Activator activator) {
+        activators.add(activator);
+        crashCounter.put(activator, new AtomicInteger(0));
+        submitActivator(activator);
+    }
+    
+    public void submitActivator(Activator activator) {
+        CompletableFuture<Void> future = submit((Supplier<Boolean>) () -> {
+            try {
+                return activator.call();
+            } catch (Throwable e) {
+                log.error("Activator: " + activator.getID() + "crashed", e);
+                return true;
+            }
+        }).thenAccept(restart -> {
+            if (restart != null && !restart) {
+                log.debug("Activator: " + activator.getID() + "returned false, will not restart");
+            } else {
+                log.error("Activator: " + activator.getID() + "returned not true");
+                if (crashCounter.get(activator).get() < 100) {
+                    log.error("Until now activator: " + activator.getID() + "was restarted: " +
+                            crashCounter.get(activator).get() + " times, attempting restart.");
+                    crashCounter.get(activator).incrementAndGet();
+                    submitActivator(activator);
+                } else {
+                    log.error("Activator: " + activator.getID() + "reached restarting limit with " +
+                            crashCounter.get(activator).get() + " restarts.");
+                }
+            }
+        });
+
+        CompletableFuture existing = futures.put(activator, future);
+        if (!existing.isDone()) existing.cancel(true);
+    }
     
 }

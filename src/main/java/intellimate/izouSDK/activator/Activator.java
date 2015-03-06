@@ -1,17 +1,11 @@
 package intellimate.izouSDK.activator;
 
-import intellimate.izou.activator.ActivatorManager;
 import intellimate.izou.events.Event;
 import intellimate.izou.events.EventCallable;
-import intellimate.izou.events.LocalEventManager;
 import intellimate.izou.events.MultipleEventsException;
-import intellimate.izou.system.Context;
-import intellimate.izou.identification.Identifiable;
-import intellimate.izou.identification.Identification;
 import intellimate.izou.identification.IdentificationManager;
+import intellimate.izou.system.Context;
 import intellimate.izou.threadpool.ExceptionCallback;
-
-import java.util.Optional;
 
 /**
  * The Task of an Activator is to listen for whatever you choose to implement and fires events to notify a change.
@@ -19,11 +13,8 @@ import java.util.Optional;
  * The Activator always runs in the Background, just overwrite activatorStarts(). To use Activator simply extend from it
  * and hand an instance over to the ActivatorManager.
  */
-public abstract class Activator implements intellimate.izou.activator.Activator, Runnable, Identifiable,
-        ExceptionCallback {
-    private LocalEventManager.EventCaller caller;
-    private LocalEventManager localEventManager;
-    private ActivatorManager activatorManager;
+public abstract class Activator implements intellimate.izou.activator.Activator, ExceptionCallback {
+    private EventCallable caller;
     private IdentificationManager identificationManager = IdentificationManager.getInstance();
     //counts the exception
     private int exceptionCount = 0;
@@ -40,20 +31,25 @@ public abstract class Activator implements intellimate.izou.activator.Activator,
     }
 
     /**
-     * This method implements runnable and should only be called by a Thread.
+     * it this method returns false (and only if it returns false) it will not get restarted once stopped
+     * <p>
+     * Internally there is a limit of 100 times the activator is allowed to finish exceptionally (everything but
+     * returning false)
+     * </p>
+     *
+     * @return true if the activator should get restarted, false if not
+     * @throws Exception if unable to compute a result
      */
     @Override
-    public void run() {
+    public Boolean call() throws Exception {
         try {
             activatorStarts();
         } catch (InterruptedException e) {
-            context.logger.getLogger().warn("Unable to start activator", e);
-            //noinspection UnnecessaryReturnStatement
-            return;
+            return !terminated(e);
         } catch (Exception e) {
-            context.logger.getLogger().warn("Unable to start activator - trying again", e);
-            this.exceptionThrown(e);
+            return !terminated(e);
         }
+        return false;
     }
 
     /**
@@ -72,14 +68,14 @@ public abstract class Activator implements intellimate.izou.activator.Activator,
     public final void exceptionThrown(Exception e) {
         exceptionCount++;
         if(exceptionCount < exceptionLimit) {
-            if(terminated(e) && activatorManager != null)
+            if(terminated(e))
             {
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException e1) {
                     context.logger.getLogger().fatal(e);
                 }
-                activatorManager.restartActivator(this);
+                //activatorManager.restartActivator(this);
             }
         }
     }
@@ -94,16 +90,6 @@ public abstract class Activator implements intellimate.izou.activator.Activator,
      * @return true if the Thread should be restarted
      */
     public abstract boolean terminated(Exception e);
-
-    /**
-     * unregister the Caller at the EventManager.
-     * <p>
-     * If you don't need this class anymore, you should unregister the caller to avoid memory leaks.
-     */
-    public void unregisterCaller() {
-        if (caller == null) return;
-        localEventManager.unregisterCaller(identificationManager.getIdentification(this).get());
-    }
 
     /**
      * fires an Event.
@@ -128,22 +114,6 @@ public abstract class Activator implements intellimate.izou.activator.Activator,
      */
     public EventCallable getCaller() {
         return caller;
-    }
-
-    private void setLocalEventManager(LocalEventManager localEventManager) {
-        this.localEventManager = localEventManager;
-        Optional<Identification> identification = identificationManager.getIdentification(this);
-        if(!identification.isPresent()) {
-            context.logger.getLogger().fatal("Identification not found while setting local event manager");
-            return;
-        }
-        Optional<LocalEventManager.EventCaller> result = localEventManager.registerCaller(identification.get());
-        //noinspection StatementWithEmptyBody
-        if(!result.isPresent()) {
-            context.logger.getLogger().fatal("Unable to register with local event manager");
-            return;
-        }
-        caller = result.get();
     }
 
     /**

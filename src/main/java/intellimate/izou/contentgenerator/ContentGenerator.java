@@ -1,7 +1,6 @@
 package intellimate.izou.contentgenerator;
 
 import intellimate.izou.resource.ResourceBuilder;
-import intellimate.izou.threadpool.ExceptionCallback;
 
 /**
  * The Task of an ContentGenerator is to generate a Resources-Object when a Event it subscribed to was fired.
@@ -12,5 +11,5 @@ import intellimate.izou.threadpool.ExceptionCallback;
  * @author Leander Kurscheidt
  * @version 1.0
  */
-public interface ContentGenerator extends ResourceBuilder, ExceptionCallback {
+public interface ContentGenerator extends ResourceBuilder {
 }
