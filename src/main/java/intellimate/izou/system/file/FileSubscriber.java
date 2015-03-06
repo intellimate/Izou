@@ -1,4 +1,4 @@
-package intellimate.izou.system;
+package intellimate.izou.system.file;
 
 /**
  * FileSubscribers are usually paired with {@link ReloadableFile} objects in the {@link FilePublisher}, where their

@@ -2,6 +2,8 @@ package intellimate.izou.testHelper;
 
 import intellimate.izou.addon.AddOn;
 import intellimate.izou.events.Event;
+import intellimate.izou.system.Context;
+import intellimate.izou.system.javafx.JavaFXInitializer;
 import intellimate.izouSDK.events.EventImpl;
 import intellimate.izou.events.MultipleEventsException;
 import intellimate.izou.fullplugintesting.TestAddOn;
@@ -9,7 +11,6 @@ import intellimate.izou.identification.Identifiable;
 import intellimate.izou.identification.Identification;
 import intellimate.izou.identification.IdentificationManager;
 import intellimate.izou.main.Main;
-import intellimate.izou.system.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +35,7 @@ public class IzouTest implements Identifiable {
     private static final class Lock { }
     private final Object lock = new Lock();
     private TestAddOn testAddOn = new TestAddOn(getID());
-    private Context  context;
+    private Context context;
 
     /**
      * creates a new instance of IzouTest

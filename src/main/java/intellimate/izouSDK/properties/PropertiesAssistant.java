@@ -2,7 +2,7 @@ package intellimate.izouSDK.properties;
 
 import intellimate.izou.addon.AddOn;
 import intellimate.izou.system.Context;
-import intellimate.izou.system.ReloadableFile;
+import intellimate.izou.system.file.ReloadableFile;
 
 import java.io.*;
 import java.util.Enumeration;

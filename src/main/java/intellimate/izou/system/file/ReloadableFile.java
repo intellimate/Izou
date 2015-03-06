@@ -1,4 +1,4 @@
-package intellimate.izou.system;
+package intellimate.izou.system.file;
 
 /**
  * Interface for system-manager. System-manager calls on reloadFile when it detects a change in the file. Any class

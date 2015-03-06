@@ -1,4 +1,4 @@
-package intellimate.izou.system;
+package intellimate.izou.system.javafx;
 
 import intellimate.izou.main.Main;
 import javafx.application.Application;

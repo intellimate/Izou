@@ -4,10 +4,11 @@ import intellimate.izou.addon.AddOn;
 import intellimate.izou.events.*;
 import intellimate.izou.identification.Identification;
 import intellimate.izou.main.Main;
-import intellimate.izou.properties.PropertiesContainer;
-import intellimate.izou.properties.PropertiesAssistant;
 import intellimate.izou.resource.Resource;
 import intellimate.izou.resource.ResourceBuilder;
+import intellimate.izou.system.file.FileSubscriber;
+import intellimate.izou.system.file.ReloadableFile;
+import intellimate.izou.system.logger.IzouLogger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.spi.ExtendedLogger;
 
@@ -138,7 +139,7 @@ public class Context {
         }
 
         /**
-         * Registers a {@link FileSubscriber} so that whenever any file is reloaded, the fileSubscriber is notified.
+         * Registers a {@link intellimate.izou.system.file.FileSubscriber} so that whenever any file is reloaded, the fileSubscriber is notified.
          *
          * @param fileSubscriber the fileSubscriber that should be notified when the reloadable file is reloaded
          */
