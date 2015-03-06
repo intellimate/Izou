@@ -21,7 +21,7 @@ public class OutputManagerTest extends IzouTest{
     @Test
     public void testAddOutputExtension() throws Exception {
         OutputManager outputManager = main.getOutputManager();
-        OutputPlugin outputPlugin = new OutputPlugin("1234", getContext()) {
+        OutputPlugin outputPlugin = new OutputPluginImpl("1234", getContext()) {
             @Override
             public void renderFinalOutput() {
 
@@ -47,7 +47,7 @@ public class OutputManagerTest extends IzouTest{
     @Test
     public void testRemoveOutputExtension() throws Exception {
         OutputManager outputManager = main.getOutputManager();
-        OutputPlugin outputPlugin = new OutputPlugin("1234", getContext()) {
+        OutputPlugin outputPlugin = new OutputPluginImpl("1234", getContext()) {
             @Override
             public void renderFinalOutput() {
 
@@ -77,7 +77,7 @@ public class OutputManagerTest extends IzouTest{
         if(!event.isPresent()) fail();
 
         OutputManager outputManager = main.getOutputManager();
-        OutputPlugin outputPlugin = new OutputPlugin("1234", getContext()) {
+        OutputPlugin outputPlugin = new OutputPluginImpl("1234", getContext()) {
             @Override
             public void renderFinalOutput() {
 
@@ -113,7 +113,7 @@ public class OutputManagerTest extends IzouTest{
     @Test
     public void testAddOutputExtensionLater() throws Exception {
         OutputManager outputManager = new OutputManager(getMain());
-        OutputPlugin outputPlugin = new OutputPlugin("1234", getContext()) {
+        OutputPlugin outputPlugin = new OutputPluginImpl("1234", getContext()) {
             @Override
             public void renderFinalOutput() {
 
