@@ -5,9 +5,9 @@ import intellimate.izou.events.Event;
 import intellimate.izou.events.LocalEventManager;
 import intellimate.izou.events.MultipleEventsException;
 import intellimate.izou.system.Context;
-import intellimate.izou.system.Identifiable;
-import intellimate.izou.system.Identification;
-import intellimate.izou.system.IdentificationManager;
+import intellimate.izou.identification.Identifiable;
+import intellimate.izou.identification.Identification;
+import intellimate.izou.identification.IdentificationManager;
 import intellimate.izou.threadpool.ExceptionCallback;
 
 import java.util.Optional;
