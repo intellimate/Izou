@@ -1,17 +1,16 @@
 package intellimate.izou.addon;
 
-import intellimate.izou.identification.Identifiable;
 import intellimate.izou.main.Main;
+import intellimate.izou.properties.PropertiesManager;
 import intellimate.izou.system.Context;
+import intellimate.izou.system.Identifiable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import ro.fortsoft.pf4j.DefaultPluginManager;
-import ro.fortsoft.pf4j.IzouPluginClassLoader;
-import ro.fortsoft.pf4j.PluginManager;
-import ro.fortsoft.pf4j.PluginWrapper;
+import ro.fortsoft.pf4j.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -75,6 +74,26 @@ public class AddOnManager {
         registerIzouModule(AddOn::registerOutputExtension,
                 outputExtension ->
                         main.getOutputManager().addOutputExtension(outputExtension, outputExtension.getPluginId()));
+        /*
+        for (AddOn addOn : addOnList) {
+            try {
+                OutputExtension[] outputExtensions = addOn.registerOutputExtension();
+                if (outputExtensions == null || outputExtensions.length == 0) continue;
+                for (OutputExtension outputExtension : addOn.registerOutputExtension()) {
+                    if (outputExtension == null) continue;
+                    fileLogger.debug("registering OutputExtension: " + outputExtension.getID()
+                                            + " from AddOn: " + addOn.getID());
+                    try {
+                        main.getOutputManager().addOutputExtension(outputExtension, outputExtension.getPluginId());
+                    } catch (Exception e) {
+                        fileLogger.error("Error while registering the OutputExtension: " + outputExtension.getID(), e);
+                    }
+                }
+            } catch (Exception | NoClassDefFoundError e) {
+                fileLogger.error("Error while trying to register the OutputExtensions", e);
+            }
+        }
+        */
     }
 
     /**
@@ -109,7 +128,7 @@ public class AddOnManager {
         /*
         String dir = "." + File.separator + "properties";
         runOnAddOnsAsync(addOn -> {
-            if(!(PropertiesManager.getFolder(addOn) == null)) {
+            if(!(PropertiesAssistant.getFolder(addOn) == null)) {
                 try {
                     main.getFileManager().registerFileDir(Paths.get(dir), addOn.getID(),
                             addOn.getContext().properties.getPropertiesManger());
@@ -119,7 +138,7 @@ public class AddOnManager {
 
                 if (addOn.setUnusualDefaultPropertiesPath() == null) {
                     addOn.getContext().properties.getPropertiesManger().
-                            setDefaultPropertiesPath(PropertiesManager.getFolder(addOn));
+                            setDefaultPropertiesPath(PropertiesAssistant.getFolder(addOn));
                 }
             } else {
                 fileLogger.debug("no property file was found for AddOn: " + addOn.getID());
