@@ -114,7 +114,7 @@ public class Main {
         outputManager = new OutputManager(this);
         resourceManager = new ResourceManager(this);
         eventDistributor = new EventDistributor(this);
-        localEventManager = new LocalEventManager(eventDistributor);
+        localEventManager = new LocalEventManager(this);
         threadPoolManager.getIzouThreadPool().submit(localEventManager);
         activatorManager = new ActivatorManager(this);
         filePublisher = new FilePublisher(this);

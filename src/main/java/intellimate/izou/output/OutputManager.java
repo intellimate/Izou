@@ -1,5 +1,6 @@
 package intellimate.izou.output;
 
+import intellimate.izou.IzouModule;
 import intellimate.izou.events.Event;
 import intellimate.izou.main.Main;
 import intellimate.izou.resource.Resource;
@@ -24,7 +25,7 @@ import java.util.stream.Collectors;
  * OutputManager manages all output plugins and is the main class anyone outside the output package should talk to.
  * It can register/remove new output-plugins and add/delete output-extensions
  */
-public class OutputManager implements Identifiable{
+public class OutputManager extends IzouModule {
     public static final String ID = OutputManager.class.getCanonicalName();
 
     /**
@@ -56,6 +57,7 @@ public class OutputManager implements Identifiable{
      * @param main the main instance started from
      */
     public OutputManager(Main main) {
+        super(main);
         outputPluginsList = new ArrayList<>();
         executor = main.getThreadPoolManager().getAddOnsThreadPool();
         futureHashMap = new HashMap<>();

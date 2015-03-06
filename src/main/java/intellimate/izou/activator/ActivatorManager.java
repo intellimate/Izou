@@ -1,6 +1,6 @@
 package intellimate.izou.activator;
 
-import intellimate.izou.AddOnsCollection;
+import intellimate.izou.IdentifiableCollection;
 import intellimate.izou.AddonThreadPoolUser;
 import intellimate.izou.IzouModule;
 import intellimate.izou.main.Main;
@@ -16,7 +16,7 @@ import java.util.function.Supplier;
  */
 @SuppressWarnings("WeakerAccess")
 public class ActivatorManager extends IzouModule implements AddonThreadPoolUser {
-    AddOnsCollection<Activator> activators = new AddOnsCollection<>();
+    IdentifiableCollection<Activator> activators = new IdentifiableCollection<>();
     ConcurrentHashMap<Activator, CompletableFuture> futures = new ConcurrentHashMap<>();
     ConcurrentHashMap<Activator, AtomicInteger> crashCounter = new ConcurrentHashMap<>();
     
