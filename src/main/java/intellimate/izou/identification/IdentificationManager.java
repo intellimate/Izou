@@ -9,7 +9,7 @@ import java.util.Optional;
 /**
  * You can register an Object with the IdentificationManager and receive an Identification Objects.
  */
-public class IdentificationManager {
+public final class IdentificationManager implements IdentificationManagerSpecification {
     private LinkedList<Identifiable> identifiables = new LinkedList<>();
     private static IdentificationManager ourInstance = new IdentificationManager();
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
@@ -27,6 +27,7 @@ public class IdentificationManager {
      * @param identifiable the registered Identifiable
      * @return an Identification Instance or null if not registered
      */
+    @Override
     public Optional<Identification> getIdentification(Identifiable identifiable) {
         if(identifiables.stream()
                 .anyMatch(listIdentifiable -> listIdentifiable.getID().equals(identifiable.getID()))) {
@@ -41,6 +42,7 @@ public class IdentificationManager {
      * @param id the ID of the registered Identifiable
      * @return an Identification Instance or null if not registered
      */
+    @Override
     public Optional<Identification> getIdentification(String id) {
         Optional<Identifiable> result = identifiables.stream()
                 .filter(identifiable1 -> identifiable1.getID().equals(id))
@@ -58,6 +60,7 @@ public class IdentificationManager {
      * @param identifiable the Identifiable to register
      * @return true if registered/already registered or false if the ID is already existing
      */
+    @Override
     public boolean registerIdentification(Identifiable identifiable) {
         if(identifiable == null) return false;
         if(identifiables.contains(identifiable)  || identifiables.stream()
