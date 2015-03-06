@@ -16,15 +16,15 @@ import java.util.stream.Stream;
  * @author Leander Kurscheidt
  * @version 1.0
  */
-public class AddonsCollection<X extends Identifiable> {
+public class AddOnsCollection<X extends Identifiable> {
     private IdentificationManager identificationManager = IdentificationManager.getInstance();
     private Set<X> set = new HashSet<>();
 
-    public AddonsCollection(Set<X> set) {
+    public AddOnsCollection(Set<X> set) {
         this.set = set;
     }
 
-    public AddonsCollection() {}
+    public AddOnsCollection() {}
 
     public boolean add(X x) {
         return set.add(x);
@@ -32,6 +32,10 @@ public class AddonsCollection<X extends Identifiable> {
 
     public boolean remove(X x) {
         return  set.remove(x);
+    }
+    
+    public boolean contains(X x) {
+        return set.contains(x);
     }
 
     public Stream<X> stream() {
