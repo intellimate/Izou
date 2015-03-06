@@ -1,6 +1,6 @@
 package intellimate.izou.activator;
 
-import intellimate.izou.system.Identifiable;
+import intellimate.izou.identification.Identifiable;
 
 /**
  * The Task of an Activator is to listen for whatever you choose to implement and fires events to notify a change.
