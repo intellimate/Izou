@@ -1,9 +1,10 @@
 package intellimate.izouSDK.output;
 
 import intellimate.izou.events.Event;
-import intellimate.izou.resource.Resource;
 import intellimate.izou.identification.Identifiable;
 import intellimate.izou.identification.IdentificationManager;
+import intellimate.izou.output.OutputManager;
+import intellimate.izou.resource.Resource;
 import intellimate.izou.system.Context;
 import intellimate.izou.threadpool.ExceptionCallback;
 
@@ -20,7 +21,8 @@ import java.util.stream.Collectors;
  * output and then render it on its own medium
  */
 @SuppressWarnings("UnusedDeclaration")
-public abstract class OutputPlugin<T> implements Runnable, Identifiable, ExceptionCallback {
+public abstract class OutputPlugin<T> implements Runnable, Identifiable, ExceptionCallback,
+        intellimate.izou.output.OutputPlugin<T> {
     /**
      * id of the of OutputPlugin, it is primarily used by OutputManager to communicate with specific output plugins
      */

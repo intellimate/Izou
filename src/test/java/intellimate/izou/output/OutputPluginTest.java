@@ -28,7 +28,7 @@ public class OutputPluginTest extends IzouTest{
                 new ResourceImpl<String>("3"));
         event.get().getListResourceContainer().addResource(resources);
 
-        OutputPlugin outputPlugin = new OutputPlugin("abcd", getContext()) {
+        OutputPluginImpl outputPlugin = new OutputPluginImpl("abcd", getContext()) {
             @Override
             public void renderFinalOutput() {
 
@@ -73,7 +73,7 @@ public class OutputPluginTest extends IzouTest{
 
     @Test
     public void testAddOutputExtension() throws Exception {
-        OutputPlugin outputPlugin = new OutputPlugin("abcd", getContext()) {
+        OutputPluginImpl outputPlugin = new OutputPluginImpl("abcd", getContext()) {
             @Override
             public void renderFinalOutput() {
 
@@ -110,7 +110,7 @@ public class OutputPluginTest extends IzouTest{
 
     @Test
     public void testRemoveOutputExtension() throws Exception {
-        OutputPlugin outputPlugin = new OutputPlugin("abcd", getContext()) {
+        OutputPluginImpl outputPlugin = new OutputPluginImpl("abcd", getContext()) {
             @Override
             public void renderFinalOutput() {
 
@@ -155,7 +155,7 @@ public class OutputPluginTest extends IzouTest{
                 new ResourceImpl<String>("3"));
         event.get().getListResourceContainer().addResource(resources);
 
-        OutputPlugin outputPlugin = new OutputPlugin("abcd", getContext()) {
+        OutputPluginImpl outputPlugin = new OutputPluginImpl("abcd", getContext()) {
             @Override
             public void renderFinalOutput() {
 
