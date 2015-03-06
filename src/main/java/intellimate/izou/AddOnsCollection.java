@@ -24,8 +24,7 @@ public class AddOnsCollection<X extends Identifiable> {
         this.set = set;
     }
 
-    public AddOnsCollection() {
-    }
+    public AddOnsCollection() {}
 
     public boolean add(X x) {
         return set.add(x);
