@@ -2,6 +2,7 @@ package intellimate.izouSDK.activator;
 
 import intellimate.izou.activator.ActivatorManager;
 import intellimate.izou.events.Event;
+import intellimate.izou.events.EventCallable;
 import intellimate.izou.events.LocalEventManager;
 import intellimate.izou.events.MultipleEventsException;
 import intellimate.izou.system.Context;
@@ -125,7 +126,7 @@ public abstract class Activator implements intellimate.izou.activator.Activator,
      * returns the associated EventCaller
      * @return the EventCaller
      */
-    public LocalEventManager.EventCaller getCaller() {
+    public EventCallable getCaller() {
         return caller;
     }
 

@@ -1,6 +1,5 @@
 package intellimate.izou.addon;
 
-import intellimate.izou.identification.Identifiable;
 import intellimate.izou.main.Main;
 import intellimate.izou.system.Context;
 import org.apache.logging.log4j.LogManager;
@@ -12,7 +11,6 @@ import ro.fortsoft.pf4j.PluginWrapper;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -36,104 +34,124 @@ public class AddOnManager {
         this.main = main;
     }
 
-    /**
-     * loops through all AddOns and lets them register all their Activators
-     */
-    private void registerActivators() {
-        registerIzouModule(AddOn::registerActivator,
-                activator -> main.getActivatorManager().addActivator(activator));
-    }
-
-    /**
-     * loops through all AddOns and lets them register all their ContentGenerators
-     */
-    private void registerContentGenerators() {
-        registerIzouModule(AddOn::registerContentGenerator,
-                contentGenerator -> main.getResourceManager().registerResourceBuilder(contentGenerator));
-    }
-
-    /**
-     * loops through all AddOns and lets them register all their EventController
-     */
-    private void registerEventControllers() {
-        registerIzouModule(AddOn::registerEventController,
-                eventsController -> main.getEventDistributor().registerEventsController(eventsController));
-    }
-
-    /**
-     * loops through all AddOns and lets them register all their OutputsPlugins
-     */
-    private void registerOutputPlugins() {
-        registerIzouModule(AddOn::registerOutputPlugin,
-                outputPlugin -> main.getOutputManager().addOutputPlugin(outputPlugin));
-    }
-
-    /**
-     * loops through all AddOns and lets them register all their OutputsExtensions
-     */
-    private void registerOutputExtensions() {
-        registerIzouModule(AddOn::registerOutputExtension,
-                outputExtension ->
-                        main.getOutputManager().addOutputExtension(outputExtension, outputExtension.getPluginId()));
-    }
-
-    /**
-     * registers modules from the AddOns (e.g. OutputPlugins)
-     * @param supplierFunction the supplier, taking a addOn and returning an array of modules
-     * @param consumer use this consumer to register your
-     * @param <T> The type of the modules
-     */
-    public <T extends Identifiable> void registerIzouModule(Function<AddOn, T[]> supplierFunction, Consumer<T> consumer) {
-        runOnAddOnsAsync(supplierFunction).stream()
-                .filter(Objects::nonNull)
-                .map(Arrays::asList)
-                .flatMap(List::stream)
-                .filter(Objects::nonNull)
-                .peek(module -> fileLogger.debug("registering Module: " + module.getID()))
-                .forEach(module -> {
-                    try {
-                        consumer.accept(module);
-                    } catch (Exception e) {
-                        fileLogger.debug("Exception while trying to register Module: " + module.getID(), e);
-                    } catch (LinkageError e) {
-                        fileLogger.debug("Error while trying to register Module: " + module.getID(), e);
-                    }
-                });
-    }
-
-    /**
-     * Registers all property files with the FileManager
-     */
-    private void registerFiles() {
-        throw new UnsupportedOperationException();
-        /*
-        String dir = "." + File.separator + "properties";
-        runOnAddOnsAsync(addOn -> {
-            if(!(PropertiesManager.getFolder(addOn) == null)) {
-                try {
-                    main.getFileManager().registerFileDir(Paths.get(dir), addOn.getID(),
-                            addOn.getContext().properties.getPropertiesManger());
-                } catch (IOException e) {
-                    fileLogger.error("error while trying to register Files for addon" + addOn.getID(), e);
-                }
-
-                if (addOn.setUnusualDefaultPropertiesPath() == null) {
-                    addOn.getContext().properties.getPropertiesManger().
-                            setDefaultPropertiesPath(PropertiesManager.getFolder(addOn));
-                }
-            } else {
-                fileLogger.debug("no property file was found for AddOn: " + addOn.getID());
-            }
-        });*/
-    }
-
-    /**
-     * registers all the properties-Files for the AddOns
-     */
-    private void registerProperties() {
-        runOnAddOnsAsync((Consumer<AddOn>) addon ->
-                        addon.getContext().properties.getPropertiesManger().initProperties());
-    }
+//    /**
+//     * loops through all AddOns and lets them register all their Activators
+//     */
+//    private void registerActivators() {
+//        registerIzouModule(AddOn::registerActivator,
+//                activator -> main.getActivatorManager().addActivator(activator));
+//    }
+//
+//    /**
+//     * loops through all AddOns and lets them register all their ContentGenerators
+//     */
+//    private void registerContentGenerators() {
+//        registerIzouModule(AddOn::registerContentGenerator,
+//                contentGenerator -> main.getResourceManager().registerResourceBuilder(contentGenerator));
+//    }
+//
+//    /**
+//     * loops through all AddOns and lets them register all their EventController
+//     */
+//    private void registerEventControllers() {
+//        registerIzouModule(AddOn::registerEventController,
+//                eventsController -> main.getEventDistributor().registerEventsController(eventsController));
+//    }
+//
+//    /**
+//     * loops through all AddOns and lets them register all their OutputsPlugins
+//     */
+//    private void registerOutputPlugins() {
+//        registerIzouModule(AddOn::registerOutputPlugin,
+//                outputPlugin -> main.getOutputManager().addOutputPlugin(outputPlugin));
+//    }
+//
+//    /**
+//     * loops through all AddOns and lets them register all their OutputsExtensions
+//     */
+//    private void registerOutputExtensions() {
+//        registerIzouModule(AddOn::registerOutputExtension,
+//                outputExtension ->
+//                        main.getOutputManager().addOutputExtension(outputExtension, outputExtension.getPluginId()));
+//        /*
+//        for (AddOn addOn : addOnList) {
+//            try {
+//                OutputExtension[] outputExtensions = addOn.registerOutputExtension();
+//                if (outputExtensions == null || outputExtensions.length == 0) continue;
+//                for (OutputExtension outputExtension : addOn.registerOutputExtension()) {
+//                    if (outputExtension == null) continue;
+//                    fileLogger.debug("registering OutputExtension: " + outputExtension.getID()
+//                                            + " from AddOn: " + addOn.getID());
+//                    try {
+//                        main.getOutputManager().addOutputExtension(outputExtension, outputExtension.getPluginId());
+//                    } catch (Exception e) {
+//                        fileLogger.error("Error while registering the OutputExtension: " + outputExtension.getID(), e);
+//                    }
+//                }
+//            } catch (Exception | NoClassDefFoundError e) {
+//                fileLogger.error("Error while trying to register the OutputExtensions", e);
+//            }
+//        }
+//        */
+//    }
+//
+//    /**
+//     * registers modules from the AddOns (e.g. OutputPlugins)
+//     * @param supplierFunction the supplier, taking a addOn and returning an array of modules
+//     * @param consumer use this consumer to register your
+//     * @param <T> The type of the modules
+//     */
+//    public <T extends Identifiable> void registerIzouModule(Function<AddOn, T[]> supplierFunction, Consumer<T> consumer) {
+//        runOnAddOnsAsync(supplierFunction).stream()
+//                .filter(Objects::nonNull)
+//                .map(Arrays::asList)
+//                .flatMap(List::stream)
+//                .filter(Objects::nonNull)
+//                .peek(module -> fileLogger.debug("registering Module: " + module.getID()))
+//                .forEach(module -> {
+//                    try {
+//                        consumer.accept(module);
+//                    } catch (Exception e) {
+//                        fileLogger.debug("Exception while trying to register Module: " + module.getID(), e);
+//                    } catch (LinkageError e) {
+//                        fileLogger.debug("Error while trying to register Module: " + module.getID(), e);
+//                    }
+//                });
+//    }
+//
+//    /**
+//     * Registers all property files with the FileManager
+//     */
+//    private void registerFiles() {
+//        throw new UnsupportedOperationException();
+//        /*
+//        String dir = "." + File.separator + "properties";
+//        runOnAddOnsAsync(addOn -> {
+//            if(!(PropertiesAssistant.getFolder(addOn) == null)) {
+//                try {
+//                    main.getFileManager().registerFileDir(Paths.get(dir), addOn.getID(),
+//                            addOn.getContext().properties.getPropertiesManger());
+//                } catch (IOException e) {
+//                    fileLogger.error("error while trying to register Files for addon" + addOn.getID(), e);
+//                }
+//
+//                if (addOn.setUnusualDefaultPropertiesPath() == null) {
+//                    addOn.getContext().properties.getPropertiesManger().
+//                            setDefaultPropertiesPath(PropertiesAssistant.getFolder(addOn));
+//                }
+//            } else {
+//                fileLogger.debug("no property file was found for AddOn: " + addOn.getID());
+//            }
+//        });*/
+//    }
+//
+//    /**
+//     * registers all the properties-Files for the AddOns
+//     */
+//    private void registerProperties() {
+//        runOnAddOnsAsync((Consumer<AddOn>) addon ->
+//                        addon.getContext().properties.getPropertiesManger().initProperties());
+//    }
 
     /**
      * retrieves and registers all AddOns.
@@ -141,10 +159,10 @@ public class AddOnManager {
     public void retrieveAndRegisterAddOns() {
         addAllAddOns();
         initAllAddOns();
-        registerFiles();
-        registerProperties();
-        prepareAllAddOns();
-        registerAllAddOns();
+//        registerFiles();
+//        registerProperties();
+//        prepareAllAddOns();
+//        registerAllAddOns();
     }
 
     /**
@@ -163,10 +181,10 @@ public class AddOnManager {
     public void addAndRegisterAddOns(List<AddOn> addOns) {
         addOnList.addAll(addOns);
         initAllAddOns();
-        registerFiles();
-        registerProperties();
-        prepareAllAddOns();
-        registerAllAddOns();
+//        registerFiles();
+//        registerProperties();
+//        prepareAllAddOns();
+//        registerAllAddOns();
     }
 
     /**
@@ -197,25 +215,25 @@ public class AddOnManager {
         }
         try {
             List<AddOn> addOns = pluginManager.getExtensions(AddOn.class);
-            for (AddOn addOn : addOns) {
-                if (addOn.getClass().getClassLoader() instanceof IzouPluginClassLoader) {
-                    IzouPluginClassLoader izouPluginClassLoader = (IzouPluginClassLoader) addOn.getClass().getClassLoader();
-                    PluginWrapper plugin = pluginManager.getPlugin(izouPluginClassLoader.getPluginDescriptor().getPluginId());
-                    addOn.setPlugin(plugin);
-                }
-            }
+            addOns.stream()
+                    .filter(addOn -> addOn.getClass().getClassLoader() instanceof IzouPluginClassLoader)
+                    .forEach(addOn -> {
+                IzouPluginClassLoader izouPluginClassLoader = (IzouPluginClassLoader) addOn.getClass().getClassLoader();
+                PluginWrapper plugin = pluginManager.getPlugin(izouPluginClassLoader.getPluginDescriptor().getPluginId());
+                addOn.setPlugin(plugin);
+            });
             addOnList.addAll(addOns);
         } catch (Exception e) {
             fileLogger.fatal("Error while trying to start the AddOns", e);
         }
     }
 
-    /**
-     * prepares all AddOns
-     */
-    private void prepareAllAddOns() {
-        runOnAddOnsAsync(AddOn::prepare);
-    }
+//    /**
+//     * prepares all AddOns
+//     */
+//    private void prepareAllAddOns() {
+//        runOnAddOnsAsync(AddOn::prepare);
+//    }
 
     /**
      * internal initiation of all addOns
@@ -270,14 +288,14 @@ public class AddOnManager {
         });
     }
 
-    /**
-     * registers all AddOns
-     */
-    private void registerAllAddOns() {
-        registerOutputPlugins();
-        registerOutputExtensions();
-        registerContentGenerators();
-        registerEventControllers();
-        registerActivators();
-    }
+//    /**
+//     * registers all AddOns
+//     */
+//    private void registerAllAddOns() {
+//        registerOutputPlugins();
+//        registerOutputExtensions();
+//        registerContentGenerators();
+//        registerEventControllers();
+//        registerActivators();
+//    }
 }

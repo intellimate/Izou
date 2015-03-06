@@ -4,7 +4,7 @@ import intellimate.izou.activator.ActivatorManager;
 import intellimate.izou.addon.AddOn;
 import intellimate.izou.addon.AddOnManager;
 import intellimate.izou.events.EventDistributor;
-import intellimate.izou.events.EventPropertiesManager;
+import intellimate.izouSDK.events.EventPropertiesManager;
 import intellimate.izou.events.LocalEventManager;
 import intellimate.izou.output.OutputManager;
 import intellimate.izou.resource.ResourceManager;
