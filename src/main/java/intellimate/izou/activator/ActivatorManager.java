@@ -23,33 +23,41 @@ public class ActivatorManager extends IzouModule implements AddonThreadPoolUser 
     public ActivatorManager(Main main) {
         super(main);
     }
-    
+
+    /**
+     * adds an activator and automatically submits it to the Thread-Pool
+     * @param activator the activator to add
+     */
     public void addActivator(Activator activator) {
         activators.add(activator);
         crashCounter.put(activator, new AtomicInteger(0));
         submitActivator(activator);
     }
-    
-    public void submitActivator(Activator activator) {
+
+    /**
+     * submits the activator to the ThreadPool
+     * @param activator teh activator to submit
+     */
+    private void submitActivator(Activator activator) {
         CompletableFuture<Void> future = submit((Supplier<Boolean>) () -> {
             try {
                 return activator.call();
             } catch (Throwable e) {
-                log.error("Activator: " + activator.getID() + "crashed", e);
+                error("Activator: " + activator.getID() + "crashed", e);
                 return true;
             }
         }).thenAccept(restart -> {
             if (restart != null && !restart) {
-                log.debug("Activator: " + activator.getID() + "returned false, will not restart");
+                debug("Activator: " + activator.getID() + "returned false, will not restart");
             } else {
-                log.error("Activator: " + activator.getID() + "returned not true");
+                error("Activator: " + activator.getID() + "returned not true");
                 if (crashCounter.get(activator).get() < 100) {
-                    log.error("Until now activator: " + activator.getID() + "was restarted: " +
+                    error("Until now activator: " + activator.getID() + "was restarted: " +
                             crashCounter.get(activator).get() + " times, attempting restart.");
                     crashCounter.get(activator).incrementAndGet();
                     submitActivator(activator);
                 } else {
-                    log.error("Activator: " + activator.getID() + "reached restarting limit with " +
+                    error("Activator: " + activator.getID() + "reached restarting limit with " +
                             crashCounter.get(activator).get() + " restarts.");
                 }
             }

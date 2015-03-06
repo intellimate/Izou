@@ -26,4 +26,46 @@ public abstract class IzouModule implements MainProvider {
     public Main getMain() {
         return main;
     }
+
+    /**
+     * Used to log messages at debug level
+     *
+     * @param msg the message
+     * @param e   the Throwable
+     */
+    @Override
+    public void debug(String msg, Throwable e) {
+        log.debug(msg, e);
+    }
+
+    /**
+     * Used to log messages at debug level
+     *
+     * @param msg the message
+     */
+    @Override
+    public void debug(String msg) {
+        log.debug(msg);
+    }
+
+    /**
+     * Used to log messages at error level
+     *
+     * @param msg the message
+     * @param e   the Throwable
+     */
+    @Override
+    public void error(String msg, Throwable e) {
+        log.error(msg, e);
+    }
+
+    /**
+     * Used to log messages at error level
+     *
+     * @param msg the message
+     */
+    @Override
+    public void error(String msg) {
+        log.error(msg);
+    }
 }

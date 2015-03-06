@@ -3,6 +3,7 @@ package intellimate.izou;
 import intellimate.izou.identification.Identifiable;
 import intellimate.izou.identification.IdentificationManager;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -28,6 +29,10 @@ public class AddOnsCollection<X extends Identifiable> {
 
     public boolean add(X x) {
         return set.add(x);
+    }
+
+    public boolean addAll(Collection<? extends X> x) {
+        return set.addAll(x);
     }
 
     public boolean remove(X x) {

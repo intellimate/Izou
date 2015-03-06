@@ -22,7 +22,10 @@ public interface AddOn extends ExtensionPoint, Identifiable, ExceptionCallback {
     void initAddOn(Context context);
 
     /**
-     * use this method to register your Modules
+     * use this method to register your Modules.
+     * <p>
+     * It will time out after 3 seconds!
+     * </p> 
      */
     void register();
 
