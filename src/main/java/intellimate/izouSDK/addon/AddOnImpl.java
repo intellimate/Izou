@@ -1,6 +1,11 @@
 package intellimate.izouSDK.addon;
 
+import intellimate.izou.activator.Activator;
 import intellimate.izou.addon.AddOn;
+import intellimate.izou.contentgenerator.ContentGenerator;
+import intellimate.izou.events.EventsController;
+import intellimate.izou.output.OutputExtension;
+import intellimate.izou.output.OutputPlugin;
 import intellimate.izou.properties.PropertiesContainer;
 import intellimate.izou.system.Context;
 import ro.fortsoft.pf4j.PluginWrapper;
@@ -26,7 +31,43 @@ public abstract class AddOnImpl implements AddOn {
         this.addOnID = addOnID;
     }
 
+    /**
+     * use this method to register your Modules
+     */
+    @Override
+    public void register() {
+        //TODO: register
+    }
 
+    /**
+     * use this method to register (if needed) your Activators.
+     * @return Array containing Instances of Activators
+     */
+    public abstract Activator[] registerActivator();
+
+    /**
+     * use this method to register (if needed) your ContentGenerators.
+     * @return Array containing Instances of ContentGenerators
+     */
+    public abstract ContentGenerator[] registerContentGenerator();
+
+    /**
+     * use this method to register (if needed) your EventControllers.
+     * @return Array containing Instances of EventControllers
+     */
+    public abstract EventsController[] registerEventController();
+
+    /**
+     * use this method to register (if needed) your OutputPlugins.
+     * @return Array containing Instances of OutputPlugins
+     */
+    public abstract OutputPlugin[] registerOutputPlugin();
+
+    /**
+     * use this method to register (if needed) your Output.
+     * @return Array containing Instances of OutputExtensions
+     */
+    public abstract OutputExtension[] registerOutputExtension();
 
     /**
      * Internal initiation of addOn - fake constructor, comes before prepare
@@ -44,7 +85,6 @@ public abstract class AddOnImpl implements AddOn {
      *
      * @return an instance of Context.
      */
-    @Override
     public Context getContext() {
         return context;
     }

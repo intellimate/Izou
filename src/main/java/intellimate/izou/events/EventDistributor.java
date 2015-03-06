@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  * This class gets all the Events from all registered EventPublisher, generates Resources and passes them to the
  * OutputManager
  */
-public class EventDistributor implements Runnable{
+public class EventDistributor implements Runnable {
     private BlockingQueue<Event> events = new LinkedBlockingQueue<>();
     private ConcurrentHashMap<Identification, EventPublisher> registered = new ConcurrentHashMap<>();
     private final ResourceManager resourceManager;

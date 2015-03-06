@@ -8,6 +8,7 @@ import intellimate.izou.resource.Resource;
 import java.util.List;
 
 /**
+ * This class represents an Event, the main communication form for the AddOns.
  * @author Leander Kurscheidt
  * @version 1.0
  */

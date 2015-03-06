@@ -1,11 +1,6 @@
 package intellimate.izou.addon;
 
-import intellimate.izou.activator.Activator;
-import intellimate.izou.contentgenerator.ContentGenerator;
-import intellimate.izou.events.EventsController;
 import intellimate.izou.identification.Identifiable;
-import intellimate.izou.output.OutputExtension;
-import intellimate.izou.output.OutputPlugin;
 import intellimate.izou.system.Context;
 import intellimate.izou.threadpool.ExceptionCallback;
 import ro.fortsoft.pf4j.ExtensionPoint;
@@ -27,39 +22,9 @@ public interface AddOn extends ExtensionPoint, Identifiable, ExceptionCallback {
     void initAddOn(Context context);
 
     /**
-     * use this method to build your instances etc.
+     * use this method to register your Modules
      */
-    void prepare();
-
-    /**
-     * use this method to register (if needed) your Activators.
-     * @return Array containing Instances of Activators
-     */
-    Activator[] registerActivator();
-
-    /**
-     * use this method to register (if needed) your ContentGenerators.
-     * @return Array containing Instances of ContentGenerators
-     */
-    ContentGenerator[] registerContentGenerator();
-
-    /**
-     * use this method to register (if needed) your EventControllers.
-     * @return Array containing Instances of EventControllers
-     */
-    EventsController[] registerEventController();
-
-    /**
-     * use this method to register (if needed) your OutputPlugins.
-     * @return Array containing Instances of OutputPlugins
-     */
-    OutputPlugin[] registerOutputPlugin();
-
-    /**
-     * use this method to register (if needed) your Output.
-     * @return Array containing Instances of OutputExtensions
-     */
-    OutputExtension[] registerOutputExtension();
+    void register();
 
     /**
      * gets the associated Plugin.
@@ -72,13 +37,4 @@ public interface AddOn extends ExtensionPoint, Identifiable, ExceptionCallback {
      * @param plugin the plugin
      */
     public void setPlugin(PluginWrapper plugin);
-
-    /**
-     * returns the Context of the AddOn.
-     *
-     * Context provides some general Communications.
-     *
-     * @return an instance of Context.
-     */
-    public Context getContext();
 }
