@@ -39,7 +39,6 @@ public class Main {
     private final ThreadPoolManager threadPoolManager;
     private final EventPropertiesManager eventPropertiesManager;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
-    private final LifeCycle lifeCycle;
 
     /**
      * Creates a new Main instance with debugging enabled (doesn't search the lib-folder)
@@ -106,7 +105,6 @@ public class Main {
         } catch (IOException e) {
             fileLogger.fatal("Failed to create the FileSystemManager", e);
         }
-        lifeCycle = new LifeCycle(this);
         threadPoolManager = new ThreadPoolManager();
         izouLogger = new IzouLogger();
         outputManager = new OutputManager(this);
@@ -196,9 +194,5 @@ public class Main {
 
     public IzouLogger getIzouLogger() {
         return izouLogger;
-    }
-
-    public LifeCycle getLifeCycle() {
-        return lifeCycle;
     }
 }

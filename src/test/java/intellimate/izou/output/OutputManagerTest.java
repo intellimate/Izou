@@ -2,6 +2,7 @@ package intellimate.izou.output;
 
 import intellimate.izou.events.Event;
 import intellimate.izou.resource.Resource;
+import intellimate.izouSDK.resource.ResourceImpl;
 import intellimate.izou.testHelper.IzouTest;
 import org.junit.Test;
 
@@ -98,9 +99,9 @@ public class OutputManagerTest extends IzouTest{
         outputExtension.addResourceIdToWishList("1");
         outputExtension.addResourceIdToWishList("2");
 
-        List<Resource> resources = Arrays.asList(new Resource<String>("1"),
-                                                new Resource<String>("2"),
-                                                new Resource<String>("3"));
+        List<Resource> resources = Arrays.asList(new ResourceImpl<String>("1"),
+                                                new ResourceImpl<String>("2"),
+                                                new ResourceImpl<String>("3"));
         event.get().getListResourceContainer().addResource(resources);
 
         outputManager.addOutputPlugin(outputPlugin);

@@ -1,5 +1,6 @@
 package intellimate.izou.fullplugintesting;
 
+import intellimate.izouSDK.resource.ResourceImpl;
 import intellimate.izouSDK.contentgenerator.ContentGenerator;
 import intellimate.izou.system.Context;
 import intellimate.izou.events.Event;
@@ -24,7 +25,7 @@ public class TestCG extends ContentGenerator {
      */
     @Override
     public List<Resource> announceResources() {
-        return Arrays.asList(new Resource("test_ID"));
+        return Arrays.asList(new ResourceImpl("test_ID"));
     }
 
     /**
@@ -48,7 +49,7 @@ public class TestCG extends ContentGenerator {
     @Override
     public List<Resource> provideResource(List<Resource> resources, Optional<Event> event) {
         System.out.println("2");
-        Resource<String> resource = new Resource<>("test_ID");
+        ResourceImpl<String> resource = new ResourceImpl<>("test_ID");
         resource.setResource("IT WORKS1111!!!!!!!!!!!");
         return Arrays.asList(resource);
     }

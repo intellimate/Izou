@@ -47,4 +47,12 @@ public interface ResourceProvider {
      * @return a list of resources found
      */
     abstract List<Resource> provideResource(String resourceID);
+
+    /**
+     * returns the resource (if existing) from the source
+     *
+     * @param sourceID the ID of the source
+     * @return a list containing all the found resources
+     */
+    public List<Resource> provideResourceFromSource(String sourceID);
 }

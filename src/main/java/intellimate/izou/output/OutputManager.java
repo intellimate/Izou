@@ -6,6 +6,7 @@ import intellimate.izou.resource.Resource;
 import intellimate.izou.identification.Identifiable;
 import intellimate.izou.identification.Identification;
 import intellimate.izou.identification.IdentificationManager;
+import intellimate.izouSDK.resource.ResourceImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -276,8 +277,8 @@ public class OutputManager implements Identifiable{
                lock.unlock();
            };
            Resource<Consumer> resource = IdentificationManager.getInstance().getIdentification(this)
-                   .map(id -> new Resource<Consumer>(outputPlugin.getID(), id, consumer))
-                   .orElse(new Resource<Consumer>(outputPlugin.getID())
+                   .map(id -> new ResourceImpl<Consumer>(outputPlugin.getID(), id, consumer))
+                   .orElse(new ResourceImpl<Consumer>(outputPlugin.getID())
                            .setResource(consumer));
            event.getListResourceContainer().addResource(resource);
 

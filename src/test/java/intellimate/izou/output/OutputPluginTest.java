@@ -2,6 +2,7 @@ package intellimate.izou.output;
 
 import intellimate.izou.events.Event;
 import intellimate.izou.resource.Resource;
+import intellimate.izouSDK.resource.ResourceImpl;
 import intellimate.izou.testHelper.IzouTest;
 import org.junit.Test;
 
@@ -22,9 +23,9 @@ public class OutputPluginTest extends IzouTest{
     public void testDistributeContentData() throws Exception {
         Optional<Event> event = getNextEvent();
         if(!event.isPresent()) fail();
-        List<Resource> resources = Arrays.asList(new Resource<String>("1"),
-                new Resource<String>("2"),
-                new Resource<String>("3"));
+        List<Resource> resources = Arrays.asList(new ResourceImpl<String>("1"),
+                new ResourceImpl<String>("2"),
+                new ResourceImpl<String>("3"));
         event.get().getListResourceContainer().addResource(resources);
 
         OutputPlugin outputPlugin = new OutputPlugin("abcd", getContext()) {
@@ -149,9 +150,9 @@ public class OutputPluginTest extends IzouTest{
     public void testOutputPluginParameters() {
         Optional<Event> event = getEvent(id + 1);
         if(!event.isPresent()) fail();
-        List<Resource> resources = Arrays.asList(new Resource<String>("1"),
-                new Resource<String>("2"),
-                new Resource<String>("3"));
+        List<Resource> resources = Arrays.asList(new ResourceImpl<String>("1"),
+                new ResourceImpl<String>("2"),
+                new ResourceImpl<String>("3"));
         event.get().getListResourceContainer().addResource(resources);
 
         OutputPlugin outputPlugin = new OutputPlugin("abcd", getContext()) {

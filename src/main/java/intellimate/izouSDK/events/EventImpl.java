@@ -1,9 +1,12 @@
 package intellimate.izouSDK.events;
 
-import intellimate.izou.events.*;
+import intellimate.izou.events.Event;
+import intellimate.izou.events.EventBehaviourController;
+import intellimate.izou.events.EventCallable;
+import intellimate.izou.events.MultipleEventsException;
+import intellimate.izou.identification.Identification;
 import intellimate.izou.resource.ListResourceProvider;
 import intellimate.izou.resource.Resource;
-import intellimate.izou.identification.Identification;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -58,7 +61,7 @@ public class EventImpl implements Event {
     private final String type;
     private final Identification source;
     private final List<String> descriptors;
-    private final ListResourceProvider listResourceContainer = new ListResourceProvider();
+    private final ListResourceProvider listResourceContainer = new intellimate.izouSDK.resource.ListResourceProvider();
     private final EventBehaviourController eventBehaviourController = new EventBehaviourControllerImpl(this);
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
