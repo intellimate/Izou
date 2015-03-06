@@ -1,6 +1,7 @@
 package intellimate.izou.activator;
 
 import intellimate.izou.events.Event;
+import intellimate.izouSDK.events.EventImpl;
 import intellimate.izou.system.Context;
 import intellimate.izou.identification.Identification;
 import intellimate.izou.identification.IdentificationManager;
@@ -34,7 +35,7 @@ public class ActivatorTest extends IzouTest{
 
     @Test
     public void testFireEvent() throws Exception {
-        Event event2 = Event.createEvent(ActivatorTest.class.getCanonicalName() + 2, id).get();
+        Event event2 = EventImpl.createEvent(ActivatorTest.class.getCanonicalName() + 2, id).get();
         final boolean[] isWorking = {false};
         main.getEventDistributor().registerEventListener(event2, id -> isWorking[0] = true);
         activator.fireEvent(event2);

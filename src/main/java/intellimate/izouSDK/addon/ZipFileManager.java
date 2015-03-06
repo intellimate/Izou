@@ -1,4 +1,4 @@
-package intellimate.izou.addon;
+package intellimate.izouSDK.addon;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

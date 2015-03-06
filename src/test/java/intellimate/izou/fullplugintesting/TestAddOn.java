@@ -1,7 +1,7 @@
 package intellimate.izou.fullplugintesting;
 
 import intellimate.izou.activator.Activator;
-import intellimate.izou.addon.AddOn;
+import intellimate.izouSDK.addon.AddOnImpl;
 import intellimate.izou.contentgenerator.ContentGenerator;
 import intellimate.izou.events.EventsController;
 import intellimate.izou.output.OutputExtension;
@@ -10,7 +10,7 @@ import intellimate.izou.output.OutputPlugin;
 /**
  * Created by julianbrendl on 11/20/14.
  */
-public class TestAddOn extends AddOn {
+public class TestAddOn extends AddOnImpl {
 
     public TestAddOn(String addOnID) {
         super(addOnID);

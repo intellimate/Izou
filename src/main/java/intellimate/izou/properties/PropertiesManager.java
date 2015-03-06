@@ -233,7 +233,7 @@ public class PropertiesManager implements ReloadableFile {
 
     /**
      * If you are looking for a way to change to default location of your <i>defaultProperties.txt</i> file, go look
-     * at {@link AddOn#setUnusualDefaultPropertiesPath}
+     * at {@link intellimate.izouSDK.addon.AddOnImpl#setUnusualDefaultPropertiesPath}
      * <p>
      * *** YOU SHOULD NOT HAVE TO USE THIS METHOD ***
      * <br><br>

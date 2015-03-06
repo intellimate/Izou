@@ -2,6 +2,7 @@ package intellimate.izou.fullplugintesting;
 
 import intellimate.izou.activator.Activator;
 import intellimate.izou.events.Event;
+import intellimate.izouSDK.events.EventImpl;
 import intellimate.izou.events.MultipleEventsException;
 import intellimate.izou.identification.Identification;
 import intellimate.izou.identification.IdentificationManager;
@@ -34,7 +35,7 @@ public class TestAct extends Activator {
                 System.out.println("1");
                 Optional<Identification> id = IdentificationManager.getInstance().getIdentification(this);
                 if(!id.isPresent()) return;
-                Optional<Event> event = Event.createEvent("1", id.get());
+                Optional<Event> event = EventImpl.createEvent("1", id.get());
                 if(!event.isPresent()) return;
                 try {
                     this.fireEvent(event.get());

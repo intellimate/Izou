@@ -6,6 +6,7 @@ import intellimate.izou.events.EventsController;
 import intellimate.izou.main.Main;
 import intellimate.izou.output.OutputExtension;
 import intellimate.izou.output.OutputPlugin;
+import intellimate.izouSDK.addon.AddOnImpl;
 import junit.framework.TestCase;
 
 import java.util.LinkedList;
@@ -26,7 +27,7 @@ public class PropertiesManagerTest extends TestCase {
     }
 
     @SuppressWarnings("SameParameterValue")
-    private class TestAddOn extends AddOn{
+    private class TestAddOn extends AddOnImpl {
         /**
          * the default constructor for AddOns
          *

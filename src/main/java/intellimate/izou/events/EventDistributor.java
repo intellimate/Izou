@@ -5,6 +5,7 @@ import intellimate.izou.output.OutputManager;
 import intellimate.izou.resource.Resource;
 import intellimate.izou.resource.ResourceManager;
 import intellimate.izou.identification.Identification;
+import intellimate.izouSDK.events.EventImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -172,7 +173,7 @@ public class EventDistributor implements Runnable{
      * @return true if the event should be fired
      */
     private boolean checkEventsControllers(Event event) {
-        if (event.getID().equals(Event.NOTIFICATION))
+        if (event.getID().equals(EventImpl.NOTIFICATION))
             return true;
         boolean shouldExecute = true;
         for (EventsController controller : eventsControllers) {

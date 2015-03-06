@@ -3,6 +3,7 @@ package intellimate.izou.events;
 import intellimate.izou.identification.Identification;
 import intellimate.izou.identification.IdentificationManager;
 import intellimate.izou.testHelper.IzouTest;
+import intellimate.izouSDK.events.EventImpl;
 import org.junit.Test;
 
 public class EventsControllerTest extends IzouTest {
@@ -39,7 +40,7 @@ public class EventsControllerTest extends IzouTest {
         try {
             IdentificationManager.getInstance().registerIdentification(eventsController);
             Identification id = IdentificationManager.getInstance().getIdentification(eventsController).get();
-            Event event = Event.createEvent(super.id+1, id).get();
+            Event event = EventImpl.createEvent(super.id + 1, id).get();
             testListenerFalse(isWorking, event);
         } catch (InterruptedException e) {
             e.printStackTrace();

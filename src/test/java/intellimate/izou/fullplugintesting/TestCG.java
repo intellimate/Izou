@@ -1,6 +1,6 @@
 package intellimate.izou.fullplugintesting;
 
-import intellimate.izou.contentgenerator.ContentGenerator;
+import intellimate.izouSDK.contentgenerator.ContentGenerator;
 import intellimate.izou.system.Context;
 import intellimate.izou.events.Event;
 import intellimate.izou.resource.Resource;

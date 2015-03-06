@@ -2,6 +2,7 @@ package intellimate.izou.testHelper;
 
 import intellimate.izou.addon.AddOn;
 import intellimate.izou.events.Event;
+import intellimate.izouSDK.events.EventImpl;
 import intellimate.izou.events.MultipleEventsException;
 import intellimate.izou.fullplugintesting.TestAddOn;
 import intellimate.izou.identification.Identifiable;
@@ -70,7 +71,7 @@ public class IzouTest implements Identifiable {
     public Optional<Event> getEvent(String type) {
         Optional<Identification> id = identificationManager.getIdentification(this);
         if(!id.isPresent()) return Optional.empty();
-        return Event.createEvent(type, id.get());
+        return EventImpl.createEvent(type, id.get());
     }
 
     /**
