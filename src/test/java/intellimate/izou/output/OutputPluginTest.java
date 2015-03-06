@@ -33,7 +33,7 @@ public class OutputPluginTest extends IzouTest{
 
             }
         };
-        OutputExtension ext1 = new OutputExtension("789", getContext()) {
+        OutputExtensionimpl ext1 = new OutputExtensionimpl("789", getContext()) {
             /**
              * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
              * to the outputPlugin
@@ -46,7 +46,7 @@ public class OutputPluginTest extends IzouTest{
                 return null;
             }
         };
-        OutputExtension ext2 = new OutputExtension("10", getContext()) {
+        OutputExtensionimpl ext2 = new OutputExtensionimpl("10", getContext()) {
             /**
              * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
              * to the outputPlugin
@@ -78,7 +78,7 @@ public class OutputPluginTest extends IzouTest{
 
             }
         };
-        OutputExtension ext1 = new OutputExtension("789", getContext()) {
+        OutputExtensionimpl ext1 = new OutputExtensionimpl("789", getContext()) {
             /**
              * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
              * to the outputPlugin
@@ -90,7 +90,7 @@ public class OutputPluginTest extends IzouTest{
                 return null;
             }
         };
-        OutputExtension ext2 = new OutputExtension("10", getContext()) {
+        OutputExtensionimpl ext2 = new OutputExtensionimpl("10", getContext()) {
             /**
              * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
              * to the outputPlugin
@@ -115,7 +115,7 @@ public class OutputPluginTest extends IzouTest{
 
             }
         };
-        OutputExtension ext1 = new OutputExtension("789", getContext()) {
+        OutputExtensionimpl ext1 = new OutputExtensionimpl("789", getContext()) {
             /**
              * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
              * to the outputPlugin
@@ -127,7 +127,7 @@ public class OutputPluginTest extends IzouTest{
                 return null;
             }
         };
-        OutputExtension ext2 = new OutputExtension("10", getContext()) {
+        OutputExtensionimpl ext2 = new OutputExtensionimpl("10", getContext()) {
             /**
              * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
              * to the outputPlugin
@@ -160,7 +160,7 @@ public class OutputPluginTest extends IzouTest{
 
             }
         };
-        OutputExtension ext1 = new OutputExtension("789", getContext()) {
+        OutputExtensionimpl ext1 = new OutputExtensionimpl("789", getContext()) {
             /**
              * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
              * to the outputPlugin
@@ -172,7 +172,7 @@ public class OutputPluginTest extends IzouTest{
                 return null;
             }
         };
-        OutputExtension ext2 = new OutputExtension("10", getContext()) {
+        OutputExtensionimpl ext2 = new OutputExtensionimpl("10", getContext()) {
             /**
              * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
              * to the outputPlugin

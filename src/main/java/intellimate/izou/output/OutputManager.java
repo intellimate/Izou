@@ -150,7 +150,6 @@ public class OutputManager implements Identifiable{
                     fileLogger.error("Error while trying to add the OutputExtension: " + outputExtension.getID()
                                     + " to the OutputPlugin: " + oPlug.getID(), e);
                 }
-                outputExtension.setPluginId(oPlug.getID());
                 found = true;
                 break;
             }

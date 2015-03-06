@@ -1,7 +1,7 @@
 package intellimate.izou.fullplugintesting;
 
 import intellimate.izou.events.Event;
-import intellimate.izou.output.OutputExtension;
+import intellimate.izou.output.OutputExtensionimpl;
 import intellimate.izou.system.Context;
 import intellimate.izou.resource.Resource;
 
@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
  * Created by julianbrendl on 10/7/14.
  */
 @SuppressWarnings("SameParameterValue")
-public class TestOE extends OutputExtension<TestOD>{
+public class TestOE extends OutputExtensionimpl<TestOD> {
 
     public TestOE(String id, Context context) {
         super(id, context);

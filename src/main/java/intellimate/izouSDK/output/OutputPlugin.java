@@ -1,4 +1,4 @@
-package intellimate.izou.output;
+package intellimate.izouSDK.output;
 
 import intellimate.izou.events.Event;
 import intellimate.izou.resource.Resource;
@@ -120,7 +120,7 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable, Excepti
      * @param event the event to add
      * @throws IllegalStateException raised if problems adding an event to blockingQueue
      */
-    public void addToEventList(Event event) throws IllegalStateException{ //!
+    public void addToEventList(Event event) throws IllegalStateException{
         eventBlockingQueue.add(event);
     }
 

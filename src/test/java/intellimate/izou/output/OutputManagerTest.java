@@ -27,7 +27,7 @@ public class OutputManagerTest extends IzouTest{
 
             }
         };
-        OutputExtension outputExtension = new OutputExtension("abcd", getContext()) {
+        OutputExtensionimpl outputExtension = new OutputExtensionimpl("abcd", getContext()) {
             /**
              * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
              * to the outputPlugin
@@ -53,7 +53,7 @@ public class OutputManagerTest extends IzouTest{
 
             }
         };
-        OutputExtension outputExtension = new OutputExtension("abcd", getContext()) {
+        OutputExtensionimpl outputExtension = new OutputExtensionimpl("abcd", getContext()) {
             /**
              * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
              * to the outputPlugin
@@ -83,7 +83,7 @@ public class OutputManagerTest extends IzouTest{
 
             }
         };
-        OutputExtension outputExtension = new OutputExtension("abcd", getContext()) {
+        OutputExtensionimpl outputExtension = new OutputExtensionimpl("abcd", getContext()) {
             /**
              * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
              * to the outputPlugin
@@ -119,7 +119,7 @@ public class OutputManagerTest extends IzouTest{
 
             }
         };
-        OutputExtension outputExtension = new OutputExtension("abcd", getContext()) {
+        OutputExtensionimpl outputExtension = new OutputExtensionimpl("abcd", getContext()) {
             /**
              * the main method of the outputExtension, it converts the resources into the necessary data format and returns it
              * to the outputPlugin
