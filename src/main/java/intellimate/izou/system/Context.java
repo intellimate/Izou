@@ -24,7 +24,6 @@ import java.util.function.Consumer;
 /**
  * This class provides much of the general Communication with Izou.
  */
-
 @SuppressWarnings("UnusedDeclaration")
 public class Context {
     @SuppressWarnings("FieldCanBeLocal")
@@ -333,7 +332,7 @@ public class Context {
          * @param identification the Identification of the the instance
          * @return an Optional, empty if already registered
          */
-        public Optional<LocalEventManager.EventCaller> registerEventCaller(Identification identification) {
+        public Optional<EventCallable> registerEventCaller(Identification identification) {
             return main.getLocalEventManager().registerCaller(identification);
         }
 
@@ -377,7 +376,7 @@ public class Context {
              * @param identification the Identification of the Source
              * @return An Optional Object which may or may not contains an EventPublisher
              */
-            public Optional<EventPublisher> registerEventPublisher(Identification identification) {
+            public Optional<EventCallable> registerEventPublisher(Identification identification) {
                 return main.getEventDistributor().registerEventPublisher(identification);
             }
 

@@ -45,7 +45,7 @@ public class EventDistributor implements Runnable {
      * @param identification the Identification of the Source
      * @return An Optional Object which may or may not contains an EventPublisher
      */
-    public Optional<EventPublisher> registerEventPublisher(Identification identification) {
+    public Optional<EventCallable> registerEventPublisher(Identification identification) {
         if(registered.containsKey(identification)) return Optional.empty();
         EventPublisher eventPublisher = new EventPublisher(events);
         registered.put(identification, eventPublisher);
@@ -261,5 +261,25 @@ public class EventDistributor implements Runnable {
         return futures.stream()
                 .filter(Future::isDone)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * This class is used to pass Events to the EventDistributor
+     */
+    public static class EventPublisher implements EventCallable {
+        //the queue where all the Events are stored
+        private final BlockingQueue<Event> events;
+        protected EventPublisher(BlockingQueue<Event> events) {
+            this.events = events;
+        }
+
+        /**
+         * use this method to fire Events.
+         * @param event the Event to fire
+         */
+        public void fire(Event event) {
+            if(event == null) return;
+            events.add(event);
+        }
     }
 }

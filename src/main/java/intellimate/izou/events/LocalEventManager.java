@@ -21,17 +21,20 @@ public class LocalEventManager implements Runnable, Identifiable{
     private final BlockingQueue<Event> events = new LinkedBlockingQueue<>(1);
     //if false, run() will stop
     private boolean stop = false;
-    private Optional<EventPublisher> eventPublisher = Optional.empty();
+    private final EventCallable eventCallable;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     public LocalEventManager(EventDistributor eventDistributor) {
         IdentificationManager identificationManager = IdentificationManager.getInstance();
         identificationManager.registerIdentification(this);
-        Optional<Identification> id = identificationManager.getIdentification(this);
-        if(!id.isPresent()) {
-            fileLogger.fatal("Unable to obtain ID for " + getID());
+        Optional<EventCallable> eventCallable = identificationManager.getIdentification(this)
+                .flatMap(eventDistributor::registerEventPublisher);
+        if (!eventCallable.isPresent()) {
+            fileLogger.fatal("Unable to obtain EventCallable for " + getID());
+            System.exit(1);
+            this.eventCallable = null;
         } else {
-            eventPublisher = eventDistributor.registerEventPublisher(id.get());
+            this.eventCallable = eventCallable.get();
         }
     }
 
@@ -45,7 +48,7 @@ public class LocalEventManager implements Runnable, Identifiable{
      * @return an Optional, empty if already registered
      */
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    public Optional<EventCaller> registerCaller(Identification identification) throws IllegalArgumentException{
+    public Optional<EventCallable> registerCaller(Identification identification) throws IllegalArgumentException{
         if(identification == null ||
             callers.containsKey(identification)) return Optional.empty();
         EventCaller eventCaller = new EventCaller(events);
@@ -72,8 +75,12 @@ public class LocalEventManager implements Runnable, Identifiable{
      *
      * @param event the fired Event
      */
-    private void fireEvent(Event event) throws InterruptedException {
-        if(eventPublisher.isPresent()) eventPublisher.get().fire(event);
+    private void fireEvent(Event event) {
+        try {
+            eventCallable.fire(event);
+        } catch (intellimate.izou.events.MultipleEventsException e) {
+            fileLogger.error("unable to fire Event", e);
+        }
     }
 
     @Override

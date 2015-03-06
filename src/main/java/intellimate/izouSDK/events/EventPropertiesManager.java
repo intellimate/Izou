@@ -1,4 +1,4 @@
-package intellimate.izou.events;
+package intellimate.izouSDK.events;
 
 import intellimate.izou.system.FileSystemManager;
 import intellimate.izou.system.ReloadableFile;
