@@ -16,15 +16,15 @@ import java.util.stream.Stream;
  * @author Leander Kurscheidt
  * @version 1.0
  */
-public class AddOnsCollection<X extends Identifiable> {
+public class AddonsCollection<X extends Identifiable> {
     private IdentificationManager identificationManager = IdentificationManager.getInstance();
     private Set<X> set = new HashSet<>();
 
-    public AddOnsCollection(Set<X> set) {
+    public AddonsCollection(Set<X> set) {
         this.set = set;
     }
 
-    public AddOnsCollection() {}
+    public AddonsCollection() {}
 
     public boolean add(X x) {
         return set.add(x);
