@@ -2,12 +2,11 @@ package intellimate.izouSDK.addon;
 
 import intellimate.izou.activator.Activator;
 import intellimate.izou.addon.AddOn;
+import intellimate.izouSDK.Context;
 import intellimate.izouSDK.contentgenerator.ContentGenerator;
 import intellimate.izou.events.EventsController;
 import intellimate.izou.output.OutputExtension;
 import intellimate.izou.output.OutputPlugin;
-import intellimate.izou.properties.PropertiesContainer;
-import intellimate.izou.system.context.ContextImplementation;
 import ro.fortsoft.pf4j.PluginWrapper;
 
 /**
@@ -20,7 +19,7 @@ import ro.fortsoft.pf4j.PluginWrapper;
 public abstract class AddOnImpl implements AddOn {
     @SuppressWarnings("FieldCanBeLocal")
     private final String addOnID;
-    private ContextImplementation context;
+    private Context context;
     private PluginWrapper plugin;
 
     /**
@@ -74,8 +73,8 @@ public abstract class AddOnImpl implements AddOn {
      * @param context the context to initialize with
      */
     @Override
-    public void initAddOn(ContextImplementation context) {
-        this.context = context;
+    public void initAddOn(intellimate.izou.system.Context context) {
+        this.context = new Context(context);
     }
 
     /**
@@ -85,7 +84,7 @@ public abstract class AddOnImpl implements AddOn {
      *
      * @return an instance of Context.
      */
-    public ContextImplementation getContext() {
+    public Context getContext() {
         return context;
     }
 

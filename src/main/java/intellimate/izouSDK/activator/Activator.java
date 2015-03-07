@@ -4,9 +4,8 @@ import intellimate.izou.events.Event;
 import intellimate.izou.events.EventCallable;
 import intellimate.izou.events.MultipleEventsException;
 import intellimate.izou.identification.IdentificationManager;
-import intellimate.izou.system.Context;
-import intellimate.izou.system.context.ContextImplementation;
 import intellimate.izou.threadpool.ExceptionCallback;
+import intellimate.izouSDK.Context;
 
 /**
  * The Task of an Activator is to listen for whatever you choose to implement and fires events to notify a change.
@@ -22,11 +21,11 @@ public abstract class Activator implements intellimate.izou.activator.Activator,
     //limit of the exceptionCount
     @SuppressWarnings("FieldCanBeLocal")
     private final int exceptionLimit = 100;
-    private ContextImplementation context;
+    private Context context;
 
-    public Activator(ContextImplementation context) {
+    public Activator(Context context) {
         if(!identificationManager.registerIdentification(this)) {
-            context.logger.getLogger().fatal("Failed to register with identification manager" + getID());
+            context.getLogger().fatal("Failed to register with identification manager" + getID());
         }
         this.context = context;
     }
@@ -74,7 +73,7 @@ public abstract class Activator implements intellimate.izou.activator.Activator,
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException e1) {
-                    context.logger.getLogger().fatal(e);
+                    context.getLogger().fatal(e);
                 }
                 //activatorManager.restartActivator(this);
             }

@@ -1,10 +1,9 @@
 package intellimate.izouSDK.contentgenerator;
 
 import intellimate.izou.events.Event;
-import intellimate.izou.resource.Resource;
-import intellimate.izou.system.Context;
-import intellimate.izou.system.context.ContextImplementation;
 import intellimate.izou.identification.IdentificationManager;
+import intellimate.izou.resource.Resource;
+import intellimate.izouSDK.Context;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,7 +18,7 @@ import java.util.Optional;
 public abstract class ContentGeneratorImpl implements ContentGenerator {
     //stores the ID of the ContentGenerator
     private final String contentGeneratorID;
-    private final ContextImplementation context;
+    private final Context context;
     private IdentificationManager identificationManager = IdentificationManager.getInstance();
 
     /**
@@ -36,7 +35,7 @@ public abstract class ContentGeneratorImpl implements ContentGenerator {
      * @param eventIDName the event id name
      * @param eventID the actual event id
      */
-    public ContentGeneratorImpl(String id, ContextImplementation context, String eventDescription, String eventIDName,
+    public ContentGeneratorImpl(String id, Context context, String eventDescription, String eventIDName,
                                 String eventID) {
         this.contentGeneratorID = id;
         this.context = context;
