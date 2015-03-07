@@ -34,7 +34,7 @@ import java.util.function.Consumer;
 public class Context implements intellimate.izou.system.context.Context {
     private final AddOn addOn;
     private final Main main;
-    //TODO make the private!
+    //TODO make them private!
     public final Events events = new EventsImpl();
     public final Resources resources = new ResourcesImpl();
     public final Files files;
