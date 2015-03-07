@@ -67,7 +67,7 @@ public class Context implements intellimate.izou.system.context.Context {
             this.logger = null;
             org.apache.logging.log4j.Logger fileLogger = LogManager.getLogger(this.getClass());
             fileLogger.error("IzouLogger has not been initialized");
-            throw new NullPointerException("IzouLogger has not been initialized");reworked
+            throw new NullPointerException("IzouLogger has not been initialized");
         }
     }
 
