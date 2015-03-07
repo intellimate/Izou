@@ -66,6 +66,6 @@ public interface AddonThreadPoolUser extends MainProvider {
         }
         return futures.stream()
                 .filter(Future::isDone)
-                .collect(Collectors.toList());
+                .collect(Collectors.<V>toList());
     }
 }

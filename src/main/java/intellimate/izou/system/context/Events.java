@@ -71,25 +71,8 @@ public interface Events {
     void unregisterEventCaller(Identification identification);
 
     /**
-     * Adds the event ID of {@code value} to the PopularEvents.properties file with a key of {@code key}
-     *
-     * @param description a short description of what the event ID is for, should not be null
-     * @param key the key with which to store the event ID, should not be null
-     * @param value the complete event ID, should not be null
-     */
-    void addEventIDToPropertiesFile(String description, String key, String value);
-
-    /**
-     * Gets the full event ID associated with the key {@code key}
-     *
-     * @param key the key of the full event ID
-     * @return the complete the event ID, or null if none is found
-     */
-    String getEventsID(String key);
-
-    /**
      * returns the API for the EventsDistributor
      * @return Distributor
      */
-    EventsDistributor distributor();
+    public EventsDistributor distributor();
 }

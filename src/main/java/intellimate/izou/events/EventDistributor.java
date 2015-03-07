@@ -5,7 +5,6 @@ import intellimate.izou.IzouModule;
 import intellimate.izou.identification.Identification;
 import intellimate.izou.main.Main;
 import intellimate.izou.resource.Resource;
-import intellimate.izouSDK.events.EventImpl;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -154,8 +153,10 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
      * @return true if the event should be fired
      */
     private boolean checkEventsControllers(Event event) {
+        //TODO: move to SDK
+        /*
         if (event.getID().equals(EventImpl.NOTIFICATION))
-            return true;
+            return true;*/
         boolean shouldExecute = true;
         for (EventsController controller : eventsControllers) {
             if (!controller.controlEventDispatcher(event)) {
