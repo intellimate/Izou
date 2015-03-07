@@ -1,7 +1,7 @@
 package intellimate.izou.system.file;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import intellimate.izou.IzouModule;
+import intellimate.izou.main.Main;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -21,7 +21,7 @@ import static java.nio.file.StandardWatchEventKinds.*;
  *
  * You can register an {@code AddOn} or a {@code ReloadableFile} with the path to the directory it is supposed to watch
  */
-public class FileManager implements Runnable {
+public class FileManager extends IzouModule implements Runnable {
     /**
      * Default java watching service for directories, raises events when changes happen in this directory
      */
@@ -31,20 +31,17 @@ public class FileManager implements Runnable {
      * Map that holds watchKeys (ID's) of the directories and the addOns using the directories
      */
     private Map<WatchKey, List<FileInfo>> addOnMap;
-    private FilePublisher filePublisher;
-    private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     /**
      * Creates a new FileManager with a watcher and addOnMap
      *
      * @throws IOException exception is thrown by watcher service
      */
-    public FileManager(FilePublisher filePublisher) throws IOException {
+    public FileManager(Main main) throws IOException {
+        super(main);
         watcher = FileSystems.getDefault().newWatchService();
         addOnMap = new HashMap<>();
-        this.filePublisher =  filePublisher;
-        Thread thread = new Thread(this);
-        thread.start();
+        getMain().getThreadPoolManager().getAddOnsThreadPool().submit(this);
     }
 
     /**
@@ -100,48 +97,9 @@ public class FileManager implements Runnable {
             Files.copy(Paths.get(defaultFilePath), Paths.get(realFilePath), StandardCopyOption.REPLACE_EXISTING);
             return true;
         } catch (IOException e) {
-            fileLogger.error("Unable to write to copy Properties-File", e);
+            error("Unable to write to copy Properties-File", e);
             return false;
         }
-        /*
-        boolean outcome = true;
-
-        BufferedReader bufferedReader = null;
-        BufferedWriter bufferedWriter = null;
-        try {
-            bufferedReader = new BufferedReader(new FileReader(defaultFilePath));
-            bufferedWriter = new BufferedWriter(new FileWriter(realFilePath));
-            String line;
-
-            // c is the character read from bufferedReader and written to bufferedWriter
-            int c = 0;
-            if (bufferedReader.ready()) {
-                while (c != -1) {
-                    c = bufferedReader.read();
-                    if (!(c == (byte)'\uFFFF')) {
-                        bufferedWriter.write(c);
-                    }
-                }
-            }
-
-        } catch (IOException e) {
-            fileLogger.error("Unable to write to the Properties-File", e);
-            outcome =  false;
-        } finally {
-            if (bufferedReader != null)
-                try {
-                    bufferedReader.close();
-                } catch (IOException e) {
-                    fileLogger.error(e);                }
-            if (bufferedWriter != null)
-                try {
-                    bufferedWriter.close();
-                } catch (IOException e) {
-                    fileLogger.error(e);
-                }
-        }
-        return outcome;
-        */
     }
 
     /**
@@ -162,13 +120,13 @@ public class FileManager implements Runnable {
                 bufferedWriterInit.write(initMessage);
             }
         } catch (IOException e) {
-            fileLogger.error("unable to create the Default-File", e);
+            error("unable to create the Default-File", e);
         } finally {
             if(bufferedWriterInit != null) {
                 try {
                     bufferedWriterInit.close();
                 } catch (IOException e) {
-                    fileLogger.error("Unable to close input stream", e);
+                    error("Unable to close input stream", e);
                 }
             }
         }
@@ -189,23 +147,23 @@ public class FileManager implements Runnable {
                     try {
                         throw new IncompleteFileEventException();
                     } catch (IncompleteFileEventException e) {
-                        fileLogger.warn(e);
+                        log.warn(e);
                     }
                 } else if ((kind == ENTRY_CREATE || kind == ENTRY_MODIFY || kind == ENTRY_DELETE)
                         && isFileType(event, fileInfo.getFileType())) {
                     try {
                         if (fileInfo.getReloadableFile() != null) {
                             fileInfo.getReloadableFile().reloadFile(kind.toString());
-                            fileLogger.debug("Reloaded file: " + event.context().toString());
-                            filePublisher.notifyFileSubscribers(fileInfo.getReloadableFile());
+                            debug("Reloaded file: " + event.context().toString());
+                            getMain().getFilePublisher().notifyFileSubscribers(fileInfo.getReloadableFile());
                         }
                     } catch (Exception e) {
-                        fileLogger.warn(e);
+                        log.warn(e);
                     }
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
-                        fileLogger.warn(e);
+                        log.warn(e);
                     }
                 }
             }
@@ -222,7 +180,7 @@ public class FileManager implements Runnable {
             try {
                 key = watcher.take();
             } catch (InterruptedException e) {
-                fileLogger.warn(e);
+                log.warn(e);
                 continue;
             }
 
