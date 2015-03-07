@@ -1,12 +1,11 @@
 package intellimate.izou.system.file;
 
+import intellimate.izou.IdentifiableSet;
 import intellimate.izou.IzouModule;
 import intellimate.izou.identification.Identification;
 import intellimate.izou.main.Main;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -15,8 +14,8 @@ import java.util.concurrent.CompletableFuture;
  * subscribers belonging to it are notified. All file subscribers in general can also be notified.
  */
 public class FilePublisher extends IzouModule {
-    private HashMap<ReloadableFile, List<FileSubscriber>> fileSubscribers;
-    private List<FileSubscriber> defaultFileSubscribers;
+    private HashMap<ReloadableFile, IdentifiableSet<FileSubscriber>> fileSubscribers;
+    private IdentifiableSet<FileSubscriber> defaultFileSubscribers;
 
     /**
      * Creates a new FilePublisher object. There should only be one in Izou
@@ -25,7 +24,7 @@ public class FilePublisher extends IzouModule {
     public FilePublisher(Main main) {
         super(main);
         this.fileSubscribers = new HashMap<>();
-        this.defaultFileSubscribers = new ArrayList<>();
+        this.defaultFileSubscribers = new IdentifiableSet<>(false);
     }
 
     /**
@@ -37,15 +36,13 @@ public class FilePublisher extends IzouModule {
      * @param identification the Identification of the FileSubscriber
      */
     public void register(ReloadableFile reloadableFile, FileSubscriber fileSubscriber, Identification identification) {
-        List<FileSubscriber> subscribers = fileSubscribers.get(reloadableFile);
+        IdentifiableSet<FileSubscriber> subscribers = fileSubscribers.get(reloadableFile);
 
         if (subscribers == null) {
-            List<FileSubscriber> subList = new ArrayList<>();
-            subList.add(fileSubscriber);
-            fileSubscribers.put(reloadableFile, subList);
-        } else {
-            subscribers.add(fileSubscriber);
+            subscribers = new IdentifiableSet<>(false);
+            fileSubscribers.put(reloadableFile, subscribers);
         }
+        subscribers.add(fileSubscriber, identification);
     }
 
     /**
@@ -55,7 +52,7 @@ public class FilePublisher extends IzouModule {
      * @param identification the Identification of the FileSubscriber
      */
     public void register(FileSubscriber fileSubscriber, Identification identification) {
-        defaultFileSubscribers.add(fileSubscriber);
+        defaultFileSubscribers.add(fileSubscriber, identification);
     }
 
     /**
@@ -64,7 +61,7 @@ public class FilePublisher extends IzouModule {
      * @param fileSubscriber the fileSubscriber to unregister
      */
     public void unregister(FileSubscriber fileSubscriber) {
-        for (List<FileSubscriber> subList : fileSubscribers.values()) {
+        for (IdentifiableSet<FileSubscriber> subList : fileSubscribers.values()) {
             subList.remove(fileSubscriber);
         }
         defaultFileSubscribers.remove(fileSubscriber);
@@ -78,7 +75,7 @@ public class FilePublisher extends IzouModule {
     public synchronized void notifyFileSubscribers(ReloadableFile reloadableFile) {
         notifyDefaultFileSubscribers();
 
-        List<FileSubscriber> subList = fileSubscribers.get(reloadableFile);
+        IdentifiableSet<FileSubscriber> subList = fileSubscribers.get(reloadableFile);
         if (subList == null) {
             return;
         }
@@ -92,7 +89,7 @@ public class FilePublisher extends IzouModule {
      * Notifies all file subscribers.
      */
     public synchronized void notifyAllFileSubcribers() {
-        for (List<FileSubscriber> subList : fileSubscribers.values()) {
+        for (IdentifiableSet<FileSubscriber> subList : fileSubscribers.values()) {
             for (FileSubscriber sub : subList) {
                 CompletableFuture.runAsync(sub::update, main.getThreadPoolManager().getAddOnsThreadPool());
             }
@@ -116,7 +113,7 @@ public class FilePublisher extends IzouModule {
      * @param reloadableFile the {@code reloadableFile} for which to get all subscribers
      * @return all subscribers for a {@code reloadableFile}
      */
-    public List<FileSubscriber> getFileSubscribersForReloadableFile(ReloadableFile reloadableFile) {
+    public IdentifiableSet<FileSubscriber> getFileSubscribersForReloadableFile(ReloadableFile reloadableFile) {
         return fileSubscribers.get(reloadableFile);
     }
 }
