@@ -4,11 +4,11 @@ import intellimate.izou.AddonThreadPoolUser;
 import intellimate.izou.IdentifiableCollection;
 import intellimate.izou.IzouModule;
 import intellimate.izou.events.Event;
-import intellimate.izou.main.Main;
-import intellimate.izou.resource.Resource;
 import intellimate.izou.identification.Identification;
 import intellimate.izou.identification.IdentificationManager;
-import intellimate.izouSDK.resource.ResourceImpl;
+import intellimate.izou.main.Main;
+import intellimate.izou.resource.Resource;
+import intellimate.izou.resource.ResourceMinimalImpl;
 
 import java.util.*;
 import java.util.concurrent.Future;
@@ -181,8 +181,8 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
        };
         
         Resource<Consumer<Boolean>> resource = IdentificationManager.getInstance().getIdentification(this)
-               .map(id -> (Resource<Consumer<Boolean>>) new ResourceImpl<>(outputPlugin.getID(), id, consumer))
-               .orElse(new ResourceImpl<Consumer<Boolean>>(outputPlugin.getID()).setResource(consumer));
+               .map(id -> (Resource<Consumer<Boolean>>) new ResourceMinimalImpl<>(outputPlugin.getID(), id, consumer, null))
+               .orElse(new ResourceMinimalImpl<>(outputPlugin.getID(), null, consumer, null));
        event.getListResourceContainer().addResource(resource);
 
        outputPlugin.addToEventList(event);
