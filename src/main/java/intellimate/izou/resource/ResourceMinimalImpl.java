@@ -1,8 +1,6 @@
 package intellimate.izou.resource;
 
 import intellimate.izou.identification.Identification;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
 import java.util.List;
@@ -16,7 +14,7 @@ import java.util.function.Function;
  * </p> 
  * Note! This Object is immutable!
  */
-public class ResourceMinimalImpl<T> implements Resource<T> {
+public class ResourceMinimalImpl<T> implements Resource<T, ResourceMinimalImpl<T>> {
     private final String resourceID;
     private final Identification provider;
     private final Identification consumer;
@@ -55,8 +53,8 @@ public class ResourceMinimalImpl<T> implements Resource<T> {
      * @param resource the data to set
      * @return the Resource
      */
-    public Resource<T> setResource(T resource) {
-        return new ResourceMinimalImpl<T>(resourceID, provider, resource, consumer);
+    public ResourceMinimalImpl<T> setResource(T resource) {
+        return new ResourceMinimalImpl<>(resourceID, provider, resource, consumer);
     }
 
     /**
@@ -104,7 +102,7 @@ public class ResourceMinimalImpl<T> implements Resource<T> {
      * @return R
      */
     @Override
-    public <R> R map(Function<Resource<T>, R> function) {
+    public <R> R map(Function<ResourceMinimalImpl<T>, R> function) {
         return function.apply(this);
     }
 
@@ -113,7 +111,7 @@ public class ResourceMinimalImpl<T> implements Resource<T> {
      * @return a list
      */
     @Override
-    public List<Resource<T>> toList() {
+    public List<ResourceMinimalImpl<T>> toList() {
         return Arrays.asList(this);
     }
 

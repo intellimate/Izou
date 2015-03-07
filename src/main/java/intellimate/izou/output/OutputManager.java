@@ -8,7 +8,6 @@ import intellimate.izou.identification.Identification;
 import intellimate.izou.identification.IdentificationManager;
 import intellimate.izou.identification.IllegalIDException;
 import intellimate.izou.main.Main;
-import intellimate.izou.resource.Resource;
 import intellimate.izou.resource.ResourceMinimalImpl;
 
 import java.util.*;
@@ -192,8 +191,8 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
            lock.unlock();
        };
         
-        Resource<Consumer<Boolean>> resource = IdentificationManager.getInstance().getIdentification(this)
-               .map(id -> (Resource<Consumer<Boolean>>) new ResourceMinimalImpl<>(outputPlugin.getID(), id, consumer, null))
+        ResourceMinimalImpl<Consumer<Boolean>> resource = IdentificationManager.getInstance().getIdentification(this)
+               .map(id -> new ResourceMinimalImpl<>(outputPlugin.getID(), id, consumer, null))
                .orElse(new ResourceMinimalImpl<>(outputPlugin.getID(), null, consumer, null));
        event.getListResourceContainer().addResource(resource);
 

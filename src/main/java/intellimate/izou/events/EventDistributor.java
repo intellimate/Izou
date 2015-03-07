@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  * OutputManager
  */
 public class EventDistributor extends IzouModule implements Runnable, AddonThreadPoolUser {
-    private BlockingQueue<Event> events = new LinkedBlockingQueue<>();
+    private BlockingQueue<Event<?>> events = new LinkedBlockingQueue<>();
     private ConcurrentHashMap<Identification, EventPublisher> registered = new ConcurrentHashMap<>();
     //here are all the Instances to to control the Event-dispatching stored
     private final ConcurrentLinkedQueue<EventsController> eventsControllers = new ConcurrentLinkedQueue<>();
@@ -97,7 +97,7 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
      */
     @SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter"})
     public void registerEventListener(Event event, EventListener eventListener) throws IllegalIDException {
-        registerEventListener(event.getAllIformations(), eventListener);
+        registerEventListener(event.getAllInformations(), eventListener);
     }
 
     /**
@@ -138,8 +138,8 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
      * @throws IllegalArgumentException if Listener is already listening to the Event or the id is not allowed
      */
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    public void unregisterEventListener(Event event, EventListener eventListener) throws IllegalArgumentException {
-        for (String id : event.getAllIformations()) {
+    public void unregisterEventListener(Event<Event> event, EventListener eventListener) throws IllegalArgumentException {
+        for (String id : event.getAllInformations()) {
             ArrayList<EventListener> listenersList = listeners.get(id);
             if (listenersList == null) {
                 return;
@@ -171,7 +171,7 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
         return shouldExecute;
     }
 
-    public BlockingQueue<Event> getEvents() {
+    public BlockingQueue<Event<?>> getEvents() {
         return events;
     }
 
@@ -190,12 +190,12 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
     public void run() {
         while(!stop) {
             try {
-                Event event = events.take();
+                Event<?> event = events.take();
                 debug("EventFired: " + event.getID() + " from " + event.getSource().getID());
                 if (checkEventsControllers(event)) {
                     List<Resource> resourceList = getMain().getResourceManager().generateResources(event);
                     event.addResources(resourceList);
-                    List<EventListener> listenersTemp = event.getAllIformations().parallelStream()
+                    List<EventListener> listenersTemp = event.getAllInformations().parallelStream()
                             .map(listeners::get)
                             .filter(Objects::nonNull)
                             .flatMap(Collection::stream)
@@ -227,8 +227,8 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
      */
     private class EventPublisher implements EventCallable {
         //the queue where all the Events are stored
-        private final BlockingQueue<Event> events;
-        protected EventPublisher(BlockingQueue<Event> events) {
+        private final BlockingQueue<Event<?>> events;
+        protected EventPublisher(BlockingQueue<Event<?>> events) {
             this.events = events;
         }
 

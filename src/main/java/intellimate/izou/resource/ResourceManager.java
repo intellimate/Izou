@@ -37,11 +37,11 @@ public class ResourceManager extends IzouModule implements AddonThreadPoolUser {
      * @param event the Event to generate the resources for
      * @return a List containing all the generated resources
      */
-    public List<Resource> generateResources(Event event) {
-        if(!event.getAllIformations().stream()
-                .anyMatch(eventSubscribers::containsKey)) return new LinkedList<>();
+    public List<Resource> generateResources(Event<?> event) {
+        if(!event.getAllInformations().stream()
+                .allMatch(eventSubscribers::containsKey)) return new LinkedList<>();
 
-        List<ResourceBuilder> resourceBuilders = event.getAllIformations().stream()
+        List<ResourceBuilder> resourceBuilders = event.getAllInformations().stream()
                 .map(eventSubscribers::get)
                 .filter(Objects::nonNull)
                 .flatMap(Collection::stream)
@@ -135,7 +135,7 @@ public class ResourceManager extends IzouModule implements AddonThreadPoolUser {
      * @param resourceBuilder an instance of ResourceBuilder
      */
     private void registerResourceIDsForResourceBuilder(ResourceBuilder resourceBuilder) {
-        List<Resource> resources = resourceBuilder.announceResources();
+        List<? extends Resource> resources = resourceBuilder.announceResources();
         if(resources == null) return;
         resources.stream()
                 .map(this::getRegisteredListForResource)
@@ -163,10 +163,10 @@ public class ResourceManager extends IzouModule implements AddonThreadPoolUser {
      * @param resourceBuilder an instance of ResourceBuilder
      */
     private void registerEventsForResourceBuilder(ResourceBuilder resourceBuilder) {
-        List<Event> events = resourceBuilder.announceEvents();
+        List<? extends Event<?>> events = resourceBuilder.announceEvents();
         if(events == null) return;
         events.stream()
-                .flatMap(event -> event.getAllIformations().stream())
+                .flatMap(event -> event.getAllInformations().stream())
                 .map(this::getRegisteredListForEvent)
                 .forEach(list -> list.add(resourceBuilder));
     }
@@ -203,7 +203,7 @@ public class ResourceManager extends IzouModule implements AddonThreadPoolUser {
      * @param resourceBuilder an instance of ResourceBuilder
      */
     private void unregisterResourceIDForResourceBuilder(ResourceBuilder resourceBuilder) {
-        List<Resource> resources = resourceBuilder.announceResources();
+        List<? extends Resource> resources = resourceBuilder.announceResources();
         resources.stream().map(resource -> resourceIDs.get(resource.getResourceID()))
                 .filter(Objects::nonNull)
                 .forEach(list -> list.remove(resourceBuilder));

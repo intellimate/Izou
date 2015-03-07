@@ -55,7 +55,7 @@ public interface Event<X extends Event> extends Identifiable {
      * returns a List containing all the Descriptors and the type.
      * @return a List containing the Descriptors
      */
-    List<String> getAllIformations();
+    List<String> getAllInformations();
 
     /**
      * returns whether the event contains the specific descriptor.
