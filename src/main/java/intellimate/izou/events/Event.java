@@ -12,7 +12,7 @@ import java.util.List;
  * @author Leander Kurscheidt
  * @version 1.0
  */
-public interface Event extends Identifiable {
+public interface Event<X extends Event> extends Identifiable {
     /**
      * The type of the Event.
      * It describes the Type of the Event.
@@ -37,13 +37,13 @@ public interface Event extends Identifiable {
      * @param resource an instance of the resource to add
      * @return the resulting Event (which is the same instance)
      */
-    Event addResource(Resource resource);
+    X addResource(Resource resource);
 
     /**
      * adds a List of Resources to the Container
      * @param resources a list containing all the resources
      */
-    Event addResources(List<Resource> resources);
+    X addResources(List<Resource> resources);
 
     /**
      * returns a List containing all the Descriptors.

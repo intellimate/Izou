@@ -10,7 +10,7 @@ import java.util.function.Function;
  * @author Leander Kurscheidt
  * @version 1.0
  */
-public interface Resource<T> extends Identifiable {
+public interface Resource<T, X extends Resource<T, X>> extends Identifiable {
     /**
      * returns the associated Resource data if set.
      * This method is thread-safe.
@@ -50,11 +50,11 @@ public interface Resource<T> extends Identifiable {
      * @param <R> the return type
      * @return R
      */
-    <R> R map (Function<Resource<T>, R> function);
+    <R> R map (Function<X, R> function);
 
     /**
      * creates a list with this Element in it.
      * @return a list
      */
-    List<Resource<T>> toList();
+    List<X> toList();
 }
