@@ -421,7 +421,8 @@ public class Context {
         /**
          * registers a ResourceBuilder.
          * <p>
-         * this method registers all the events, resourcesID etc.
+         *  this method registers all the events, resourcesID etc.
+         * </p>
          * @param resourceBuilder an instance of the ResourceBuilder
          */
         public void registerResourceBuilder(ResourceBuilder resourceBuilder) {

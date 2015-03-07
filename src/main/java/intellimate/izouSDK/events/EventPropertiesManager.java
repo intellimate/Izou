@@ -1,7 +1,7 @@
 package intellimate.izouSDK.events;
 
-import intellimate.izou.system.FileSystemManager;
-import intellimate.izou.system.ReloadableFile;
+import intellimate.izou.system.file.FileSystemManager;
+import intellimate.izou.system.file.ReloadableFile;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -70,10 +70,43 @@ public class EventPropertiesManager implements ReloadableFile {
                     bufferedWriterInit.close();
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                fileLogger.error("Unable to close buffered writer", e);
             }
         }
     }
+
+    /**
+     * Unregisters or deletes an event from the local_events.properties file
+     *
+     * @param event the complete event ID
+     */
+    public void unregisterEventID(String event) {
+        properties.remove(event);
+
+        BufferedWriter bufferedWriterInit = null;
+        try {
+            bufferedWriterInit = new BufferedWriter(new FileWriter(EVENTS_PROPERTIES_PATH, true));
+        } catch (IOException e) {
+            fileLogger.error("Unable to create buffered writer", e);
+        }
+
+        try {
+            if (bufferedWriterInit != null) {
+                properties.store(bufferedWriterInit, null);
+            }
+        } catch (IOException e) {
+            fileLogger.error("Unable to delete the event from the properties file", e);
+        } finally {
+            try {
+                if (bufferedWriterInit != null) {
+                    bufferedWriterInit.close();
+                }
+            } catch (IOException e) {
+                fileLogger.error("Unable to close buffered writer", e);
+            }
+        }
+    }
+
 
     @Override
     public void reloadFile(String eventType) {

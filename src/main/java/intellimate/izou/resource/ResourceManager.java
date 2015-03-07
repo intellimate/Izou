@@ -230,7 +230,7 @@ public class ResourceManager {
     private void registerEventsForResourceBuilder(ResourceBuilder resourceBuilder) {
         List<String> events = resourceBuilder.announceEvents();
         if(events == null) return;
-        for(String event : events) {
+        for (String event : events) {
             //TODO: @Julian here!
             if(eventSubscribers.containsKey(event)) {
                 LinkedList<ResourceBuilder> resourceBuilders = eventSubscribers.get(event);
@@ -260,7 +260,6 @@ public class ResourceManager {
      * @param resourceBuilder an instance of ResourceBuilder
      */
     private void unregisterResourceIDForResourceBuilder(ResourceBuilder resourceBuilder) {
-        //TODO @Julian intercept here for removal!
         List<Resource> resources = resourceBuilder.announceResources();
         resources.stream().map(resource -> resourceIDs.get(resource.getResourceID()))
                 .filter(Objects::nonNull)
@@ -272,6 +271,7 @@ public class ResourceManager {
      * @param resourceBuilder an instance of ResourceBuilder
      */
     private void unregisterEventsForResourceBuilder(ResourceBuilder resourceBuilder) {
+        //TODO @Julian intercept here for removal!
         resourceBuilder.announceEvents().stream()
                 .map(eventSubscribers::get)
                 .filter(Objects::nonNull)
