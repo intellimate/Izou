@@ -1,10 +1,10 @@
 package intellimate.izou;
 
 import intellimate.izou.identification.Identifiable;
-import intellimate.izou.identification.IdentificationManager;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -17,8 +17,7 @@ import java.util.stream.Stream;
  * @author Leander Kurscheidt
  * @version 1.0
  */
-public class IdentifiableCollection<X extends Identifiable> {
-    private IdentificationManager identificationManager = IdentificationManager.getInstance();
+public class IdentifiableCollection<X extends Identifiable> implements Iterable<X> {
     private Set<X> set = new HashSet<>();
 
     public IdentifiableCollection(Set<X> set) {
@@ -45,6 +44,20 @@ public class IdentifiableCollection<X extends Identifiable> {
 
     public Stream<X> stream() {
         return set.stream();
+    }
+    
+    public Set<X> getCopy() {
+        return new HashSet<>(set);
+    }
+
+    /**
+     * Returns an iterator over elements of type {@code T}.
+     *
+     * @return an Iterator.
+     */
+    @Override
+    public Iterator<X> iterator() {
+        return set.iterator();
     }
 }
 

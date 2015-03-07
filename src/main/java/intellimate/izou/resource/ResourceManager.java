@@ -230,6 +230,7 @@ public class ResourceManager {
         List<String> events = resourceBuilder.announceEvents();
         if(events == null) return;
         for(String event : events) {
+            //TODO: @Julian here!
             if(eventSubscribers.containsKey(event)) {
                 LinkedList<ResourceBuilder> resourceBuilders = eventSubscribers.get(event);
                 if (!resourceBuilders.contains(resourceBuilder))
@@ -257,6 +258,7 @@ public class ResourceManager {
      * @param resourceBuilder an instance of ResourceBuilder
      */
     private void unregisterResourceIDForResourceBuilder(ResourceBuilder resourceBuilder) {
+        //TODO @Julian intercept here for removal!
         List<Resource> resources = resourceBuilder.announceResources();
         resources.stream().map(resource -> resourceIDs.get(resource.getResourceID()))
                 .filter(Objects::nonNull)

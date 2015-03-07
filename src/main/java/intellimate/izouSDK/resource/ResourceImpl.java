@@ -168,4 +168,17 @@ public class ResourceImpl<T> implements Resource<T> {
     public List<Resource<T>> toList() {
         return Arrays.asList(this);
     }
+
+    /**
+     * An ID must always be unique.
+     * A Class like Activator or OutputPlugin can just provide their .class.getCanonicalName()
+     * If you have to implement this interface multiple times, just concatenate unique Strings to
+     * .class.getCanonicalName()
+     *
+     * @return A String containing an ID
+     */
+    @Override
+    public String getID() {
+        return resourceID;
+    }
 }

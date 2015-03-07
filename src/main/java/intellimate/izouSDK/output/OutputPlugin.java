@@ -122,16 +122,8 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable, Excepti
      * @param event the event to add
      * @throws IllegalStateException raised if problems adding an event to blockingQueue
      */
-    public void addToEventList(Event event) throws IllegalStateException{
+    public void addToEventList(Event event) {
         eventBlockingQueue.add(event);
-    }
-
-    /**
-     * sets the executor of the OutputManager for efficiency reasons
-     * @param executor the executor to be set
-     */
-    public void setExecutor(ExecutorService executor) {
-        this.executor = executor;
     }
 
     /**

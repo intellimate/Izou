@@ -1,5 +1,6 @@
 package intellimate.izou.events;
 
+import intellimate.izou.identification.Identifiable;
 import intellimate.izou.identification.Identification;
 
 import java.util.HashMap;
@@ -10,9 +11,12 @@ import java.util.List;
  * @author Leander Kurscheidt
  * @version 1.0
  */
-public interface EventBehaviourController {
+public interface EventBehaviourController extends Identifiable {
     /**
      * generates the data to control the Event
+     * <p>
+     * The Identifications with the highest Integer get the priority.
+     * </p> 
      * @param identifications the Identifications of the OutputPlugins
      * @return a HashMap, where the keys represent the associated Behaviour and the values the Identification;
      */
