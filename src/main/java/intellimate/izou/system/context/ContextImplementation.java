@@ -1,11 +1,9 @@
 package intellimate.izou.system.context;
 
 import intellimate.izou.addon.AddOn;
-import intellimate.izou.events.Event;
-import intellimate.izou.events.EventCallable;
-import intellimate.izou.events.EventListener;
-import intellimate.izou.events.EventsController;
+import intellimate.izou.events.*;
 import intellimate.izou.identification.Identification;
+import intellimate.izou.identification.IllegalIDException;
 import intellimate.izou.main.Main;
 import intellimate.izou.output.OutputExtension;
 import intellimate.izou.output.OutputPlugin;
@@ -300,6 +298,17 @@ public class ContextImplementation implements Context {
         @Override
         public void unregisterEventCaller(Identification identification) {
             main.getLocalEventManager().unregisterCaller(identification);
+        }
+
+        /**
+         * This method fires an Event
+         *
+         * @param event the fired Event
+         * @throws IllegalAccessError not yet implemented
+         */
+        @Override
+        public void fireEvent(Event event) throws IllegalIDException, MultipleEventsException {
+            main.getLocalEventManager().fireEvent(event);
         }
 
         /**

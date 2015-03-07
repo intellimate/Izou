@@ -3,6 +3,7 @@ package intellimate.izou.events;
 import intellimate.izou.IzouModule;
 import intellimate.izou.identification.Identification;
 import intellimate.izou.identification.IdentificationManager;
+import intellimate.izou.identification.IllegalIDException;
 import intellimate.izou.main.Main;
 
 import java.util.Optional;
@@ -70,15 +71,17 @@ public class LocalEventManager extends IzouModule implements Runnable {
     }
 
     /**
-     * this method actually used to fire an event.
+     * This method fires an Event
      *
      * @param event the fired Event
+     * @throws IllegalAccessException not yet implemented
      */
-    private void fireEvent(Event event) {
-        try {
-            eventCallable.fire(event);
-        } catch (intellimate.izou.events.MultipleEventsException e) {
-            log.error("unable to fire Event", e);
+    public void fireEvent(Event event) throws IllegalIDException, intellimate.izou.events.MultipleEventsException {
+        if(events == null) return;
+        if(events.isEmpty()) {
+            events.add(event);
+        } else {
+            throw new intellimate.izou.events.MultipleEventsException();
         }
     }
 
@@ -86,8 +89,14 @@ public class LocalEventManager extends IzouModule implements Runnable {
     public void run() {
         stop = false;
         while (!stop) {
+            Event event = null;
             try {
-                fireEvent(events.take());
+                event = events.take();
+                try {
+                    eventCallable.fire(event);
+                } catch (intellimate.izou.events.MultipleEventsException e) {
+                    log.error("unable to fire Event", e);
+                }
             } catch (InterruptedException e) {
                 log.warn(e);
             }
@@ -126,8 +135,7 @@ public class LocalEventManager extends IzouModule implements Runnable {
          * @throws intellimate.izou.events.MultipleEventsException an Exception will be thrown if there are currently other events fired
          */
         public void fire(Event event) throws intellimate.izou.events.MultipleEventsException {
-            if(localEvents == null) return;
-            if(localEvents.isEmpty()) {
+            if(events.isEmpty()) {
                 localEvents.add(event);
             } else {
                 throw new intellimate.izou.events.MultipleEventsException();

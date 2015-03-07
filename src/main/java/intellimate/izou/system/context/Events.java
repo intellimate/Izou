@@ -3,7 +3,9 @@ package intellimate.izou.system.context;
 import intellimate.izou.events.Event;
 import intellimate.izou.events.EventCallable;
 import intellimate.izou.events.EventListener;
+import intellimate.izou.events.MultipleEventsException;
 import intellimate.izou.identification.Identification;
+import intellimate.izou.identification.IllegalIDException;
 
 import java.util.List;
 import java.util.Optional;
@@ -69,6 +71,14 @@ public interface Events {
      * @param identification the Identification of the the instance
      */
     void unregisterEventCaller(Identification identification);
+
+    /**
+     * This method fires an Event
+     *
+     * @param event the fired Event
+     * @throws java.lang.IllegalAccessError not yet implemented
+     */
+    void fireEvent(Event event) throws IllegalIDException, MultipleEventsException;
 
     /**
      * returns the API for the EventsDistributor
