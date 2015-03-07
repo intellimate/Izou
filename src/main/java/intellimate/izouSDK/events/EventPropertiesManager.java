@@ -1,6 +1,7 @@
 package intellimate.izouSDK.events;
 
 import intellimate.izou.system.file.FileSystemManager;
+import intellimate.izou.system.file.ReloadableFile;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -12,6 +13,7 @@ import java.util.Properties;
  * events to the file, and get events from the file. The file pretty much serves as a hub for event IDs.
  */
 public class EventPropertiesManager implements ReloadableFile {
+
     /**
      * The path to the local_events.properties file
      */
@@ -59,7 +61,7 @@ public class EventPropertiesManager implements ReloadableFile {
         }
         try {
             if (bufferedWriterInit != null) {
-                bufferedWriterInit.write("\n\n# " + description + "\n" + key + " = " + value);
+                bufferedWriterInit.write("\n\n" + key + "_DESCRIPTION = " + description + "\n" + key + " = " + value);
             }
         } catch (IOException e) {
             fileLogger.error("Unable to write to local_events.properties file", e);
@@ -77,51 +79,54 @@ public class EventPropertiesManager implements ReloadableFile {
     /**
      * Unregisters or deletes an event from the local_events.properties file
      *
-     * @param event the complete event ID
+     * @param eventKey the key under which the complete event ID is stored in the properties file
      */
-    public void unregisterEventID(String event) {
-        properties.remove(event);
+    public void unregisterEventID(String eventKey) {
+        properties.remove(eventKey + "_DESCRIPTION");
+        properties.remove(eventKey);
 
-        BufferedWriter bufferedWriterInit = null;
+        BufferedWriter bufferedWriter = null;
         try {
-            bufferedWriterInit = new BufferedWriter(new FileWriter(EVENTS_PROPERTIES_PATH, true));
+            bufferedWriter = new BufferedWriter(new FileWriter(EVENTS_PROPERTIES_PATH, true));
         } catch (IOException e) {
             fileLogger.error("Unable to create buffered writer", e);
         }
 
         try {
-            if (bufferedWriterInit != null) {
-                properties.store(bufferedWriterInit, null);
+            if (bufferedWriter != null) {
+                properties.store(bufferedWriter, null);
             }
         } catch (IOException e) {
             fileLogger.error("Unable to delete the event from the properties file", e);
         } finally {
             try {
-                if (bufferedWriterInit != null) {
-                    bufferedWriterInit.close();
+                if (bufferedWriter != null) {
+                    bufferedWriter.close();
                 }
             } catch (IOException e) {
                 fileLogger.error("Unable to close buffered writer", e);
             }
         }
+
+        reloadFile(null);
     }
 
 
     @Override
     public void reloadFile(String eventType) {
         Properties temp = new Properties();
-        InputStream inputStream = null;
+        BufferedReader in = null;
         try {
             File properties = new File(EVENTS_PROPERTIES_PATH);
-            BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(properties), "UTF8"));
+            in = new BufferedReader(new InputStreamReader(new FileInputStream(properties), "UTF8"));
             temp.load(in);
             this.properties = temp;
         } catch(IOException e) {
             fileLogger.error("Error while trying to load local_events.properties", e);
         } finally {
-            if (inputStream != null) {
+            if (in != null) {
                 try {
-                    inputStream.close();
+                    in.close();
                 } catch (IOException e) {
                     fileLogger.error("Unable to close input stream", e);
                 }
