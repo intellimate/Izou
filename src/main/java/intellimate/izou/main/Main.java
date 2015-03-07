@@ -4,21 +4,20 @@ import intellimate.izou.activator.ActivatorManager;
 import intellimate.izou.addon.AddOn;
 import intellimate.izou.addon.AddOnManager;
 import intellimate.izou.events.EventDistributor;
+import intellimate.izou.events.LocalEventManager;
+import intellimate.izou.output.OutputManager;
+import intellimate.izou.resource.ResourceManager;
 import intellimate.izou.system.file.FileManager;
 import intellimate.izou.system.file.*;
 import intellimate.izou.system.file.FileSystemManager;
 import intellimate.izou.system.javafx.JavaFXInitializer;
 import intellimate.izou.system.logger.*;
-import intellimate.izouSDK.events.EventPropertiesManager;
-import intellimate.izou.events.LocalEventManager;
-import intellimate.izou.output.OutputManager;
-import intellimate.izou.resource.ResourceManager;
 import intellimate.izou.threadpool.ThreadPoolManager;
+import intellimate.izouSDK.events.EventPropertiesManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -128,15 +127,17 @@ public class Main {
             fileLogger.fatal("Failed to create the FileManager", e);
         }
         fileManager = fileManagerTemp;
-
+        
+        /*
         try {
+            //TODO: move to SDK
             if (fileManager != null) {
                 fileManager.registerFileDir(Paths.get(FileSystemManager.PROPERTIES_PATH),
                         "local_events.properties", eventPropertiesManager);
             }
         } catch (IOException e) {
             fileLogger.error("Unable to register the eventPropertiesManager", e);
-        }
+        }*/
 
         addOnManager = new AddOnManager(this);
         if(addOns != null && !debug) {
