@@ -13,7 +13,6 @@ import intellimate.izou.system.file.FileSystemManager;
 import intellimate.izou.system.javafx.JavaFXInitializer;
 import intellimate.izou.system.logger.*;
 import intellimate.izou.threadpool.ThreadPoolManager;
-import intellimate.izouSDK.events.EventPropertiesManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -40,7 +39,6 @@ public class Main {
     private final FilePublisher filePublisher;
     private final IzouLogger izouLogger;
     private final ThreadPoolManager threadPoolManager;
-    private final EventPropertiesManager eventPropertiesManager;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     /**
@@ -102,13 +100,13 @@ public class Main {
              fileLogger.debug("Done initializing JavaFX ToolKit");
          }
 
-        FileSystemManager fileSystemManager = new FileSystemManager();
+        FileSystemManager fileSystemManager = new FileSystemManager(this);
         try {
             fileSystemManager.createIzouFileSystem();
         } catch (IOException e) {
             fileLogger.fatal("Failed to create the FileSystemManager", e);
         }
-        threadPoolManager = new ThreadPoolManager();
+        threadPoolManager = new ThreadPoolManager(this);
         izouLogger = new IzouLogger();
         outputManager = new OutputManager(this);
         resourceManager = new ResourceManager(this);
@@ -117,11 +115,10 @@ public class Main {
         threadPoolManager.getIzouThreadPool().submit(localEventManager);
         activatorManager = new ActivatorManager(this);
         filePublisher = new FilePublisher(this);
-        eventPropertiesManager = new EventPropertiesManager();
 
         FileManager fileManagerTemp;
         try {
-            fileManagerTemp = new FileManager(filePublisher);
+            fileManagerTemp = new FileManager(this);
         } catch (IOException e) {
             fileManagerTemp = null;
             fileLogger.fatal("Failed to create the FileManager", e);
@@ -179,10 +176,6 @@ public class Main {
 
     public EventDistributor getEventDistributor() {
         return eventDistributor;
-    }
-
-    public EventPropertiesManager getEventPropertiesManager() {
-        return eventPropertiesManager;
     }
 
     public ThreadPoolManager getThreadPoolManager() {
