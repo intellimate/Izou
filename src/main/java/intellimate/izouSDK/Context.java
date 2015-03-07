@@ -1,25 +1,113 @@
 package intellimate.izouSDK;
 
+import intellimate.izou.addon.AddOn;
+import intellimate.izou.system.context.*;
 import intellimate.izouSDK.properties.PropertiesAssistant;
 import intellimate.izouSDK.properties.PropertiesContainer;
+import org.apache.logging.log4j.spi.ExtendedLogger;
 
 /**
  * @author Leander Kurscheidt
  * @version 1.0
  */
-public class Context {
-    private intellimate.izou.system.context.Context context;
+public class Context implements intellimate.izou.system.Context {
+    private intellimate.izou.system.Context context;
     private final Properties properties;
     /**
      */
-    public Context(intellimate.izou.system.context.Context context) {
+    public Context(intellimate.izou.system.Context context) {
         this.context = context;
-        properties = new Properties();
+        properties = new Properties(new PropertiesAssistant(this, getAddOn().getID()));
     }
 
+    /**
+     * returns the API used fo the Properties
+     * @return Properties
+     */
     public Properties getProperties() {
         return properties;
     }
+
+    /**
+     * returns the API used for interaction with Events
+     *
+     * @return Events
+     */
+    @Override
+    public Events getEvents() {
+        return context.getEvents();
+    }
+
+    /**
+     * returns the API used for interaction with Resource
+     *
+     * @return Resource
+     */
+    @Override
+    public Resources getResources() {
+        return context.getResources();
+    }
+
+    /**
+     * returns the API used for interaction with Files
+     *
+     * @return Files
+     */
+    @Override
+    public Files getFiles() {
+        return context.getFiles();
+    }
+
+    /**
+     * returns the API used to log
+     * @return Logger
+     */
+    @Override
+    public ExtendedLogger getLogger() {
+        return context.getLogger();
+    }
+
+    /**
+     * returns the API used to manage the ThreadPool
+     *
+     * @return ThreadPool
+     */
+    @Override
+    public ThreadPool getThreadPool() {
+        return context.getThreadPool();
+    }
+
+    /**
+     * returns the API to manage the Activators
+     *
+     * @return Activator
+     */
+    @Override
+    public Activators getActivators() {
+        return context.getActivators();
+    }
+
+    /**
+     * returns the API used to manage the OutputPlugins and OutputExtensions
+     *
+     * @return Output
+     */
+    @Override
+    public Output getOutput() {
+        return context.getOutput();
+    }
+
+    /**
+     * gets addOn
+     *
+     * @return the addOn
+     */
+    @Override
+    public AddOn getAddOn() {
+        return context.getAddOn();
+    }
+
+
 
     public class Properties {
         private PropertiesAssistant propertiesManager;
@@ -28,8 +116,8 @@ public class Context {
          * Creates a new properties object within the context
          *
          */
-        public Properties() {
-            this.propertiesManager = new PropertiesAssistant(Context.this, addOn.getID());
+        public Properties(PropertiesAssistant propertiesAssistant) {
+            this.propertiesManager = propertiesAssistant;
         }
 
         /**

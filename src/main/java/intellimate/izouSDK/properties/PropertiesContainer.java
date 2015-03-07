@@ -1,5 +1,7 @@
 package intellimate.izouSDK.properties;
 
+import intellimate.izou.system.Context;
+
 import java.util.Properties;
 
 /**
@@ -7,14 +9,14 @@ import java.util.Properties;
  */
 public class PropertiesContainer implements intellimate.izou.properties.PropertiesContainer{
     private Properties properties;
-    private intellimate.izou.system.context.Context context;
+    private Context context;
 
     /**
      * Creates a new properties-container
      *
      * @param context instance of Context
      */
-    public PropertiesContainer(intellimate.izou.system.context.Context context) {
+    public PropertiesContainer(Context context) {
         this.properties = new Properties();
         this.context = context;
     }
@@ -42,7 +44,7 @@ public class PropertiesContainer implements intellimate.izou.properties.Properti
      *
      * @return context of the current addOn
      */
-    public intellimate.izou.system.context.Context getContext() {
+    public Context getContext() {
         return context;
     }
 }

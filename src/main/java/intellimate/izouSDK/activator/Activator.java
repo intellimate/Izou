@@ -5,6 +5,7 @@ import intellimate.izou.events.EventCallable;
 import intellimate.izou.events.MultipleEventsException;
 import intellimate.izou.identification.IdentificationManager;
 import intellimate.izou.system.Context;
+import intellimate.izou.system.context.ContextImplementation;
 import intellimate.izou.threadpool.ExceptionCallback;
 
 /**
@@ -21,9 +22,9 @@ public abstract class Activator implements intellimate.izou.activator.Activator,
     //limit of the exceptionCount
     @SuppressWarnings("FieldCanBeLocal")
     private final int exceptionLimit = 100;
-    private Context context;
+    private ContextImplementation context;
 
-    public Activator(Context context) {
+    public Activator(ContextImplementation context) {
         if(!identificationManager.registerIdentification(this)) {
             context.logger.getLogger().fatal("Failed to register with identification manager" + getID());
         }
@@ -123,7 +124,7 @@ public abstract class Activator implements intellimate.izou.activator.Activator,
      *
      * @return an instance of Context.
      */
-    public intellimate.izou.system.context.Context getContext() {
+    public Context getContext() {
         return context;
     }
 

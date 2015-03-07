@@ -1,7 +1,7 @@
 package intellimate.izouSDK.properties;
 
 import intellimate.izou.addon.AddOn;
-import intellimate.izou.system.Context;
+import intellimate.izouSDK.Context;
 import intellimate.izou.system.file.ReloadableFile;
 
 import java.io.*;
@@ -123,7 +123,7 @@ public class PropertiesAssistant implements ReloadableFile {
                     + addOnID + ".properties";
         } catch (IOException e) {
             propertiesPathTemp = null;
-            context.logger.getLogger().error("Error while trying to build the propertiesPathTemp", e);
+            context.getLogger().error("Error while trying to build the propertiesPathTemp", e);
         }
 
         propertiesPath = propertiesPathTemp;
@@ -131,7 +131,7 @@ public class PropertiesAssistant implements ReloadableFile {
         if (!propertiesFile.exists()) try {
             propertiesFile.createNewFile();
         } catch (IOException e) {
-            context.logger.getLogger().error("Error while trying to create the new Properties file", e);
+            context.getLogger().error("Error while trying to create the new Properties file", e);
         }
 
         //InputStream inputStream;
@@ -144,10 +144,10 @@ public class PropertiesAssistant implements ReloadableFile {
                 //properties.load(inputStream);
                 properties.load(in);
             } catch (IOException e) {
-                context.logger.getLogger().error("unable to load the InputStream for the PropertiesFile",e);
+                context.getLogger().error("unable to load the InputStream for the PropertiesFile",e);
             }
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
-            context.logger.getLogger().error("Error while trying to read Properties-File", e);
+            context.getLogger().error("Error while trying to read Properties-File", e);
         }
 
         if (defaultPropertiesPath != null) {
@@ -158,14 +158,14 @@ public class PropertiesAssistant implements ReloadableFile {
                 try {
                     createDefaultPropertyFile(defaultPropertiesPath);
                 } catch (IOException e) {
-                    context.logger.getLogger().error("Error while trying to copy the Default-Properties File", e);
+                    context.getLogger().error("Error while trying to copy the Default-Properties File", e);
                 }
 
                 if (new File(defaultPropertiesPath).exists() && !writeToPropertiesFile(defaultPropertiesPath)) return;
                 try {
                     reloadProperties();
                 } catch (IOException e) {
-                    context.logger.getLogger().error("Error while trying to reload the Properties-Files", e);
+                    context.getLogger().error("Error while trying to reload the Properties-Files", e);
                 }
             }
         }
@@ -179,8 +179,7 @@ public class PropertiesAssistant implements ReloadableFile {
      * @return true if operation has succeeded, else false
      */
     private boolean writeToPropertiesFile(String defaultPropsPath) {
-        return context.files.writeToFile(defaultPropsPath, context.properties.
-                getPropertiesPath());
+        return context.getFiles().writeToFile(defaultPropsPath, context.getProperties().getPropertiesPath());
     }
 
     /**
@@ -194,7 +193,7 @@ public class PropertiesAssistant implements ReloadableFile {
      * @throws IOException is thrown by bufferedWriter
      */
     private void createDefaultPropertyFile(String defaultPropsPath) throws IOException {
-        context.files.createDefaultFile(defaultPropsPath, "# Properties should always be in the "
+        context.getFiles().createDefaultFile(defaultPropsPath, "# Properties should always be in the "
                 + "form of: \"key = value\"");
     }
 
@@ -207,7 +206,7 @@ public class PropertiesAssistant implements ReloadableFile {
         Properties temp = new Properties();
         InputStream inputStream = null;
         try {
-            File properties = new File(context.properties.getPropertiesPath());
+            File properties = new File(context.getProperties().getPropertiesPath());
 
             //Reader reader = new FileReader(properties);
             BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(properties),
@@ -218,14 +217,14 @@ public class PropertiesAssistant implements ReloadableFile {
             //temp.load(inputStream);
             propertiesContainer.setProperties(temp);
         } catch(IOException e) {
-            context.logger.getLogger().error("Error while trying to load the Properties-File: "
-                    + context.properties.getPropertiesPath(), e);
+            context.getLogger().error("Error while trying to load the Properties-File: "
+                    + context.getProperties().getPropertiesPath(), e);
         } finally {
             if (inputStream != null) {
                 try {
                     inputStream.close();
                 } catch (IOException e) {
-                    context.logger.getLogger().error("Unable to close input stream", e);
+                    context.getLogger().error("Unable to close input stream", e);
                 }
             }
         }
@@ -293,7 +292,7 @@ public class PropertiesAssistant implements ReloadableFile {
         try {
             reloadProperties();
         } catch (IOException e) {
-            context.logger.getLogger().error("Error reloading property file for" + addOnID, e);
+            context.getLogger().error("Error reloading property file for" + addOnID, e);
         }
     }
 

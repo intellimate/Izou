@@ -6,6 +6,7 @@ import intellimate.izou.identification.IdentificationManager;
 import intellimate.izou.output.OutputManager;
 import intellimate.izou.resource.Resource;
 import intellimate.izou.system.Context;
+import intellimate.izou.system.context.ContextImplementation;
 import intellimate.izou.threadpool.ExceptionCallback;
 
 import java.util.ArrayList;
@@ -56,7 +57,7 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable, Excepti
     /**
      * the context of the addOn
      */
-    private Context context;
+    private ContextImplementation context;
 
     /**
      * creates a new output-plugin with a new id
@@ -64,7 +65,7 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable, Excepti
      * @param id the id of the new output-plugin
      * @param context context and sh*t, you know
      */
-    public OutputPlugin(String id, Context context) {
+    public OutputPlugin(String id, ContextImplementation context) {
         this.id = id;
         this.context = context;
         outputExtensionList = new ArrayList<>();
@@ -208,7 +209,7 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable, Excepti
      *
      * @return an instance of Context.
      */
-    public intellimate.izou.system.context.Context getContext() {
+    public Context getContext() {
         return context;
     }
 

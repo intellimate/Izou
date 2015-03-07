@@ -1,6 +1,7 @@
 package intellimate.izou.activator;
 
 import intellimate.izou.events.Event;
+import intellimate.izou.system.Context;
 import intellimate.izouSDK.events.EventImpl;
 import intellimate.izou.identification.Identification;
 import intellimate.izou.identification.IdentificationManager;
@@ -15,7 +16,7 @@ public class ActivatorTest extends IzouTest{
 
     public ActivatorTest() {
         super(false, ActivatorTest.class.getCanonicalName());
-        intellimate.izou.system.context.Context context = getContext();
+        Context context = getContext();
         activator = new Activator(getContext()) {
             @Override
             public String getID() {

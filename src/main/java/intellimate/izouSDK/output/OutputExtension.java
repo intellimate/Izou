@@ -1,6 +1,7 @@
 package intellimate.izouSDK.output;
 
 import intellimate.izou.events.Event;
+import intellimate.izou.system.Context;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,14 +37,14 @@ public abstract class OutputExtension<T> implements intellimate.izou.output.Outp
     /**
      * the context of the addOn - where "global" methods are stored
      */
-    private intellimate.izou.system.context.Context context;
+    private Context context;
 
     /**
      * creates a new outputExtension with a new id
      * @param id the id to be set to the id of outputExtension
      * @param context the context of the addon
      */
-    public OutputExtension(String id, intellimate.izou.system.context.Context context) {
+    public OutputExtension(String id, Context context) {
         this.id = id;
         resourceIdWishList = new ArrayList<>();
         this.context = context;
@@ -167,7 +168,7 @@ public abstract class OutputExtension<T> implements intellimate.izou.output.Outp
      *
      * @return an instance of Context.
      */
-    public intellimate.izou.system.context.Context getContext() {
+    public Context getContext() {
         return context;
     }
 }

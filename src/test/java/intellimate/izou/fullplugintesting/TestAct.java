@@ -2,6 +2,7 @@ package intellimate.izou.fullplugintesting;
 
 import intellimate.izou.activator.Activator;
 import intellimate.izou.events.Event;
+import intellimate.izou.system.Context;
 import intellimate.izouSDK.events.EventImpl;
 import intellimate.izou.events.MultipleEventsException;
 import intellimate.izou.identification.Identification;
@@ -16,7 +17,7 @@ import java.util.Optional;
 public class TestAct extends Activator {
     private boolean start;
 
-    public TestAct(intellimate.izou.system.context.Context context) {
+    public TestAct(Context context) {
         super(context);
         start = true;
     }

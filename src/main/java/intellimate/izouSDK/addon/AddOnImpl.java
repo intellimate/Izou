@@ -7,7 +7,7 @@ import intellimate.izou.events.EventsController;
 import intellimate.izou.output.OutputExtension;
 import intellimate.izou.output.OutputPlugin;
 import intellimate.izou.properties.PropertiesContainer;
-import intellimate.izou.system.Context;
+import intellimate.izou.system.context.ContextImplementation;
 import ro.fortsoft.pf4j.PluginWrapper;
 
 /**
@@ -20,7 +20,7 @@ import ro.fortsoft.pf4j.PluginWrapper;
 public abstract class AddOnImpl implements AddOn {
     @SuppressWarnings("FieldCanBeLocal")
     private final String addOnID;
-    private Context context;
+    private ContextImplementation context;
     private PluginWrapper plugin;
 
     /**
@@ -74,7 +74,7 @@ public abstract class AddOnImpl implements AddOn {
      * @param context the context to initialize with
      */
     @Override
-    public void initAddOn(Context context) {
+    public void initAddOn(ContextImplementation context) {
         this.context = context;
     }
 
@@ -85,7 +85,7 @@ public abstract class AddOnImpl implements AddOn {
      *
      * @return an instance of Context.
      */
-    public Context getContext() {
+    public ContextImplementation getContext() {
         return context;
     }
 
@@ -125,7 +125,7 @@ public abstract class AddOnImpl implements AddOn {
      * If the key is not found in this property list, the default property list, and its defaults, recursively, are
      * then checked. The method returns null if the property is not found.
      *
-     * @deprecated since version 0.9.9.9 - use {@link Context.Properties#getProperties}
+     * @deprecated since version 0.9.9.9 - use {@link intellimate.izou.system.context.ContextImplementation.Properties#getProperties}
      * @param key the property key.
      * @return the value in this property list with the specified key value.
      */
@@ -138,7 +138,7 @@ public abstract class AddOnImpl implements AddOn {
      * Returns an Instance of Properties, if found
      *
      * @return an Instance of Properties or null;
-     * @deprecated since version 0.9.9.9 - use {@link Context.Properties#getPropertiesContainer}
+     * @deprecated since version 0.9.9.9 - use {@link intellimate.izou.system.context.ContextImplementation.Properties#getPropertiesContainer}
      */
     @Deprecated
     public PropertiesContainer getPropertiesContainer() {
@@ -151,7 +151,7 @@ public abstract class AddOnImpl implements AddOn {
      * Provided for parallelism with the getProperty method. Enforces use of strings for
      * property keys and values. The value returned is the result of the HashTable call to put.
      *
-     * @deprecated since version 0.9.9.9 - use {@link Context.Properties#setProperties}
+     * @deprecated since version 0.9.9.9 - use {@link intellimate.izou.system.context.ContextImplementation.Properties#setProperties}
      * @param key the key to be placed into this property list.
      * @param value the value corresponding to key.
      */
@@ -163,7 +163,7 @@ public abstract class AddOnImpl implements AddOn {
     /**
      * Sets properties
      *
-     * @deprecated since version 0.9.9.9 - use {@link Context.Properties#setProperties}
+     * @deprecated since version 0.9.9.9 - use {@link intellimate.izou.system.context.ContextImplementation.Properties#setProperties}
      * @param properties instance of properties, not null
      */
     @Deprecated
@@ -174,7 +174,7 @@ public abstract class AddOnImpl implements AddOn {
     /**
      * Sets properties-container
      *
-     * @deprecated since version 0.9.9.9 - use {@link Context.Properties#setPropertiesContainer}
+     * @deprecated since version 0.9.9.9 - use {@link intellimate.izou.system.context.ContextImplementation.Properties#setPropertiesContainer}
      * @param propertiesContainer the properties-container
      */
     @Deprecated
@@ -185,7 +185,7 @@ public abstract class AddOnImpl implements AddOn {
     /**
      * Gets the path to properties file (the real properties file - as opposed to the {@code defaultProperties.txt} file)
      *
-     * @deprecated since version 0.9.9.9 - use {@link Context.Properties#getPropertiesPath}
+     * @deprecated since version 0.9.9.9 - use {@link intellimate.izou.system.context.ContextImplementation.Properties#getPropertiesPath}
      * @return path to properties file
      */
     @Deprecated
@@ -196,7 +196,7 @@ public abstract class AddOnImpl implements AddOn {
     /**
      * Sets the path to properties file (the real properties file - as opposed to the {@code defaultProperties.txt} file)
      *
-     * @deprecated since version 0.9.9.9 - use {@link Context.Properties#setPropertiesPath}
+     * @deprecated since version 0.9.9.9 - use {@link intellimate.izou.system.context.ContextImplementation.Properties#setPropertiesPath}
      * @param propertiesPath to properties file
      */
     @Deprecated
@@ -207,7 +207,7 @@ public abstract class AddOnImpl implements AddOn {
     /**
      * Gets the path to default properties file (the file which is copied into the real properties on start)
      *
-     * @deprecated since version 0.9.9.9 - use {@link Context.Properties#getDefaultPropertiesPath}
+     * @deprecated since version 0.9.9.9 - use {@link intellimate.izou.system.context.ContextImplementation.Properties#getDefaultPropertiesPath}
      * @return path to default properties file
      */
     @Deprecated
@@ -218,7 +218,7 @@ public abstract class AddOnImpl implements AddOn {
     /**
      * this method gets called when the task submitted to the ThreadPool crashes
      *
-     * @deprecated since version 0.9.9.9 - use {@link Context.Properties#getPropertiesContainer}
+     * @deprecated since version 0.9.9.9 - use {@link intellimate.izou.system.context.ContextImplementation.Properties#getPropertiesContainer}
      * @param e the exception catched
      */
     @Override
