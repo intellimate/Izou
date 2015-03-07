@@ -19,11 +19,14 @@ public interface ResourceBuilder extends Identifiable {
      */
     abstract List<Resource> announceResources();
     /**
-     * This method is called to register for what Events it wants to provide Resources.
-     *
+     * this method is called to register for what Events it wants to provide Resources.
+     * <p>
+     * The Event has to be in the following format: It should contain only one Descriptor and and one Resource with the
+     * ID "description", which contains an description of the Event.
+     * </p> 
      * @return a List containing ID's for the Events
      */
-    abstract List<String> announceEvents();
+    abstract List<Event> announceEvents();
     /**
      * This method is called when an object wants to get a Resource.
      *

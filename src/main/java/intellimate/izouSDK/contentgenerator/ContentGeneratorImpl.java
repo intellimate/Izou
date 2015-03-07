@@ -49,23 +49,6 @@ public abstract class ContentGeneratorImpl implements ContentGenerator {
     }
 
     /**
-     * this method is called to register what resources the object provides.
-     * just pass a List of Resources without Data in it.
-     *
-     * @return a List containing the resources the object provides
-     */
-    @Override
-    public abstract List<Resource> announceResources();
-
-    /**
-     * this method is called to register for what Events it wants to provide Resources.
-     *
-     * @return a List containing ID's for the Events
-     */
-    @Override
-    public abstract List<String> announceEvents();
-
-    /**
      * this method is called when an object wants to get a Resource.
      * <p>
      * Don't use the Resources provided as arguments, they are just the requests.

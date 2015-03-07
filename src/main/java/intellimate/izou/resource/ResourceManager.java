@@ -133,16 +133,23 @@ public class ResourceManager extends IzouModule implements AddonThreadPoolUser {
     private void registerResourceIDsForResourceBuilder(ResourceBuilder resourceBuilder) {
         List<Resource> resources = resourceBuilder.announceResources();
         if(resources == null) return;
-        for(Resource resource : resources) {
-            if(resourceIDs.containsKey(resource.getResourceID())) {
-                LinkedList<ResourceBuilder> resourceBuilders = resourceIDs.get(resource.getResourceID());
-                if (!resourceBuilders.contains(resourceBuilder))
-                    resourceBuilders.add(resourceBuilder);
-            } else {
-                LinkedList<ResourceBuilder> tempList = new LinkedList<>();
-                tempList.add(resourceBuilder);
-                resourceIDs.put(resource.getResourceID(), tempList);
-            }
+        resources.stream()
+                .map(this::getRegisteredListForResource)
+                .forEach(list -> list.add(resourceBuilder));
+    }
+
+    /**
+     * returns the list with all the ResourceBuilders listening to the Resource
+     * @param resource the resource to listen to
+     * @return a List of ResourceBuilders
+     */
+    private List<ResourceBuilder> getRegisteredListForResource(Resource resource) {
+        if(resourceIDs.containsKey(resource.getResourceID())) {
+            return resourceIDs.get(resource.getResourceID());
+        } else {
+            LinkedList<ResourceBuilder> tempList = new LinkedList<>();
+            resourceIDs.put(resource.getResourceID(), tempList);
+            return tempList;
         }
     }
 
@@ -152,19 +159,26 @@ public class ResourceManager extends IzouModule implements AddonThreadPoolUser {
      * @param resourceBuilder an instance of ResourceBuilder
      */
     private void registerEventsForResourceBuilder(ResourceBuilder resourceBuilder) {
-        List<String> events = resourceBuilder.announceEvents();
+        List<Event> events = resourceBuilder.announceEvents();
         if(events == null) return;
-        for (String event : events) {
-            //TODO: @Julian here!
-            if(eventSubscribers.containsKey(event)) {
-                LinkedList<ResourceBuilder> resourceBuilders = eventSubscribers.get(event);
-                if (!resourceBuilders.contains(resourceBuilder))
-                    resourceBuilders.add(resourceBuilder);
-            } else {
-                LinkedList<ResourceBuilder> tempList = new LinkedList<>();
-                tempList.add(resourceBuilder);
-                eventSubscribers.put(event, tempList);
-            }
+        events.stream()
+                .flatMap(event -> event.getAllIformations().stream())
+                .map(this::getRegisteredListForEvent)
+                .forEach(list -> list.add(resourceBuilder));
+    }
+
+    /**
+     * returns a list of all the ResourceBuilders listening to the Event-ID 
+     * @param event the eventID
+     * @return a List of ResourceBuilders
+     */
+    private List<ResourceBuilder> getRegisteredListForEvent(String event) {
+        if(eventSubscribers.containsKey(event)) {
+            return eventSubscribers.get(event);
+        } else {
+            LinkedList<ResourceBuilder> tempList = new LinkedList<>();
+            eventSubscribers.put(event, tempList);
+            return tempList;
         }
     }
 
@@ -196,7 +210,6 @@ public class ResourceManager extends IzouModule implements AddonThreadPoolUser {
      * @param resourceBuilder an instance of ResourceBuilder
      */
     private void unregisterEventsForResourceBuilder(ResourceBuilder resourceBuilder) {
-        //TODO @Julian intercept here for removal!
         resourceBuilder.announceEvents().stream()
                 .map(eventSubscribers::get)
                 .filter(Objects::nonNull)
