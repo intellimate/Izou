@@ -27,6 +27,11 @@ public abstract class ContentGeneratorImpl implements ContentGenerator {
         identificationManager.registerIdentification(this);
     }
 
+    @Override
+    public void setContentID(String description, String eventIDName, String eventID) {
+        getContext().events.addEventIDToPropertiesFile(description, eventIDName, eventID);
+    }
+
     /**
      * this method is called to register what resources the object provides.
      * just pass a List of Resources without Data in it.
@@ -60,7 +65,6 @@ public abstract class ContentGeneratorImpl implements ContentGenerator {
      *
      * @param e the exception caught
      */
-    @Override
     public void exceptionThrown(Exception e) {
         context.logger.getLogger().fatal("ContentGenerator: " + getID() + " crashed", e);
     }

@@ -12,4 +12,13 @@ import intellimate.izou.resource.ResourceBuilder;
  * @version 1.0
  */
 public interface ContentGenerator extends ResourceBuilder {
+
+    /**
+     * This method ensures that each content generator has its own event id so that it can be triggered by activators.
+     *
+     * @param description the description of the event id
+     * @param eventIDName the event id name
+     * @param eventID the actual event id
+     */
+    public void setContentID(String description, String eventIDName, String eventID);
 }
