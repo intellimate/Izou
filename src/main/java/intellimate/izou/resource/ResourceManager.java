@@ -223,7 +223,8 @@ public class ResourceManager {
     }
 
     /**
-     * registers the events for the ResourceBuilder
+     * Registers the events for the ResourceBuilder
+     *
      * @param resourceBuilder an instance of ResourceBuilder
      */
     private void registerEventsForResourceBuilder(ResourceBuilder resourceBuilder) {
@@ -254,7 +255,8 @@ public class ResourceManager {
     }
 
     /**
-     * unregisters all ResourceIDs for the ResourceBuilders
+     * Unregisters all ResourceIDs for the ResourceBuilders
+     *
      * @param resourceBuilder an instance of ResourceBuilder
      */
     private void unregisterResourceIDForResourceBuilder(ResourceBuilder resourceBuilder) {

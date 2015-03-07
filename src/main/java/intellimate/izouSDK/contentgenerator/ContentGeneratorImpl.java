@@ -24,9 +24,11 @@ public abstract class ContentGeneratorImpl implements ContentGenerator {
     /**
      * Creates a new content generator and ensures that each content generator has its own event id so that it can be
      * triggered by activators.
+     *
      * <p>
      *     It essentially forces each content generator to register an event ID with the local_event.properties file.
      * </p>
+     *
      * @param id the id of the content generator
      * @param context the context of the addOn
      * @param eventDescription the description of the event id
@@ -38,7 +40,12 @@ public abstract class ContentGeneratorImpl implements ContentGenerator {
         this.contentGeneratorID = id;
         this.context = context;
         identificationManager.registerIdentification(this);
-        getContext().events.addEventIDToPropertiesFile(eventDescription, eventIDName, eventID);
+
+        if (eventDescription == null || eventIDName == null || eventID == null) {
+            context.logger.getLogger().error("Unable to register event for content generator: " + id);
+        } else {
+            context.events.addEventIDToPropertiesFile(eventDescription, eventIDName, eventID);
+        }
     }
 
     /**
