@@ -3,6 +3,7 @@ package intellimate.izou.resource;
 import intellimate.izou.AddonThreadPoolUser;
 import intellimate.izou.IzouModule;
 import intellimate.izou.events.Event;
+import intellimate.izou.identification.IllegalIDException;
 import intellimate.izou.main.Main;
 
 import java.util.*;
@@ -90,9 +91,10 @@ public class ResourceManager extends IzouModule implements AddonThreadPoolUser {
      * </p>
      * @param resource the resource to request
      * @param consumer the callback when the ResourceBuilder finishes
+     * @throws IllegalIDException not yet implemented
      */
     @Deprecated
-    public void generatedResource(Resource resource, Consumer<List<Resource>> consumer) {
+    public void generatedResource(Resource resource, Consumer<List<Resource>> consumer) throws IllegalIDException {
         generateResource(resource)
                 .ifPresent(completableFuture -> completableFuture.thenAccept(consumer));
     }
@@ -105,8 +107,9 @@ public class ResourceManager extends IzouModule implements AddonThreadPoolUser {
      * </p>
      * @param resource the resource to request
      * @return an optional of an CompletableFuture
+     * @throws IllegalIDException not yet implemented
      */
-    public Optional<CompletableFuture<List<Resource>>> generateResource (Resource resource) {
+    public Optional<CompletableFuture<List<Resource>>> generateResource (Resource resource) throws IllegalIDException {
         if(resourceIDs.get(resource.getResourceID()) == null) return Optional.empty();
         return resourceIDs.get(resource.getResourceID()).stream()
                 //return true if resource has no provider, if not check provider
@@ -120,8 +123,9 @@ public class ResourceManager extends IzouModule implements AddonThreadPoolUser {
      * <p>
      * this method registers all the events, resourcesID etc.
      * @param resourceBuilder an instance of the ResourceBuilder
+     * @throws IllegalIDException not yet implemented
      */
-    public void registerResourceBuilder(ResourceBuilder resourceBuilder) {
+    public void registerResourceBuilder(ResourceBuilder resourceBuilder) throws IllegalIDException {
         registerResourceIDsForResourceBuilder(resourceBuilder);
         registerEventsForResourceBuilder(resourceBuilder);
     }

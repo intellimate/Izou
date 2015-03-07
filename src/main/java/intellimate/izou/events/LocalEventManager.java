@@ -28,7 +28,14 @@ public class LocalEventManager extends IzouModule implements Runnable {
         IdentificationManager identificationManager = IdentificationManager.getInstance();
         identificationManager.registerIdentification(this);
         Optional<EventCallable> eventCallable = identificationManager.getIdentification(this)
-                .flatMap(getMain().getEventDistributor()::registerEventPublisher);
+                .flatMap(id -> {
+                    try {
+                        return getMain().getEventDistributor().registerEventPublisher(id);
+                    } catch (IllegalIDException e) {
+                        log.fatal("Illegal ID for LocalEventManager", e);
+                        return Optional.empty();
+                    }
+                });
         if (!eventCallable.isPresent()) {
             log.fatal("Unable to obtain EventCallable for " + getID());
             System.exit(1);
@@ -46,9 +53,10 @@ public class LocalEventManager extends IzouModule implements Runnable {
      *
      * @param identification the Identification of the the instance
      * @return an Optional, empty if already registered
+     * @throws IllegalIDException not yet implemented
      */
-    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    public Optional<EventCallable> registerCaller(Identification identification) throws IllegalArgumentException{
+    @SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter"})
+    public Optional<EventCallable> registerCaller(Identification identification) throws IllegalIDException {
         if(identification == null ||
             callers.containsKey(identification)) return Optional.empty();
         EventCaller eventCaller = new EventCaller(events);
@@ -74,7 +82,7 @@ public class LocalEventManager extends IzouModule implements Runnable {
      * This method fires an Event
      *
      * @param event the fired Event
-     * @throws IllegalAccessException not yet implemented
+     * @throws IllegalIDException not yet implemented
      */
     public void fireEvent(Event event) throws IllegalIDException, intellimate.izou.events.MultipleEventsException {
         if(events == null) return;

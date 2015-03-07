@@ -3,6 +3,7 @@ package intellimate.izou.system.context;
 import intellimate.izou.events.EventCallable;
 import intellimate.izou.events.EventsController;
 import intellimate.izou.identification.Identification;
+import intellimate.izou.identification.IllegalIDException;
 
 import java.util.Optional;
 
@@ -18,8 +19,9 @@ public interface EventsDistributor {
      * This method is intended for use cases where you have an entire new source of events (e.g. network)
      * @param identification the Identification of the Source
      * @return An Optional Object which may or may not contains an EventPublisher
+     * @throws IllegalIDException not yet implemented
      */
-    Optional<EventCallable> registerEventPublisher(Identification identification);
+    Optional<EventCallable> registerEventPublisher(Identification identification) throws IllegalIDException;
 
     /**
      * with this method you can unregister EventPublisher add a Source of Events to the System.
@@ -37,8 +39,9 @@ public interface EventsDistributor {
      * It is expected that this method executes quickly.
      *
      * @param eventsController the EventController Interface to control event-dispatching
+     * @throws IllegalIDException not yet implemented
      */
-    void registerEventsController(EventsController eventsController);
+    void registerEventsController(EventsController eventsController) throws IllegalIDException;
 
     /**
      * Unregisters an EventController

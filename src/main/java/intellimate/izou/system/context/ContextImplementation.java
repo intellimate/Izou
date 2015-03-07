@@ -199,9 +199,11 @@ public class ContextImplementation implements Context {
          * @param reloadableFile the reloadable file that should be observed
          * @param fileSubscriber the fileSubscriber that should be notified when the reloadable file is reloaded
          * @param identification the Identification of the requesting instance
+         * @throws IllegalIDException not yet implemented
          */
         @Override
-        public void register(ReloadableFile reloadableFile, FileSubscriber fileSubscriber, Identification identification) {
+        public void register(ReloadableFile reloadableFile, FileSubscriber fileSubscriber,
+                             Identification identification) throws IllegalIDException {
             main.getFilePublisher().register(reloadableFile, fileSubscriber, identification);
         }
 
@@ -210,9 +212,10 @@ public class ContextImplementation implements Context {
          *
          * @param fileSubscriber the fileSubscriber that should be notified when the reloadable file is reloaded
          * @param identification the Identification of the requesting instance
+         * @throws IllegalIDException not yet implemented
          */
         @Override
-        public void register(FileSubscriber fileSubscriber, Identification identification) {
+        public void register(FileSubscriber fileSubscriber, Identification identification) throws IllegalIDException {
            main.getFilePublisher().register(fileSubscriber, identification);
         }
 
@@ -240,9 +243,11 @@ public class ContextImplementation implements Context {
          * </p>
          * @param event the Event to listen to (it will listen to all descriptors individually!)
          * @param eventListener the ActivatorEventListener-interface for receiving activator events
+         * @throws IllegalIDException not yet implemented
          */
+        @SuppressWarnings("JavaDoc")
         @Override
-        public void registerEventListener(Event event, EventListener eventListener) {
+        public void registerEventListener(Event event, EventListener eventListener) throws IllegalIDException {
             main.getEventDistributor().registerEventListener(event, eventListener);
         }
 
@@ -283,9 +288,10 @@ public class ContextImplementation implements Context {
          * Method is thread-safe.
          * @param identification the Identification of the the instance
          * @return an Optional, empty if already registered
+         * @throws IllegalIDException not yet implemented
          */
         @Override
-        public Optional<EventCallable> registerEventCaller(Identification identification) {
+        public Optional<EventCallable> registerEventCaller(Identification identification) throws IllegalIDException {
             return main.getLocalEventManager().registerCaller(identification);
         }
 
@@ -304,7 +310,7 @@ public class ContextImplementation implements Context {
          * This method fires an Event
          *
          * @param event the fired Event
-         * @throws IllegalAccessError not yet implemented
+         * @throws IllegalIDException not yet implemented
          */
         @Override
         public void fireEvent(Event event) throws IllegalIDException, MultipleEventsException {
@@ -328,9 +334,10 @@ public class ContextImplementation implements Context {
              * This method is intended for use cases where you have an entire new source of events (e.g. network)
              * @param identification the Identification of the Source
              * @return An Optional Object which may or may not contains an EventPublisher
+             * @throws IllegalIDException not yet implemented
              */
             @Override
-            public Optional<EventCallable> registerEventPublisher(Identification identification) {
+            public Optional<EventCallable> registerEventPublisher(Identification identification) throws IllegalIDException {
                 return main.getEventDistributor().registerEventPublisher(identification);
             }
 
@@ -353,9 +360,10 @@ public class ContextImplementation implements Context {
              * It is expected that this method executes quickly.
              *
              * @param eventsController the EventController Interface to control event-dispatching
+             * @throws IllegalIDException not yet implemented
              */
             @Override
-            public void registerEventsController(EventsController eventsController) {
+            public void registerEventsController(EventsController eventsController) throws IllegalIDException {
                 main.getEventDistributor().registerEventsController(eventsController);
             }
 
@@ -380,9 +388,10 @@ public class ContextImplementation implements Context {
          *  this method registers all the events, resourcesID etc.
          * </p>
          * @param resourceBuilder an instance of the ResourceBuilder
+         * @throws IllegalIDException not yet implemented
          */
         @Override
-        public void registerResourceBuilder(ResourceBuilder resourceBuilder) {
+        public void registerResourceBuilder(ResourceBuilder resourceBuilder) throws IllegalIDException {
             main.getResourceManager().registerResourceBuilder(resourceBuilder);
         }
 
@@ -402,10 +411,11 @@ public class ContextImplementation implements Context {
          * <p>
          * @param resource the resource to request
          * @param consumer the callback when the ResourceBuilder finishes
+         * @throws IllegalIDException not yet implemented
          */
         @Override
         @Deprecated
-        public void generateResource(Resource resource, Consumer<List<Resource>> consumer) {
+        public void generateResource(Resource resource, Consumer<List<Resource>> consumer) throws IllegalIDException {
             main.getResourceManager().generatedResource(resource, consumer);
         }
 
@@ -417,9 +427,10 @@ public class ContextImplementation implements Context {
          * </p>
          * @param resource the resource to request
          * @return an optional of an CompletableFuture
+         * @throws IllegalIDException not yet implemented
          */
         @Override
-        public Optional<CompletableFuture<List<Resource>>> generateResource(Resource resource) {
+        public Optional<CompletableFuture<List<Resource>>> generateResource(Resource resource) throws IllegalIDException {
             return main.getResourceManager().generateResource(resource);
         }
     }
@@ -450,9 +461,10 @@ public class ContextImplementation implements Context {
         /**
          * adds an activator and automatically submits it to the Thread-Pool
          * @param activator the activator to add
+         * @throws IllegalIDException not yet implemented
          */
         @Override
-        public void addActivator(intellimate.izou.activator.Activator activator) {
+        public void addActivator(intellimate.izou.activator.Activator activator) throws IllegalIDException {
             main.getActivatorManager().addActivator(activator);
         }
 
@@ -474,9 +486,10 @@ public class ContextImplementation implements Context {
          * task as needed. The outputExtension is specific to the output-plugin
          *
          * @param outputExtension the outputExtension to be added
+         * @throws IllegalIDException not yet implemented
          */
         @Override
-        public void addOutputExtension(OutputExtension outputExtension) {
+        public void addOutputExtension(OutputExtension outputExtension) throws IllegalIDException {
             main.getOutputManager().addOutputExtension(outputExtension);
         }
 
@@ -493,9 +506,10 @@ public class ContextImplementation implements Context {
         /**
          * adds outputPlugin to outputPluginList, starts a new thread for the outputPlugin, and stores the future object in a HashMap
          * @param outputPlugin OutputPlugin to add
+         * @throws IllegalIDException not yet implemented
          */
         @Override
-        public void addOutputPlugin(OutputPlugin outputPlugin) {
+        public void addOutputPlugin(OutputPlugin outputPlugin) throws IllegalIDException {
             main.getOutputManager().addOutputPlugin(outputPlugin);
         }
 

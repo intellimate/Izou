@@ -6,6 +6,7 @@ import intellimate.izou.IzouModule;
 import intellimate.izou.events.Event;
 import intellimate.izou.identification.Identification;
 import intellimate.izou.identification.IdentificationManager;
+import intellimate.izou.identification.IllegalIDException;
 import intellimate.izou.main.Main;
 import intellimate.izou.resource.Resource;
 import intellimate.izou.resource.ResourceMinimalImpl;
@@ -59,8 +60,9 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
     /**
      * adds outputPlugin to outputPluginList, starts a new thread for the outputPlugin, and stores the future object in a HashMap
      * @param outputPlugin OutputPlugin to add
+     * @throws IllegalIDException not yet implemented
      */
-    public void addOutputPlugin(OutputPlugin outputPlugin) {
+    public void addOutputPlugin(OutputPlugin outputPlugin) throws IllegalIDException {
         if (!futureHashMap.containsKey(outputPlugin.getID())) {
             outputPlugins.add(outputPlugin);
             futureHashMap.put(outputPlugin.getID(), submit(outputPlugin));
@@ -103,8 +105,9 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
      * task as needed. The outputExtension is specific to the output-plugin
      *
      * @param outputExtension the outputExtension to be added
+     * @throws IllegalIDException not yet implemented
      */
-    public void addOutputExtension(OutputExtension outputExtension) {
+    public void addOutputExtension(OutputExtension outputExtension) throws IllegalIDException {
         for (OutputPlugin oPlug: outputPlugins) {
             if (oPlug.getID().equals(outputExtension.getPluginId())) {
                 try {

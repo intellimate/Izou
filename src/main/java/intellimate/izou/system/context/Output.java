@@ -1,5 +1,6 @@
 package intellimate.izou.system.context;
 
+import intellimate.izou.identification.IllegalIDException;
 import intellimate.izou.output.OutputExtension;
 import intellimate.izou.output.OutputPlugin;
 
@@ -15,8 +16,9 @@ public interface Output {
      * task as needed. The outputExtension is specific to the output-plugin
      *
      * @param outputExtension the outputExtension to be added
+     * @throws IllegalIDException not yet implemented
      */
-    void addOutputExtension(OutputExtension outputExtension);
+    void addOutputExtension(OutputExtension outputExtension) throws IllegalIDException;
 
     /**
      * removes the output-extension of id: extensionId from outputPluginList
@@ -28,8 +30,9 @@ public interface Output {
     /**
      * adds outputPlugin to outputPluginList, starts a new thread for the outputPlugin, and stores the future object in a HashMap
      * @param outputPlugin OutputPlugin to add
+     * @throws IllegalIDException not yet implemented
      */
-    void addOutputPlugin(OutputPlugin outputPlugin);
+    void addOutputPlugin(OutputPlugin outputPlugin) throws IllegalIDException;
 
     /**
      * removes the OutputPlugin and stops the thread

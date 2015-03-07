@@ -1,14 +1,14 @@
 package intellimate.izou.activator;
 
-import intellimate.izou.IdentifiableCollection;
 import intellimate.izou.AddonThreadPoolUser;
+import intellimate.izou.IdentifiableCollection;
 import intellimate.izou.IzouModule;
+import intellimate.izou.identification.IllegalIDException;
 import intellimate.izou.main.Main;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Supplier;
 
 /**
  * The ActivatorManager holds all the Activator-instances and runs them parallel in Threads.
@@ -27,8 +27,9 @@ public class ActivatorManager extends IzouModule implements AddonThreadPoolUser 
     /**
      * adds an activator and automatically submits it to the Thread-Pool
      * @param activator the activator to add
+     * * @throws IllegalIDException not yet implemented
      */
-    public void addActivator(Activator activator) {
+    public void addActivator(Activator activator) throws IllegalIDException {
         activators.add(activator);
         crashCounter.put(activator, new AtomicInteger(0));
         submitActivator(activator);
@@ -52,7 +53,7 @@ public class ActivatorManager extends IzouModule implements AddonThreadPoolUser 
      * @param activator teh activator to submit
      */
     private void submitActivator(Activator activator) {
-        CompletableFuture<Void> future = submit((Supplier<Boolean>) () -> {
+        CompletableFuture<Void> future = submit(() -> {
             try {
                 return activator.call();
             } catch (Throwable e) {

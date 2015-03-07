@@ -1,5 +1,6 @@
 package intellimate.izou.system.context;
 
+import intellimate.izou.identification.IllegalIDException;
 import intellimate.izou.resource.Resource;
 import intellimate.izou.resource.ResourceBuilder;
 
@@ -19,8 +20,9 @@ public interface Resources {
      *  this method registers all the events, resourcesID etc.
      * </p>
      * @param resourceBuilder an instance of the ResourceBuilder
+     * @throws IllegalIDException not yet implemented
      */
-    void registerResourceBuilder(ResourceBuilder resourceBuilder);
+    void registerResourceBuilder(ResourceBuilder resourceBuilder) throws IllegalIDException;
 
     /**
      * unregister a ResourceBuilder.
@@ -35,9 +37,10 @@ public interface Resources {
      * <p>
      * @param resource the resource to request
      * @param consumer the callback when the ResourceBuilder finishes
+     *  @throws IllegalIDException not yet implemented
      */
     @Deprecated
-    void generateResource(Resource resource, Consumer<List<Resource>> consumer);
+    void generateResource(Resource resource, Consumer<List<Resource>> consumer) throws IllegalIDException;
 
     /**
      * generates a resources
@@ -47,6 +50,7 @@ public interface Resources {
      * </p>
      * @param resource the resource to request
      * @return an optional of an CompletableFuture
+     * @throws IllegalIDException not yet implemented
      */
-    Optional<CompletableFuture<List<Resource>>> generateResource(Resource resource);
+    Optional<CompletableFuture<List<Resource>>> generateResource(Resource resource) throws IllegalIDException;
 }

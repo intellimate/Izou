@@ -1,6 +1,7 @@
 package intellimate.izou.system.context;
 
 import intellimate.izou.identification.Identification;
+import intellimate.izou.identification.IllegalIDException;
 import intellimate.izou.system.file.FileSubscriber;
 import intellimate.izou.system.file.ReloadableFile;
 
@@ -59,16 +60,18 @@ public interface Files {
      * @param reloadableFile the reloadable file that should be observed
      * @param fileSubscriber the fileSubscriber that should be notified when the reloadable file is reloaded
      * @param identification the Identification of the requesting instance
+     * @throws IllegalIDException not yet implemented
      */
-    void register(ReloadableFile reloadableFile, FileSubscriber fileSubscriber, Identification identification);
+    void register(ReloadableFile reloadableFile, FileSubscriber fileSubscriber, Identification identification) throws IllegalIDException;
 
     /**
      * Registers a {@link intellimate.izou.system.file.FileSubscriber} so that whenever any file is reloaded, the fileSubscriber is notified.
      *
      * @param fileSubscriber the fileSubscriber that should be notified when the reloadable file is reloaded
      * @param identification the Identification of the requesting instance
+     * @throws IllegalIDException not yet implemented
      */
-    void register(FileSubscriber fileSubscriber, Identification identification);
+    void register(FileSubscriber fileSubscriber, Identification identification) throws IllegalIDException;
 
     /**
      * Unregisters all instances of fileSubscriber found.

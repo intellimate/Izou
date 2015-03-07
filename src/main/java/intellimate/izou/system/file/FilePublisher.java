@@ -3,6 +3,7 @@ package intellimate.izou.system.file;
 import intellimate.izou.IdentifiableSet;
 import intellimate.izou.IzouModule;
 import intellimate.izou.identification.Identification;
+import intellimate.izou.identification.IllegalIDException;
 import intellimate.izou.main.Main;
 
 import java.util.HashMap;
@@ -34,8 +35,10 @@ public class FilePublisher extends IzouModule {
      * @param reloadableFile the reloadable file that should be observed
      * @param fileSubscriber the fileSubscriber that should be notified when the reloadable file is reloaded
      * @param identification the Identification of the FileSubscriber
+     * @throws IllegalIDException not yet implemented
      */
-    public void register(ReloadableFile reloadableFile, FileSubscriber fileSubscriber, Identification identification) {
+    public void register(ReloadableFile reloadableFile, FileSubscriber fileSubscriber, Identification identification)
+                                                                                            throws IllegalIDException {
         IdentifiableSet<FileSubscriber> subscribers = fileSubscribers.get(reloadableFile);
 
         if (subscribers == null) {
@@ -50,8 +53,9 @@ public class FilePublisher extends IzouModule {
      *
      * @param fileSubscriber the fileSubscriber that should be notified when the reloadable file is reloaded
      * @param identification the Identification of the FileSubscriber
+     * @throws IllegalIDException not yet implemented
      */
-    public void register(FileSubscriber fileSubscriber, Identification identification) {
+    public void register(FileSubscriber fileSubscriber, Identification identification) throws IllegalIDException {
         defaultFileSubscribers.add(fileSubscriber, identification);
     }
 

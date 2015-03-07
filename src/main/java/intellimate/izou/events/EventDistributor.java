@@ -3,6 +3,7 @@ package intellimate.izou.events;
 import intellimate.izou.AddonThreadPoolUser;
 import intellimate.izou.IzouModule;
 import intellimate.izou.identification.Identification;
+import intellimate.izou.identification.IllegalIDException;
 import intellimate.izou.main.Main;
 import intellimate.izou.resource.Resource;
 
@@ -35,8 +36,9 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
      * This method is intended for use cases where you have an entire new source of events (e.g. network)
      * @param identification the Identification of the Source
      * @return An Optional Object which may or may not contains an EventPublisher
+     * @throws IllegalIDException not yet implemented
      */
-    public Optional<EventCallable> registerEventPublisher(Identification identification) {
+    public Optional<EventCallable> registerEventPublisher(Identification identification) throws IllegalIDException {
         if(registered.containsKey(identification)) return Optional.empty();
         EventPublisher eventPublisher = new EventPublisher(events);
         registered.put(identification, eventPublisher);
@@ -62,8 +64,9 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
      * It is expected that this method executes quickly.
      *
      * @param controller the EventController Interface to control event-dispatching
+     * @throws IllegalIDException not yet implemented
      */
-    public void registerEventsController(EventsController controller) throws IllegalArgumentException{
+    public void registerEventsController(EventsController controller) throws IllegalIDException  {
         eventsControllers.add(controller);
     }
 
@@ -90,9 +93,10 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
      * </p>
      * @param event the Event to listen to (it will listen to all descriptors individually!)
      * @param eventListener the ActivatorEventListener-interface for receiving activator events
+     * @throws IllegalIDException not yet implemented
      */
-    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    public void registerEventListener(Event event, EventListener eventListener) {
+    @SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter"})
+    public void registerEventListener(Event event, EventListener eventListener) throws IllegalIDException {
         registerEventListener(event.getAllIformations(), eventListener);
     }
 
@@ -134,7 +138,7 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
      * @throws IllegalArgumentException if Listener is already listening to the Event or the id is not allowed
      */
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    public void unregisterEventListener(Event event, EventListener eventListener) throws IllegalArgumentException{
+    public void unregisterEventListener(Event event, EventListener eventListener) throws IllegalArgumentException {
         for (String id : event.getAllIformations()) {
             ArrayList<EventListener> listenersList = listeners.get(id);
             if (listenersList == null) {

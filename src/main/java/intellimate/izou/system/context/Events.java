@@ -26,8 +26,9 @@ public interface Events {
      * </p>
      * @param event the Event to listen to (it will listen to all descriptors individually!)
      * @param eventListener the ActivatorEventListener-interface for receiving activator events
+     * @throws IllegalIDException not yet implemented
      */
-    void registerEventListener(Event event, EventListener eventListener);
+    void registerEventListener(Event event, EventListener eventListener) throws IllegalIDException;
 
     /**
      * Adds an listener for events.
@@ -61,8 +62,9 @@ public interface Events {
      * Method is thread-safe.
      * @param identification the Identification of the the instance
      * @return an Optional, empty if already registered
+     * @throws IllegalIDException not yet implemented
      */
-    Optional<EventCallable> registerEventCaller(Identification identification);
+    Optional<EventCallable> registerEventCaller(Identification identification) throws IllegalIDException;
 
     /**
      * Unregister with the LocalEventManager.
@@ -77,6 +79,7 @@ public interface Events {
      *
      * @param event the fired Event
      * @throws java.lang.IllegalAccessError not yet implemented
+     * @throws IllegalIDException not yet implemented
      */
     void fireEvent(Event event) throws IllegalIDException, MultipleEventsException;
 
