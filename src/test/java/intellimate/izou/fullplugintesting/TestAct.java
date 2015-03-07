@@ -6,7 +6,6 @@ import intellimate.izouSDK.events.EventImpl;
 import intellimate.izou.events.MultipleEventsException;
 import intellimate.izou.identification.Identification;
 import intellimate.izou.identification.IdentificationManager;
-import intellimate.izou.system.Context;
 
 import java.util.Optional;
 
@@ -17,7 +16,7 @@ import java.util.Optional;
 public class TestAct extends Activator {
     private boolean start;
 
-    public TestAct(Context context) {
+    public TestAct(intellimate.izou.system.context.Context context) {
         super(context);
         start = true;
     }

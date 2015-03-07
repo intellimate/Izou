@@ -1,14 +1,20 @@
 package intellimate.izou.system;
 
 import intellimate.izou.addon.AddOn;
-import intellimate.izou.events.*;
+import intellimate.izou.events.Event;
+import intellimate.izou.events.EventCallable;
+import intellimate.izou.events.EventListener;
+import intellimate.izou.events.EventsController;
 import intellimate.izou.identification.Identification;
 import intellimate.izou.main.Main;
+import intellimate.izou.output.OutputExtension;
+import intellimate.izou.output.OutputPlugin;
 import intellimate.izou.resource.Resource;
 import intellimate.izou.resource.ResourceBuilder;
+import intellimate.izou.system.context.*;
 import intellimate.izou.system.file.FileSubscriber;
-import intellimate.izou.system.file.*;
-import intellimate.izou.system.logger.*;
+import intellimate.izou.system.file.ReloadableFile;
+import intellimate.izou.system.logger.IzouLogger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.spi.ExtendedLogger;
 
@@ -25,17 +31,17 @@ import java.util.function.Consumer;
 /**
  * This class provides much of the general Communication with Izou.
  */
-@SuppressWarnings("UnusedDeclaration")
-public class Context {
-    @SuppressWarnings("FieldCanBeLocal")
-    private AddOn addOn;
-    private Main main;
-    public Events events = new Events();
-    public Resources resources = new Resources();
-    public Files files;
-    public Properties properties;
-    public Logger logger;
-    public ThreadPool threadPool;
+public class Context implements intellimate.izou.system.context.Context {
+    private final AddOn addOn;
+    private final Main main;
+    //TODO make the private!
+    public final Events events = new EventsImpl();
+    public final Resources resources = new ResourcesImpl();
+    public final Files files;
+    public final Logger logger;
+    public final ThreadPool threadPool;
+    private final Activators activators = new ActivatorsImpl();
+    private final Output output = new OutputImpl();
 
     /**
      * creates a new context for the addOn
@@ -50,20 +56,82 @@ public class Context {
     public Context(AddOn addOn, Main main, String logLevel) {
         this.addOn = addOn;
         this.main = main;
-        this.files = new Files();
-        this.properties = new Properties();
-        this.threadPool = new ThreadPool();
+        this.files = new FilesImpl();
+        this.threadPool = new ThreadPoolImpl();
 
         IzouLogger izouLogger = main.getIzouLogger();
         ExtendedLogger logger = null;
         if (izouLogger != null)
-            this.logger = new Logger(izouLogger.createFileLogger(addOn.getID(), logLevel));
+            this.logger = new LoggerImpl(izouLogger.createFileLogger(addOn.getID(), logLevel));
         else {
             this.logger = null;
             org.apache.logging.log4j.Logger fileLogger = LogManager.getLogger(this.getClass());
             fileLogger.error("IzouLogger has not been initialized");
-            throw new NullPointerException("IzouLogger has not been initialized");
+            throw new NullPointerException("IzouLogger has not been initialized");reworked
         }
+    }
+
+    /**
+     * returns the API used for interaction with Events
+     * @return Events
+     */
+    @Override
+    public Events getEvents() {
+        return events;
+    }
+
+    /**
+     * returns the API used for interaction with Resource
+     * @return Resource
+     */
+    @Override
+    public Resources getResources() {
+        return resources;
+    }
+
+    /**
+     * returns the API used for interaction with Files
+     * @return Files
+     */
+    @Override
+    public Files getFiles() {
+        return files;
+    }
+
+    /**
+     * returns the API used to log
+     * @return Logger
+     */
+    @Override
+    public Logger getLogger() {
+        return logger;
+    }
+
+    /**
+     * returns the API used to manage the ThreadPool
+     * @return ThreadPool
+     */
+    @Override
+    public ThreadPool getThreadPool() {
+        return threadPool;
+    }
+
+    /**
+     * returns the API to manage the Activators
+     * @return Activator
+     */
+    @Override
+    public Activators getActivators() {
+        return activators;
+    }
+
+    /**
+     * returns the API used to manage the OutputPlugins and OutputExtensions
+     * @return Output
+     */
+    @Override
+    public Output getOutput() {
+        return output;
     }
 
     /**
@@ -71,11 +139,12 @@ public class Context {
      *
      * @return the addOn
      */
+    @Override
     public AddOn getAddOn() {
         return addOn;
     }
 
-    public class Files {
+    private class FilesImpl implements Files {
         /**
          * Use this method to register a file with the watcherService
          *
@@ -89,6 +158,7 @@ public class Context {
          * @param reloadableFile object of interface that file belongs to
          * @throws IOException exception thrown by watcher service
          */
+        @Override
         public void registerFileDir(Path dir, String fileType, ReloadableFile reloadableFile) throws IOException {
             main.getFileManager().registerFileDir(dir, fileType, reloadableFile);
         }
@@ -105,6 +175,7 @@ public class Context {
          * @param realFilePath path to real file (that should be filled with content of default file)
          * @return true if operation has succeeded, else false
          */
+        @Override
         public boolean writeToFile(String defaultFilePath, String realFilePath) {
             return main.getFileManager().writeToFile(defaultFilePath, realFilePath);
         }
@@ -117,6 +188,7 @@ public class Context {
          * @param initMessage the string to write in default file
          * @throws java.io.IOException is thrown by bufferedWriter
          */
+        @Override
         public void createDefaultFile(String defaultFilePath, String initMessage) throws IOException {
             main.getFileManager().createDefaultFile(defaultFilePath, initMessage);
         }
@@ -126,25 +198,24 @@ public class Context {
          * reloaded, the fileSubscriber will be notified. Multiple file subscribers can be registered with the same
          * reloadable file.
          *
-         * <p>
-         *     The {@link intellimate.izou.properties.PropertiesAssistant}, that is included in every addOn is a FileSubscriber for example, so it
-         *     can be used to get notified when property files are reloaded.
-         * </p>
-         *
          * @param reloadableFile the reloadable file that should be observed
          * @param fileSubscriber the fileSubscriber that should be notified when the reloadable file is reloaded
+         * @param identification the Identification of the requesting instance
          */
-        public void register(ReloadableFile reloadableFile, FileSubscriber fileSubscriber) {
-            main.getFilePublisher().register(reloadableFile, fileSubscriber);
+        @Override
+        public void register(ReloadableFile reloadableFile, FileSubscriber fileSubscriber, Identification identification) {
+            main.getFilePublisher().register(reloadableFile, fileSubscriber, identification);
         }
 
         /**
          * Registers a {@link intellimate.izou.system.file.FileSubscriber} so that whenever any file is reloaded, the fileSubscriber is notified.
          *
          * @param fileSubscriber the fileSubscriber that should be notified when the reloadable file is reloaded
+         * @param identification the Identification of the requesting instance
          */
-        public void register(FileSubscriber fileSubscriber) {
-           main.getFilePublisher().register(fileSubscriber);
+        @Override
+        public void register(FileSubscriber fileSubscriber, Identification identification) {
+           main.getFilePublisher().register(fileSubscriber, identification);
         }
 
         /**
@@ -152,120 +223,16 @@ public class Context {
          *
          * @param fileSubscriber the fileSubscriber to unregister
          */
+        @Override
         public void unregister(FileSubscriber fileSubscriber) {
            main.getFilePublisher().unregister(fileSubscriber);
         }
     }
 
-    public class Properties {
-        private PropertiesAssistant propertiesManager;
-
-        /**
-         * Creates a new properties object within the context
-         *
-         */
-        public Properties() {
-            this.propertiesManager = new PropertiesAssistant(Context.this, addOn.getID());
-        }
-
-        /**
-         * You should probably use getPropertiesContainer() unless you have a very good reason not to.
-         *
-         * Searches for the property with the specified key in this property list.
-         *
-         * If the key is not found in this property list, the default property list, and its defaults, recursively, are
-         * then checked. The method returns null if the property is not found.
-         *
-         * @param key the property key.
-         * @return the value in this property list with the specified key value.
-         */
-        public String getProperties(String key) {
-            return propertiesManager.getPropertiesContainer().getProperties().getProperty(key);
-        }
-
-        /**
-         * Returns an Instance of Properties, if found
-         *
-         * @return an Instance of Properties or null;
-         */
-        public PropertiesContainer getPropertiesContainer() {
-            return propertiesManager.getPropertiesContainer();
-        }
-
-        /**
-         * Gets the {@code propertiesManger}
-         *
-         * @return the {@code propertiesManger}
-         */
-        public PropertiesAssistant getPropertiesManger() {
-            return propertiesManager;
-        }
-
-        /**
-         * Calls the HashTable method put.
-         *
-         * Provided for parallelism with the getProperty method. Enforces use of strings for
-         *     * property keys and values. The value returned is the result of the HashTable call to put.
-
-         * @param key the key to be placed into this property list.
-         * @param value the value corresponding to key.
-         */
-        public void setProperties(String key, String value) {
-            this.propertiesManager.getPropertiesContainer().getProperties().setProperty(key, value);
-        }
-
-        /**
-         * Sets properties
-         *
-         * @param properties instance of properties, not null
-         */
-        public void setProperties(java.util.Properties properties) {
-            if(properties == null) return;
-            this.propertiesManager.setProperties(properties);
-        }
-
-        /**
-         * Sets properties-container
-         *
-         * @param propertiesContainer the properties-container
-         */
-        public void setPropertiesContainer(PropertiesContainer propertiesContainer) {
-            if(propertiesContainer == null) return;
-            this.propertiesManager.setPropertiesContainer(propertiesContainer);
-        }
-
-        /**
-         * Gets the path to properties file (the real properties file - as opposed to the {@code defaultProperties.txt} file)
-         *
-         * @return path to properties file
-         */
-        public String getPropertiesPath() {
-            return propertiesManager.getPropertiesPath();
-        }
-
-        /**
-         * Sets the path to properties file (the real properties file - as opposed to the {@code defaultProperties.txt} file)
-         *
-         * @param propertiesPath to properties file
-         */
-        public void setPropertiesPath(String propertiesPath) {
-            this.propertiesManager.setPropertiesPath(propertiesPath);
-        }
-
-        /**
-         * Gets the path to default properties file (the file which is copied into the real properties on start)
-         *
-         * @return path to default properties file
-         */
-        public String getDefaultPropertiesPath() {
-            return propertiesManager.getDefaultPropertiesPath();
-        }
-    }
-
-    public class Logger {
+    private class LoggerImpl implements Logger {
         private final ExtendedLogger logger;
 
-        public Logger(ExtendedLogger logger) {
+        public LoggerImpl(ExtendedLogger logger) {
             this.logger = logger;
         }
 
@@ -274,13 +241,14 @@ public class Context {
          *
          * @return the logger
          */
+        @Override
         public ExtendedLogger getLogger() {
             return logger;
         }
     }
 
-    public class Events {
-        public Distributor distributor = new Distributor();
+    private class EventsImpl implements Events {
+        public EventsDistributor eventsDistributor = new DistributorImpl();
         /**
          * Adds an listener for events.
          * <p>
@@ -293,6 +261,7 @@ public class Context {
          * @param event the Event to listen to (it will listen to all descriptors individually!)
          * @param eventListener the ActivatorEventListener-interface for receiving activator events
          */
+        @Override
         public void registerEventListener(Event event, EventListener eventListener) {
             main.getEventDistributor().registerEventListener(event, eventListener);
         }
@@ -307,6 +276,7 @@ public class Context {
          * @param ids this can be type, or descriptors etc.
          * @param eventListener the ActivatorEventListener-interface for receiving activator events
          */
+        @Override
         public void registerEventListener(List<String> ids, EventListener eventListener) {
             main.getEventDistributor().registerEventListener(ids, eventListener);
         }
@@ -321,6 +291,7 @@ public class Context {
          * @param eventListener the ActivatorEventListener used to listen for events
          * @throws IllegalArgumentException if Listener is already listening to the Event or the id is not allowed
          */
+        @Override
         public void unregisterEventListener(Event event, EventListener eventListener) {
             main.getEventDistributor().unregisterEventListener(event, eventListener);
         }
@@ -333,6 +304,7 @@ public class Context {
          * @param identification the Identification of the the instance
          * @return an Optional, empty if already registered
          */
+        @Override
         public Optional<EventCallable> registerEventCaller(Identification identification) {
             return main.getLocalEventManager().registerCaller(identification);
         }
@@ -343,6 +315,7 @@ public class Context {
          * Method is thread-safe.
          * @param identification the Identification of the the instance
          */
+        @Override
         public void unregisterEventCaller(Identification identification) {
             main.getLocalEventManager().unregisterCaller(identification);
         }
@@ -354,6 +327,7 @@ public class Context {
          * @param key the key with which to store the event ID, should not be null
          * @param value the complete event ID, should not be null
          */
+        @Override
         public void addEventIDToPropertiesFile(String description, String key, String value) {
             main.getEventPropertiesManager().registerEventID(description, key, value);
         }
@@ -364,11 +338,21 @@ public class Context {
          * @param key the key of the full event ID
          * @return the complete the event ID, or null if none is found
          */
+        @Override
         public String getEventsID(String key) {
             return main.getEventPropertiesManager().getEventID(key);
         }
 
-        public class Distributor {
+        /**
+         * returns the API for the EventsDistributor
+         * @return Distributor
+         */
+        @Override
+        public EventsDistributor distributor() {
+            return eventsDistributor;
+        }
+
+        private class DistributorImpl implements EventsDistributor {
             /**
              * with this method you can register EventPublisher add a Source of Events to the System.
              * <p>
@@ -377,6 +361,7 @@ public class Context {
              * @param identification the Identification of the Source
              * @return An Optional Object which may or may not contains an EventPublisher
              */
+            @Override
             public Optional<EventCallable> registerEventPublisher(Identification identification) {
                 return main.getEventDistributor().registerEventPublisher(identification);
             }
@@ -388,6 +373,7 @@ public class Context {
              * This method is intended for use cases where you have an entire new source of events (e.g. network)
              * @param identification the Identification of the Source
              */
+            @Override
             public void unregisterEventPublisher(Identification identification) {
                 main.getEventDistributor().unregisterEventPublisher(identification);
             }
@@ -400,6 +386,7 @@ public class Context {
              *
              * @param eventsController the EventController Interface to control event-dispatching
              */
+            @Override
             public void registerEventsController(EventsController eventsController) {
                 main.getEventDistributor().registerEventsController(eventsController);
             }
@@ -411,13 +398,14 @@ public class Context {
              *
              * @param eventsController the EventController Interface to remove
              */
+            @Override
             public void unregisterEventsController(EventsController eventsController) {
                 main.getEventDistributor().unregisterEventsController(eventsController);
             }
         }
     }
 
-    public class Resources {
+    private class ResourcesImpl implements Resources {
         /**
          * registers a ResourceBuilder.
          * <p>
@@ -425,6 +413,7 @@ public class Context {
          * </p>
          * @param resourceBuilder an instance of the ResourceBuilder
          */
+        @Override
         public void registerResourceBuilder(ResourceBuilder resourceBuilder) {
             main.getResourceManager().registerResourceBuilder(resourceBuilder);
         }
@@ -435,6 +424,7 @@ public class Context {
          * this method unregisters all the events, resourcesID etc.
          * @param resourceBuilder an instance of the ResourceBuilder
          */
+        @Override
         public void unregisterResourceBuilder(ResourceBuilder resourceBuilder) {
             main.getResourceManager().unregisterResourceBuilder(resourceBuilder);
         }
@@ -445,6 +435,7 @@ public class Context {
          * @param resource the resource to request
          * @param consumer the callback when the ResourceBuilder finishes
          */
+        @Override
         @Deprecated
         public void generateResource(Resource resource, Consumer<List<Resource>> consumer) {
             main.getResourceManager().generatedResource(resource, consumer);
@@ -459,18 +450,20 @@ public class Context {
          * @param resource the resource to request
          * @return an optional of an CompletableFuture
          */
+        @Override
         public Optional<CompletableFuture<List<Resource>>> generateResource(Resource resource) {
             return main.getResourceManager().generateResource(resource);
         }
     }
 
-    public class ThreadPool {
+    private class ThreadPoolImpl implements ThreadPool {
         /**
          * Submits a new Callable to the ThreadPool
          * @param callable the callable to submit
          * @param <V> the type of the callable
          * @return a Future representing pending completion of the task
          */
+        @Override
         public <V> Future<V> submitToIzouThreadPool(Callable<V> callable) {
             return main.getThreadPoolManager().getAddOnsThreadPool().submit(callable);
         }
@@ -479,8 +472,72 @@ public class Context {
          * returns an ThreadPool where all the IzouPlugins are running
          * @return an instance of ExecutorService
          */
+        @Override
         public ExecutorService getThreadPool() {
             return main.getThreadPoolManager().getAddOnsThreadPool();
+        }
+    }
+
+    private class ActivatorsImpl implements Activators {
+        /**
+         * adds an activator and automatically submits it to the Thread-Pool
+         * @param activator the activator to add
+         */
+        @Override
+        public void addActivator(intellimate.izou.activator.Activator activator) {
+            main.getActivatorManager().addActivator(activator);
+        }
+
+        /**
+         * removes the activator and stops the Thread
+         * @param activator the activator to remove
+         */
+        @Override
+        public void removeActivator(intellimate.izou.activator.Activator activator) {
+            main.getActivatorManager().removeActivator(activator);
+        }
+    }
+
+    public class OutputImpl implements Output {
+        /**
+         * adds output extension to desired outputPlugin
+         *
+         * adds output extension to desired outputPlugin, so that the output-plugin can start and stop the outputExtension
+         * task as needed. The outputExtension is specific to the output-plugin
+         *
+         * @param outputExtension the outputExtension to be added
+         */
+        @Override
+        public void addOutputExtension(OutputExtension outputExtension) {
+            main.getOutputManager().addOutputExtension(outputExtension);
+        }
+
+        /**
+         * removes the output-extension of id: extensionId from outputPluginList
+         *
+         * @param outputExtension the OutputExtension to remove
+         */
+        @Override
+        public void removeOutputExtension(OutputExtension outputExtension) {
+            main.getOutputManager().removeOutputExtension(outputExtension);
+        }
+
+        /**
+         * adds outputPlugin to outputPluginList, starts a new thread for the outputPlugin, and stores the future object in a HashMap
+         * @param outputPlugin OutputPlugin to add
+         */
+        @Override
+        public void addOutputPlugin(OutputPlugin outputPlugin) {
+            main.getOutputManager().addOutputPlugin(outputPlugin);
+        }
+
+        /**
+         * removes the OutputPlugin and stops the thread
+         * @param outputPlugin the outputPlugin to remove
+         */
+        @Override
+        public void removeOutputPlugin(OutputPlugin outputPlugin) {
+            main.getOutputManager().removeOutputPlugin(outputPlugin);
         }
     }
 }

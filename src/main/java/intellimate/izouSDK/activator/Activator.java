@@ -123,7 +123,7 @@ public abstract class Activator implements intellimate.izou.activator.Activator,
      *
      * @return an instance of Context.
      */
-    public Context getContext() {
+    public intellimate.izou.system.context.Context getContext() {
         return context;
     }
 

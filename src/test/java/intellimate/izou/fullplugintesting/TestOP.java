@@ -1,7 +1,6 @@
 package intellimate.izou.fullplugintesting;
 
 import intellimate.izou.output.OutputPluginImpl;
-import intellimate.izou.system.Context;
 
 import java.util.List;
 
@@ -11,7 +10,7 @@ import java.util.List;
 @SuppressWarnings("SameParameterValue")
 public class TestOP extends OutputPluginImpl<TestOD> {
 
-    public TestOP(String id, Context context) {
+    public TestOP(String id, intellimate.izou.system.context.Context context) {
         super(id, context);
     }
 

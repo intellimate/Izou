@@ -35,7 +35,7 @@ public class IzouTest implements Identifiable {
     private static final class Lock { }
     private final Object lock = new Lock();
     private TestAddOn testAddOn = new TestAddOn(getID());
-    private Context context;
+    private intellimate.izou.system.context.Context context;
 
     /**
      * creates a new instance of IzouTest
@@ -172,7 +172,7 @@ public class IzouTest implements Identifiable {
         }
     }
 
-    public Context getContext() {
+    public intellimate.izou.system.context.Context getContext() {
         return context;
     }
 

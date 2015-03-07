@@ -208,7 +208,7 @@ public abstract class OutputPlugin<T> implements Runnable, Identifiable, Excepti
      *
      * @return an instance of Context.
      */
-    public Context getContext() {
+    public intellimate.izou.system.context.Context getContext() {
         return context;
     }
 

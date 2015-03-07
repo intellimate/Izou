@@ -35,6 +35,19 @@ public class ActivatorManager extends IzouModule implements AddonThreadPoolUser 
     }
 
     /**
+     * removes the activator and stops the Thread
+     * @param activator the activator to remove
+     */
+    public void removeActivator(Activator activator) {
+        activators.remove(activator);
+        CompletableFuture remove = futures.remove(activator);
+        if (remove != null) {
+            remove.cancel(true);
+        }
+        crashCounter.remove(activator);
+    }
+
+    /**
      * submits the activator to the ThreadPool
      * @param activator teh activator to submit
      */

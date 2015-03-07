@@ -32,15 +32,14 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
     IdentifiableCollection<OutputPlugin> outputPlugins;
 
     /**
-     * HashMap that stores the future objects of the output-plugins
+     * HashMap that stores OutputPlugins and the Future objects representing the Task
      */
     private HashMap<String, Future> futureHashMap;
 
     /**
-     * a HashMap that stores all outputExtensions which were to be added to a still non-existent output-plugins,
-     * this HashMap gets checked every time a new output-plugin is added for relevant output-extensions
+     * this HashMap stores all added OutputExtensions
      */
-    private HashMap<String, List<OutputExtension>> tempExtensionStorage;
+    private HashMap<String, IdentifiableCollection<OutputExtension>> outputExtensions;
 
 
     /**
@@ -51,7 +50,7 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
         super(main);
         outputPlugins = new IdentifiableCollection<>();
         futureHashMap = new HashMap<>();
-        tempExtensionStorage = new HashMap<>();
+        outputExtensions = new HashMap<>();
         if (!IdentificationManager.getInstance().registerIdentification(this)) {
             log.fatal("Unable to obtain ID for" + getID());
         }
@@ -72,8 +71,8 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
             }
         }
 
-        if (tempExtensionStorage.containsKey(outputPlugin.getID())) {
-            for(OutputExtension oE: tempExtensionStorage.get(outputPlugin.getID())) {
+        if (outputExtensions.containsKey(outputPlugin.getID())) {
+            for(OutputExtension oE: outputExtensions.get(outputPlugin.getID())) {
                 try {
                     //noinspection unchecked
                     outputPlugin.addOutputExtension(oE);
@@ -82,8 +81,19 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
                     log.warn(e);
                 }
             }
-            tempExtensionStorage.remove(outputPlugin.getID());
         }
+    }
+
+    /**
+     * removes the OutputPlugin and stops the thread
+     * @param outputPlugin the outputPlugin to remove
+     */
+    public void removeOutputPlugin(OutputPlugin outputPlugin) {
+        Future future = futureHashMap.remove(outputPlugin.getID());
+        if (future != null) {
+            future.cancel(true);
+        }
+        outputPlugins.remove(outputPlugin);
     }
 
     /**
@@ -107,26 +117,25 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
                 break;
             }
         }
-        if(tempExtensionStorage.containsKey(outputExtension.getPluginId())) {
-            tempExtensionStorage.get(outputExtension.getPluginId()).add(outputExtension);
+        if(outputExtensions.containsKey(outputExtension.getPluginId())) {
+            outputExtensions.get(outputExtension.getPluginId()).add(outputExtension);
         }
         else {
-            List<OutputExtension> outputExtensionList = new ArrayList<>();
+            IdentifiableCollection<OutputExtension> outputExtensionList = new IdentifiableCollection<>();
             outputExtensionList.add(outputExtension);
-            tempExtensionStorage.put(outputExtension.getPluginId(), outputExtensionList);
+            outputExtensions.put(outputExtension.getPluginId(), outputExtensionList);
         }
     }
 
     /**
      * removes the output-extension of id: extensionId from outputPluginList
      *
-     * @param pluginId the id of the output-plugin in which the output-extension should be removed
-     * @param extensionId the id of output-extension to be removed
+     * @param outputExtension the OutputExtension to remove
      */
-    public void removeOutputExtension(String pluginId, String extensionId) {
+    public void removeOutputExtension(OutputExtension outputExtension) {
         for(OutputPlugin oPlug: outputPlugins) {
-            if(oPlug.getID().equals(pluginId)) {
-                oPlug.removeOutputExtension(extensionId);
+            if(oPlug.getID().equals(outputExtension.getPluginId())) {
+                oPlug.removeOutputExtension(outputExtension.getID());
                 break;
             }
         }

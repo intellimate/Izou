@@ -1,5 +1,7 @@
 package intellimate.izou.threadpool;
 
+import intellimate.izou.IzouModule;
+import intellimate.izou.main.Main;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -11,12 +13,20 @@ import java.util.concurrent.*;
  * @author LeanderK
  * @version 1.0
  */
-public class ThreadPoolManager {
+public class ThreadPoolManager extends IzouModule {
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
     //holds the threads
     private final ExecutorService izouThreadPool = Executors.newCachedThreadPool(new LoggingThreadFactory());
     //holds the threads
     private final ExecutorService addOnsThreadPool = Executors.newCachedThreadPool(new LoggingThreadFactory());
+
+    /**
+     * creates a new ThreadPoolManager
+     * @param main instance of Main
+     */
+    public ThreadPoolManager(Main main) {
+        super(main);
+    }
 
     /**
      * returns the ThreadPool where all the Izou-Components are running

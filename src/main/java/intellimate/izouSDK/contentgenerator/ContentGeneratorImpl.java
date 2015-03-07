@@ -91,7 +91,7 @@ public abstract class ContentGeneratorImpl implements ContentGenerator {
      *
      * @return an instance of Context.
      */
-    public Context getContext() {
+    public intellimate.izou.system.context.Context getContext() {
         return context;
     }
 
