@@ -2,7 +2,6 @@ package intellimate.izou;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.function.Supplier;
@@ -22,15 +21,6 @@ public interface AddonThreadPoolUser extends MainProvider {
      */
     default CompletableFuture<Void> submit(Runnable runnable) {
         return CompletableFuture.runAsync(runnable, getMain().getThreadPoolManager().getAddOnsThreadPool());
-    }
-
-    /**
-     * submits the Callable to the AddOns Thread-Pool
-     * @param callable the Callable to submit
-     * @return a Future representing pending completion of the task
-     */
-    default <V> Future<V> submit(Callable<V> callable) {
-        return getMain().getThreadPoolManager().getAddOnsThreadPool().submit(callable);
     }
 
     /**

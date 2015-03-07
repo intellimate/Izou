@@ -21,7 +21,6 @@ public class ResourceMinimalImpl<T> implements Resource<T> {
     private final Identification provider;
     private final Identification consumer;
     private final T resource;
-    private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     /**
      * creates a new Resource.
