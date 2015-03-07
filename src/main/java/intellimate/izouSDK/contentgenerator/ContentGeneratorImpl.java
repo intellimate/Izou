@@ -27,6 +27,21 @@ public abstract class ContentGeneratorImpl implements ContentGenerator {
         identificationManager.registerIdentification(this);
     }
 
+    /**
+     * This method ensures that each content generator has its own event id so that it can be triggered by activators.
+     * <p>
+     *     It essentially forces each content generator to register an event ID with the local_event.properties file.
+     * </p>
+     * <p>
+     *     The reason this method is explicitly found here and not in the context
+     *     (also in the context at {@link intellimate.izou.system.Context.Events#addEventIDToPropertiesFile}) is that
+     *     it is essential that a content generator is individually reachable, that is why we leave no choice in the
+     *     manner.
+     * </p>
+     * @param description the description of the event id
+     * @param eventIDName the event id name
+     * @param eventID the actual event id
+     */
     @Override
     public void setContentID(String description, String eventIDName, String eventID) {
         getContext().events.addEventIDToPropertiesFile(description, eventIDName, eventID);
