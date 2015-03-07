@@ -26,9 +26,7 @@ public interface ResourceBuilder extends Identifiable {
     abstract List<String> announceEvents();
     /**
      * This method is called when an object wants to get a Resource.
-     * it has as an argument resource instances without data, which just need to get populated.
      *
-     * this method is called when an object wants to get a Resource.
      * <p>
      * Don't use the Resources provided as arguments, they are just the requests.
      * There is a timeout after 1 second.
