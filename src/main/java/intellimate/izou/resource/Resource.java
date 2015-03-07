@@ -1,5 +1,6 @@
 package intellimate.izou.resource;
 
+import intellimate.izou.identification.Identifiable;
 import intellimate.izou.identification.Identification;
 
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.function.Function;
  * @author Leander Kurscheidt
  * @version 1.0
  */
-public interface Resource<T> {
+public interface Resource<T> extends Identifiable {
     /**
      * returns the associated Resource data if set.
      * This method is thread-safe.

@@ -2,7 +2,6 @@ package intellimate.izou.addon;
 
 import intellimate.izou.identification.Identifiable;
 import intellimate.izou.system.Context;
-import intellimate.izou.threadpool.ExceptionCallback;
 import ro.fortsoft.pf4j.ExtensionPoint;
 import ro.fortsoft.pf4j.PluginWrapper;
 
@@ -14,7 +13,7 @@ import ro.fortsoft.pf4j.PluginWrapper;
  * @author Leander Kurscheidt
  * @version 1.0
  */
-public interface AddOn extends ExtensionPoint, Identifiable, ExceptionCallback {
+public interface AddOn extends ExtensionPoint, Identifiable {
     /**
      * Internal initiation of addOn - fake constructor, comes before prepare
      * @param context the context to initialize with

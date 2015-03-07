@@ -2,29 +2,19 @@ package intellimate.izou.output;
 
 import intellimate.izou.events.Event;
 import intellimate.izou.identification.Identifiable;
-import intellimate.izou.threadpool.ExceptionCallback;
-
-import java.util.concurrent.ExecutorService;
 
 /**
  * The OutputPlugin class gets Event and then starts threads filled with output-extension tasks to create the final
  * output and then render it on its own medium
  */
-public interface OutputPlugin<T> extends Runnable, Identifiable, ExceptionCallback {
+public interface OutputPlugin<T> extends Runnable, Identifiable {
     /**
      * Adds an event to blockingQueue
      *
      * @param event the event to add
      * @throws IllegalStateException raised if problems adding an event to blockingQueue
      */
-    void addToEventList(Event event) throws IllegalStateException;
-
-    /**
-     * Sets the executor of the OutputManager for efficiency reasons
-     *
-     * @param executor the executor to be set
-     */
-    void setExecutor(ExecutorService executor);
+    void addToEventList(Event event);
 
     /**
      * add outputExtension to outputExtensionList

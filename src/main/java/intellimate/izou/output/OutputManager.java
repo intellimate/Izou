@@ -1,42 +1,35 @@
 package intellimate.izou.output;
 
+import intellimate.izou.AddonThreadPoolUser;
+import intellimate.izou.IdentifiableCollection;
 import intellimate.izou.IzouModule;
 import intellimate.izou.events.Event;
 import intellimate.izou.main.Main;
 import intellimate.izou.resource.Resource;
-import intellimate.izou.identification.Identifiable;
 import intellimate.izou.identification.Identification;
 import intellimate.izou.identification.IdentificationManager;
 import intellimate.izouSDK.resource.ResourceImpl;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.*;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
  * OutputManager manages all output plugins and is the main class anyone outside the output package should talk to.
  * It can register/remove new output-plugins and add/delete output-extensions
  */
-public class OutputManager extends IzouModule {
-    public static final String ID = OutputManager.class.getCanonicalName();
+public class OutputManager extends IzouModule implements AddonThreadPoolUser {
 
     /**
      * a list that contains all the registered output-plugins of Jarvis
      */
-    private List<OutputPlugin> outputPluginsList;
-
-    /**
-     * responsible for running output-plugins in different threads
-     */
-    private final ExecutorService executor;
+    IdentifiableCollection<OutputPlugin> outputPlugins;
 
     /**
      * HashMap that stores the future objects of the output-plugins
@@ -49,8 +42,6 @@ public class OutputManager extends IzouModule {
      */
     private HashMap<String, List<OutputExtension>> tempExtensionStorage;
 
-    private final Logger fileLogger = LogManager.getLogger(this.getClass());
-
 
     /**
      * Creates a new output-manager with a list of output-plugins
@@ -58,22 +49,12 @@ public class OutputManager extends IzouModule {
      */
     public OutputManager(Main main) {
         super(main);
-        outputPluginsList = new ArrayList<>();
-        executor = main.getThreadPoolManager().getAddOnsThreadPool();
+        outputPlugins = new IdentifiableCollection<>();
         futureHashMap = new HashMap<>();
         tempExtensionStorage = new HashMap<>();
         if (!IdentificationManager.getInstance().registerIdentification(this)) {
-            fileLogger.fatal("Unable to obtain ID for" + getID());
+            log.fatal("Unable to obtain ID for" + getID());
         }
-    }
-
-    /**
-     * returns the list containing all the registered outputPlugins of the output-manager
-     *
-     * @return list containing all the registered outputPlugins
-     */
-    public List<OutputPlugin> getOutputPluginsList() {
-        return outputPluginsList;
     }
 
     /**
@@ -82,14 +63,12 @@ public class OutputManager extends IzouModule {
      */
     public void addOutputPlugin(OutputPlugin outputPlugin) {
         if (!futureHashMap.containsKey(outputPlugin.getID())) {
-            outputPlugin.setExecutor(executor);
-            outputPluginsList.add(outputPlugin);
-            futureHashMap.put(outputPlugin.getID(), executor.submit(outputPlugin));
+            outputPlugins.add(outputPlugin);
+            futureHashMap.put(outputPlugin.getID(), submit(outputPlugin));
         } else {
             if (futureHashMap.get(outputPlugin.getID()).isDone()) {
-                outputPlugin.setExecutor(executor);
                 futureHashMap.remove(outputPlugin.getID());
-                futureHashMap.put(outputPlugin.getID(), executor.submit(outputPlugin));
+                futureHashMap.put(outputPlugin.getID(), submit(outputPlugin));
             }
         }
 
@@ -100,36 +79,10 @@ public class OutputManager extends IzouModule {
                     outputPlugin.addOutputExtension(oE);
                 }
                 catch (ClassCastException e) {
-                    fileLogger.warn(e);
+                    log.warn(e);
                 }
             }
             tempExtensionStorage.remove(outputPlugin.getID());
-        }
-    }
-
-    public OutputPlugin getOutputPlugin(String id) {
-        for (OutputPlugin oP: outputPluginsList) {
-            if (oP.getID().equals(id)) {
-                return oP;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * removes the output-plugin of id: pluginId from outputPluginList and ends the thread
-     *
-     * @param pluginId the id of the output-plugin to remove
-     */
-    public void removeOutputPlugin(String pluginId) {
-        for(OutputPlugin oPlug: outputPluginsList) {
-            if(oPlug.getID().equals(pluginId)) {
-                outputPluginsList.remove(oPlug);
-                oPlug.setExecutor(null);
-                futureHashMap.get(oPlug.getID()).cancel(true);
-                futureHashMap.remove(oPlug.getID());
-                break;
-            }
         }
     }
 
@@ -140,32 +93,27 @@ public class OutputManager extends IzouModule {
      * task as needed. The outputExtension is specific to the output-plugin
      *
      * @param outputExtension the outputExtension to be added
-     * @param outputPluginId the output-plugin the outputExtension is to be added to
      */
-    public void addOutputExtension(OutputExtension outputExtension, String outputPluginId) {
-        boolean found = false;
-        for (OutputPlugin oPlug: outputPluginsList) {
-            if (oPlug.getID().equals(outputPluginId)) {
+    public void addOutputExtension(OutputExtension outputExtension) {
+        for (OutputPlugin oPlug: outputPlugins) {
+            if (oPlug.getID().equals(outputExtension.getPluginId())) {
                 try {
                     //noinspection unchecked
                     oPlug.addOutputExtension(outputExtension);
                 } catch (ClassCastException e) {
-                    fileLogger.error("Error while trying to add the OutputExtension: " + outputExtension.getID()
+                    log.error("Error while trying to add the OutputExtension: " + outputExtension.getID()
                                     + " to the OutputPlugin: " + oPlug.getID(), e);
                 }
-                found = true;
                 break;
             }
         }
-        if (!found) {
-            if(tempExtensionStorage.containsKey(outputPluginId)) {
-                tempExtensionStorage.get(outputPluginId).add(outputExtension);
-            }
-            else {
-                List<OutputExtension> outputExtensionList = new ArrayList<>();
-                outputExtensionList.add(outputExtension);
-                tempExtensionStorage.put(outputPluginId, outputExtensionList);
-            }
+        if(tempExtensionStorage.containsKey(outputExtension.getPluginId())) {
+            tempExtensionStorage.get(outputExtension.getPluginId()).add(outputExtension);
+        }
+        else {
+            List<OutputExtension> outputExtensionList = new ArrayList<>();
+            outputExtensionList.add(outputExtension);
+            tempExtensionStorage.put(outputExtension.getPluginId(), outputExtensionList);
         }
     }
 
@@ -176,7 +124,7 @@ public class OutputManager extends IzouModule {
      * @param extensionId the id of output-extension to be removed
      */
     public void removeOutputExtension(String pluginId, String extensionId) {
-        for(OutputPlugin oPlug: outputPluginsList) {
+        for(OutputPlugin oPlug: outputPlugins) {
             if(oPlug.getID().equals(pluginId)) {
                 oPlug.removeOutputExtension(extensionId);
                 break;
@@ -193,118 +141,65 @@ public class OutputManager extends IzouModule {
      */
     public void passDataToOutputPlugins(Event event) {
         IdentificationManager identificationManager = IdentificationManager.getInstance();
-        List<Identification> ids = outputPluginsList.stream()
+        List<Identification> allIds = outputPlugins.stream()
                 .map(identificationManager::getIdentification)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());
-
+        
         HashMap<Integer, List<Identification>> outputPluginBehaviour = event.getEventBehaviourController()
-                .getOutputPluginBehaviour(ids);
+                .getOutputPluginBehaviour(allIds);
 
-        Comparator<Integer> reversed = Comparator.<Integer>naturalOrder().reversed();
-
-        Set<Integer> keySet = outputPluginBehaviour.keySet();
-
-
-        List<OutputPlugin> orderedPositive = keySet.stream()
-                .sorted(reversed)
-                .filter(integer -> integer >= 0)
-                .map(outputPluginBehaviour::get)
-                .flatMap(Collection::stream)
-                .distinct()
-                .map(id -> outputPluginsList.stream()
+        Set<OutputPlugin> outputPluginsCopy = this.outputPlugins.getCopy();
+        
+        Function<List<Identification>, List<OutputPlugin>> getOutputPlugin = ids -> ids.stream()
+                .map(id -> outputPluginsCopy.stream()
                         .filter(outputPlugin -> outputPlugin.isOwner(id))
-                        .findFirst())
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                        .findFirst()
+                        .orElseGet(null))
+                .filter(Objects::nonNull)
+                .peek(outputPluginsCopy::remove)
                 .collect(Collectors.toList());
-        /*
-        List<List<Identification>> positiveIdentifications = new ArrayList<>();
-        for (int i : keySet) {
-            if(i > 0) {
-                positiveIdentifications.add(i, outputPluginBehaviour.get(i));
-            }
-        }
-
-        LinkedList<OutputPlugin> positiveOutputPlugins = new LinkedList<>();
-        for(int i = 0; i < positiveIdentifications.size(); i++) {
-            int index = (positiveIdentifications.size() -1) - i;
-
-            List<Identification> listIdentifications = positiveIdentifications.get(index);
-            if(listIdentifications == null) continue;
-            for (Identification id : listIdentifications) {
-                for (OutputPlugin outputPlugin : outputPluginsList) {
-                    if(outputPlugin.isOwner(id) && !positiveOutputPlugins.contains(outputPlugin)) {
-                        positiveOutputPlugins.push(outputPlugin);
-                    }
-                }
-            }
-        }
-        */
-
-        List<OutputPlugin> orderedNegative = keySet.stream()
-                .sorted(reversed)
-                .filter(integer -> integer < 0)
-                .map(outputPluginBehaviour::get)
-                .flatMap(Collection::stream)
+        
+        outputPluginBehaviour.entrySet().stream()
+                .sorted(Comparator.comparingInt((Map.Entry<Integer, List<Identification>> x) -> x.getKey()).reversed())
+                .flatMap(entry -> getOutputPlugin.apply(entry.getValue()).stream())
                 .distinct()
-                .map(id -> outputPluginsList.stream()
-                        .filter(outputPlugin -> outputPlugin.isOwner(id))
-                        .findFirst())
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toList());
-        List<Identification> all = outputPluginBehaviour.values().stream()
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
-        @SuppressWarnings("SuspiciousMethodCalls")
-        List<OutputPlugin> orderedNeutral = outputPluginsList.stream()
-                .filter(outputPlugin -> !all.contains(outputPlugin))
-                .collect(Collectors.toList());
-
-        processOutputPlugins(event, orderedPositive);
-        processOutputPlugins(event, orderedNeutral);
-        processOutputPlugins(event, orderedNegative);
+                .forEach(op -> processOutputPlugins(event, op));
+        
+        outputPluginsCopy.forEach(op -> processOutputPlugins(event, op));
     }
 
-    private void processOutputPlugins(Event event, List<OutputPlugin> outputPlugins) {
-       for(OutputPlugin outputPlugin : outputPlugins) {
-           final Lock lock = new ReentrantLock();
-           final Condition processing = lock.newCondition();
+    private void processOutputPlugins(Event event, OutputPlugin outputPlugin) {
+       final Lock lock = new ReentrantLock();
+       final Condition processing = lock.newCondition();
 
-           Consumer<Boolean> consumer = noParam -> {
-               lock.lock();
-               processing.signal();
-               lock.unlock();
-           };
-           Resource<Consumer> resource = IdentificationManager.getInstance().getIdentification(this)
-                   .map(id -> new ResourceImpl<Consumer>(outputPlugin.getID(), id, consumer))
-                   .orElse(new ResourceImpl<Consumer>(outputPlugin.getID())
-                           .setResource(consumer));
-           event.getListResourceContainer().addResource(resource);
+       Consumer<Boolean> consumer = noParam -> {
+           lock.lock();
+           processing.signal();
+           lock.unlock();
+       };
+        
+        Resource<Consumer<Boolean>> resource = IdentificationManager.getInstance().getIdentification(this)
+               .map(id -> (Resource<Consumer<Boolean>>) new ResourceImpl<>(outputPlugin.getID(), id, consumer))
+               .orElse(new ResourceImpl<Consumer<Boolean>>(outputPlugin.getID()).setResource(consumer));
+       event.getListResourceContainer().addResource(resource);
 
-           outputPlugin.addToEventList(event);
+       outputPlugin.addToEventList(event);
 
-           boolean finished = false;
-           try {
-               lock.lock();
-               finished = processing.await(100, TimeUnit.SECONDS);
-           } catch (InterruptedException e) {
-               fileLogger.error("Waiting for OutputPlugins interrupted", e);
-           } finally {
-               lock.unlock();
-           }
-           if(finished) {
-               fileLogger.debug("OutputPlugin: " + outputPlugin.getID() + " finished");
-           } else {
-               fileLogger.error("OutputPlugin: " + outputPlugin.getID() + " timed out");
-           }
+       boolean finished = false;
+       try {
+           lock.lock();
+           finished = processing.await(100, TimeUnit.SECONDS);
+       } catch (InterruptedException e) {
+           log.error("Waiting for OutputPlugins interrupted", e);
+       } finally {
+           lock.unlock();
        }
-    }
-
-    @Override
-    public String getID() {
-        return ID;
-    }
+       if(finished) {
+           log.debug("OutputPlugin: " + outputPlugin.getID() + " finished");
+       } else {
+           log.error("OutputPlugin: " + outputPlugin.getID() + " timed out");
+       }
+   }
 }
