@@ -28,6 +28,11 @@ public interface ResourceBuilder extends Identifiable {
      * This method is called when an object wants to get a Resource.
      * it has as an argument resource instances without data, which just need to get populated.
      *
+     * this method is called when an object wants to get a Resource.
+     * <p>
+     * Don't use the Resources provided as arguments, they are just the requests.
+     * There is a timeout after 1 second.
+     * </p> 
      * @param resources a list of resources without data
      * @param event if an event caused the action, it gets passed. It can also be null.
      * @return a list of resources with data
