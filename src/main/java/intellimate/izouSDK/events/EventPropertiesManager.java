@@ -30,6 +30,28 @@ public class EventPropertiesManager implements ReloadableFile {
         reloadFile(null);
     }
 
+    //TODO: call this method
+    private void createIzouPropertiesFiles() throws IOException {
+        String propertiesPath = new File(".").getCanonicalPath() + File.separator + "properties" + File.separator +
+                "local_events.properties";
+
+        File file = new File(propertiesPath);
+        BufferedWriter bufferedWriterInit = null;
+        try {
+            if (!file.exists()) {
+                file.createNewFile();
+                bufferedWriterInit = new BufferedWriter(new FileWriter(propertiesPath));
+                bufferedWriterInit.write("# You can use this file to store an event ID with a key, or shortcut, " +
+                        " so that others can easily access and\n# fire it using the key");
+            }
+        } catch (IOException e) {
+            //error("unable to create the local_events file", e);
+        } finally {
+            if(bufferedWriterInit != null)
+                bufferedWriterInit.close();
+        }
+    }
+
     /**
      * Gets the full event ID associated with the key {@code key}
      *

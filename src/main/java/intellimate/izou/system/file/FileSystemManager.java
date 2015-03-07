@@ -1,33 +1,32 @@
 package intellimate.izou.system.file;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import intellimate.izou.IzouModule;
+import intellimate.izou.main.Main;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 
 /**
  * FileSystemManager is responsible for creating all the files and folders Izou needs to operate
  */
-public class FileSystemManager {
+public class FileSystemManager extends IzouModule {
     /**
      * Path to log files
      */
     public static final String LOG_PATH = "." + File.separator + "logs" + File.separator;
 
     /**
-     *
+     * path to the proterties files
      */
     public static final String PROPERTIES_PATH = "." + File.separator + "properties" + File.separator;
-    private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     /**
      * creates a file system manager
+     * @param main an instance of main
      */
-    public FileSystemManager() {
+    public FileSystemManager(Main main) {
+        super(main);
     }
 
     /**
@@ -76,7 +75,6 @@ public class FileSystemManager {
         File propertiesDir = new File(propertiesPath);
         if(!Files.exists(propertiesDir.toPath()))
             Files.createDirectories(propertiesDir.toPath());
-        createIzouPropertiesFiles();
     }
 
     /**
@@ -89,26 +87,5 @@ public class FileSystemManager {
         File logFile = new File(logPath);
         if(!Files.exists(logFile.toPath()))
             Files.createDirectories(logFile.toPath());
-    }
-
-    private void createIzouPropertiesFiles() throws IOException {
-        String propertiesPath = new File(".").getCanonicalPath() + File.separator + "properties" + File.separator +
-                "local_events.properties";
-
-        File file = new File(propertiesPath);
-        BufferedWriter bufferedWriterInit = null;
-        try {
-            if (!file.exists()) {
-                file.createNewFile();
-                bufferedWriterInit = new BufferedWriter(new FileWriter(propertiesPath));
-                bufferedWriterInit.write("# You can use this file to store an event ID with a key, or shortcut, " +
-                        " so that others can easily access and\n# fire it using the key");
-            }
-        } catch (IOException e) {
-            fileLogger.error("unable to create the local_events file", e);
-        } finally {
-            if(bufferedWriterInit != null)
-                bufferedWriterInit.close();
-        }
     }
 }
