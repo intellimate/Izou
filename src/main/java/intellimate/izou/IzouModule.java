@@ -1,6 +1,7 @@
 package intellimate.izou;
 
 import intellimate.izou.identification.Identifiable;
+import intellimate.izou.identification.IdentificationManager;
 import intellimate.izou.main.Main;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,6 +18,9 @@ public abstract class IzouModule implements MainProvider, Identifiable {
 
     public IzouModule(Main main) {
         this.main = main;
+        if (!IdentificationManager.getInstance().registerIdentification(this)) {
+            log.fatal("unable to register!");
+        }
     }
 
     /**
