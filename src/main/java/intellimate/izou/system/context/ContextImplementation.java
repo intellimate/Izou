@@ -2,6 +2,7 @@ package intellimate.izou.system.context;
 
 import intellimate.izou.addon.AddOn;
 import intellimate.izou.events.*;
+import intellimate.izou.identification.Identifiable;
 import intellimate.izou.identification.Identification;
 import intellimate.izou.identification.IllegalIDException;
 import intellimate.izou.main.Main;
@@ -13,6 +14,7 @@ import intellimate.izou.system.Context;
 import intellimate.izou.system.file.FileSubscriber;
 import intellimate.izou.system.file.ReloadableFile;
 import intellimate.izou.system.logger.IzouLogger;
+import intellimate.izou.threadpool.TrackingExecutorService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.spi.ExtendedLogger;
 
@@ -20,10 +22,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 /**
@@ -437,23 +437,15 @@ public class ContextImplementation implements Context {
 
     private class ThreadPoolImpl implements ThreadPool {
         /**
-         * Submits a new Callable to the ThreadPool
-         * @param callable the callable to submit
-         * @param <V> the type of the callable
-         * @return a Future representing pending completion of the task
-         */
-        @Override
-        public <V> Future<V> submitToIzouThreadPool(Callable<V> callable) {
-            return main.getThreadPoolManager().getAddOnsThreadPool().submit(callable);
-        }
-
-        /**
          * returns an ThreadPool where all the IzouPlugins are running
+         * @param identifiable the Identifiable to set each created Task as the Source
          * @return an instance of ExecutorService
+         * @throws IllegalIDException not implemented yet
          */
         @Override
-        public ExecutorService getThreadPool() {
-            return main.getThreadPoolManager().getAddOnsThreadPool();
+        public ExecutorService getThreadPool(Identifiable identifiable) throws IllegalIDException {
+            return TrackingExecutorService.createTrackingExecutorService(
+                    main.getThreadPoolManager().getAddOnsThreadPool(), identifiable);
         }
     }
 

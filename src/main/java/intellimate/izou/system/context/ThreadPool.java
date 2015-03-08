@@ -1,8 +1,9 @@
 package intellimate.izou.system.context;
 
-import java.util.concurrent.Callable;
+import intellimate.izou.identification.Identifiable;
+import intellimate.izou.identification.IllegalIDException;
+
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 
 /**
  * @author Leander Kurscheidt
@@ -10,16 +11,10 @@ import java.util.concurrent.Future;
  */
 public interface ThreadPool {
     /**
-     * Submits a new Callable to the ThreadPool
-     * @param callable the callable to submit
-     * @param <V> the type of the callable
-     * @return a Future representing pending completion of the task
-     */
-    <V> Future<V> submitToIzouThreadPool(Callable<V> callable);
-
-    /**
      * returns an ThreadPool where all the IzouPlugins are running
+     * @param identifiable the Identifiable to set each created Task as the Source
      * @return an instance of ExecutorService
+     * @throws IllegalIDException not implemented yet
      */
-    ExecutorService getThreadPool();
+    ExecutorService getThreadPool(Identifiable identifiable) throws IllegalIDException;
 }

@@ -14,7 +14,7 @@ import java.util.*;
  */
 public class IdentifiableSet<X> extends AbstractSet<X> implements Set<X>, Cloneable, Identifiable {
     private HashMap<X, Identification> map;
-    private boolean allowElementsWithoutIdentification;
+    private boolean allowElementsWithoutIdentification = false;
     private static Identification placeholder = null;
 
     /**

@@ -2,8 +2,6 @@ package intellimate.izou.threadpool;
 
 import intellimate.izou.IzouModule;
 import intellimate.izou.main.Main;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Field;
 import java.util.concurrent.*;
@@ -14,7 +12,6 @@ import java.util.concurrent.*;
  * @version 1.0
  */
 public class ThreadPoolManager extends IzouModule {
-    private final Logger fileLogger = LogManager.getLogger(this.getClass());
     //holds the threads
     private final ExecutorService izouThreadPool = Executors.newCachedThreadPool(new LoggingThreadFactory());
     //holds the threads
@@ -30,6 +27,7 @@ public class ThreadPoolManager extends IzouModule {
 
     /**
      * returns the ThreadPool where all the Izou-Components are running
+     * <p>this method should only be used by IzouModules</p>
      * @return an ExecutorService
      */
     public ExecutorService getIzouThreadPool() {
@@ -42,24 +40,6 @@ public class ThreadPoolManager extends IzouModule {
      */
     public ExecutorService getAddOnsThreadPool() {
         return addOnsThreadPool;
-    }
-
-    /**
-     * Submits a new AddOn Callable to the ThreadPool
-     * @param callable the callable to submit
-     * @param <V> the type of the callable
-     * @return a Future representing pending completion of the task
-     */
-    public <V> Future<V> submitToIzouThreadPool(Callable<V> callable) {
-        return addOnsThreadPool.submit(callable);
-    }
-
-    /**
-     * Submits a new AddOn Callable to the ThreadPool
-     * @param runnable the runnable to submit
-     */
-    public void submitToIzouThreadPool(Runnable runnable) {
-        addOnsThreadPool.submit(runnable);
     }
 
     /**
@@ -85,10 +65,10 @@ public class ThreadPoolManager extends IzouModule {
                                     exceptionCallback.exceptionThrown(new RuntimeException(e));
                                 }
                             } catch (IllegalArgumentException | IllegalAccessException e1) {
-                                fileLogger.fatal("unable to provide callback", e);
+                                log.fatal("unable to provide callback", e);
                             }
                         } catch (NoSuchFieldException ecp ) {
-                            fileLogger.fatal(e);
+                            log.fatal(e);
                         }
                     }
                 }
