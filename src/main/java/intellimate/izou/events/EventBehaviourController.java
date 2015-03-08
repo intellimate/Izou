@@ -1,6 +1,5 @@
 package intellimate.izou.events;
 
-import intellimate.izou.identification.Identifiable;
 import intellimate.izou.identification.Identification;
 
 import java.util.HashMap;
@@ -11,7 +10,7 @@ import java.util.List;
  * @author Leander Kurscheidt
  * @version 1.0
  */
-public interface EventBehaviourController extends Identifiable {
+public interface EventBehaviourController {
     /**
      * generates the data to control the Event
      * <p>
