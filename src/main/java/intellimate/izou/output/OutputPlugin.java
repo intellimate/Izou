@@ -25,6 +25,12 @@ public interface OutputPlugin<X, T> extends Runnable, Identifiable {
     void outputExtensionAdded(Identification identification);
 
     /**
+     * callback method to notify that an OutputExtension was added
+     * @param identification the Identification of the OutputExtension added
+     */
+    void outputExtensionRemoved(Identification identification);
+
+    /**
      * returns the Type of the one wants to receive from the OutputExtensions
      * @return the type of the generic
      */

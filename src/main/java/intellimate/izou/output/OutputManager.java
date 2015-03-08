@@ -106,6 +106,10 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
             outputExtensionList.add(outputExtension);
             outputExtensions.put(outputExtension.getPluginId(), outputExtensionList);
         }
+        IdentificationManager.getInstance().getIdentification(outputExtension)
+                .ifPresent(id -> outputPlugins.stream()
+                        .filter(outputPlugin -> outputPlugin.getID().equals(outputExtension.getPluginId()))
+                        .forEach(outputPlugin -> outputPlugin.outputExtensionAdded(id)));
     }
 
     /**
@@ -118,6 +122,10 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
                 this.outputExtensions.get(outputExtension.getPluginId());
         if (outputExtensions != null)
             outputExtensions.remove(outputExtension);
+        IdentificationManager.getInstance().getIdentification(outputExtension)
+                .ifPresent(id -> outputPlugins.stream()
+                        .filter(outputPlugin -> outputPlugin.getID().equals(outputExtension.getPluginId()))
+                        .forEach(outputPlugin -> outputPlugin.outputExtensionRemoved(id)));
     }
 
     /**
