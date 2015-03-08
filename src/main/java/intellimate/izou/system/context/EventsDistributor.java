@@ -51,4 +51,9 @@ public interface EventsDistributor {
      * @param eventsController the EventController Interface to remove
      */
     void unregisterEventsController(EventsController eventsController);
+
+    /**
+     * returns the ID of the Manager (EventsDistributor)
+     */
+    Identification getManagerIdentification();
 }

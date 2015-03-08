@@ -1,5 +1,6 @@
 package intellimate.izou.system.context;
 
+import intellimate.izou.identification.Identification;
 import intellimate.izou.identification.IllegalIDException;
 
 /**
@@ -19,4 +20,9 @@ public interface Activators {
      * @param activator the activator to remove
      */
     void removeActivator(intellimate.izou.activator.Activator activator);
+
+    /**
+     * returns the ID of the Manager
+     */
+    Identification getManagerIdentification();
 }

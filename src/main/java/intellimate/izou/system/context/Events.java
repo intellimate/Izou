@@ -88,4 +88,9 @@ public interface Events {
      * @return Distributor
      */
     public EventsDistributor distributor();
+
+    /**
+     * returns the ID of the Manager (LocalEventManager)
+     */
+    Identification getManagerIdentification();
 }

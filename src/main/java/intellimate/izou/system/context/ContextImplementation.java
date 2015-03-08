@@ -4,6 +4,7 @@ import intellimate.izou.addon.AddOn;
 import intellimate.izou.events.*;
 import intellimate.izou.identification.Identifiable;
 import intellimate.izou.identification.Identification;
+import intellimate.izou.identification.IdentificationManager;
 import intellimate.izou.identification.IllegalIDException;
 import intellimate.izou.main.Main;
 import intellimate.izou.output.OutputExtension;
@@ -326,6 +327,20 @@ public class ContextImplementation implements Context {
             return eventsDistributor;
         }
 
+        /**
+         * returns the ID of the Manager (LocalEventManager)
+         */
+        @Override
+        public Identification getManagerIdentification() {
+            Optional<Identification> identification = IdentificationManager.getInstance()
+                    .getIdentification(main.getLocalEventManager());
+            if (!identification.isPresent()) {
+                //should not happen
+                throw new RuntimeException("unable to obtain ID for LocalEventManager");
+            }
+            return identification.get();
+        }
+
         private class DistributorImpl implements EventsDistributor {
             /**
              * with this method you can register EventPublisher add a Source of Events to the System.
@@ -377,6 +392,20 @@ public class ContextImplementation implements Context {
             @Override
             public void unregisterEventsController(EventsController eventsController) {
                 main.getEventDistributor().unregisterEventsController(eventsController);
+            }
+
+            /**
+             * returns the ID of the Manager (EventsDistributor)
+             */
+            @Override
+            public Identification getManagerIdentification() {
+                Optional<Identification> identification = IdentificationManager.getInstance()
+                        .getIdentification(main.getEventDistributor());
+                if (!identification.isPresent()) {
+                    //should not happen
+                    throw new RuntimeException("unable to obtain ID for EventsDistributor");
+                }
+                return identification.get();
             }
         }
     }
@@ -433,6 +462,20 @@ public class ContextImplementation implements Context {
         public Optional<CompletableFuture<List<Resource>>> generateResource(Resource resource) throws IllegalIDException {
             return main.getResourceManager().generateResource(resource);
         }
+
+        /**
+         * returns the ID of the Manager
+         */
+        @Override
+        public Identification getManagerIdentification() {
+            Optional<Identification> identification = IdentificationManager.getInstance()
+                    .getIdentification(main.getResourceManager());
+            if (!identification.isPresent()) {
+                //should not happen
+                throw new RuntimeException("unable to obtain ID for ResourceManager");
+            }
+            return identification.get();
+        }
     }
 
     private class ThreadPoolImpl implements ThreadPool {
@@ -446,6 +489,20 @@ public class ContextImplementation implements Context {
         public ExecutorService getThreadPool(Identifiable identifiable) throws IllegalIDException {
             return TrackingExecutorService.createTrackingExecutorService(
                     main.getThreadPoolManager().getAddOnsThreadPool(), identifiable);
+        }
+
+        /**
+         * returns the ID of the Manager
+         */
+        @Override
+        public Identification getManagerIdentification() {
+            Optional<Identification> identification = IdentificationManager.getInstance()
+                    .getIdentification(main.getEventDistributor());
+            if (!identification.isPresent()) {
+                //should not happen
+                throw new RuntimeException("unable to obtain ID for ThreadPoolManager");
+            }
+            return identification.get();
         }
     }
 
@@ -467,6 +524,20 @@ public class ContextImplementation implements Context {
         @Override
         public void removeActivator(intellimate.izou.activator.Activator activator) {
             main.getActivatorManager().removeActivator(activator);
+        }
+
+        /**
+         * returns the ID of the Manager
+         */
+        @Override
+        public Identification getManagerIdentification() {
+            Optional<Identification> identification = IdentificationManager.getInstance()
+                    .getIdentification(main.getActivatorManager());
+            if (!identification.isPresent()) {
+                //should not happen
+                throw new RuntimeException("unable to obtain ID for ActivatorManager");
+            }
+            return identification.get();
         }
     }
 
@@ -536,6 +607,20 @@ public class ContextImplementation implements Context {
         public <T, X> List<CompletableFuture<T>> generateAllOutputExtensions(OutputPlugin<T, X> outputPlugin,
                                                                                        X x, Event event) {
             return main.getOutputManager().generateAllOutputExtensions(outputPlugin, x, event);
+        }
+
+        /**
+         * returns the ID of the Manager
+         */
+        @Override
+        public Identification getManagerIdentification() {
+            Optional<Identification> identification = IdentificationManager.getInstance()
+                    .getIdentification(main.getOutputManager());
+            if (!identification.isPresent()) {
+                //should not happen
+                throw new RuntimeException("unable to obtain ID for OutputManager");
+            }
+            return identification.get();
         }
     }
 }

@@ -1,6 +1,7 @@
 package intellimate.izou.system.context;
 
 import intellimate.izou.identification.Identifiable;
+import intellimate.izou.identification.Identification;
 import intellimate.izou.identification.IllegalIDException;
 
 import java.util.concurrent.ExecutorService;
@@ -17,4 +18,9 @@ public interface ThreadPool {
      * @throws IllegalIDException not implemented yet
      */
     ExecutorService getThreadPool(Identifiable identifiable) throws IllegalIDException;
+
+    /**
+     * returns the ID of the Manager
+     */
+    Identification getManagerIdentification();
 }

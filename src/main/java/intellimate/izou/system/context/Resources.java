@@ -1,5 +1,6 @@
 package intellimate.izou.system.context;
 
+import intellimate.izou.identification.Identification;
 import intellimate.izou.identification.IllegalIDException;
 import intellimate.izou.resource.Resource;
 import intellimate.izou.resource.ResourceBuilder;
@@ -53,4 +54,9 @@ public interface Resources {
      * @throws IllegalIDException not yet implemented
      */
     Optional<CompletableFuture<List<Resource>>> generateResource(Resource resource) throws IllegalIDException;
+
+    /**
+     * returns the ID of the Manager
+     */
+    Identification getManagerIdentification();
 }

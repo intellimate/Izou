@@ -61,4 +61,9 @@ public interface Output {
      */
     public <T, X> List<CompletableFuture<T>> generateAllOutputExtensions(OutputPlugin<T, X> outputPlugin,
                                                                                    X x, Event event);
+
+    /**
+     * returns the ID of the Manager
+     */
+    Identification getManagerIdentification();
 }
