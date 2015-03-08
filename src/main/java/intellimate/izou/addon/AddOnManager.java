@@ -1,6 +1,6 @@
 package intellimate.izou.addon;
 
-import intellimate.izou.IdentifiableCollection;
+import intellimate.izou.IdentifiableSet;
 import intellimate.izou.AddonThreadPoolUser;
 import intellimate.izou.IzouModule;
 import intellimate.izou.main.Main;
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  * Manages all the AddOns.
  */
 public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
-    private IdentifiableCollection<AddOn> addOns = new IdentifiableCollection<>();
+    private IdentifiableSet<AddOn> addOns = new IdentifiableSet<>();
     
     public AddOnManager(Main main) {
         super(main);
@@ -52,7 +52,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
         registerAllAddOns(this.addOns);
     }
     
-    public void registerAllAddOns(IdentifiableCollection<AddOn> addOns) {
+    public void registerAllAddOns(IdentifiableSet<AddOn> addOns) {
         List<CompletableFuture<Void>> futures = addOns.stream()
                 .map(addOn -> submit((Runnable) addOn::register))
                 .collect(Collectors.toList());

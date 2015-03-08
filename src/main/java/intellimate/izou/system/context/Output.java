@@ -1,8 +1,13 @@
 package intellimate.izou.system.context;
 
+import intellimate.izou.events.Event;
+import intellimate.izou.identification.Identification;
 import intellimate.izou.identification.IllegalIDException;
 import intellimate.izou.output.OutputExtension;
 import intellimate.izou.output.OutputPlugin;
+
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author Leander Kurscheidt
@@ -39,4 +44,21 @@ public interface Output {
      * @param outputPlugin the outputPlugin to remove
      */
     void removeOutputPlugin(OutputPlugin outputPlugin);
+
+    /**
+     * returns all the associated OutputExtensions
+     * @param outputPlugin the OutputPlugin to search for
+     * @return a List of Identifications
+     */
+    List<Identification> getAssociatedOutputExtension(OutputPlugin<?, ?> outputPlugin);
+
+    /**
+     * starts every associated OutputExtension
+     * @param outputPlugin the OutputPlugin to generate the Data for
+     * @param x the argument or null
+     * @param event the Event to generate for
+     * @return a List of Future-Objects
+     */
+    public <T, X> List<CompletableFuture<T>> generateAllOutputExtensions(OutputPlugin<T, X> outputPlugin,
+                                                                                   X x, Event event);
 }

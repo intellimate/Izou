@@ -1,13 +1,15 @@
 package intellimate.izou.output;
 
+import com.google.common.reflect.TypeToken;
 import intellimate.izou.events.Event;
 import intellimate.izou.identification.Identifiable;
+import intellimate.izou.identification.Identification;
 
 /**
  * The OutputPlugin class gets Event and then starts threads filled with output-extension tasks to create the final
  * output and then render it on its own medium
  */
-public interface OutputPlugin<T> extends Runnable, Identifiable {
+public interface OutputPlugin<X, T> extends Runnable, Identifiable {
     /**
      * Adds an event to blockingQueue
      *
@@ -17,19 +19,22 @@ public interface OutputPlugin<T> extends Runnable, Identifiable {
     void addToEventList(Event event);
 
     /**
-     * add outputExtension to outputExtensionList
-     *
-     * @param outputExtension the output-extension to be added to outputExtensionList
+     * callback method to notify that an OutputExtension was added
+     * @param identification the Identification of the OutputExtension added
      */
-    void addOutputExtension(OutputExtension<T> outputExtension);
+    void outputExtensionAdded(Identification identification);
 
     /**
-     * Removes output-extensions from outputExtensionList
-     *
-     * Removes output-extensions from outputExtensionList, outputExtensionList is an ArrayList that stores all
-     * outputExtensions of all OutputPlugins
-     *
-     * @param id the id of the output extension to be removed
+     * returns the Type of the one wants to receive from the OutputExtensions
+     * @return the type of the generic
      */
-    void removeOutputExtension(String id);
+    //i don't think there is another way
+    TypeToken<T> getRecievingType();
+
+    /**
+     * returns the Type of the argument for the OutputExtensions, or null if none
+     * @return the type of the Argument
+     */
+    //i don't think there is another way
+    TypeToken<X> getArgumentType();
 }

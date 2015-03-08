@@ -1,7 +1,7 @@
 package intellimate.izou.activator;
 
 import intellimate.izou.AddonThreadPoolUser;
-import intellimate.izou.IdentifiableCollection;
+import intellimate.izou.IdentifiableSet;
 import intellimate.izou.IzouModule;
 import intellimate.izou.identification.IllegalIDException;
 import intellimate.izou.main.Main;
@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @SuppressWarnings("WeakerAccess")
 public class ActivatorManager extends IzouModule implements AddonThreadPoolUser {
-    IdentifiableCollection<Activator> activators = new IdentifiableCollection<>();
+    IdentifiableSet<Activator> activators = new IdentifiableSet<>();
     ConcurrentHashMap<Activator, CompletableFuture> futures = new ConcurrentHashMap<>();
     ConcurrentHashMap<Activator, AtomicInteger> crashCounter = new ConcurrentHashMap<>();
     

@@ -513,5 +513,29 @@ public class ContextImplementation implements Context {
         public void removeOutputPlugin(OutputPlugin outputPlugin) {
             main.getOutputManager().removeOutputPlugin(outputPlugin);
         }
+
+        /**
+         * returns all the associated OutputExtensions
+         *
+         * @param outputPlugin the OutputPlugin to search for
+         * @return a List of Identifications
+         */
+        @Override
+        public List<Identification> getAssociatedOutputExtension(OutputPlugin<?, ?> outputPlugin) {
+            return main.getOutputManager().getAssociatedOutputExtension(outputPlugin);
+        }
+
+        /**
+         * starts every associated OutputExtension
+         *
+         * @param outputPlugin the OutputPlugin to generate the Data for
+         * @param x            the argument or null
+         * @param event        the Event to generate for  @return a List of Future-Objects
+         */
+        @Override
+        public <T, X> List<CompletableFuture<T>> generateAllOutputExtensions(OutputPlugin<T, X> outputPlugin,
+                                                                                       X x, Event event) {
+            return main.getOutputManager().generateAllOutputExtensions(outputPlugin, x, event);
+        }
     }
 }

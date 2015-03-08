@@ -1,112 +1,29 @@
 package intellimate.izou;
 
 import intellimate.izou.identification.Identifiable;
-import intellimate.izou.identification.Identification;
-import intellimate.izou.identification.IdentificationManager;
 
-import java.util.*;
+import java.util.AbstractSet;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
- * it has the same Properties as an normal HashSet, but (optionally) keeps an Identification for every object to
- * identify its source.
+ * Use this class if you want to store a Set of AddOnModules permanently.
+ * <p>
+ * The reason for this class is that in the future it might be needed to de-register an AddOn and with this class it is
+ * easy to introduce this Feature.
+ * </p>
  * @author Leander Kurscheidt
  * @version 1.0
  */
-public class IdentifiableSet<X> extends AbstractSet<X> implements Set<X>, Cloneable, Identifiable {
-    private HashMap<X, Identification> map;
-    private boolean allowElementsWithoutIdentification = false;
-    private static Identification placeholder = null;
+public class IdentifiableSet<X extends Identifiable> extends AbstractSet<X> implements Set<X>, Cloneable {
+    private Set<X> set = new HashSet<>();
 
-    /**
-     * Constructs a new, empty set;
-     * <p>
-     * the backing HashMap instance has default initial capacity (16) and load factor (0.75).
-     * </p>
-     */
-    public IdentifiableSet() {
-        map = new HashMap<>();
-        init();
+    public IdentifiableSet(Set<X> set) {
+        this.set = set;
     }
 
-    /**
-     * Constructs a new, empty set.
-     * <p>the backing HashMap instance has the specified initial capacity and the specified load factor.</p>
-     * @param initialCapacity the initial capacity of the hash map
-     * @param loadFactor the load factor of the hash map
-     * @throws java.lang.IllegalArgumentException if the initial capacity is less than zero, or if the load factor is
-     *                                          nonpositive
-     */
-    public IdentifiableSet(int initialCapacity, float loadFactor) {
-        map = new HashMap<>(initialCapacity, loadFactor);
-        init();
-    }
-
-    /**
-     * Constructs a new, empty set.
-     * <p>the backing HashMap instance has the specified initial capacity and default load factor (0.75).</p>
-     * @param initialCapacity initialCapacity the initial capacity of the hash table
-     * @throws java.lang.IllegalArgumentException if the initial capacity is less than zero
-     */
-    public IdentifiableSet(int initialCapacity) {
-        map = new HashMap<>(initialCapacity);
-        init();
-    }
-
-    /**
-     * Constructs a new, empty set;
-     * <p>
-     * the backing HashMap instance has default initial capacity (16) and load factor (0.75).
-     * </p>
-     * @param allow whether it is allowed to put Elements without Identification in this Set
-     */
-    public IdentifiableSet(boolean allow) {
-        map = new HashMap<>();
-        allowElementsWithoutIdentification = allow;
-        init();
-    }
-
-    /**
-     * Constructs a new, empty set.
-     * <p>the backing HashMap instance has the specified initial capacity and the specified load factor.</p>
-     * @param initialCapacity the initial capacity of the hash map
-     * @param loadFactor the load factor of the hash map
-     * @param allow whether it is allowed to put Elements without Identification in this Set
-     * @throws java.lang.IllegalArgumentException if the initial capacity is less than zero, or if the load factor is
-     *                                          nonpositive
-     */
-    public IdentifiableSet(int initialCapacity, float loadFactor, boolean allow) {
-        map = new HashMap<>(initialCapacity, loadFactor);
-        allowElementsWithoutIdentification = allow;
-        init();
-    }
-
-    /**
-     * Constructs a new, empty set.
-     * <p>the backing HashMap instance has the specified initial capacity and default load factor (0.75).</p>
-     * @param initialCapacity initialCapacity the initial capacity of the hash table
-     * @param allow whether it is allowed to put Elements without Identification in this Set
-     * @throws java.lang.IllegalArgumentException if the initial capacity is less than zero
-     */
-    public IdentifiableSet(int initialCapacity, boolean allow) {
-        map = new HashMap<>(initialCapacity);
-        allowElementsWithoutIdentification = allow;
-        init();
-    }
-
-    /**
-     * initializes some common fields in the Set
-     */
-    private void init() {
-        if (placeholder == null) {
-            IdentificationManager.getInstance().registerIdentification(this);
-            Optional<Identification> identification = IdentificationManager.getInstance().getIdentification(this);
-            if (!identification.isPresent()) {
-                throw new IllegalStateException("Unable to obtain Identification");
-            } else {
-                placeholder = identification.get();
-            }
-        }
-    }
+    public IdentifiableSet() {}
 
     /**
      * Returns the number of elements in this set (its cardinality).  If this
@@ -117,7 +34,7 @@ public class IdentifiableSet<X> extends AbstractSet<X> implements Set<X>, Clonea
      */
     @Override
     public int size() {
-        return map.size();
+        return set.size();
     }
 
     /**
@@ -127,7 +44,7 @@ public class IdentifiableSet<X> extends AbstractSet<X> implements Set<X>, Clonea
      */
     @Override
     public boolean isEmpty() {
-        return map.isEmpty();
+        return set.isEmpty();
     }
 
     /**
@@ -147,7 +64,7 @@ public class IdentifiableSet<X> extends AbstractSet<X> implements Set<X>, Clonea
      */
     @Override
     public boolean contains(Object o) {
-        return map.containsKey(o);
+        return set.contains(o);
     }
 
     /**
@@ -155,20 +72,7 @@ public class IdentifiableSet<X> extends AbstractSet<X> implements Set<X>, Clonea
      * @return an Iterator over the elements in this set
      */
     public Iterator<X> iterator() {
-        return map.keySet().iterator();
-    }
-
-    /**
-     * An ID must always be unique.
-     * A Class like Activator or OutputPlugin can just provide their .class.getCanonicalName()
-     * If you have to implement this interface multiple times, just concatenate unique Strings to
-     * .class.getCanonicalName()
-     *
-     * @return A String containing an ID
-     */
-    @Override
-    public String getID() {
-        return IdentifiableSet.class.getCanonicalName();
+        return set.iterator();
     }
 
     /**
@@ -180,20 +84,7 @@ public class IdentifiableSet<X> extends AbstractSet<X> implements Set<X>, Clonea
      */
     @Override
     public boolean add(X x) {
-        if (!allowElementsWithoutIdentification)
-            throw new IllegalArgumentException("It is not allowed to put Elements without Identification in this Set");
-
-        return map.put(x, placeholder) == null;
-    }
-
-    /**
-     * Adds an Element to the Set
-     * @param x the Element
-     * @param identification the identification
-     * @return true if this set did not already contain the specified element
-     */
-    public boolean add(X x, Identification identification) {
-        return map.put(x, identification) == null;
+        return set.add(x);
     }
 
     /**
@@ -210,7 +101,7 @@ public class IdentifiableSet<X> extends AbstractSet<X> implements Set<X>, Clonea
      */
     @Override
     public boolean remove(Object o) {
-        return map.remove(o) != null;
+        return set.remove(o);
     }
 
     /**
@@ -224,7 +115,7 @@ public class IdentifiableSet<X> extends AbstractSet<X> implements Set<X>, Clonea
      */
     @Override
     public void clear() {
-        map.clear();
+        set.clear();
     }
 
     /**
@@ -233,27 +124,15 @@ public class IdentifiableSet<X> extends AbstractSet<X> implements Set<X>, Clonea
      * @return a shallow copy of this set
      */
     @Override
-    protected Object clone() throws CloneNotSupportedException {
+    public Object clone() {
         try {
             IdentifiableSet<X> newSet = (IdentifiableSet<X>) super.clone();
-            newSet.map = (HashMap<X, Identification>) map.clone();
+            newSet.set = (Set<X>) ((HashSet<X>) set).clone();
             return newSet;
         } catch (CloneNotSupportedException e) {
             throw new InternalError();
         }
     }
-
-    /**
-     * returns the associated Identification (if it was added with an identification)
-     * @param x the Element
-     * @return the identification or an Empty Optional
-     */
-    public Optional<Identification> getIdentificationFor(X x) {
-        Identification identification = map.get(x);
-        if (identification == null || identification.equals(placeholder)) {
-            return Optional.empty();
-        } else {
-            return Optional.of(identification);
-        }
-    }
 }
+
+

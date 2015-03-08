@@ -1,6 +1,6 @@
 package intellimate.izou.system.file;
 
-import intellimate.izou.IdentifiableSet;
+import intellimate.izou.IdentificationSet;
 import intellimate.izou.IzouModule;
 import intellimate.izou.identification.Identification;
 import intellimate.izou.identification.IllegalIDException;
@@ -15,8 +15,8 @@ import java.util.concurrent.CompletableFuture;
  * subscribers belonging to it are notified. All file subscribers in general can also be notified.
  */
 public class FilePublisher extends IzouModule {
-    private HashMap<ReloadableFile, IdentifiableSet<FileSubscriber>> fileSubscribers;
-    private IdentifiableSet<FileSubscriber> defaultFileSubscribers;
+    private HashMap<ReloadableFile, IdentificationSet<FileSubscriber>> fileSubscribers;
+    private IdentificationSet<FileSubscriber> defaultFileSubscribers;
 
     /**
      * Creates a new FilePublisher object. There should only be one in Izou
@@ -25,7 +25,7 @@ public class FilePublisher extends IzouModule {
     public FilePublisher(Main main) {
         super(main);
         this.fileSubscribers = new HashMap<>();
-        this.defaultFileSubscribers = new IdentifiableSet<>(false);
+        this.defaultFileSubscribers = new IdentificationSet<>(false);
     }
 
     /**
@@ -39,10 +39,10 @@ public class FilePublisher extends IzouModule {
      */
     public void register(ReloadableFile reloadableFile, FileSubscriber fileSubscriber, Identification identification)
                                                                                             throws IllegalIDException {
-        IdentifiableSet<FileSubscriber> subscribers = fileSubscribers.get(reloadableFile);
+        IdentificationSet<FileSubscriber> subscribers = fileSubscribers.get(reloadableFile);
 
         if (subscribers == null) {
-            subscribers = new IdentifiableSet<>(false);
+            subscribers = new IdentificationSet<>(false);
             fileSubscribers.put(reloadableFile, subscribers);
         }
         subscribers.add(fileSubscriber, identification);
@@ -65,7 +65,7 @@ public class FilePublisher extends IzouModule {
      * @param fileSubscriber the fileSubscriber to unregister
      */
     public void unregister(FileSubscriber fileSubscriber) {
-        for (IdentifiableSet<FileSubscriber> subList : fileSubscribers.values()) {
+        for (IdentificationSet<FileSubscriber> subList : fileSubscribers.values()) {
             subList.remove(fileSubscriber);
         }
         defaultFileSubscribers.remove(fileSubscriber);
@@ -79,7 +79,7 @@ public class FilePublisher extends IzouModule {
     public synchronized void notifyFileSubscribers(ReloadableFile reloadableFile) {
         notifyDefaultFileSubscribers();
 
-        IdentifiableSet<FileSubscriber> subList = fileSubscribers.get(reloadableFile);
+        IdentificationSet<FileSubscriber> subList = fileSubscribers.get(reloadableFile);
         if (subList == null) {
             return;
         }
@@ -93,7 +93,7 @@ public class FilePublisher extends IzouModule {
      * Notifies all file subscribers.
      */
     public synchronized void notifyAllFileSubcribers() {
-        for (IdentifiableSet<FileSubscriber> subList : fileSubscribers.values()) {
+        for (IdentificationSet<FileSubscriber> subList : fileSubscribers.values()) {
             for (FileSubscriber sub : subList) {
                 CompletableFuture.runAsync(sub::update, main.getThreadPoolManager().getAddOnsThreadPool());
             }
@@ -117,7 +117,7 @@ public class FilePublisher extends IzouModule {
      * @param reloadableFile the {@code reloadableFile} for which to get all subscribers
      * @return all subscribers for a {@code reloadableFile}
      */
-    public IdentifiableSet<FileSubscriber> getFileSubscribersForReloadableFile(ReloadableFile reloadableFile) {
+    public IdentificationSet<FileSubscriber> getFileSubscribersForReloadableFile(ReloadableFile reloadableFile) {
         return fileSubscribers.get(reloadableFile);
     }
 }
