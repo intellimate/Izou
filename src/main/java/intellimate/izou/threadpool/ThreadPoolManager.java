@@ -65,7 +65,7 @@ public class ThreadPoolManager extends IzouModule {
                                     exceptionCallback.exceptionThrown(new RuntimeException(e));
                                 }
                             } catch (IllegalArgumentException | IllegalAccessException e1) {
-                                log.fatal("unable to provide callback", e);
+                                log.fatal("unable to provide callback for:" + target.toString(), e);
                             }
                         } catch (NoSuchFieldException ecp ) {
                             log.fatal(e);
