@@ -78,7 +78,7 @@ public class FileSystemManager extends IzouModule {
     }
 
     /**
-     * create logs folder
+     * Create logs folder
      *
      * @throws IOException could throw IOException because working with files
      */
