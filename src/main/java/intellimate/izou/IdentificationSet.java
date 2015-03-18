@@ -7,8 +7,9 @@ import intellimate.izou.identification.IdentificationManager;
 import java.util.*;
 
 /**
- * it has the same Properties as an normal HashSet, but (optionally) keeps an Identification for every object to
+ * It has the same Properties as an normal HashSet, but (optionally) keeps an Identification for every object to
  * identify its source.
+ *
  * @author Leander Kurscheidt
  * @version 1.0
  */
