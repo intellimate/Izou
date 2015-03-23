@@ -3,7 +3,8 @@ package intellimate.izou;
 import intellimate.izou.main.Main;
 
 /**
- * this interface signals that the class provides an instance of main 
+ * This interface provides an instance of main
+ *
  * @author Leander Kurscheidt
  * @version 1.0
  */

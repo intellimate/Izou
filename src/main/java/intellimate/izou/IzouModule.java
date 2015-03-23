@@ -8,6 +8,8 @@ import org.apache.logging.log4j.Logger;
 
 /**
  * The base class for each IzouModule
+ * FIXME: What is an izou module exactly?
+ *
  * @author Leander Kurscheidt
  * @version 1.0
  */
