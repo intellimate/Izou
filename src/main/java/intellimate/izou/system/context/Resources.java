@@ -2,8 +2,8 @@ package intellimate.izou.system.context;
 
 import intellimate.izou.identification.Identification;
 import intellimate.izou.identification.IllegalIDException;
-import intellimate.izou.resource.Resource;
-import intellimate.izou.resource.ResourceBuilder;
+import intellimate.izou.resource.ResourceModel;
+import intellimate.izou.resource.ResourceBuilderModel;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +23,7 @@ public interface Resources {
      * @param resourceBuilder an instance of the ResourceBuilder
      * @throws IllegalIDException not yet implemented
      */
-    void registerResourceBuilder(ResourceBuilder resourceBuilder) throws IllegalIDException;
+    void registerResourceBuilder(ResourceBuilderModel resourceBuilder) throws IllegalIDException;
 
     /**
      * unregister a ResourceBuilder.
@@ -31,7 +31,7 @@ public interface Resources {
      * this method unregisters all the events, resourcesID etc.
      * @param resourceBuilder an instance of the ResourceBuilder
      */
-    void unregisterResourceBuilder(ResourceBuilder resourceBuilder);
+    void unregisterResourceBuilder(ResourceBuilderModel resourceBuilder);
 
     /**
      * generates a resources
@@ -41,7 +41,7 @@ public interface Resources {
      *  @throws IllegalIDException not yet implemented
      */
     @Deprecated
-    void generateResource(Resource resource, Consumer<List<Resource>> consumer) throws IllegalIDException;
+    void generateResource(ResourceModel resource, Consumer<List<ResourceModel>> consumer) throws IllegalIDException;
 
     /**
      * generates a resources
@@ -53,7 +53,7 @@ public interface Resources {
      * @return an optional of an CompletableFuture
      * @throws IllegalIDException not yet implemented
      */
-    Optional<CompletableFuture<List<Resource>>> generateResource(Resource resource) throws IllegalIDException;
+    Optional<CompletableFuture<List<ResourceModel>>> generateResource(ResourceModel resource) throws IllegalIDException;
 
     /**
      * returns the ID of the Manager

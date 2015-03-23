@@ -1,6 +1,6 @@
 package intellimate.izou.fullplugintesting;
 
-import intellimate.izou.addon.AddOn;
+import intellimate.izou.addon.AddOnModel;
 import intellimate.izou.main.Main;
 import org.junit.Test;
 
@@ -19,7 +19,7 @@ public class TestAll {
     @Test
     public void testPlugin() throws Exception {
         TestAddOn testAddOn = new TestAddOn("test-AddOn");
-        List<AddOn> addOnList = new ArrayList<>();
+        List<AddOnModel> addOnList = new ArrayList<>();
         addOnList.add(testAddOn);
         Main main = new Main(addOnList, false, true);
         int count = 0;

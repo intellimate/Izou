@@ -2,8 +2,8 @@ package intellimate.izou.events;
 
 import intellimate.izou.identification.Identifiable;
 import intellimate.izou.identification.Identification;
-import intellimate.izou.resource.ListResourceProvider;
-import intellimate.izou.resource.Resource;
+import intellimate.izou.resource.ListResourceProviderModel;
+import intellimate.izou.resource.ResourceModel;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ import java.util.List;
  * @author Leander Kurscheidt
  * @version 1.0
  */
-public interface Event<X extends Event> extends Identifiable {
+public interface EventModel<X extends EventModel> extends Identifiable {
     /**
      * The type of the Event.
      * It describes the Type of the Event.
@@ -30,20 +30,20 @@ public interface Event<X extends Event> extends Identifiable {
      * returns all the Resources the Event currently has
      * @return an instance of ListResourceContainer
      */
-    ListResourceProvider getListResourceContainer();
+    ListResourceProviderModel getListResourceContainer();
 
     /**
      * adds a Resource to the Container
      * @param resource an instance of the resource to add
      * @return the resulting Event (which is the same instance)
      */
-    X addResource(Resource resource);
+    X addResource(ResourceModel resource);
 
     /**
      * adds a List of Resources to the Container
      * @param resources a list containing all the resources
      */
-    X addResources(List<Resource> resources);
+    X addResources(List<ResourceModel> resources);
 
     /**
      * returns a List containing all the Descriptors.
@@ -69,5 +69,5 @@ public interface Event<X extends Event> extends Identifiable {
      * returns the associated EventBehaviourController
      * @return an instance of EventBehaviourController
      */
-    EventBehaviourController getEventBehaviourController();
+    EventBehaviourControllerModel getEventBehaviourController();
 }

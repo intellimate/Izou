@@ -1,7 +1,7 @@
 package intellimate.izou.fullplugintesting;
 
-import intellimate.izou.activator.Activator;
-import intellimate.izou.events.Event;
+import intellimate.izou.activator.ActivatorModel;
+import intellimate.izou.events.EventModel;
 import intellimate.izou.system.Context;
 import intellimate.izouSDK.events.EventImpl;
 import intellimate.izou.events.MultipleEventsException;
@@ -14,7 +14,7 @@ import java.util.Optional;
  * Created by julianbrendl on 10/7/14.
  */
 @SuppressWarnings("SameParameterValue")
-public class TestAct extends Activator {
+public class TestAct extends ActivatorModel {
     private boolean start;
 
     public TestAct(Context context) {
@@ -35,7 +35,7 @@ public class TestAct extends Activator {
                 System.out.println("1");
                 Optional<Identification> id = IdentificationManager.getInstance().getIdentification(this);
                 if(!id.isPresent()) return;
-                Optional<Event> event = EventImpl.createEvent("1", id.get());
+                Optional<EventModel> event = EventImpl.createEvent("1", id.get());
                 if(!event.isPresent()) return;
                 try {
                     this.fireEvent(event.get());

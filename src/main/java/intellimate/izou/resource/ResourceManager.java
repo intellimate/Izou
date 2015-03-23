@@ -2,7 +2,7 @@ package intellimate.izou.resource;
 
 import intellimate.izou.AddonThreadPoolUser;
 import intellimate.izou.IzouModule;
-import intellimate.izou.events.Event;
+import intellimate.izou.events.EventModel;
 import intellimate.izou.identification.IllegalIDException;
 import intellimate.izou.main.Main;
 
@@ -20,13 +20,13 @@ public class ResourceManager extends IzouModule implements AddonThreadPoolUser {
      * this object maps all the eventIDs to ResourceBuilders
      * the key is the registered event (or noEvent)
      */
-    private HashMap<String, LinkedList<ResourceBuilder>> eventSubscribers = new HashMap<>();
+    private HashMap<String, LinkedList<ResourceBuilderModel>> eventSubscribers = new HashMap<>();
     /**
      * this object maps all the resourceID to ResourceBuilders
      * the key is the registered event (or noEvent)
      * the List contains all the ResourceBuilders registered
      */
-    private HashMap<String, LinkedList<ResourceBuilder>> resourceIDs= new HashMap<>();
+    private HashMap<String, LinkedList<ResourceBuilderModel>> resourceIDs= new HashMap<>();
 
     public ResourceManager(Main main) {
         super(main);
@@ -37,11 +37,11 @@ public class ResourceManager extends IzouModule implements AddonThreadPoolUser {
      * @param event the Event to generate the resources for
      * @return a List containing all the generated resources
      */
-    public List<Resource> generateResources(Event<?> event) {
+    public List<ResourceModel> generateResources(EventModel<?> event) {
         if(!event.getAllInformations().stream()
                 .allMatch(eventSubscribers::containsKey)) return new LinkedList<>();
 
-        List<ResourceBuilder> resourceBuilders = event.getAllInformations().stream()
+        List<ResourceBuilderModel> resourceBuilders = event.getAllInformations().stream()
                 .map(eventSubscribers::get)
                 .filter(Objects::nonNull)
                 .flatMap(Collection::stream)
@@ -57,9 +57,9 @@ public class ResourceManager extends IzouModule implements AddonThreadPoolUser {
      * @param event the event or null if not present
      * @return a List of generated resources
      */
-    private List<Resource> generateResources(List<ResourceBuilder> resourceBuilders, Event event) {
-        Optional<Event> parameter = event != null ? Optional.of(event) : Optional.empty();
-        List<CompletableFuture<List<Resource>>> futures = resourceBuilders.stream()
+    private List<ResourceModel> generateResources(List<ResourceBuilderModel> resourceBuilders, EventModel event) {
+        Optional<EventModel> parameter = event != null ? Optional.of(event) : Optional.empty();
+        List<CompletableFuture<List<ResourceModel>>> futures = resourceBuilders.stream()
                 .map(resourceB -> submit(() -> resourceB.provideResource(resourceB.announceResources(), parameter)))
                 .collect(Collectors.toList());
 
@@ -94,7 +94,7 @@ public class ResourceManager extends IzouModule implements AddonThreadPoolUser {
      * @throws IllegalIDException not yet implemented
      */
     @Deprecated
-    public void generatedResource(Resource resource, Consumer<List<Resource>> consumer) throws IllegalIDException {
+    public void generatedResource(ResourceModel resource, Consumer<List<ResourceModel>> consumer) throws IllegalIDException {
         generateResource(resource)
                 .ifPresent(completableFuture -> completableFuture.thenAccept(consumer));
     }
@@ -109,7 +109,7 @@ public class ResourceManager extends IzouModule implements AddonThreadPoolUser {
      * @return an optional of an CompletableFuture
      * @throws IllegalIDException not yet implemented
      */
-    public Optional<CompletableFuture<List<Resource>>> generateResource (Resource resource) throws IllegalIDException {
+    public Optional<CompletableFuture<List<ResourceModel>>> generateResource (ResourceModel resource) throws IllegalIDException {
         if(resourceIDs.get(resource.getResourceID()) == null) return Optional.empty();
         return resourceIDs.get(resource.getResourceID()).stream()
                 //return true if resource has no provider, if not check provider
@@ -125,7 +125,7 @@ public class ResourceManager extends IzouModule implements AddonThreadPoolUser {
      * @param resourceBuilder an instance of the ResourceBuilder
      * @throws IllegalIDException not yet implemented
      */
-    public void registerResourceBuilder(ResourceBuilder resourceBuilder) throws IllegalIDException {
+    public void registerResourceBuilder(ResourceBuilderModel resourceBuilder) throws IllegalIDException {
         registerResourceIDsForResourceBuilder(resourceBuilder);
         registerEventsForResourceBuilder(resourceBuilder);
     }
@@ -134,8 +134,8 @@ public class ResourceManager extends IzouModule implements AddonThreadPoolUser {
      * registers all ResourceIDs for the ResourceBuilders
      * @param resourceBuilder an instance of ResourceBuilder
      */
-    private void registerResourceIDsForResourceBuilder(ResourceBuilder resourceBuilder) {
-        List<? extends Resource> resources = resourceBuilder.announceResources();
+    private void registerResourceIDsForResourceBuilder(ResourceBuilderModel resourceBuilder) {
+        List<? extends ResourceModel> resources = resourceBuilder.announceResources();
         if(resources == null) return;
         resources.stream()
                 .map(this::getRegisteredListForResource)
@@ -147,11 +147,11 @@ public class ResourceManager extends IzouModule implements AddonThreadPoolUser {
      * @param resource the resource to listen to
      * @return a List of ResourceBuilders
      */
-    private List<ResourceBuilder> getRegisteredListForResource(Resource resource) {
+    private List<ResourceBuilderModel> getRegisteredListForResource(ResourceModel resource) {
         if(resourceIDs.containsKey(resource.getResourceID())) {
             return resourceIDs.get(resource.getResourceID());
         } else {
-            LinkedList<ResourceBuilder> tempList = new LinkedList<>();
+            LinkedList<ResourceBuilderModel> tempList = new LinkedList<>();
             resourceIDs.put(resource.getResourceID(), tempList);
             return tempList;
         }
@@ -162,8 +162,8 @@ public class ResourceManager extends IzouModule implements AddonThreadPoolUser {
      *
      * @param resourceBuilder an instance of ResourceBuilder
      */
-    private void registerEventsForResourceBuilder(ResourceBuilder resourceBuilder) {
-        List<? extends Event<?>> events = resourceBuilder.announceEvents();
+    private void registerEventsForResourceBuilder(ResourceBuilderModel resourceBuilder) {
+        List<? extends EventModel<?>> events = resourceBuilder.announceEvents();
         if(events == null) return;
         events.stream()
                 .flatMap(event -> event.getAllInformations().stream())
@@ -176,11 +176,11 @@ public class ResourceManager extends IzouModule implements AddonThreadPoolUser {
      * @param event the eventID
      * @return a List of ResourceBuilders
      */
-    private List<ResourceBuilder> getRegisteredListForEvent(String event) {
+    private List<ResourceBuilderModel> getRegisteredListForEvent(String event) {
         if(eventSubscribers.containsKey(event)) {
             return eventSubscribers.get(event);
         } else {
-            LinkedList<ResourceBuilder> tempList = new LinkedList<>();
+            LinkedList<ResourceBuilderModel> tempList = new LinkedList<>();
             eventSubscribers.put(event, tempList);
             return tempList;
         }
@@ -192,7 +192,7 @@ public class ResourceManager extends IzouModule implements AddonThreadPoolUser {
      * this method unregisters all the events, resourcesID etc.
      * @param resourceBuilder an instance of the ResourceBuilder
      */
-    public void unregisterResourceBuilder(ResourceBuilder resourceBuilder) {
+    public void unregisterResourceBuilder(ResourceBuilderModel resourceBuilder) {
         unregisterResourceIDForResourceBuilder(resourceBuilder);
         unregisterEventsForResourceBuilder(resourceBuilder);
     }
@@ -202,8 +202,8 @@ public class ResourceManager extends IzouModule implements AddonThreadPoolUser {
      *
      * @param resourceBuilder an instance of ResourceBuilder
      */
-    private void unregisterResourceIDForResourceBuilder(ResourceBuilder resourceBuilder) {
-        List<? extends Resource> resources = resourceBuilder.announceResources();
+    private void unregisterResourceIDForResourceBuilder(ResourceBuilderModel resourceBuilder) {
+        List<? extends ResourceModel> resources = resourceBuilder.announceResources();
         resources.stream().map(resource -> resourceIDs.get(resource.getResourceID()))
                 .filter(Objects::nonNull)
                 .forEach(list -> list.remove(resourceBuilder));
@@ -213,7 +213,7 @@ public class ResourceManager extends IzouModule implements AddonThreadPoolUser {
      * unregisters the events for the ResourceBuilder
      * @param resourceBuilder an instance of ResourceBuilder
      */
-    private void unregisterEventsForResourceBuilder(ResourceBuilder resourceBuilder) {
+    private void unregisterEventsForResourceBuilder(ResourceBuilderModel resourceBuilder) {
         resourceBuilder.announceEvents().stream()
                 .map(eventSubscribers::get)
                 .filter(Objects::nonNull)

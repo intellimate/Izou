@@ -13,7 +13,7 @@ import ro.fortsoft.pf4j.PluginWrapper;
  * @author Leander Kurscheidt
  * @version 1.0
  */
-public interface AddOn extends ExtensionPoint, Identifiable {
+public interface AddOnModel extends ExtensionPoint, Identifiable {
     /**
      * Internal initiation of addOn - fake constructor, comes before prepare
      * @param context the context to initialize with

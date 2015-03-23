@@ -9,12 +9,12 @@ import java.util.Optional;
 /**
  * You can register an Object with the IdentificationManager and receive an Identification Objects.
  */
-public final class IdentificationManager implements IdentificationManagerSpecification {
+public final class IdentificationManager implements IdentificationManagerM {
     private LinkedList<Identifiable> identifiables = new LinkedList<>();
     private static IdentificationManager ourInstance = new IdentificationManager();
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
-    public static IdentificationManager getInstance() {
+    public static IdentificationManagerM getInstance() {
         return ourInstance;
     }
 

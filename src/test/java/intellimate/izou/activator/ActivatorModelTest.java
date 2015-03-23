@@ -1,6 +1,6 @@
 package intellimate.izou.activator;
 
-import intellimate.izou.events.Event;
+import intellimate.izou.events.EventModel;
 import intellimate.izou.system.Context;
 import intellimate.izouSDK.events.EventImpl;
 import intellimate.izou.identification.Identification;
@@ -10,14 +10,14 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
-public class ActivatorTest extends IzouTest{
-    static Activator activator;
+public class ActivatorModelTest extends IzouTest{
+    static ActivatorModel activatorModel;
     Identification id;
 
-    public ActivatorTest() {
-        super(false, ActivatorTest.class.getCanonicalName());
+    public ActivatorModelTest() {
+        super(false, ActivatorModelTest.class.getCanonicalName());
         Context context = getContext();
-        activator = new Activator(getContext()) {
+        activatorModel = new ActivatorModel(getContext()) {
             @Override
             public String getID() {
                 return "unbelievable activator id";
@@ -29,16 +29,16 @@ public class ActivatorTest extends IzouTest{
             @Override
             public boolean terminated(Exception e) {return false;}
         };
-        main.getActivatorManager().addActivator(activator);
-        id = IdentificationManager.getInstance().getIdentification(activator).get();
+        main.getActivatorManager().addActivator(activatorModel);
+        id = IdentificationManager.getInstance().getIdentification(activatorModel).get();
     }
 
     @Test
     public void testFireEvent() throws Exception {
-        Event event2 = EventImpl.createEvent(ActivatorTest.class.getCanonicalName() + 2, id).get();
+        EventModel event2 = EventImpl.createEvent(ActivatorModelTest.class.getCanonicalName() + 2, id).get();
         final boolean[] isWorking = {false};
         main.getEventDistributor().registerEventListener(event2, id -> isWorking[0] = true);
-        activator.fireEvent(event2);
+        activatorModel.fireEvent(event2);
         waitForMultith(event2);
         assertTrue(isWorking[0]);
     }

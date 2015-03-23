@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  * Manages all the AddOns.
  */
 public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
-    private IdentifiableSet<AddOn> addOns = new IdentifiableSet<>();
+    private IdentifiableSet<AddOnModel> addOns = new IdentifiableSet<>();
     
     public AddOnManager(Main main) {
         super(main);
@@ -38,7 +38,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
      * Adds AddOns without registering them.
      * @param addOns a List containing all the AddOns
      */
-    public void addAddOnsWithoutRegistering(List<AddOn> addOns) {
+    public void addAddOnsWithoutRegistering(List<AddOnModel> addOns) {
         this.addOns.addAll(addOns);
     }
 
@@ -47,12 +47,12 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
      *
      * @param addOns a List containing all the AddOns
      */
-    public void addAndRegisterAddOns(List<AddOn> addOns) {
+    public void addAndRegisterAddOns(List<AddOnModel> addOns) {
         this.addOns.addAll(addOns);
         registerAllAddOns(this.addOns);
     }
     
-    public void registerAllAddOns(IdentifiableSet<AddOn> addOns) {
+    public void registerAllAddOns(IdentifiableSet<AddOnModel> addOns) {
         List<CompletableFuture<Void>> futures = addOns.stream()
                 .map(addOn -> submit((Runnable) addOn::register))
                 .collect(Collectors.toList());
@@ -67,7 +67,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
      * This method searches all the "/lib"-directory for AddOns and adds them to the addOnList
      * @return the retrieved addOns
      */
-    private List<AddOn> loadAddOns() {
+    private List<AddOnModel> loadAddOns() {
         File libFile;
         try {
             String libPath = new File(".").getCanonicalPath() + File.separator + "lib";
@@ -88,7 +88,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
             log.fatal("Error while trying to start the PF4J-Plugins", e);
         }
         try {
-            List<AddOn> addOns = pluginManager.getExtensions(AddOn.class);
+            List<AddOnModel> addOns = pluginManager.getExtensions(AddOnModel.class);
             addOns.stream()
                     .filter(addOn -> addOn.getClass().getClassLoader() instanceof IzouPluginClassLoader)
                     .forEach(addOn -> {

@@ -1,7 +1,7 @@
 package intellimate.izou.system.context;
 
 import intellimate.izou.events.EventCallable;
-import intellimate.izou.events.EventsController;
+import intellimate.izou.events.EventsControllerModel;
 import intellimate.izou.identification.Identification;
 import intellimate.izou.identification.IllegalIDException;
 
@@ -41,7 +41,7 @@ public interface EventsDistributor {
      * @param eventsController the EventController Interface to control event-dispatching
      * @throws IllegalIDException not yet implemented
      */
-    void registerEventsController(EventsController eventsController) throws IllegalIDException;
+    void registerEventsController(EventsControllerModel eventsController) throws IllegalIDException;
 
     /**
      * Unregisters an EventController
@@ -50,7 +50,7 @@ public interface EventsDistributor {
      *
      * @param eventsController the EventController Interface to remove
      */
-    void unregisterEventsController(EventsController eventsController);
+    void unregisterEventsController(EventsControllerModel eventsController);
 
     /**
      * returns the ID of the Manager (EventsDistributor)

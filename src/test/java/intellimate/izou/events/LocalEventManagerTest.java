@@ -20,7 +20,7 @@ public class LocalEventManagerTest extends IzouTest {
 
     @Test
     public void testRegisterActivatorEvent() throws Exception {
-        Event event = getNextEvent().get();
+        EventModel event = getNextEvent().get();
         Identification id = getNextIdentification().get();
         LocalEventManager.EventCaller caller = main.getLocalEventManager().registerCaller(id).get();
         final boolean[] isWorking = {false};
@@ -44,7 +44,7 @@ public class LocalEventManagerTest extends IzouTest {
 
     @Test
     public void testUnregisterEvent() throws Exception {
-        Event event = getNextEvent().get();
+        EventModel event = getNextEvent().get();
         Identification id = getNextIdentification().get();
         LocalEventManager.EventCaller caller = main.getLocalEventManager().registerCaller(id).get();
         final boolean[] isWorking = {false};
@@ -68,7 +68,7 @@ public class LocalEventManagerTest extends IzouTest {
 
     @Test
     public void testAddActivatorEventListener() throws Exception {
-        Event event = getNextEvent().get();
+        EventModel event = getNextEvent().get();
         Identification id = getNextIdentification().get();
         LocalEventManager.EventCaller caller = main.getLocalEventManager().registerCaller(id).get();
         final boolean[] isWorking = {false};
@@ -91,11 +91,11 @@ public class LocalEventManagerTest extends IzouTest {
 
     @Test
     public void testDeleteActivatorEventListener() throws Exception {
-        Event event = getNextEvent().get();
+        EventModel event = getNextEvent().get();
         Identification id = getNextIdentification().get();
         LocalEventManager.EventCaller caller = main.getLocalEventManager().registerCaller(id).get();
         final boolean[] isWorking = {false};
-        EventListener listener = s -> isWorking[0] = true;
+        EventListenerModel listener = s -> isWorking[0] = true;
         main.getEventDistributor().registerEventListener(event, listener);
         main.getEventDistributor().unregisterEventListener(event, listener);
         caller.fire(event);
@@ -116,12 +116,12 @@ public class LocalEventManagerTest extends IzouTest {
 
     @Test
     public void testAddEventController() throws Exception {
-        Event event = getNextEvent().get();
+        EventModel event = getNextEvent().get();
         Identification id = getNextIdentification().get();
         boolean[] isWorking = {false, true};
         LocalEventManager.EventCaller caller = main.getLocalEventManager().registerCaller(id).get();
         main.getEventDistributor().registerEventListener(event, s -> isWorking[0] = true);
-        EventsController eventsController = new EventsController() {
+        EventsControllerModel eventsController = new EventsControllerModel() {
             /**
              * this method gets called when the task submitted to the ThreadPool crashes
              *
@@ -133,7 +133,7 @@ public class LocalEventManagerTest extends IzouTest {
             }
 
             @Override
-            public boolean controlEventDispatcher(Event event) {
+            public boolean controlEventDispatcher(EventModel event) {
                 isWorking[1] = false;
                 return false;
             }
@@ -164,12 +164,12 @@ public class LocalEventManagerTest extends IzouTest {
 
     @Test
     public void testRemoveEventController() throws Exception {
-        Event event = getNextEvent().get();
+        EventModel event = getNextEvent().get();
         Identification id = getNextIdentification().get();
         boolean[] isWorking = {false, true};
         LocalEventManager.EventCaller caller = main.getLocalEventManager().registerCaller(id).get();
         main.getEventDistributor().registerEventListener(event, s -> isWorking[0] = true);
-        EventsController eventsController = new EventsController() {
+        EventsControllerModel eventsController = new EventsControllerModel() {
             /**
              * this method gets called when the task submitted to the ThreadPool crashes
              *
@@ -181,7 +181,7 @@ public class LocalEventManagerTest extends IzouTest {
             }
 
             @Override
-            public boolean controlEventDispatcher(Event event) {
+            public boolean controlEventDispatcher(EventModel event) {
                 isWorking[1] = false;
                 return false;
             }

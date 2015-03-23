@@ -15,7 +15,7 @@ public class EventsControllerTest extends IzouTest {
     @Test
     public void testControlEventDispatcher () {
         boolean[] isWorking = {false, true};
-        EventsController eventsController = new EventsController() {
+        EventsControllerModel eventsController = new EventsControllerModel() {
             /**
              * this method gets called when the task submitted to the ThreadPool crashes
              *
@@ -27,7 +27,7 @@ public class EventsControllerTest extends IzouTest {
             }
 
             @Override
-            public boolean controlEventDispatcher(Event event) {
+            public boolean controlEventDispatcher(EventModel event) {
                 isWorking[1] = false;
                 return false;
             }
@@ -40,7 +40,7 @@ public class EventsControllerTest extends IzouTest {
         try {
             IdentificationManager.getInstance().registerIdentification(eventsController);
             Identification id = IdentificationManager.getInstance().getIdentification(eventsController).get();
-            Event event = EventImpl.createEvent(super.id + 1, id).get();
+            EventModel event = EventImpl.createEvent(super.id + 1, id).get();
             testListenerFalse(isWorking, event);
         } catch (InterruptedException e) {
             e.printStackTrace();

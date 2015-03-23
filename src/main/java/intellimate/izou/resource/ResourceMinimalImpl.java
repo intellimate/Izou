@@ -14,7 +14,7 @@ import java.util.function.Function;
  * </p> 
  * Note! This Object is immutable!
  */
-public class ResourceMinimalImpl<T> implements Resource<T, ResourceMinimalImpl<T>> {
+public class ResourceMinimalImpl<T> implements ResourceModel<T, ResourceMinimalImpl<T>> {
     private final String resourceID;
     private final Identification provider;
     private final Identification consumer;

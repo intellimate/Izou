@@ -1,8 +1,8 @@
 package intellimate.izou.system.context;
 
-import intellimate.izou.events.Event;
+import intellimate.izou.events.EventModel;
 import intellimate.izou.events.EventCallable;
-import intellimate.izou.events.EventListener;
+import intellimate.izou.events.EventListenerModel;
 import intellimate.izou.events.MultipleEventsException;
 import intellimate.izou.identification.Identification;
 import intellimate.izou.identification.IllegalIDException;
@@ -28,7 +28,7 @@ public interface Events {
      * @param eventListener the ActivatorEventListener-interface for receiving activator events
      * @throws IllegalIDException not yet implemented
      */
-    void registerEventListener(Event event, EventListener eventListener) throws IllegalIDException;
+    void registerEventListener(EventModel event, EventListenerModel eventListener) throws IllegalIDException;
 
     /**
      * Adds an listener for events.
@@ -40,7 +40,7 @@ public interface Events {
      * @param ids this can be type, or descriptors etc.
      * @param eventListener the ActivatorEventListener-interface for receiving activator events
      */
-    void registerEventListener(List<String> ids, EventListener eventListener);
+    void registerEventListener(List<String> ids, EventListenerModel eventListener);
 
     /**
      * unregister an EventListener
@@ -53,7 +53,7 @@ public interface Events {
      * @param eventListener the ActivatorEventListener used to listen for events
      * @throws IllegalArgumentException if Listener is already listening to the Event or the id is not allowed
      */
-    void unregisterEventListener(Event event, EventListener eventListener);
+    void unregisterEventListener(EventModel event, EventListenerModel eventListener);
 
     /**
      * Registers with the LocalEventManager to fire an event.
@@ -81,7 +81,7 @@ public interface Events {
      * @throws java.lang.IllegalAccessError not yet implemented
      * @throws IllegalIDException not yet implemented
      */
-    void fireEvent(Event event) throws IllegalIDException, MultipleEventsException;
+    void fireEvent(EventModel event) throws IllegalIDException, MultipleEventsException;
 
     /**
      * returns the API for the EventsDistributor

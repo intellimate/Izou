@@ -5,7 +5,7 @@ import intellimate.izou.IzouModule;
 import intellimate.izou.identification.Identification;
 import intellimate.izou.identification.IllegalIDException;
 import intellimate.izou.main.Main;
-import intellimate.izou.resource.Resource;
+import intellimate.izou.resource.ResourceModel;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -16,12 +16,12 @@ import java.util.stream.Collectors;
  * OutputManager
  */
 public class EventDistributor extends IzouModule implements Runnable, AddonThreadPoolUser {
-    private BlockingQueue<Event<?>> events = new LinkedBlockingQueue<>();
+    private BlockingQueue<EventModel<?>> events = new LinkedBlockingQueue<>();
     private ConcurrentHashMap<Identification, EventPublisher> registered = new ConcurrentHashMap<>();
     //here are all the Instances to to control the Event-dispatching stored
-    private final ConcurrentLinkedQueue<EventsController> eventsControllers = new ConcurrentLinkedQueue<>();
+    private final ConcurrentLinkedQueue<EventsControllerModel> eventsControllers = new ConcurrentLinkedQueue<>();
     //here are all the Listeners stored
-    private final ConcurrentHashMap<String, ArrayList<EventListener>> listeners = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, ArrayList<EventListenerModel>> listeners = new ConcurrentHashMap<>();
     private boolean stop = false;
 
     public EventDistributor(Main main) {
@@ -66,7 +66,7 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
      * @param controller the EventController Interface to control event-dispatching
      * @throws IllegalIDException not yet implemented
      */
-    public void registerEventsController(EventsController controller) throws IllegalIDException  {
+    public void registerEventsController(EventsControllerModel controller) throws IllegalIDException  {
         eventsControllers.add(controller);
     }
 
@@ -77,7 +77,7 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
      *
      * @param controller the EventController Interface to remove
      */
-    public void unregisterEventsController(EventsController controller) {
+    public void unregisterEventsController(EventsControllerModel controller) {
         eventsControllers.remove(controller);
     }
 
@@ -96,7 +96,7 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
      * @throws IllegalIDException not yet implemented
      */
     @SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter"})
-    public void registerEventListener(Event event, EventListener eventListener) throws IllegalIDException {
+    public void registerEventListener(EventModel event, EventListenerModel eventListener) throws IllegalIDException {
         registerEventListener(event.getAllInformations(), eventListener);
     }
 
@@ -111,9 +111,9 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
      * @param eventListener the ActivatorEventListener-interface for receiving activator events
      */
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    public void registerEventListener(List<String> ids, EventListener eventListener) {
+    public void registerEventListener(List<String> ids, EventListenerModel eventListener) {
         for(String id : ids) {
-            ArrayList<EventListener> listenersList = listeners.get(id);
+            ArrayList<EventListenerModel> listenersList = listeners.get(id);
             if (listenersList == null) {
                 listeners.put(id, new ArrayList<>());
                 listenersList = listeners.get(id);
@@ -138,9 +138,9 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
      * @throws IllegalArgumentException if Listener is already listening to the Event or the id is not allowed
      */
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    public void unregisterEventListener(Event<Event> event, EventListener eventListener) throws IllegalArgumentException {
+    public void unregisterEventListener(EventModel<EventModel> event, EventListenerModel eventListener) throws IllegalArgumentException {
         for (String id : event.getAllInformations()) {
-            ArrayList<EventListener> listenersList = listeners.get(id);
+            ArrayList<EventListenerModel> listenersList = listeners.get(id);
             if (listenersList == null) {
                 return;
             }
@@ -156,13 +156,13 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
      * @param event the fired Event
      * @return true if the event should be fired
      */
-    private boolean checkEventsControllers(Event event) {
+    private boolean checkEventsControllers(EventModel event) {
         //TODO: move to SDK
         /*
         if (event.getID().equals(EventImpl.NOTIFICATION))
             return true;*/
         boolean shouldExecute = true;
-        for (EventsController controller : eventsControllers) {
+        for (EventsControllerModel controller : eventsControllers) {
             if (!controller.controlEventDispatcher(event)) {
                 shouldExecute = false;
                 break;
@@ -171,7 +171,7 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
         return shouldExecute;
     }
 
-    public BlockingQueue<Event<?>> getEvents() {
+    public BlockingQueue<EventModel<?>> getEvents() {
         return events;
     }
 
@@ -190,12 +190,12 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
     public void run() {
         while(!stop) {
             try {
-                Event<?> event = events.take();
+                EventModel<?> event = events.take();
                 debug("EventFired: " + event.getID() + " from " + event.getSource().getID());
                 if (checkEventsControllers(event)) {
-                    List<Resource> resourceList = getMain().getResourceManager().generateResources(event);
+                    List<ResourceModel> resourceList = getMain().getResourceManager().generateResources(event);
                     event.addResources(resourceList);
-                    List<EventListener> listenersTemp = event.getAllInformations().parallelStream()
+                    List<EventListenerModel> listenersTemp = event.getAllInformations().parallelStream()
                             .map(listeners::get)
                             .filter(Objects::nonNull)
                             .flatMap(Collection::stream)
@@ -227,8 +227,8 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
      */
     private class EventPublisher implements EventCallable {
         //the queue where all the Events are stored
-        private final BlockingQueue<Event<?>> events;
-        protected EventPublisher(BlockingQueue<Event<?>> events) {
+        private final BlockingQueue<EventModel<?>> events;
+        protected EventPublisher(BlockingQueue<EventModel<?>> events) {
             this.events = events;
         }
 
@@ -236,7 +236,7 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
          * use this method to fire Events.
          * @param event the Event to fire
          */
-        public void fire(Event event) {
+        public void fire(EventModel event) {
             if(event == null) return;
             events.add(event);
         }

@@ -1,7 +1,7 @@
 package intellimate.izou.main;
 
 import intellimate.izou.activator.ActivatorManager;
-import intellimate.izou.addon.AddOn;
+import intellimate.izou.addon.AddOnModel;
 import intellimate.izou.addon.AddOnManager;
 import intellimate.izou.events.EventDistributor;
 import intellimate.izou.events.LocalEventManager;
@@ -56,7 +56,7 @@ public class Main {
      *
      * @param addOns a List of AddOns to run
      */
-    public Main(List<AddOn> addOns) {
+    public Main(List<AddOnModel> addOns) {
         this(addOns, false, false);
     }
 
@@ -66,7 +66,7 @@ public class Main {
      * @param debug if true, izou will not load plugin from the lib-folder
      * @param addOns a List of AddOns to run
      */
-    public Main(List<AddOn> addOns, boolean debug) {
+    public Main(List<AddOnModel> addOns, boolean debug) {
         this(addOns, false, debug);
     }
 
@@ -77,7 +77,7 @@ public class Main {
      * @param debug if true, izou will not load plugin from the lib-folder
      * @param addOns a List of AddOns to run
      */
-    public Main(List<AddOn> addOns, boolean javaFX, boolean debug) {
+    public Main(List<AddOnModel> addOns, boolean javaFX, boolean debug) {
          if (javaFX) {
              jfxToolKitInit = new AtomicBoolean(false);
              JavaFXInitializer.initToolKit();

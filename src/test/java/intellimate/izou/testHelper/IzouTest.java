@@ -1,7 +1,7 @@
 package intellimate.izou.testHelper;
 
-import intellimate.izou.addon.AddOn;
-import intellimate.izou.events.Event;
+import intellimate.izou.addon.AddOnModel;
+import intellimate.izou.events.EventModel;
 import intellimate.izou.system.Context;
 import intellimate.izou.system.context.ContextImplementation;
 import intellimate.izou.system.javafx.JavaFXInitializer;
@@ -70,7 +70,7 @@ public class IzouTest implements Identifiable {
         return id;
     }
 
-    public Optional<Event> getEvent(String type) {
+    public Optional<EventModel> getEvent(String type) {
         Optional<Identification> id = identificationManager.getIdentification(this);
         if(!id.isPresent()) return Optional.empty();
         return EventImpl.createEvent(type, id.get());
@@ -79,7 +79,7 @@ public class IzouTest implements Identifiable {
     /**
      * checks if is working is set everywhere to false, [0] should be reserved for the test here
      */
-    public void testListenerTrue(final boolean[] isWorking, Event event) throws InterruptedException {
+    public void testListenerTrue(final boolean[] isWorking, EventModel event) throws InterruptedException {
         main.getEventDistributor().registerEventListener(event, id -> {
             isWorking[0] = true;
         });
@@ -108,7 +108,7 @@ public class IzouTest implements Identifiable {
     /**
      * checks if is working is set everywhere to false, [0] should be reserved for the test here
      */
-    public void testListenerFalse(final boolean[] isWorking, Event eventId) throws InterruptedException {
+    public void testListenerFalse(final boolean[] isWorking, EventModel eventId) throws InterruptedException {
         main.getEventDistributor().registerEventListener(eventId, id -> isWorking[0] = true);
         try {
             Identification id = IdentificationManager.getInstance().getIdentification(this).get();
@@ -136,7 +136,7 @@ public class IzouTest implements Identifiable {
      * fires the event
      * @param event the event to fire
      */
-    public void testFireEvent(Event event) {
+    public void testFireEvent(EventModel event) {
         try {
             Identification id = IdentificationManager.getInstance().getIdentification(this).get();
             main.getLocalEventManager().registerCaller(id).get().fire(event);
@@ -149,7 +149,7 @@ public class IzouTest implements Identifiable {
      * waits for multitasking
      * @throws InterruptedException
      */
-    public void waitForMultith(Event event) throws InterruptedException {
+    public void waitForMultith(EventModel event) throws InterruptedException {
         synchronized (lock) {
             final java.util.concurrent.locks.Lock lock = new ReentrantLock();
             final Condition processing = lock.newCondition();
@@ -190,7 +190,7 @@ public class IzouTest implements Identifiable {
         return idStr;
     }
 
-    public Optional<Event> getNextEvent() {
+    public Optional<EventModel> getNextEvent() {
         eventNumber++;
         return getEvent(id + eventNumber);
     }
@@ -199,7 +199,7 @@ public class IzouTest implements Identifiable {
         return main;
     }
 
-    public static synchronized  Main getNewMain(List<AddOn> list) {
+    public static synchronized  Main getNewMain(List<AddOnModel> list) {
         JavaFXInitializer jfx = new JavaFXInitializer();
         try {
             jfx.stop();

@@ -1,6 +1,6 @@
 package intellimate.izou.resource;
 
-import intellimate.izou.events.Event;
+import intellimate.izou.events.EventModel;
 import intellimate.izou.identification.Identifiable;
 
 import java.util.List;
@@ -10,14 +10,14 @@ import java.util.Optional;
  * This interface is used to provide resources to other parts of the application.
  */
 @SuppressWarnings("UnusedDeclaration")
-public interface ResourceBuilder extends Identifiable {
+public interface ResourceBuilderModel extends Identifiable {
     /**
      * This method is called to register what resources the object provides.
      * just pass a List of Resources without Data in it.
      *
      * @return a List containing the resources the object provides
      */
-    abstract List<? extends Resource> announceResources();
+    abstract List<? extends ResourceModel> announceResources();
     /**
      * this method is called to register for what Events it wants to provide Resources.
      * <p>
@@ -26,7 +26,7 @@ public interface ResourceBuilder extends Identifiable {
      * </p> 
      * @return a List containing ID's for the Events
      */
-    abstract List<? extends Event<?>> announceEvents();
+    abstract List<? extends EventModel<?>> announceEvents();
     /**
      * This method is called when an object wants to get a Resource.
      *
@@ -38,5 +38,5 @@ public interface ResourceBuilder extends Identifiable {
      * @param event if an event caused the action, it gets passed. It can also be null.
      * @return a list of resources with data
      */
-    abstract List<Resource> provideResource(List<? extends Resource> resources, Optional<Event> event);
+    abstract List<ResourceModel> provideResource(List<? extends ResourceModel> resources, Optional<EventModel> event);
 }

@@ -10,7 +10,7 @@ import java.util.concurrent.Callable;
  * The Activator always runs in the Background, just overwrite activatorStarts(). To use Activator simply extend from it
  * and hand an instance over to the ActivatorManager.
  */
-public interface Activator extends Identifiable, Callable<Boolean> {
+public interface ActivatorModel extends Identifiable, Callable<Boolean> {
 
     /**
      * it this method returns false (and only if it returns false) it will not get restarted once stopped

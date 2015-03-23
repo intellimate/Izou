@@ -1,19 +1,20 @@
 package intellimate.izou.system.context;
 
-import intellimate.izou.addon.AddOn;
+import intellimate.izou.activator.ActivatorModel;
+import intellimate.izou.addon.AddOnModel;
 import intellimate.izou.events.*;
 import intellimate.izou.identification.Identifiable;
 import intellimate.izou.identification.Identification;
 import intellimate.izou.identification.IdentificationManager;
 import intellimate.izou.identification.IllegalIDException;
 import intellimate.izou.main.Main;
-import intellimate.izou.output.OutputExtension;
-import intellimate.izou.output.OutputPlugin;
-import intellimate.izou.resource.Resource;
-import intellimate.izou.resource.ResourceBuilder;
+import intellimate.izou.output.OutputExtensionModel;
+import intellimate.izou.output.OutputPluginModel;
+import intellimate.izou.resource.ResourceModel;
+import intellimate.izou.resource.ResourceBuilderModel;
 import intellimate.izou.system.Context;
-import intellimate.izou.system.file.FileSubscriber;
-import intellimate.izou.system.file.ReloadableFile;
+import intellimate.izou.system.file.FileSubscriberModel;
+import intellimate.izou.system.file.ReloadableFileModel;
 import intellimate.izou.system.logger.IzouLogger;
 import intellimate.izou.threadpool.TrackingExecutorService;
 import org.apache.logging.log4j.LogManager;
@@ -31,7 +32,7 @@ import java.util.function.Consumer;
  * This class provides much of the general Communication with Izou.
  */
 public class ContextImplementation implements Context {
-    private final AddOn addOn;
+    private final AddOnModel addOn;
     private final Main main;
     private final Events events = new EventsImpl();
     private final Resources resources = new ResourcesImpl();
@@ -51,7 +52,7 @@ public class ContextImplementation implements Context {
      * @param main instance of main
      * @param logLevel the logLevel to initialize the IzouLogger with
      */
-    public ContextImplementation(AddOn addOn, Main main, String logLevel) {
+    public ContextImplementation(AddOnModel addOn, Main main, String logLevel) {
         this.addOn = addOn;
         this.main = main;
         this.files = new FilesImpl();
@@ -139,7 +140,7 @@ public class ContextImplementation implements Context {
      * @return the addOn
      */
     @Override
-    public AddOn getAddOn() {
+    public AddOnModel getAddOn() {
         return addOn;
     }
 
@@ -158,7 +159,7 @@ public class ContextImplementation implements Context {
          * @throws IOException exception thrown by watcher service
          */
         @Override
-        public void registerFileDir(Path dir, String fileType, ReloadableFile reloadableFile) throws IOException {
+        public void registerFileDir(Path dir, String fileType, ReloadableFileModel reloadableFile) throws IOException {
             main.getFileManager().registerFileDir(dir, fileType, reloadableFile);
         }
 
@@ -193,7 +194,7 @@ public class ContextImplementation implements Context {
         }
 
         /**
-         * Registers a {@link FileSubscriber} with a {@link ReloadableFile}. So when the {@code reloadableFile} is
+         * Registers a {@link intellimate.izou.system.file.FileSubscriberModel} with a {@link intellimate.izou.system.file.ReloadableFileModel}. So when the {@code reloadableFile} is
          * reloaded, the fileSubscriber will be notified. Multiple file subscribers can be registered with the same
          * reloadable file.
          *
@@ -203,20 +204,20 @@ public class ContextImplementation implements Context {
          * @throws IllegalIDException not yet implemented
          */
         @Override
-        public void register(ReloadableFile reloadableFile, FileSubscriber fileSubscriber,
+        public void register(ReloadableFileModel reloadableFile, FileSubscriberModel fileSubscriber,
                              Identification identification) throws IllegalIDException {
             main.getFilePublisher().register(reloadableFile, fileSubscriber, identification);
         }
 
         /**
-         * Registers a {@link intellimate.izou.system.file.FileSubscriber} so that whenever any file is reloaded, the fileSubscriber is notified.
+         * Registers a {@link intellimate.izou.system.file.FileSubscriberModel} so that whenever any file is reloaded, the fileSubscriber is notified.
          *
          * @param fileSubscriber the fileSubscriber that should be notified when the reloadable file is reloaded
          * @param identification the Identification of the requesting instance
          * @throws IllegalIDException not yet implemented
          */
         @Override
-        public void register(FileSubscriber fileSubscriber, Identification identification) throws IllegalIDException {
+        public void register(FileSubscriberModel fileSubscriber, Identification identification) throws IllegalIDException {
            main.getFilePublisher().register(fileSubscriber, identification);
         }
 
@@ -226,7 +227,7 @@ public class ContextImplementation implements Context {
          * @param fileSubscriber the fileSubscriber to unregister
          */
         @Override
-        public void unregister(FileSubscriber fileSubscriber) {
+        public void unregister(FileSubscriberModel fileSubscriber) {
            main.getFilePublisher().unregister(fileSubscriber);
         }
     }
@@ -248,7 +249,7 @@ public class ContextImplementation implements Context {
          */
         @SuppressWarnings("JavaDoc")
         @Override
-        public void registerEventListener(Event event, EventListener eventListener) throws IllegalIDException {
+        public void registerEventListener(EventModel event, EventListenerModel eventListener) throws IllegalIDException {
             main.getEventDistributor().registerEventListener(event, eventListener);
         }
 
@@ -263,7 +264,7 @@ public class ContextImplementation implements Context {
          * @param eventListener the ActivatorEventListener-interface for receiving activator events
          */
         @Override
-        public void registerEventListener(List<String> ids, EventListener eventListener) {
+        public void registerEventListener(List<String> ids, EventListenerModel eventListener) {
             main.getEventDistributor().registerEventListener(ids, eventListener);
         }
         /**
@@ -278,7 +279,7 @@ public class ContextImplementation implements Context {
          * @throws IllegalArgumentException if Listener is already listening to the Event or the id is not allowed
          */
         @Override
-        public void unregisterEventListener(Event event, EventListener eventListener) {
+        public void unregisterEventListener(EventModel event, EventListenerModel eventListener) {
             main.getEventDistributor().unregisterEventListener(event, eventListener);
         }
 
@@ -314,7 +315,7 @@ public class ContextImplementation implements Context {
          * @throws IllegalIDException not yet implemented
          */
         @Override
-        public void fireEvent(Event event) throws IllegalIDException, MultipleEventsException {
+        public void fireEvent(EventModel event) throws IllegalIDException, MultipleEventsException {
             main.getLocalEventManager().fireEvent(event);
         }
 
@@ -378,7 +379,7 @@ public class ContextImplementation implements Context {
              * @throws IllegalIDException not yet implemented
              */
             @Override
-            public void registerEventsController(EventsController eventsController) throws IllegalIDException {
+            public void registerEventsController(EventsControllerModel eventsController) throws IllegalIDException {
                 main.getEventDistributor().registerEventsController(eventsController);
             }
 
@@ -390,7 +391,7 @@ public class ContextImplementation implements Context {
              * @param eventsController the EventController Interface to remove
              */
             @Override
-            public void unregisterEventsController(EventsController eventsController) {
+            public void unregisterEventsController(EventsControllerModel eventsController) {
                 main.getEventDistributor().unregisterEventsController(eventsController);
             }
 
@@ -420,7 +421,7 @@ public class ContextImplementation implements Context {
          * @throws IllegalIDException not yet implemented
          */
         @Override
-        public void registerResourceBuilder(ResourceBuilder resourceBuilder) throws IllegalIDException {
+        public void registerResourceBuilder(ResourceBuilderModel resourceBuilder) throws IllegalIDException {
             main.getResourceManager().registerResourceBuilder(resourceBuilder);
         }
 
@@ -431,7 +432,7 @@ public class ContextImplementation implements Context {
          * @param resourceBuilder an instance of the ResourceBuilder
          */
         @Override
-        public void unregisterResourceBuilder(ResourceBuilder resourceBuilder) {
+        public void unregisterResourceBuilder(ResourceBuilderModel resourceBuilder) {
             main.getResourceManager().unregisterResourceBuilder(resourceBuilder);
         }
 
@@ -444,7 +445,7 @@ public class ContextImplementation implements Context {
          */
         @Override
         @Deprecated
-        public void generateResource(Resource resource, Consumer<List<Resource>> consumer) throws IllegalIDException {
+        public void generateResource(ResourceModel resource, Consumer<List<ResourceModel>> consumer) throws IllegalIDException {
             main.getResourceManager().generatedResource(resource, consumer);
         }
 
@@ -459,7 +460,7 @@ public class ContextImplementation implements Context {
          * @throws IllegalIDException not yet implemented
          */
         @Override
-        public Optional<CompletableFuture<List<Resource>>> generateResource(Resource resource) throws IllegalIDException {
+        public Optional<CompletableFuture<List<ResourceModel>>> generateResource(ResourceModel resource) throws IllegalIDException {
             return main.getResourceManager().generateResource(resource);
         }
 
@@ -509,21 +510,21 @@ public class ContextImplementation implements Context {
     private class ActivatorsImpl implements Activators {
         /**
          * adds an activator and automatically submits it to the Thread-Pool
-         * @param activator the activator to add
+         * @param activatorModel the activator to add
          * @throws IllegalIDException not yet implemented
          */
         @Override
-        public void addActivator(intellimate.izou.activator.Activator activator) throws IllegalIDException {
-            main.getActivatorManager().addActivator(activator);
+        public void addActivator(ActivatorModel activatorModel) throws IllegalIDException {
+            main.getActivatorManager().addActivator(activatorModel);
         }
 
         /**
          * removes the activator and stops the Thread
-         * @param activator the activator to remove
+         * @param activatorModel the activator to remove
          */
         @Override
-        public void removeActivator(intellimate.izou.activator.Activator activator) {
-            main.getActivatorManager().removeActivator(activator);
+        public void removeActivator(ActivatorModel activatorModel) {
+            main.getActivatorManager().removeActivator(activatorModel);
         }
 
         /**
@@ -552,7 +553,7 @@ public class ContextImplementation implements Context {
          * @throws IllegalIDException not yet implemented
          */
         @Override
-        public void addOutputExtension(OutputExtension outputExtension) throws IllegalIDException {
+        public void addOutputExtension(OutputExtensionModel outputExtension) throws IllegalIDException {
             main.getOutputManager().addOutputExtension(outputExtension);
         }
 
@@ -562,7 +563,7 @@ public class ContextImplementation implements Context {
          * @param outputExtension the OutputExtension to remove
          */
         @Override
-        public void removeOutputExtension(OutputExtension outputExtension) {
+        public void removeOutputExtension(OutputExtensionModel outputExtension) {
             main.getOutputManager().removeOutputExtension(outputExtension);
         }
 
@@ -572,7 +573,7 @@ public class ContextImplementation implements Context {
          * @throws IllegalIDException not yet implemented
          */
         @Override
-        public void addOutputPlugin(OutputPlugin outputPlugin) throws IllegalIDException {
+        public void addOutputPlugin(OutputPluginModel outputPlugin) throws IllegalIDException {
             main.getOutputManager().addOutputPlugin(outputPlugin);
         }
 
@@ -581,7 +582,7 @@ public class ContextImplementation implements Context {
          * @param outputPlugin the outputPlugin to remove
          */
         @Override
-        public void removeOutputPlugin(OutputPlugin outputPlugin) {
+        public void removeOutputPlugin(OutputPluginModel outputPlugin) {
             main.getOutputManager().removeOutputPlugin(outputPlugin);
         }
 
@@ -592,7 +593,7 @@ public class ContextImplementation implements Context {
          * @return a List of Identifications
          */
         @Override
-        public List<Identification> getAssociatedOutputExtension(OutputPlugin<?, ?> outputPlugin) {
+        public List<Identification> getAssociatedOutputExtension(OutputPluginModel<?, ?> outputPlugin) {
             return main.getOutputManager().getAssociatedOutputExtension(outputPlugin);
         }
 
@@ -604,8 +605,8 @@ public class ContextImplementation implements Context {
          * @param event        the Event to generate for  @return a List of Future-Objects
          */
         @Override
-        public <T, X> List<CompletableFuture<T>> generateAllOutputExtensions(OutputPlugin<T, X> outputPlugin,
-                                                                                       X x, Event event) {
+        public <T, X> List<CompletableFuture<T>> generateAllOutputExtensions(OutputPluginModel<T, X> outputPlugin,
+                                                                                       X x, EventModel event) {
             return main.getOutputManager().generateAllOutputExtensions(outputPlugin, x, event);
         }
 

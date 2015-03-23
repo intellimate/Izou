@@ -1,6 +1,6 @@
 package intellimate.izou.activator;
 
-import intellimate.izou.events.Event;
+import intellimate.izou.events.EventModel;
 import intellimate.izou.events.MultipleEventsException;
 import intellimate.izou.testHelper.IzouTest;
 import org.junit.Test;
@@ -12,19 +12,19 @@ import java.util.concurrent.Future;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-public class ActivatorManagerTest extends IzouTest {
+public class ActivatorModelManagerTest extends IzouTest {
     private static final class Lock { }
     private final Object lock = new Lock();
 
-    public ActivatorManagerTest() {
-        super(false, ActivatorManagerTest.class.getCanonicalName());
+    public ActivatorModelManagerTest() {
+        super(false, ActivatorModelManagerTest.class.getCanonicalName());
     }
 
     @Test
     public void testAddActivator() throws Exception {
         final boolean[] isWorking = {false};
-        Optional<Event> event = getEvent(id + 1);
-        Activator activator = new Activator(getContext()) {
+        Optional<EventModel> event = getEvent(id + 1);
+        ActivatorModel activatorModel = new ActivatorModel(getContext()) {
             /**
              * An ID must always be unique.
              * A Class like Activator or OutputPlugin can just provide their .class.getCanonicalName()
@@ -57,7 +57,7 @@ public class ActivatorManagerTest extends IzouTest {
         listenerList.add(event.get().getType());
         main.getEventDistributor().registerEventListener(listenerList, event1 -> isWorking[0] = true);
 
-        Future<?> future = main.getActivatorManager().addActivator(activator);
+        Future<?> future = main.getActivatorManager().addActivator(activatorModel);
 
 
         synchronized (lock) {

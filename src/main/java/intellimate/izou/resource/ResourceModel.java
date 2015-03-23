@@ -10,7 +10,7 @@ import java.util.function.Function;
  * @author Leander Kurscheidt
  * @version 1.0
  */
-public interface Resource<T, X extends Resource<T, X>> extends Identifiable {
+public interface ResourceModel<T, X extends ResourceModel<T, X>> extends Identifiable {
     /**
      * returns the associated Resource data if set.
      * This method is thread-safe.

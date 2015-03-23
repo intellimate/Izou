@@ -1,11 +1,11 @@
 package intellimate.izou.fullplugintesting;
 
-import intellimate.izou.activator.Activator;
+import intellimate.izou.activator.ActivatorModel;
 import intellimate.izouSDK.addon.AddOnImpl;
 import intellimate.izouSDK.contentgenerator.ContentGenerator;
-import intellimate.izou.events.EventsController;
-import intellimate.izou.output.OutputExtension;
-import intellimate.izou.output.OutputPlugin;
+import intellimate.izou.events.EventsControllerModel;
+import intellimate.izou.output.OutputExtensionModel;
+import intellimate.izou.output.OutputPluginModel;
 
 /**
  * Created by julianbrendl on 11/20/14.
@@ -22,10 +22,10 @@ public class TestAddOn extends AddOnImpl {
     }
 
     @Override
-    public Activator[] registerActivator() {
-        Activator[] activators = new Activator[1];
-        activators[0] = new TestAct(getContext());
-        return activators;
+    public ActivatorModel[] registerActivator() {
+        ActivatorModel[] activatorModels = new ActivatorModel[1];
+        activatorModels[0] = new TestAct(getContext());
+        return activatorModels;
     }
 
     @Override
@@ -41,20 +41,20 @@ public class TestAddOn extends AddOnImpl {
      * @return Array containing Instances of EventControllers
      */
     @Override
-    public EventsController[] registerEventController() {
-        return new EventsController[0];
+    public EventsControllerModel[] registerEventController() {
+        return new EventsControllerModel[0];
     }
 
     @Override
-    public OutputPlugin[] registerOutputPlugin() {
-        OutputPlugin[] outputPlugins = new OutputPlugin[1];
+    public OutputPluginModel[] registerOutputPlugin() {
+        OutputPluginModel[] outputPlugins = new OutputPluginModel[1];
         outputPlugins[0] = new TestOP("test-OP", getContext());
         return outputPlugins;
     }
 
     @Override
-    public OutputExtension[] registerOutputExtension() {
-        OutputExtension[] outputExtensions= new OutputExtension[1];
+    public OutputExtensionModel[] registerOutputExtension() {
+        OutputExtensionModel[] outputExtensions= new OutputExtensionModel[1];
         outputExtensions[0] = new TestOE("test-OE", getContext());
         return outputExtensions;
     }

@@ -3,8 +3,7 @@ package intellimate.izou.identification;
 /**
  * Makes a class identifiable by forcing implementations to set an ID.
  */
-public interface Identifiable
-{
+public interface Identifiable {
     /**
      * An ID must always be unique.
      * A Class like Activator or OutputPlugin can just provide their .class.getCanonicalName()

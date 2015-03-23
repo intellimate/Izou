@@ -1,6 +1,6 @@
 package intellimate.izou.system;
 
-import intellimate.izou.addon.AddOn;
+import intellimate.izou.addon.AddOnModel;
 import intellimate.izou.system.context.*;
 import org.apache.logging.log4j.spi.ExtendedLogger;
 
@@ -56,5 +56,5 @@ public interface Context {
      *
      * @return the addOn
      */
-    AddOn getAddOn();
+    AddOnModel getAddOn();
 }

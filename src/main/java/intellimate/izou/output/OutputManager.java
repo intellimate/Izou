@@ -4,9 +4,10 @@ import com.google.common.reflect.TypeToken;
 import intellimate.izou.AddonThreadPoolUser;
 import intellimate.izou.IdentifiableSet;
 import intellimate.izou.IzouModule;
-import intellimate.izou.events.Event;
+import intellimate.izou.events.EventModel;
 import intellimate.izou.identification.Identification;
 import intellimate.izou.identification.IdentificationManager;
+import intellimate.izou.identification.IdentificationManagerM;
 import intellimate.izou.identification.IllegalIDException;
 import intellimate.izou.main.Main;
 import intellimate.izou.resource.ResourceMinimalImpl;
@@ -32,7 +33,7 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
     /**
      * a list that contains all the registered output-plugins of Jarvis
      */
-    private IdentifiableSet<OutputPlugin<?, ?>> outputPlugins;
+    private IdentifiableSet<OutputPluginModel<?, ?>> outputPlugins;
 
     /**
      * HashMap that stores OutputPlugins and the Future objects representing the Task
@@ -42,7 +43,7 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
     /**
      * this HashMap stores all added OutputExtensions
      */
-    private HashMap<String, IdentifiableSet<OutputExtension<?, ?>>> outputExtensions;
+    private HashMap<String, IdentifiableSet<OutputExtensionModel<?, ?>>> outputExtensions;
 
 
     /**
@@ -64,7 +65,7 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
      * @param outputPlugin OutputPlugin to add
      * @throws IllegalIDException not yet implemented
      */
-    public void addOutputPlugin(OutputPlugin<?, ?> outputPlugin) throws IllegalIDException {
+    public void addOutputPlugin(OutputPluginModel<?, ?> outputPlugin) throws IllegalIDException {
         if (!futureHashMap.containsKey(outputPlugin.getID())) {
             outputPlugins.add(outputPlugin);
             futureHashMap.put(outputPlugin.getID(), submit(outputPlugin));
@@ -80,7 +81,7 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
      * removes the OutputPlugin and stops the thread
      * @param outputPlugin the outputPlugin to remove
      */
-    public void removeOutputPlugin(OutputPlugin outputPlugin) {
+    public void removeOutputPlugin(OutputPluginModel outputPlugin) {
         Future future = futureHashMap.remove(outputPlugin.getID());
         if (future != null) {
             future.cancel(true);
@@ -97,12 +98,12 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
      * @param outputExtension the outputExtension to be added
      * @throws IllegalIDException not yet implemented
      */
-    public void addOutputExtension(OutputExtension<?, ?> outputExtension) throws IllegalIDException {
+    public void addOutputExtension(OutputExtensionModel<?, ?> outputExtension) throws IllegalIDException {
         if(outputExtensions.containsKey(outputExtension.getPluginId())) {
             outputExtensions.get(outputExtension.getPluginId()).add(outputExtension);
         }
         else {
-            IdentifiableSet<OutputExtension<?, ?>> outputExtensionList = new IdentifiableSet<>();
+            IdentifiableSet<OutputExtensionModel<?, ?>> outputExtensionList = new IdentifiableSet<>();
             outputExtensionList.add(outputExtension);
             outputExtensions.put(outputExtension.getPluginId(), outputExtensionList);
         }
@@ -117,8 +118,8 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
      *
      * @param outputExtension the OutputExtension to remove
      */
-    public void removeOutputExtension(OutputExtension<?, ?> outputExtension) {
-        IdentifiableSet<OutputExtension<?, ?>> outputExtensions =
+    public void removeOutputExtension(OutputExtensionModel<?, ?> outputExtension) {
+        IdentifiableSet<OutputExtensionModel<?, ?>> outputExtensions =
                 this.outputExtensions.get(outputExtension.getPluginId());
         if (outputExtensions != null)
             outputExtensions.remove(outputExtension);
@@ -135,8 +136,8 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
      *
      * @param event an Instance of Event
      */
-    public void passDataToOutputPlugins(Event event) {
-        IdentificationManager identificationManager = IdentificationManager.getInstance();
+    public void passDataToOutputPlugins(EventModel event) {
+        IdentificationManagerM identificationManager = IdentificationManager.getInstance();
         List<Identification> allIds = outputPlugins.stream()
                 .map(identificationManager::getIdentification)
                 .filter(Optional::isPresent)
@@ -147,9 +148,9 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
                 .getOutputPluginBehaviour(allIds);
 
         @SuppressWarnings("unchecked")
-        Set<OutputPlugin> outputPluginsCopy = (Set<OutputPlugin>) this.outputPlugins.clone();
+        Set<OutputPluginModel> outputPluginsCopy = (Set<OutputPluginModel>) this.outputPlugins.clone();
         
-        Function<List<Identification>, List<OutputPlugin>> getOutputPlugin = ids -> ids.stream()
+        Function<List<Identification>, List<OutputPluginModel>> getOutputPlugin = ids -> ids.stream()
                 .map(id -> outputPluginsCopy.stream()
                         .filter(outputPlugin -> outputPlugin.isOwner(id))
                         .findFirst()
@@ -167,7 +168,7 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
         outputPluginsCopy.forEach(op -> processOutputPlugin(event, op));
     }
 
-    private void processOutputPlugin(Event event, OutputPlugin outputPlugin) {
+    private void processOutputPlugin(EventModel event, OutputPluginModel outputPlugin) {
        final Lock lock = new ReentrantLock();
        final Condition processing = lock.newCondition();
 
@@ -206,9 +207,9 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
      * @return a List of Identifications
      */
     //TODO: TEST!!!!
-    public List<Identification> getAssociatedOutputExtension(OutputPlugin<?, ?> outputPlugin) {
-        IdentifiableSet<OutputExtension<?, ?>> outputExtensions = this.outputExtensions.get(outputPlugin.getID());
-        IdentificationManager identificationManager = IdentificationManager.getInstance();
+    public List<Identification> getAssociatedOutputExtension(OutputPluginModel<?, ?> outputPlugin) {
+        IdentifiableSet<OutputExtensionModel<?, ?>> outputExtensions = this.outputExtensions.get(outputPlugin.getID());
+        IdentificationManagerM identificationManager = IdentificationManager.getInstance();
         return filterType(outputExtensions, outputPlugin).stream()
                 .map(identificationManager::getIdentification)
                 .filter(Optional::isPresent)
@@ -224,8 +225,8 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
      */
     //TODO: TEST!!!!
     @SuppressWarnings("SimplifiableIfStatement")
-    private List<OutputExtension<?, ?>> filterType(Collection<OutputExtension<?, ?>> outputExtensions,
-                                                   OutputPlugin<?, ?> outputPlugin) {
+    private List<OutputExtensionModel<?, ?>> filterType(Collection<OutputExtensionModel<?, ?>> outputExtensions,
+                                                   OutputPluginModel<?, ?> outputPlugin) {
         BiPredicate<TypeToken<?>, TypeToken<?>> isAssignable = (first, second) -> {
             if (first == null) {
                 return second == null;
@@ -251,14 +252,14 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
      * @return a List of Future-Objects
      */
     //TODO: Test! is it working?
-    public <T, X> List<CompletableFuture<T>> generateAllOutputExtensions(OutputPlugin<T, X> outputPlugin,
-                                                                                X x, Event event) {
-        IdentifiableSet<OutputExtension<?, ?>> extensions = outputExtensions.get(outputPlugin.getID());
+    public <T, X> List<CompletableFuture<T>> generateAllOutputExtensions(OutputPluginModel<T, X> outputPlugin,
+                                                                                X x, EventModel event) {
+        IdentifiableSet<OutputExtensionModel<?, ?>> extensions = outputExtensions.get(outputPlugin.getID());
         return filterType(extensions, outputPlugin).stream()
                 .map(extension -> {
                     try {
                         //noinspection unchecked
-                        return (OutputExtension<X, T>) extension;
+                        return (OutputExtensionModel<X, T>) extension;
                     } catch (ClassCastException e) {
                         return null;
                     }

@@ -3,8 +3,8 @@ package intellimate.izou.fullplugintesting;
 import intellimate.izouSDK.resource.ResourceImpl;
 import intellimate.izouSDK.contentgenerator.ContentGeneratorImpl;
 import intellimate.izou.system.context.ContextImplementation;
-import intellimate.izou.events.Event;
-import intellimate.izou.resource.Resource;
+import intellimate.izou.events.EventModel;
+import intellimate.izou.resource.ResourceModel;
 
 import java.util.Arrays;
 import java.util.List;
@@ -24,7 +24,7 @@ public class TestCG extends ContentGeneratorImpl {
      * @return a List containing the resources the object provides
      */
     @Override
-    public List<Resource> announceResources() {
+    public List<ResourceModel> announceResources() {
         return Arrays.asList(new ResourceImpl("test_ID"));
     }
 
@@ -47,7 +47,7 @@ public class TestCG extends ContentGeneratorImpl {
      * @return a list of resources with data
      */
     @Override
-    public List<Resource> provideResource(List<Resource> resources, Optional<Event> event) {
+    public List<ResourceModel> provideResource(List<ResourceModel> resources, Optional<EventModel> event) {
         System.out.println("2");
         ResourceImpl<String> resource = new ResourceImpl<>("test_ID");
         resource.setResource("IT WORKS1111!!!!!!!!!!!");

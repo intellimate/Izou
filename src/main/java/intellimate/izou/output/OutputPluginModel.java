@@ -1,7 +1,7 @@
 package intellimate.izou.output;
 
 import com.google.common.reflect.TypeToken;
-import intellimate.izou.events.Event;
+import intellimate.izou.events.EventModel;
 import intellimate.izou.identification.Identifiable;
 import intellimate.izou.identification.Identification;
 
@@ -9,14 +9,14 @@ import intellimate.izou.identification.Identification;
  * The OutputPlugin class gets Event and then starts threads filled with output-extension tasks to create the final
  * output and then render it on its own medium
  */
-public interface OutputPlugin<X, T> extends Runnable, Identifiable {
+public interface OutputPluginModel<X, T> extends Runnable, Identifiable {
     /**
      * Adds an event to blockingQueue
      *
      * @param event the event to add
      * @throws IllegalStateException raised if problems adding an event to blockingQueue
      */
-    void addToEventList(Event event);
+    void addToEventList(EventModel event);
 
     /**
      * callback method to notify that an OutputExtension was added

@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * This interface is used to provide resources
  */
-public interface ResourceProvider {
+public interface ResourceProviderModel {
 
     /**
      * checks whether it can provide the resource
@@ -13,7 +13,7 @@ public interface ResourceProvider {
      * @param resource the resource to provide
      * @return true if the container can provide the resource
      */
-    abstract boolean providesResource(Resource resource);
+    abstract boolean providesResource(ResourceModel resource);
 
     /**
      * checks whether there are any resources registered from the source
@@ -38,7 +38,7 @@ public interface ResourceProvider {
      * @param resourceIDs an Array containing the resources
      * @return a list of resources found
      */
-    abstract List<Resource> provideResource(String[] resourceIDs);
+    abstract List<ResourceModel> provideResource(String[] resourceIDs);
 
     /**
      * returns the resource (if existing)
@@ -46,7 +46,7 @@ public interface ResourceProvider {
      * @param resourceID the ID of the resource
      * @return a list of resources found
      */
-    abstract List<Resource> provideResource(String resourceID);
+    abstract List<ResourceModel> provideResource(String resourceID);
 
     /**
      * returns the resource (if existing) from the source
@@ -54,5 +54,5 @@ public interface ResourceProvider {
      * @param sourceID the ID of the source
      * @return a list containing all the found resources
      */
-    public List<Resource> provideResourceFromSource(String sourceID);
+    public List<ResourceModel> provideResourceFromSource(String sourceID);
 }

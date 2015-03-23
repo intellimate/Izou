@@ -1,5 +1,6 @@
 package intellimate.izou.system.context;
 
+import intellimate.izou.activator.ActivatorModel;
 import intellimate.izou.identification.Identification;
 import intellimate.izou.identification.IllegalIDException;
 
@@ -10,16 +11,16 @@ import intellimate.izou.identification.IllegalIDException;
 public interface Activators {
     /**
      * adds an activator and automatically submits it to the Thread-Pool
-     * @param activator the activator to add
+     * @param activatorModel the activator to add
      * @throws IllegalIDException not yet implemented
      */
-    void addActivator(intellimate.izou.activator.Activator activator) throws IllegalIDException;
+    void addActivator(ActivatorModel activatorModel) throws IllegalIDException;
 
     /**
      * removes the activator and stops the Thread
-     * @param activator the activator to remove
+     * @param activatorModel the activator to remove
      */
-    void removeActivator(intellimate.izou.activator.Activator activator);
+    void removeActivator(ActivatorModel activatorModel);
 
     /**
      * returns the ID of the Manager

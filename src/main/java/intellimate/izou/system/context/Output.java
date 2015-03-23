@@ -1,10 +1,10 @@
 package intellimate.izou.system.context;
 
-import intellimate.izou.events.Event;
+import intellimate.izou.events.EventModel;
 import intellimate.izou.identification.Identification;
 import intellimate.izou.identification.IllegalIDException;
-import intellimate.izou.output.OutputExtension;
-import intellimate.izou.output.OutputPlugin;
+import intellimate.izou.output.OutputExtensionModel;
+import intellimate.izou.output.OutputPluginModel;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -23,34 +23,34 @@ public interface Output {
      * @param outputExtension the outputExtension to be added
      * @throws IllegalIDException not yet implemented
      */
-    void addOutputExtension(OutputExtension outputExtension) throws IllegalIDException;
+    void addOutputExtension(OutputExtensionModel outputExtension) throws IllegalIDException;
 
     /**
      * removes the output-extension of id: extensionId from outputPluginList
      *
      * @param outputExtension the OutputExtension to remove
      */
-    void removeOutputExtension(OutputExtension outputExtension);
+    void removeOutputExtension(OutputExtensionModel outputExtension);
 
     /**
      * adds outputPlugin to outputPluginList, starts a new thread for the outputPlugin, and stores the future object in a HashMap
      * @param outputPlugin OutputPlugin to add
      * @throws IllegalIDException not yet implemented
      */
-    void addOutputPlugin(OutputPlugin outputPlugin) throws IllegalIDException;
+    void addOutputPlugin(OutputPluginModel outputPlugin) throws IllegalIDException;
 
     /**
      * removes the OutputPlugin and stops the thread
      * @param outputPlugin the outputPlugin to remove
      */
-    void removeOutputPlugin(OutputPlugin outputPlugin);
+    void removeOutputPlugin(OutputPluginModel outputPlugin);
 
     /**
      * returns all the associated OutputExtensions
      * @param outputPlugin the OutputPlugin to search for
      * @return a List of Identifications
      */
-    List<Identification> getAssociatedOutputExtension(OutputPlugin<?, ?> outputPlugin);
+    List<Identification> getAssociatedOutputExtension(OutputPluginModel<?, ?> outputPlugin);
 
     /**
      * starts every associated OutputExtension
@@ -59,8 +59,8 @@ public interface Output {
      * @param event the Event to generate for
      * @return a List of Future-Objects
      */
-    public <T, X> List<CompletableFuture<T>> generateAllOutputExtensions(OutputPlugin<T, X> outputPlugin,
-                                                                                   X x, Event event);
+    public <T, X> List<CompletableFuture<T>> generateAllOutputExtensions(OutputPluginModel<T, X> outputPlugin,
+                                                                                   X x, EventModel event);
 
     /**
      * returns the ID of the Manager

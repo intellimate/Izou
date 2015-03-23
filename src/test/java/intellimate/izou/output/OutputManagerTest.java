@@ -1,7 +1,7 @@
 package intellimate.izou.output;
 
-import intellimate.izou.events.Event;
-import intellimate.izou.resource.Resource;
+import intellimate.izou.events.EventModel;
+import intellimate.izou.resource.ResourceModel;
 import intellimate.izouSDK.resource.ResourceImpl;
 import intellimate.izou.testHelper.IzouTest;
 import org.junit.Test;
@@ -22,7 +22,7 @@ public class OutputManagerTest extends IzouTest{
     @Test
     public void testAddOutputExtension() throws Exception {
         OutputManager outputManager = main.getOutputManager();
-        OutputPlugin outputPlugin = new OutputPluginImpl("1234", getContext()) {
+        OutputPluginModel outputPlugin = new OutputPluginImpl("1234", getContext()) {
             @Override
             public void renderFinalOutput() {
 
@@ -36,7 +36,7 @@ public class OutputManagerTest extends IzouTest{
              * @param event
              */
             @Override
-            public Object generate(Event event) {
+            public Object generate(EventModel event) {
                 return null;
             }
         };
@@ -48,7 +48,7 @@ public class OutputManagerTest extends IzouTest{
     @Test
     public void testRemoveOutputExtension() throws Exception {
         OutputManager outputManager = main.getOutputManager();
-        OutputPlugin outputPlugin = new OutputPluginImpl("1234", getContext()) {
+        OutputPluginModel outputPlugin = new OutputPluginImpl("1234", getContext()) {
             @Override
             public void renderFinalOutput() {
 
@@ -62,7 +62,7 @@ public class OutputManagerTest extends IzouTest{
              * @param event
              */
             @Override
-            public Object generate(Event event) {
+            public Object generate(EventModel event) {
                 return null;
             }
         };
@@ -74,11 +74,11 @@ public class OutputManagerTest extends IzouTest{
 
     @Test
     public void testPassDataToOutputPlugin() throws Exception {
-        Optional<Event> event = getEvent(id + 1);
+        Optional<EventModel> event = getEvent(id + 1);
         if(!event.isPresent()) fail();
 
         OutputManager outputManager = main.getOutputManager();
-        OutputPlugin outputPlugin = new OutputPluginImpl("1234", getContext()) {
+        OutputPluginModel outputPlugin = new OutputPluginImpl("1234", getContext()) {
             @Override
             public void renderFinalOutput() {
 
@@ -92,14 +92,14 @@ public class OutputManagerTest extends IzouTest{
              * @param event
              */
             @Override
-            public Object generate(Event event) {
+            public Object generate(EventModel event) {
                 return null;
             }
         };
         outputExtension.addResourceIdToWishList("1");
         outputExtension.addResourceIdToWishList("2");
 
-        List<Resource> resources = Arrays.asList(new ResourceImpl<String>("1"),
+        List<ResourceModel> resources = Arrays.asList(new ResourceImpl<String>("1"),
                                                 new ResourceImpl<String>("2"),
                                                 new ResourceImpl<String>("3"));
         event.get().getListResourceContainer().addResource(resources);
@@ -114,7 +114,7 @@ public class OutputManagerTest extends IzouTest{
     @Test
     public void testAddOutputExtensionLater() throws Exception {
         OutputManager outputManager = new OutputManager(getMain());
-        OutputPlugin outputPlugin = new OutputPluginImpl("1234", getContext()) {
+        OutputPluginModel outputPlugin = new OutputPluginImpl("1234", getContext()) {
             @Override
             public void renderFinalOutput() {
 
@@ -128,7 +128,7 @@ public class OutputManagerTest extends IzouTest{
              * @param event
              */
             @Override
-            public Object generate(Event event) {
+            public Object generate(EventModel event) {
                 return null;
             }
         };

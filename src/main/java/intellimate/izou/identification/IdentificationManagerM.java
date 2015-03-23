@@ -6,7 +6,7 @@ import java.util.Optional;
  * @author Leander Kurscheidt
  * @version 1.0
  */
-public interface IdentificationManagerSpecification {
+public interface IdentificationManagerM {
     /**
      * If you have registered with an Identifiable interface, you can receive Identification Instances with this method.
      * @param identifiable the registered Identifiable

@@ -10,7 +10,7 @@ import java.util.List;
  * @author Leander Kurscheidt
  * @version 1.0
  */
-public interface EventBehaviourController {
+public interface EventBehaviourControllerModel {
     /**
      * generates the data to control the Event
      * <p>

@@ -57,7 +57,7 @@ public class FileManager extends IzouModule implements Runnable {
      * @param reloadableFile object of interface that file belongs to
      * @throws IOException exception thrown by watcher service
      */
-    public void registerFileDir(Path dir, String fileType, ReloadableFile reloadableFile) throws IOException {
+    public void registerFileDir(Path dir, String fileType, ReloadableFileModel reloadableFile) throws IOException {
         WatchKey key = dir.register(watcher, ENTRY_MODIFY);
         List<FileInfo> fileInfos = addOnMap.get(key);
 

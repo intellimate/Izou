@@ -1,8 +1,8 @@
 package intellimate.izou.fullplugintesting;
 
-import intellimate.izou.events.Event;
+import intellimate.izou.events.EventModel;
 import intellimate.izou.output.OutputExtensionimpl;
-import intellimate.izou.resource.Resource;
+import intellimate.izou.resource.ResourceModel;
 import intellimate.izou.system.Context;
 
 import java.util.stream.Collectors;
@@ -26,11 +26,11 @@ public class TestOE extends OutputExtensionimpl<TestOD> {
      * @param event
      */
     @Override
-    public TestOD generate(Event event) {
+    public TestOD generate(EventModel event) {
         System.out.println("3");
         String finalOutput = "";
         finalOutput = event.getListResourceContainer().provideResource("test_ID").stream()
-                .map(Resource::getResource)
+                .map(ResourceModel::getResource)
                 .filter(object -> object instanceof String)
                 .map(object -> (String) object)
                 .collect(Collectors.joining());

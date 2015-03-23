@@ -3,6 +3,7 @@ package intellimate.izou.events;
 import intellimate.izou.IzouModule;
 import intellimate.izou.identification.Identification;
 import intellimate.izou.identification.IdentificationManager;
+import intellimate.izou.identification.IdentificationManagerM;
 import intellimate.izou.identification.IllegalIDException;
 import intellimate.izou.main.Main;
 
@@ -18,14 +19,14 @@ public class LocalEventManager extends IzouModule implements Runnable {
     //here are all the Instances which fire events stored
     private final ConcurrentHashMap<Identification, EventCaller> callers = new ConcurrentHashMap<>();
     //the queue where all the Events are stored
-    final BlockingQueue<Event> events = new LinkedBlockingQueue<>(1);
+    final BlockingQueue<EventModel> events = new LinkedBlockingQueue<>(1);
     //if false, run() will stop
     private boolean stop = false;
     private final EventCallable eventCallable;
 
     public LocalEventManager(Main main) {
         super(main);
-        IdentificationManager identificationManager = IdentificationManager.getInstance();
+        IdentificationManagerM identificationManager = IdentificationManager.getInstance();
         identificationManager.registerIdentification(this);
         Optional<EventCallable> eventCallable = identificationManager.getIdentification(this)
                 .flatMap(id -> {
@@ -84,7 +85,7 @@ public class LocalEventManager extends IzouModule implements Runnable {
      * @param event the fired Event
      * @throws IllegalIDException not yet implemented
      */
-    public void fireEvent(Event event) throws IllegalIDException, intellimate.izou.events.MultipleEventsException {
+    public void fireEvent(EventModel event) throws IllegalIDException, intellimate.izou.events.MultipleEventsException {
         if(events == null) return;
         if(events.isEmpty()) {
             events.add(event);
@@ -97,7 +98,7 @@ public class LocalEventManager extends IzouModule implements Runnable {
     public void run() {
         stop = false;
         while (!stop) {
-            Event event = null;
+            EventModel event = null;
             try {
                 event = events.take();
                 try {
@@ -131,9 +132,9 @@ public class LocalEventManager extends IzouModule implements Runnable {
      */
     @SuppressWarnings("SameParameterValue")
     public final class EventCaller implements EventCallable {
-        private BlockingQueue<Event> localEvents;
+        private BlockingQueue<EventModel> localEvents;
         //private, so that this class can only constructed by EventManager
-        private EventCaller(BlockingQueue<Event> events) {
+        private EventCaller(BlockingQueue<EventModel> events) {
             this.localEvents = events;
         }
 
@@ -142,7 +143,7 @@ public class LocalEventManager extends IzouModule implements Runnable {
          *
          * @throws intellimate.izou.events.MultipleEventsException an Exception will be thrown if there are currently other events fired
          */
-        public void fire(Event event) throws intellimate.izou.events.MultipleEventsException {
+        public void fire(EventModel event) throws intellimate.izou.events.MultipleEventsException {
             if(events.isEmpty()) {
                 localEvents.add(event);
             } else {

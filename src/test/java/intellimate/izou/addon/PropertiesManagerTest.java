@@ -1,11 +1,11 @@
 package intellimate.izou.addon;
 
-import intellimate.izou.activator.Activator;
+import intellimate.izou.activator.ActivatorModel;
 import intellimate.izouSDK.contentgenerator.ContentGenerator;
-import intellimate.izou.events.EventsController;
+import intellimate.izou.events.EventsControllerModel;
 import intellimate.izou.main.Main;
-import intellimate.izou.output.OutputExtension;
-import intellimate.izou.output.OutputPlugin;
+import intellimate.izou.output.OutputExtensionModel;
+import intellimate.izou.output.OutputPluginModel;
 import intellimate.izouSDK.addon.AddOnImpl;
 import junit.framework.TestCase;
 
@@ -14,7 +14,7 @@ import java.util.LinkedList;
 public class PropertiesManagerTest extends TestCase {
 
     public void testRegisterProperty() throws Exception {
-        LinkedList<AddOn> addOns = new LinkedList<>();
+        LinkedList<AddOnModel> addOns = new LinkedList<>();
         TestAddOn testAddOn = new TestAddOn("TestID");
         addOns.add(testAddOn);
         Main main = new Main(addOns, false, true);
@@ -43,8 +43,8 @@ public class PropertiesManagerTest extends TestCase {
         }
 
         @Override
-        public Activator[] registerActivator() {
-            return new Activator[0];
+        public ActivatorModel[] registerActivator() {
+            return new ActivatorModel[0];
         }
 
         @Override
@@ -53,18 +53,18 @@ public class PropertiesManagerTest extends TestCase {
         }
 
         @Override
-        public EventsController[] registerEventController() {
-            return new EventsController[0];
+        public EventsControllerModel[] registerEventController() {
+            return new EventsControllerModel[0];
         }
 
         @Override
-        public OutputPlugin[] registerOutputPlugin() {
-            return new OutputPlugin[0];
+        public OutputPluginModel[] registerOutputPlugin() {
+            return new OutputPluginModel[0];
         }
 
         @Override
-        public OutputExtension[] registerOutputExtension() {
-            return new OutputExtension[0];
+        public OutputExtensionModel[] registerOutputExtension() {
+            return new OutputExtensionModel[0];
         }
 
         /**
