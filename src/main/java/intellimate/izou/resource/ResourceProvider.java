@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * This interface is used to provide resources
  */
-public interface ResourceProviderModel {
+public interface ResourceProvider {
 
     /**
      * checks whether it can provide the resource

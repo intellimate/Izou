@@ -6,7 +6,7 @@ import java.util.List;
  * @author Leander Kurscheidt
  * @version 1.0
  */
-public interface ListResourceProviderModel extends ResourceProviderModel {
+public interface ListResourceProvider extends ResourceProvider {
     /**
      * adds a Resource to the Container
      * @param resource an instance of the resource to add

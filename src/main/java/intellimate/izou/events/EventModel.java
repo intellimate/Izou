@@ -2,7 +2,7 @@ package intellimate.izou.events;
 
 import intellimate.izou.identification.Identifiable;
 import intellimate.izou.identification.Identification;
-import intellimate.izou.resource.ListResourceProviderModel;
+import intellimate.izou.resource.ListResourceProvider;
 import intellimate.izou.resource.ResourceModel;
 
 import java.util.List;
@@ -30,7 +30,7 @@ public interface EventModel<X extends EventModel> extends Identifiable {
      * returns all the Resources the Event currently has
      * @return an instance of ListResourceContainer
      */
-    ListResourceProviderModel getListResourceContainer();
+    ListResourceProvider getListResourceContainer();
 
     /**
      * adds a Resource to the Container
