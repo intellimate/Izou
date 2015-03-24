@@ -62,7 +62,7 @@ public final class IdentificationManager implements IdentificationManagerM {
      */
     @Override
     public boolean registerIdentification(Identifiable identifiable) {
-        if(identifiable == null) return false;
+        if(identifiable == null || identifiable.getID() == null || identifiable.getID().isEmpty()) return false;
         if(identifiables.contains(identifiable)  || identifiables.stream()
                 .anyMatch(identifiableS -> identifiableS.getID().equals(identifiable.getID())))
             return false;
