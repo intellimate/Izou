@@ -14,7 +14,7 @@ import java.util.function.Function;
  * </p> 
  * Note! This Object is immutable!
  */
-public class ResourceMinimalImpl<T> implements ResourceModel<T, ResourceMinimalImpl<T>> {
+public class ResourceMinimalImpl<T> implements ResourceModel<T> {
     private final String resourceID;
     private final Identification provider;
     private final Identification consumer;
@@ -93,26 +93,6 @@ public class ResourceMinimalImpl<T> implements ResourceModel<T, ResourceMinimalI
     @Override
     public Identification getConsumer() {
         return consumer;
-    }
-
-    /**
-     * maps this resource to another type
-     * @param function the mapping function
-     * @param <R> the return type
-     * @return R
-     */
-    @Override
-    public <R> R map(Function<ResourceMinimalImpl<T>, R> function) {
-        return function.apply(this);
-    }
-
-    /**
-     * creates a list with this Element in it.
-     * @return a list
-     */
-    @Override
-    public List<ResourceMinimalImpl<T>> toList() {
-        return Arrays.asList(this);
     }
 
     /**
