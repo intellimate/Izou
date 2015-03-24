@@ -12,7 +12,7 @@ import java.nio.file.Path;
 public class FileInfo {
     private Path path;
     private String fileType;
-    private ReloadableFileModel reloadableFile;
+    private ReloadableFile reloadableFile;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     /**
@@ -23,7 +23,7 @@ public class FileInfo {
      *                 (Ex: "test", "txt", "test.txt" all work)
      * @param reloadableFile interface that includes update method
      */
-    public FileInfo(Path path, String fileType, ReloadableFileModel reloadableFile) {
+    public FileInfo(Path path, String fileType, ReloadableFile reloadableFile) {
         this.path = path;
         this.fileType = fileType;
         this.reloadableFile = reloadableFile;
@@ -52,7 +52,7 @@ public class FileInfo {
      *
      * @return the reloadable files to which the registered file belongs
      */
-    public ReloadableFileModel getReloadableFile() {
+    public ReloadableFile getReloadableFile() {
         return reloadableFile;
     }
 

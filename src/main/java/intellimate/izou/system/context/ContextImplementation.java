@@ -13,8 +13,8 @@ import intellimate.izou.output.OutputPluginModel;
 import intellimate.izou.resource.ResourceModel;
 import intellimate.izou.resource.ResourceBuilderModel;
 import intellimate.izou.system.Context;
-import intellimate.izou.system.file.FileSubscriberModel;
-import intellimate.izou.system.file.ReloadableFileModel;
+import intellimate.izou.system.file.FileSubscriber;
+import intellimate.izou.system.file.ReloadableFile;
 import intellimate.izou.system.logger.IzouLogger;
 import intellimate.izou.threadpool.TrackingExecutorService;
 import org.apache.logging.log4j.LogManager;
@@ -159,7 +159,7 @@ public class ContextImplementation implements Context {
          * @throws IOException exception thrown by watcher service
          */
         @Override
-        public void registerFileDir(Path dir, String fileType, ReloadableFileModel reloadableFile) throws IOException {
+        public void registerFileDir(Path dir, String fileType, ReloadableFile reloadableFile) throws IOException {
             main.getFileManager().registerFileDir(dir, fileType, reloadableFile);
         }
 
@@ -194,7 +194,7 @@ public class ContextImplementation implements Context {
         }
 
         /**
-         * Registers a {@link intellimate.izou.system.file.FileSubscriberModel} with a {@link intellimate.izou.system.file.ReloadableFileModel}. So when the {@code reloadableFile} is
+         * Registers a {@link intellimate.izou.system.file.FileSubscriber} with a {@link intellimate.izou.system.file.ReloadableFile}. So when the {@code reloadableFile} is
          * reloaded, the fileSubscriber will be notified. Multiple file subscribers can be registered with the same
          * reloadable file.
          *
@@ -204,20 +204,20 @@ public class ContextImplementation implements Context {
          * @throws IllegalIDException not yet implemented
          */
         @Override
-        public void register(ReloadableFileModel reloadableFile, FileSubscriberModel fileSubscriber,
+        public void register(ReloadableFile reloadableFile, FileSubscriber fileSubscriber,
                              Identification identification) throws IllegalIDException {
             main.getFilePublisher().register(reloadableFile, fileSubscriber, identification);
         }
 
         /**
-         * Registers a {@link intellimate.izou.system.file.FileSubscriberModel} so that whenever any file is reloaded, the fileSubscriber is notified.
+         * Registers a {@link intellimate.izou.system.file.FileSubscriber} so that whenever any file is reloaded, the fileSubscriber is notified.
          *
          * @param fileSubscriber the fileSubscriber that should be notified when the reloadable file is reloaded
          * @param identification the Identification of the requesting instance
          * @throws IllegalIDException not yet implemented
          */
         @Override
-        public void register(FileSubscriberModel fileSubscriber, Identification identification) throws IllegalIDException {
+        public void register(FileSubscriber fileSubscriber, Identification identification) throws IllegalIDException {
            main.getFilePublisher().register(fileSubscriber, identification);
         }
 
@@ -227,7 +227,7 @@ public class ContextImplementation implements Context {
          * @param fileSubscriber the fileSubscriber to unregister
          */
         @Override
-        public void unregister(FileSubscriberModel fileSubscriber) {
+        public void unregister(FileSubscriber fileSubscriber) {
            main.getFilePublisher().unregister(fileSubscriber);
         }
     }

@@ -2,8 +2,8 @@ package intellimate.izou.system.context;
 
 import intellimate.izou.identification.Identification;
 import intellimate.izou.identification.IllegalIDException;
-import intellimate.izou.system.file.FileSubscriberModel;
-import intellimate.izou.system.file.ReloadableFileModel;
+import intellimate.izou.system.file.FileSubscriber;
+import intellimate.izou.system.file.ReloadableFile;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -26,7 +26,7 @@ public interface Files {
      * @param reloadableFile object of interface that file belongs to
      * @throws java.io.IOException exception thrown by watcher service
      */
-    void registerFileDir(Path dir, String fileType, ReloadableFileModel reloadableFile) throws IOException;
+    void registerFileDir(Path dir, String fileType, ReloadableFile reloadableFile) throws IOException;
 
     /**
      * Writes default file to real file
@@ -53,7 +53,7 @@ public interface Files {
     void createDefaultFile(String defaultFilePath, String initMessage) throws IOException;
 
     /**
-     * Registers a {@link intellimate.izou.system.file.FileSubscriberModel} with a {@link intellimate.izou.system.file.ReloadableFileModel}. So when the {@code reloadableFile} is
+     * Registers a {@link intellimate.izou.system.file.FileSubscriber} with a {@link intellimate.izou.system.file.ReloadableFile}. So when the {@code reloadableFile} is
      * reloaded, the fileSubscriber will be notified. Multiple file subscribers can be registered with the same
      * reloadable file.
      *
@@ -62,21 +62,21 @@ public interface Files {
      * @param identification the Identification of the requesting instance
      * @throws IllegalIDException not yet implemented
      */
-    void register(ReloadableFileModel reloadableFile, FileSubscriberModel fileSubscriber, Identification identification) throws IllegalIDException;
+    void register(ReloadableFile reloadableFile, FileSubscriber fileSubscriber, Identification identification) throws IllegalIDException;
 
     /**
-     * Registers a {@link intellimate.izou.system.file.FileSubscriberModel} so that whenever any file is reloaded, the fileSubscriber is notified.
+     * Registers a {@link intellimate.izou.system.file.FileSubscriber} so that whenever any file is reloaded, the fileSubscriber is notified.
      *
      * @param fileSubscriber the fileSubscriber that should be notified when the reloadable file is reloaded
      * @param identification the Identification of the requesting instance
      * @throws IllegalIDException not yet implemented
      */
-    void register(FileSubscriberModel fileSubscriber, Identification identification) throws IllegalIDException;
+    void register(FileSubscriber fileSubscriber, Identification identification) throws IllegalIDException;
 
     /**
      * Unregisters all instances of fileSubscriber found.
      *
      * @param fileSubscriber the fileSubscriber to unregister
      */
-    void unregister(FileSubscriberModel fileSubscriber);
+    void unregister(FileSubscriber fileSubscriber);
 }

@@ -1,10 +1,10 @@
 package intellimate.izou.system.file;
 
 /**
- * FileSubscribers are usually paired with {@link ReloadableFileModel} objects in the {@link FilePublisher}, where their
+ * FileSubscribers are usually paired with {@link ReloadableFile} objects in the {@link FilePublisher}, where their
  * update method is triggered with a file change pertaining to the reloadable file.
  */
-public interface FileSubscriberModel {
+public interface FileSubscriber {
     /**
      * Method that is called when a file pertaining to a reloadableFile is changed.
      */
