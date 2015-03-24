@@ -21,7 +21,7 @@ public abstract class IzouModule implements MainProvider, Identifiable {
     public IzouModule(Main main) {
         this.main = main;
         if (!IdentificationManager.getInstance().registerIdentification(this)) {
-            log.fatal("unable to register!");
+            log.fatal("unable to register! " + getClass().getCanonicalName());
         }
     }
 

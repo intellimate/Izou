@@ -493,6 +493,17 @@ public class ContextImplementation implements Context {
         }
 
         /**
+         * tries everything to log the exception
+         *
+         * @param throwable the Throwable
+         * @param target    an instance of the thing which has thrown the Exception
+         */
+        @Override
+        public void handleThrowable(Throwable throwable, Object target) {
+            main.getThreadPoolManager().handleThrowable(throwable, target);
+        }
+
+        /**
          * returns the ID of the Manager
          */
         @Override

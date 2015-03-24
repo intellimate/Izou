@@ -43,6 +43,24 @@ public class ThreadPoolManager extends IzouModule {
     }
 
     /**
+     * tries everything to log the exception
+     * @param e the Throwable
+     * @param target an instance of the thing which has thrown the Exception
+     */
+    public void handleThrowable(Throwable e, Object target) {
+        try {
+            ExceptionCallback exceptionCallback = (ExceptionCallback) target;
+            if (e instanceof Exception) {
+                exceptionCallback.exceptionThrown((Exception) e);
+            } else {
+                exceptionCallback.exceptionThrown(new RuntimeException(e));
+            }
+        } catch (IllegalArgumentException | ClassCastException e1) {
+            log.fatal("unable to provide callback for: " + target.toString(), e);
+        }
+    }
+
+    /**
      * used to catch Exception in threads
      */
     private class LoggingThreadFactory implements ThreadFactory {
@@ -58,16 +76,11 @@ public class ThreadPoolManager extends IzouModule {
                             Field target = Thread.class.getDeclaredField("target");
                             target.setAccessible(true);
                             try {
-                                ExceptionCallback exceptionCallback = (ExceptionCallback) target.get(this);
-                                if (e instanceof Exception) {
-                                    exceptionCallback.exceptionThrown((Exception) e);
-                                } else {
-                                    exceptionCallback.exceptionThrown(new RuntimeException(e));
-                                }
-                            } catch (IllegalArgumentException | IllegalAccessException e1) {
-                                log.fatal("unable to provide callback for:" + target.toString(), e);
+                                handleThrowable(e, target.get(this));
+                            } catch (IllegalAccessException e1) {
+                                log.fatal("unable to provide callback for: " + target.toString(), e);
                             }
-                        } catch (NoSuchFieldException ecp ) {
+                        } catch (NoSuchFieldException e1) {
                             log.fatal(e);
                         }
                     }

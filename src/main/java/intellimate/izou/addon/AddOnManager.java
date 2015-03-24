@@ -1,9 +1,12 @@
 package intellimate.izou.addon;
 
-import intellimate.izou.IdentifiableSet;
 import intellimate.izou.AddonThreadPoolUser;
+import intellimate.izou.IdentifiableSet;
 import intellimate.izou.IzouModule;
 import intellimate.izou.main.Main;
+import intellimate.izou.system.Context;
+import intellimate.izou.system.context.ContextImplementation;
+import org.apache.logging.log4j.Level;
 import ro.fortsoft.pf4j.DefaultPluginManager;
 import ro.fortsoft.pf4j.IzouPluginClassLoader;
 import ro.fortsoft.pf4j.PluginManager;
@@ -53,6 +56,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
     }
     
     public void registerAllAddOns(IdentifiableSet<AddOnModel> addOns) {
+        initAddOns(addOns);
         List<CompletableFuture<Void>> futures = addOns.stream()
                 .map(addOn -> submit((Runnable) addOn::register))
                 .collect(Collectors.toList());
@@ -61,6 +65,13 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
         } catch (InterruptedException e) {
             debug("interrupted while trying to mite out the addOns", e);
         }
+    }
+
+    private void initAddOns(IdentifiableSet<AddOnModel> addOns) {
+        addOns.forEach(addOn -> {
+            Context context = new ContextImplementation(addOn, main, Level.DEBUG.name());
+            addOn.initAddOn(context);
+        });
     }
 
     /**

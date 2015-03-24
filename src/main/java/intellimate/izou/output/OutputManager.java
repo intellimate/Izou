@@ -55,9 +55,6 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
         outputPlugins = new IdentifiableSet<>();
         futureHashMap = new HashMap<>();
         outputExtensions = new HashMap<>();
-        if (!IdentificationManager.getInstance().registerIdentification(this)) {
-            log.fatal("Unable to obtain ID for" + getID());
-        }
     }
 
     /**

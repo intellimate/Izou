@@ -20,6 +20,13 @@ public interface ThreadPool {
     ExecutorService getThreadPool(Identifiable identifiable) throws IllegalIDException;
 
     /**
+     * tries everything to log the exception
+     * @param throwable the Throwable
+     * @param target an instance of the thing which has thrown the Exception
+     */
+    void handleThrowable(Throwable throwable, Object target);
+
+    /**
      * returns the ID of the Manager
      */
     Identification getManagerIdentification();
