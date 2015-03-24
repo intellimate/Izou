@@ -10,7 +10,7 @@ import java.util.function.Function;
  * @author Leander Kurscheidt
  * @version 1.0
  */
-public interface ResourceModel<T, X extends ResourceModel<T, X>> extends Identifiable {
+public interface ResourceModel<T> extends Identifiable {
     /**
      * returns the associated Resource data if set.
      * This method is thread-safe.
@@ -43,18 +43,4 @@ public interface ResourceModel<T, X extends ResourceModel<T, X>> extends Identif
      * @return null or an Identification describing the consumer of the Resource
      */
     Identification getConsumer();
-
-    /**
-     * maps this resource to another type
-     * @param function the mapping function
-     * @param <R> the return type
-     * @return R
-     */
-    <R> R map (Function<X, R> function);
-
-    /**
-     * creates a list with this Element in it.
-     * @return a list
-     */
-    List<X> toList();
 }
