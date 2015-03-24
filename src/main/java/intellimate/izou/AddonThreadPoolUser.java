@@ -20,7 +20,12 @@ public interface AddonThreadPoolUser extends MainProvider {
      * @return the new CompletableFuture
      */
     default CompletableFuture<Void> submit(Runnable runnable) {
-        return CompletableFuture.runAsync(runnable, getMain().getThreadPoolManager().getAddOnsThreadPool());
+        return CompletableFuture.runAsync(runnable, getMain().getThreadPoolManager().getAddOnsThreadPool())
+                .whenComplete((u, ex) -> {
+                    if (ex != null) {
+                        getMain().getThreadPoolManager().handleThrowable(ex, runnable);
+                    }
+                });
     }
 
     /**
@@ -30,7 +35,12 @@ public interface AddonThreadPoolUser extends MainProvider {
      * @return the new CompletableFuture
      */
     default <U> CompletableFuture<U> submit(Supplier<U> supplier) {
-        return CompletableFuture.supplyAsync(supplier, getMain().getThreadPoolManager().getAddOnsThreadPool());
+        return CompletableFuture.supplyAsync(supplier, getMain().getThreadPoolManager().getAddOnsThreadPool())
+                .whenComplete((u, ex) -> {
+                    if (ex != null) {
+                        getMain().getThreadPoolManager().handleThrowable(ex, supplier);
+                    }
+                });
     }
 
     /**
