@@ -3,8 +3,9 @@ package intellimate.izou;
 import intellimate.izou.identification.Identifiable;
 import intellimate.izou.identification.IdentificationManager;
 import intellimate.izou.main.Main;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.spi.AbstractLogger;
 
 /**
  * The base class for each IzouModule
@@ -14,9 +15,10 @@ import org.apache.logging.log4j.Logger;
  * @version 1.0
  */
 public abstract class IzouModule implements MainProvider, Identifiable {
+    private static final String FQCN = IzouModule.class.getName();
     private String ID = this.getClass().getCanonicalName();
     protected Main main;
-    protected final Logger log = LogManager.getLogger(this.getClass());
+    protected final AbstractLogger log = (AbstractLogger) LogManager.getLogger(this.getClass());
 
     public IzouModule(Main main) {
         this.main = main;
@@ -43,6 +45,7 @@ public abstract class IzouModule implements MainProvider, Identifiable {
      */
     @Override
     public void debug(String msg, Throwable e) {
+        log.logIfEnabled(FQCN, Level.DEBUG, null, msg, e);
         log.debug(msg, e);
     }
 
@@ -53,6 +56,7 @@ public abstract class IzouModule implements MainProvider, Identifiable {
      */
     @Override
     public void debug(String msg) {
+        log.logIfEnabled(FQCN, Level.DEBUG, null, msg, (Object) null);
         log.debug(msg);
     }
 
@@ -64,6 +68,7 @@ public abstract class IzouModule implements MainProvider, Identifiable {
      */
     @Override
     public void error(String msg, Throwable e) {
+        log.logIfEnabled(FQCN, Level.ERROR, null, msg, e);
         log.error(msg, e);
     }
 
@@ -74,6 +79,7 @@ public abstract class IzouModule implements MainProvider, Identifiable {
      */
     @Override
     public void error(String msg) {
+        log.logIfEnabled(FQCN, Level.ERROR, null, msg, (Object) null);
         log.error(msg);
     }
 

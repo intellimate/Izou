@@ -166,6 +166,7 @@ public class ResourceManager extends IzouModule implements AddonThreadPoolUser {
         List<? extends EventModel<?>> events = resourceBuilder.announceEvents();
         if(events == null) return;
         events.stream()
+                .filter(event -> event.getAllInformations() != null)
                 .flatMap(event -> event.getAllInformations().stream())
                 .map(this::getRegisteredListForEvent)
                 .forEach(list -> list.add(resourceBuilder));
