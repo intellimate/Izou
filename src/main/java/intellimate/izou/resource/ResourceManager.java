@@ -39,7 +39,7 @@ public class ResourceManager extends IzouModule implements AddonThreadPoolUser {
      */
     public List<ResourceModel> generateResources(EventModel<?> event) {
         if(!event.getAllInformations().stream()
-                .allMatch(eventSubscribers::containsKey)) return new LinkedList<>();
+                .anyMatch(eventSubscribers::containsKey)) return new LinkedList<>();
 
         List<ResourceBuilderModel> resourceBuilders = event.getAllInformations().stream()
                 .map(eventSubscribers::get)
