@@ -616,9 +616,9 @@ public class ContextImplementation implements Context {
          * @param event        the Event to generate for  @return a List of Future-Objects
          */
         @Override
-        public <T, X> List<CompletableFuture<T>> generateAllOutputExtensions(OutputPluginModel<T, X> outputPlugin,
-                                                                                       X x, EventModel event) {
-            return main.getOutputManager().generateAllOutputExtensions(outputPlugin, x, event);
+        public <T, X> List<CompletableFuture<X>> generateAllOutputExtensions(OutputPluginModel<T, X> outputPlugin,
+                                                                                       T t, EventModel event) {
+            return main.getOutputManager().generateAllOutputExtensions(outputPlugin, t, event);
         }
 
         /**

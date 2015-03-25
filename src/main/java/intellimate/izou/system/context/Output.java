@@ -59,8 +59,8 @@ public interface Output {
      * @param event the Event to generate for
      * @return a List of Future-Objects
      */
-    public <T, X> List<CompletableFuture<T>> generateAllOutputExtensions(OutputPluginModel<T, X> outputPlugin,
-                                                                                   X x, EventModel event);
+    public <T, X> List<CompletableFuture<X>> generateAllOutputExtensions(OutputPluginModel<T, X> outputPlugin,
+                                                                                   T t, EventModel event);
 
     /**
      * returns the ID of the Manager
