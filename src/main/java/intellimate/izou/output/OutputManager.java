@@ -166,6 +166,7 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
     }
 
     private void processOutputPlugin(EventModel event, OutputPluginModel outputPlugin) {
+        debug("processing outputPlugin: " + outputPlugin.getID() + "for event: " + event.toString());
        final Lock lock = new ReentrantLock();
        final Condition processing = lock.newCondition();
 
@@ -187,14 +188,14 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
            lock.lock();
            finished = processing.await(100, TimeUnit.SECONDS);
        } catch (InterruptedException e) {
-           log.error("Waiting for OutputPlugins interrupted", e);
+           error("Waiting for OutputPlugins interrupted", e);
        } finally {
            lock.unlock();
        }
        if(finished) {
-           log.debug("OutputPlugin: " + outputPlugin.getID() + " finished");
+           debug("OutputPlugin: " + outputPlugin.getID() + " finished");
        } else {
-           log.error("OutputPlugin: " + outputPlugin.getID() + " timed out");
+           error("OutputPlugin: " + outputPlugin.getID() + " timed out");
        }
    }
 
@@ -237,7 +238,7 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
                 .filter(outputExtension ->
                         isAssignable.test(outputExtension.getArgumentType(), outputPlugin.getArgumentType()))
                 .filter(outputExtension ->
-                        isAssignable.test(outputExtension.getReturnType(), outputPlugin.getRecievingType()))
+                        isAssignable.test(outputExtension.getReturnType(), outputPlugin.getReceivingType()))
                 .collect(Collectors.toList());
     }
 

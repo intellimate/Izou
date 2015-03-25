@@ -35,7 +35,7 @@ public interface OutputPluginModel<X, T> extends Runnable, Identifiable {
      * @return the type of the generic
      */
     //i don't think there is another way
-    TypeToken<T> getRecievingType();
+    TypeToken<T> getReceivingType();
 
     /**
      * returns the Type of the argument for the OutputExtensions, or null if none
