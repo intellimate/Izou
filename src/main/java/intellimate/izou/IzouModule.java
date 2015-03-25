@@ -46,7 +46,6 @@ public abstract class IzouModule implements MainProvider, Identifiable {
     @Override
     public void debug(String msg, Throwable e) {
         log.logIfEnabled(FQCN, Level.DEBUG, null, msg, e);
-        log.debug(msg, e);
     }
 
     /**
@@ -57,7 +56,6 @@ public abstract class IzouModule implements MainProvider, Identifiable {
     @Override
     public void debug(String msg) {
         log.logIfEnabled(FQCN, Level.DEBUG, null, msg, (Object) null);
-        log.debug(msg);
     }
 
     /**
@@ -69,7 +67,6 @@ public abstract class IzouModule implements MainProvider, Identifiable {
     @Override
     public void error(String msg, Throwable e) {
         log.logIfEnabled(FQCN, Level.ERROR, null, msg, e);
-        log.error(msg, e);
     }
 
     /**
@@ -80,7 +77,6 @@ public abstract class IzouModule implements MainProvider, Identifiable {
     @Override
     public void error(String msg) {
         log.logIfEnabled(FQCN, Level.ERROR, null, msg, (Object) null);
-        log.error(msg);
     }
 
     /**
