@@ -24,6 +24,7 @@ public interface Activators {
 
     /**
      * returns the ID of the Manager
+     * @return an instance of Identification
      */
     Identification getManagerIdentification();
 }

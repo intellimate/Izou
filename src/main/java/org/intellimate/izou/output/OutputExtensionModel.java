@@ -12,6 +12,7 @@ public interface OutputExtensionModel<X, T> extends Identifiable {
     /**
      * Checks if the outputExtension can execute with the current event
      *
+     * @param event the event to check
      * @return the state of whether the outputExtension can execute with the current event
      */
     boolean canRun(EventModel event);

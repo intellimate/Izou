@@ -42,6 +42,7 @@ public interface EventModel<X extends EventModel> extends Identifiable {
     /**
      * adds a List of Resources to the Container
      * @param resources a list containing all the resources
+     * @return the resulting Event (which is the same instance)
      */
     X addResources(List<ResourceModel> resources);
 

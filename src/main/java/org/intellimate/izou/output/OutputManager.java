@@ -247,6 +247,8 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
      * @param outputPlugin the OutputPlugin to generate the Data for
      * @param t the argument or null
      * @param event the Event to generate for
+     * @param <T> the type of the argument
+     * @param <X> the return type
      * @return a List of Future-Objects
      */
     //TODO: Test! is it working?

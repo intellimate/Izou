@@ -34,7 +34,7 @@ public class FileManager extends IzouModule implements Runnable {
 
     /**
      * Creates a new FileManager with a watcher and addOnMap
-     *
+     * @param main an instance of main
      * @throws IOException exception is thrown by watcher service
      */
     public FileManager(Main main) throws IOException {

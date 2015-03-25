@@ -54,6 +54,7 @@ public interface EventsDistributor {
 
     /**
      * returns the ID of the Manager (EventsDistributor)
+     * @return an instance of Identification
      */
     Identification getManagerIdentification();
 }

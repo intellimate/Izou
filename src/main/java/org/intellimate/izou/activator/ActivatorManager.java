@@ -27,7 +27,7 @@ public class ActivatorManager extends IzouModule implements AddonThreadPoolUser 
     /**
      * adds an activator and automatically submits it to the Thread-Pool
      * @param activatorModel the activator to add
-     * * @throws IllegalIDException not yet implemented
+     * @throws IllegalIDException not yet implemented
      */
     public void addActivator(ActivatorModel activatorModel) throws IllegalIDException {
         activatorModels.add(activatorModel);

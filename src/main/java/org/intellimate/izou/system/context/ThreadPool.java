@@ -28,6 +28,7 @@ public interface ThreadPool {
 
     /**
      * returns the ID of the Manager
+     * @return an instance of Identification
      */
     Identification getManagerIdentification();
 }

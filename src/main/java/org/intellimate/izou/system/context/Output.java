@@ -55,8 +55,10 @@ public interface Output {
     /**
      * starts every associated OutputExtension
      * @param outputPlugin the OutputPlugin to generate the Data for
-     * @param x the argument or null
+     * @param t the argument or null
      * @param event the Event to generate for
+     * @param <T> the type of the argument
+     * @param <X> the return type
      * @return a List of Future-Objects
      */
     public <T, X> List<CompletableFuture<X>> generateAllOutputExtensions(OutputPluginModel<T, X> outputPlugin,
@@ -64,6 +66,7 @@ public interface Output {
 
     /**
      * returns the ID of the Manager
+     * @return an instance of Identification
      */
     Identification getManagerIdentification();
 }

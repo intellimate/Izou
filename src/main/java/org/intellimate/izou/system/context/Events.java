@@ -80,6 +80,7 @@ public interface Events {
      * @param event the fired Event
      * @throws java.lang.IllegalAccessError not yet implemented
      * @throws IllegalIDException not yet implemented
+     * @throws MultipleEventsException if there is currently another Event processing
      */
     void fireEvent(EventModel event) throws IllegalIDException, MultipleEventsException;
 
@@ -91,6 +92,7 @@ public interface Events {
 
     /**
      * returns the ID of the Manager (LocalEventManager)
+     * @return an instance of Identification
      */
     Identification getManagerIdentification();
 }

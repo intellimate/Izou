@@ -612,8 +612,11 @@ public class ContextImplementation implements Context {
          * starts every associated OutputExtension
          *
          * @param outputPlugin the OutputPlugin to generate the Data for
-         * @param x            the argument or null
+         * @param t            the argument or null
          * @param event        the Event to generate for  @return a List of Future-Objects
+         * @param <T>          the type of the argument
+         * @param <X>          the return type
+         * @return             a List of Future-Objects
          */
         @Override
         public <T, X> List<CompletableFuture<X>> generateAllOutputExtensions(OutputPluginModel<T, X> outputPlugin,
