@@ -57,21 +57,21 @@ public class ActivatorManager extends IzouModule implements AddonThreadPoolUser 
             try {
                 return activatorModel.call();
             } catch (Throwable e) {
-                error("Activator: " + activatorModel.getID() + "crashed", e);
+                error("Activator: " + activatorModel.getID() + " crashed", e);
                 return true;
             }
         }).thenAccept(restart -> {
             if (restart != null && !restart) {
-                debug("Activator: " + activatorModel.getID() + "returned false, will not restart");
+                debug("Activator: " + activatorModel.getID() + " returned false, will not restart");
             } else {
-                error("Activator: " + activatorModel.getID() + "returned not true");
+                error("Activator: " + activatorModel.getID() + " returned not true");
                 if (crashCounter.get(activatorModel).get() < 100) {
-                    error("Until now activator: " + activatorModel.getID() + "was restarted: " +
+                    error("Until now activator: " + activatorModel.getID() + " was restarted: " +
                             crashCounter.get(activatorModel).get() + " times, attempting restart.");
                     crashCounter.get(activatorModel).incrementAndGet();
                     submitActivator(activatorModel);
                 } else {
-                    error("Activator: " + activatorModel.getID() + "reached restarting limit with " +
+                    error("Activator: " + activatorModel.getID() + " reached restarting limit with " +
                             crashCounter.get(activatorModel).get() + " restarts.");
                 }
             }
