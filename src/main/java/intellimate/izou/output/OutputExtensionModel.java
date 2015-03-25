@@ -26,22 +26,22 @@ public interface OutputExtensionModel<X, T> extends Identifiable {
     /**
      * generates the data for the given Event
      * @param event the event to generate for
-     * @param x the optional argument
+     * @param t the optional argument
      * @return the result
      */
-    T generate(EventModel event, X x);
+    X generate(EventModel event, T t);
 
     /**
      * returns the ReturnType of the generic
      * @return the type of the generic
      */
     //i don't think there is another way
-    TypeToken<T> getReturnType();
+    TypeToken<X> getReturnType();
 
     /**
      * returns the Type of the Argument or null if none
      * @return the type of the argument
      */
     //i don't think there is another way
-    TypeToken<X> getArgumentType();
+    TypeToken<T> getArgumentType();
 }

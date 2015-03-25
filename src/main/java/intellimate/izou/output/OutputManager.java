@@ -245,13 +245,13 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
     /**
      * starts every associated OutputExtension
      * @param outputPlugin the OutputPlugin to generate the Data for
-     * @param x the argument or null
+     * @param t the argument or null
      * @param event the Event to generate for
      * @return a List of Future-Objects
      */
     //TODO: Test! is it working?
-    public <T, X> List<CompletableFuture<T>> generateAllOutputExtensions(OutputPluginModel<T, X> outputPlugin,
-                                                                                X x, EventModel event) {
+    public <T, X> List<CompletableFuture<X>> generateAllOutputExtensions(OutputPluginModel<T, X> outputPlugin,
+                                                                                T t, EventModel event) {
         IdentifiableSet<OutputExtensionModel<?, ?>> extensions = outputExtensions.get(outputPlugin.getID());
         return filterType(extensions, outputPlugin).stream()
                 .map(extension -> {
@@ -264,7 +264,7 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
                 })
                 .filter(Objects::nonNull)
                 .filter(outputExtension -> outputExtension.canRun(event))
-                .map(extension -> submit(() -> extension.generate(event, x)))
+                .map(extension -> submit(() -> extension.generate(event, t)))
                 .collect(Collectors.toList());
     }
 }
