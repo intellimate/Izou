@@ -82,7 +82,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>intellimate.izou.main.Main</mainClass>
+							<mainClass>org.intellimate.izou.main.Main</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -92,7 +92,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>intellimate.izou.main.Main</mainClass>
+                            <mainClass>org.intellimate.izou.main.Main</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
@@ -105,7 +105,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>intellimate.izou.main.Main</mainClass>
+                            <mainClass>org.intellimate.izou.main.Main</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
