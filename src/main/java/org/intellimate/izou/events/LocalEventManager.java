@@ -84,7 +84,7 @@ public class LocalEventManager extends IzouModule implements Runnable {
      *
      * @param event the fired Event
      * @throws IllegalIDException not yet implemented
-     * @throws org.intellimate.izou.events.MultipleEventsException if there is currently another Even† in processing
+     * @throws org.intellimate.izou.events.MultipleEventsException if there is currently another event getting processed
      */
     public void fireEvent(EventModel event) throws IllegalIDException, org.intellimate.izou.events.MultipleEventsException {
         if(events == null) return;
@@ -99,7 +99,7 @@ public class LocalEventManager extends IzouModule implements Runnable {
     public void run() {
         stop = false;
         while (!stop) {
-            EventModel event = null;
+            EventModel event;
             try {
                 event = events.take();
                 try {
