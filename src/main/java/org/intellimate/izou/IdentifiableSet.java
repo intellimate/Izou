@@ -92,7 +92,7 @@ public class IdentifiableSet<X extends Identifiable> extends AbstractSet<X> impl
      * <p>This implementation iterates over the collection looking for the
      * specified element.  If it finds the element, it removes the element
      * from the collection using the iterator's remove method.
-     * <p>
+     * </p>
      *
      * @param o the object to remove
      * @throws ClassCastException            {@inheritDoc}
@@ -109,7 +109,7 @@ public class IdentifiableSet<X extends Identifiable> extends AbstractSet<X> impl
      * element using the <tt>Iterator.remove</tt> operation.  Most
      * implementations will probably choose to override this method for
      * efficiency.
-     * <p>
+     * </p>
      */
     @Override
     public void clear() {
