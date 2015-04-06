@@ -84,7 +84,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
             String libPath = new File(".").getCanonicalPath() + File.separator + "lib";
             libFile = new File(libPath);
         } catch (IOException e) {
-            log.error("Error while trying to get the lib-directory"+e);
+            error("Error while trying to get the lib-directory" + e);
             return new ArrayList<>();
         }
 
@@ -96,7 +96,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
         try {
             pluginManager.startPlugins();
         } catch (Exception e) {
-            log.fatal("Error while trying to start the PF4J-Plugins", e);
+            error("Error while trying to start the PF4J-Plugins", e);
         }
         try {
             List<AddOnModel> addOns = pluginManager.getExtensions(AddOnModel.class);

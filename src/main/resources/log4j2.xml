@@ -9,7 +9,7 @@
         </Console>
     </Appenders>
     <Loggers>
-        <Logger name="intellimate.izou" level="debug">
+        <Logger name="org.intellimate.izou" level="debug">
             <!--<AppenderRef ref="fileAppender"/>-->
             <AppenderRef ref="CONSOLE"/>
         </Logger>
