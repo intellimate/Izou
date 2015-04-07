@@ -78,6 +78,6 @@ public class ActivatorManager extends IzouModule implements AddonThreadPoolUser 
         });
 
         CompletableFuture existing = futures.put(activatorModel, future);
-        if (!existing.isDone()) existing.cancel(true);
+        if (existing != null && !existing.isDone()) existing.cancel(true);
     }
 }
