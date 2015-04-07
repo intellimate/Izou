@@ -6,7 +6,7 @@
 
     <groupId>org.intellimate.izou</groupId>
     <artifactId>izou</artifactId>
-    <version>1.5.16</version>
+    <version>1.5.21</version>
     <packaging>jar</packaging>
     <name>Izou</name>
     <description>Izou is a framework used for an addon-based personal assistant</description>
