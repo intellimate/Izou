@@ -74,8 +74,8 @@
         <dependency>
             <groupId>org.intellimate.izou</groupId>
             <artifactId>pf4j</artifactId>
-            <version>1.5</version>
-            <!-- we are releasing a jar with dependencies, major version changes require a new Izou Version -->
+            <version>1.6</version>
+            <!-- we are releasing a jar with dependencies, version changes require a new Izou Version -->
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
