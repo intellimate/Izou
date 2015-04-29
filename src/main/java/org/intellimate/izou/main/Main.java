@@ -7,6 +7,7 @@ import org.intellimate.izou.events.EventDistributor;
 import org.intellimate.izou.events.LocalEventManager;
 import org.intellimate.izou.output.OutputManager;
 import org.intellimate.izou.resource.ResourceManager;
+import org.intellimate.izou.security.IzouSecurityManager;
 import org.intellimate.izou.system.file.FileManager;
 import org.intellimate.izou.system.file.FileSystemManager;
 import org.intellimate.izou.system.javafx.JavaFXInitializer;
@@ -39,6 +40,7 @@ public class Main {
     private final FilePublisher filePublisher;
     private final IzouLogger izouLogger;
     private final ThreadPoolManager threadPoolManager;
+    private final IzouSecurityManager securityManager;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     /**
@@ -78,34 +80,53 @@ public class Main {
      * @param addOns a List of AddOns to run
      */
     public Main(List<AddOnModel> addOns, boolean javaFX, boolean debug) {
-         if (javaFX) {
-             jfxToolKitInit = new AtomicBoolean(false);
-             JavaFXInitializer.initToolKit();
-             fileLogger.debug("Initializing JavaFX ToolKit");
+        // Starts javaFX if desired
+        if (javaFX) {
+         jfxToolKitInit = new AtomicBoolean(false);
+         JavaFXInitializer.initToolKit();
+         fileLogger.debug("Initializing JavaFX ToolKit");
 
-             long startTime = System.currentTimeMillis();
-             long duration = 0;
-             while (!jfxToolKitInit.get() && duration < INIT_TIME_LIMIT) {
-                 duration = System.currentTimeMillis() - startTime;
-                 try {
-                     Thread.sleep(5000);
-                 } catch (InterruptedException e) {
-                     fileLogger.error("Error happened while thread was sleeping", e);
-                 }
+         long startTime = System.currentTimeMillis();
+         long duration = 0;
+         while (!jfxToolKitInit.get() && duration < INIT_TIME_LIMIT) {
+             duration = System.currentTimeMillis() - startTime;
+             try {
+                 Thread.sleep(5000);
+             } catch (InterruptedException e) {
+                 fileLogger.error("Error happened while thread was sleeping", e);
              }
-
-             if (!jfxToolKitInit.get()) {
-                 fileLogger.error("Unable to Initialize JavaFX ToolKit");
-             }
-             fileLogger.debug("Done initializing JavaFX ToolKit");
          }
 
+         if (!jfxToolKitInit.get()) {
+             fileLogger.error("Unable to Initialize JavaFX ToolKit");
+         }
+         fileLogger.debug("Done initializing JavaFX ToolKit");
+        }
+
+        // Setting up file system
         FileSystemManager fileSystemManager = new FileSystemManager(this);
         try {
             fileSystemManager.createIzouFileSystem();
         } catch (IOException e) {
             fileLogger.fatal("Failed to create the FileSystemManager", e);
         }
+
+        // Starting security manager
+        IzouSecurityManager securityManagerTemp;
+        try {
+            securityManagerTemp = IzouSecurityManager.createSecurityManager();
+        } catch (IllegalAccessException e) {
+            securityManagerTemp = null;
+            fileLogger.fatal("Security manager already exists", e);
+        }
+        securityManager = securityManagerTemp;
+        try {
+            System.setSecurityManager(securityManager);
+            System.setProperty("java.security.policy","./izou_policy.policy");
+        } catch (SecurityException e) {
+            fileLogger.fatal("Security manager already exists", e);
+        }
+
         threadPoolManager = new ThreadPoolManager(this);
         izouLogger = new IzouLogger();
         outputManager = new OutputManager(this);
