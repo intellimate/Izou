@@ -31,6 +31,17 @@ public interface OutputPluginModel<X, T> extends Runnable, Identifiable {
     void outputExtensionRemoved(Identification identification);
 
     /**
+     * returns whether the OutputPlugin is running
+     * @return true if it is running, false if not
+     */
+    boolean isRunning();
+
+    /**
+     * stops the OutputPlugin
+     */
+    void stop();
+
+    /**
      * returns the Type of the one wants to receive from the OutputExtensions
      * @return the type of the generic
      */
