@@ -43,8 +43,8 @@ public class IzouSecurityManager extends SecurityManager {
         super();
         allowedReadDirectories = new ArrayList<>();
         allowedWriteDirectories = new ArrayList<>();
-        allowedReadFileTypesRegex = "(txt|properties|xml|class|json|zip|ds_store|mf|jar)";
-        allowedWriteFileTypesRegex = "(txt|properties|xml|json)";
+        allowedReadFileTypesRegex = "(txt|properties|xml|class|json|zip|ds_store|mf|jar|idx)";
+        allowedWriteFileTypesRegex = "(txt|properties|xml|json|idx)";
         init();
     }
 
@@ -102,7 +102,7 @@ public class IzouSecurityManager extends SecurityManager {
         if (!tempAccess && !fileWriteCheck(fd.toString())) {
             throw new SecurityException("Access denied to " + fd.toString());
         }
-    }   x=- c[]
+    }
 
     /**
      * Checks if the permission {@code perm} is a {@link FilePermission} and if so checks is the IO operation is
@@ -117,11 +117,12 @@ public class IzouSecurityManager extends SecurityManager {
             return true;
         }
 
-        if (perm.getActions().equals("write")) {
-            return fileWriteCheck(perm.getName());
+        if (perm.getActions().equals("read")) {
+            return fileReadCheck(perm.getName());
         }
 
-        return perm.getActions().equals("read") && fileReadCheck(perm.getName());
+        // If read permission is not asked, default to write permission check, which grants less rights
+        return fileWriteCheck(perm.getName());
 
     }
 
@@ -138,17 +139,18 @@ public class IzouSecurityManager extends SecurityManager {
         }
 
         String[] pathParts = filePath.split("\\.");
-        String fileName = pathParts[pathParts.length - 1].toLowerCase();
+        String fileExtension = pathParts[pathParts.length - 1].toLowerCase();
 
         tempAccess = true;
-        if (new File(filePath).isDirectory()) {
+        File file = new File(filePath);
+        if (!file.exists() || file.isDirectory()) {
             tempAccess = false;
             return true;
         }
         tempAccess = false;
 
         Pattern pattern = Pattern.compile(allowedReadFileTypesRegex);
-        Matcher matcher = pattern.matcher(fileName);
+        Matcher matcher = pattern.matcher(fileExtension);
         return matcher.matches();
     }
 
@@ -165,17 +167,18 @@ public class IzouSecurityManager extends SecurityManager {
         }
 
         String[] pathParts = filePath.split("\\.");
-        String fileName = pathParts[pathParts.length - 1].toLowerCase();
+        String fileExtension = pathParts[pathParts.length - 1].toLowerCase();
 
         tempAccess = true;
-        if (new File(filePath).isDirectory()) {
+        File file = new File(filePath);
+        if (!file.exists() || file.isDirectory()) {
             tempAccess = false;
             return true;
         }
         tempAccess = false;
 
         Pattern pattern = Pattern.compile(allowedWriteFileTypesRegex);
-        Matcher matcher = pattern.matcher(fileName);
+        Matcher matcher = pattern.matcher(fileExtension);
         return matcher.matches();
     }
 }
