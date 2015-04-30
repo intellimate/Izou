@@ -1,21 +1,21 @@
 package org.intellimate.izou.main;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.intellimate.izou.activator.ActivatorManager;
-import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.addon.AddOnManager;
+import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.events.EventDistributor;
 import org.intellimate.izou.events.LocalEventManager;
 import org.intellimate.izou.output.OutputManager;
 import org.intellimate.izou.resource.ResourceManager;
 import org.intellimate.izou.security.IzouSecurityManager;
 import org.intellimate.izou.system.file.FileManager;
+import org.intellimate.izou.system.file.FilePublisher;
 import org.intellimate.izou.system.file.FileSystemManager;
 import org.intellimate.izou.system.javafx.JavaFXInitializer;
-import org.intellimate.izou.threadpool.ThreadPoolManager;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.intellimate.izou.system.file.FilePublisher;
 import org.intellimate.izou.system.logger.IzouLogger;
+import org.intellimate.izou.threadpool.ThreadPoolManager;
 
 import java.io.IOException;
 import java.util.List;
@@ -122,7 +122,7 @@ public class Main {
         securityManager = securityManagerTemp;
         try {
             System.setSecurityManager(securityManager);
-            System.setProperty("java.security.policy","./izou_policy.policy");
+            System.setProperty("java.security.policy", "./izou_policy.policy");
         } catch (SecurityException e) {
             fileLogger.fatal("Security manager already exists", e);
         }

@@ -4,9 +4,7 @@ import org.intellimate.izou.system.file.FileSystemManager;
 
 import java.io.File;
 import java.io.FileDescriptor;
-import java.security.AccessController;
 import java.security.Permission;
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -18,8 +16,11 @@ import java.util.regex.Pattern;
  */
 public class IzouSecurityManager extends SecurityManager {
     private static boolean exists = false;
-    private final List<String> allowedDirectories;
-    private final String allowedFileTypesRegex;
+    private final List<String> allowedReadDirectories;
+    private final List<String> allowedWriteDirectories;
+    private final String allowedReadFileTypesRegex;
+    private final String allowedWriteFileTypesRegex;
+    private boolean tempAccess = false;
 
     /**
      * Creates an IzouSecurityManager. There can only be one single IzouSecurityManager, so calling this method twice
@@ -39,8 +40,10 @@ public class IzouSecurityManager extends SecurityManager {
 
     private IzouSecurityManager() {
         super();
-        allowedDirectories = new ArrayList<>();
-        allowedFileTypesRegex = "(txt|properties|xml|class|json|zip)";
+        allowedReadDirectories = new ArrayList<>();
+        allowedWriteDirectories = new ArrayList<>();
+        allowedReadFileTypesRegex = "(txt|properties|xml|class|json|zip|ds_store|mf|jar)";
+        allowedWriteFileTypesRegex = "(txt|properties|xml|json)";
         init();
     }
 
@@ -49,13 +52,21 @@ public class IzouSecurityManager extends SecurityManager {
         while (!workingDir.endsWith(File.separator + "Izou" + File.separator)) {
             workingDir = workingDir.substring(0, workingDir.length() - 1);
         }
-        allowedDirectories.add(workingDir);
-        allowedDirectories.add(".m2");
+
+        allowedReadDirectories.add(workingDir);
+        allowedReadDirectories.add("." + File.separator);
+        allowedReadDirectories.add(".m2");
+
+        allowedWriteDirectories.add(workingDir);
+        allowedWriteDirectories.add("." + File.separator);
     }
 
     @Override
     public void checkPermission(Permission perm) {
-        System.out.println("Checked");
+        boolean filePermission = checkFilePermission(perm);
+        if (!filePermission) {
+            throw new SecurityException("Access denied to " + perm.getName());
+        }
     }
 
     @Override
@@ -80,21 +91,34 @@ public class IzouSecurityManager extends SecurityManager {
 
     @Override
     public void checkRead(String file) {
-        if (!fileCheck(file)) {
+        if (!tempAccess && !fileReadCheck(file)) {
             throw new SecurityException("Access denied to " + file);
         }
     }
 
     @Override
     public void checkWrite(FileDescriptor fd) {
-        if (!fileCheck(fd.toString())) {
+        if (!tempAccess && !fileWriteCheck(fd.toString())) {
             throw new SecurityException("Access denied to " + fd.toString());
         }
     }
 
-    private boolean fileCheck(String filePath) {
+    private boolean checkFilePermission(Permission perm) {
+        if (!perm.toString().toLowerCase().contains("filepermission")) {
+            return true;
+        }
+
+        if (perm.getActions().equals("write")) {
+            return fileWriteCheck(perm.getName());
+        }
+
+        return perm.getActions().equals("read") && fileReadCheck(perm.getName());
+
+    }
+
+    private boolean fileReadCheck(String filePath) {
         boolean allowedDirectory = false;
-        for (String dir : allowedDirectories) {
+        for (String dir : allowedReadDirectories) {
             if (filePath.contains(dir)) {
                 allowedDirectory = true;
                 break;
@@ -106,14 +130,42 @@ public class IzouSecurityManager extends SecurityManager {
 
         String[] pathParts = filePath.split("\\.");
         String fileName = pathParts[pathParts.length - 1].toLowerCase();
-        final boolean isDir = (boolean) AccessController.doPrivileged((PrivilegedAction) () ->
-                new File(filePath).isDirectory());
 
-        if (isDir) {
+        tempAccess = true;
+        if (new File(filePath).isDirectory()) {
+            tempAccess = false;
             return true;
         }
+        tempAccess = false;
 
-        Pattern pattern = Pattern.compile(allowedFileTypesRegex);
+        Pattern pattern = Pattern.compile(allowedReadFileTypesRegex);
+        Matcher matcher = pattern.matcher(fileName);
+        return matcher.matches();
+    }
+
+    private boolean fileWriteCheck(String filePath) {
+        boolean allowedDirectory = false;
+        for (String dir : allowedWriteDirectories) {
+            if (filePath.contains(dir)) {
+                allowedDirectory = true;
+                break;
+            }
+        }
+        if (!allowedDirectory) {
+            return false;
+        }
+
+        String[] pathParts = filePath.split("\\.");
+        String fileName = pathParts[pathParts.length - 1].toLowerCase();
+
+        tempAccess = true;
+        if (new File(filePath).isDirectory()) {
+            tempAccess = false;
+            return true;
+        }
+        tempAccess = false;
+
+        Pattern pattern = Pattern.compile(allowedWriteFileTypesRegex);
         Matcher matcher = pattern.matcher(fileName);
         return matcher.matches();
     }
