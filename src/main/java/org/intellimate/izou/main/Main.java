@@ -158,12 +158,12 @@ public class Main {
         }*/
 
         addOnManager = new AddOnManager(this);
-        if(addOns != null && !debug) {
+        if (addOns != null && !debug) {
             addOnManager.addAddOnsWithoutRegistering(addOns);
         } else if(addOns != null) {
             addOnManager.addAndRegisterAddOns(addOns);
         }
-        if(!debug) addOnManager.retrieveAndRegisterAddOns();
+        if (!debug) addOnManager.retrieveAndRegisterAddOns();
     }
 
     public static void main(String[] args) {

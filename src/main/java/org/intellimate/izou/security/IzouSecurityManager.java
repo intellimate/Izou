@@ -4,6 +4,7 @@ import org.intellimate.izou.system.file.FileSystemManager;
 
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FilePermission;
 import java.security.Permission;
 import java.util.ArrayList;
 import java.util.List;
@@ -101,10 +102,18 @@ public class IzouSecurityManager extends SecurityManager {
         if (!tempAccess && !fileWriteCheck(fd.toString())) {
             throw new SecurityException("Access denied to " + fd.toString());
         }
-    }
+    }   x=- c[]
 
+    /**
+     * Checks if the permission {@code perm} is a {@link FilePermission} and if so checks is the IO operation is
+     * allowed, else returns false. If the permission is not a FilePermission, true is returned as the permission has
+     * nothing to do with file IO.
+     *
+     * @param perm the permission to check
+     * @return true if permission is granted from the file IO side
+     */
     private boolean checkFilePermission(Permission perm) {
-        if (!perm.toString().toLowerCase().contains("filepermission")) {
+        if (!(perm instanceof FilePermission)) {
             return true;
         }
 
