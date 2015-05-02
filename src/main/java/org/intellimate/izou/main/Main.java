@@ -122,7 +122,6 @@ public class Main {
         securityManager = securityManagerTemp;
         try {
             System.setSecurityManager(securityManager);
-            System.setProperty("java.security.policy", "./izou_policy.policy");
         } catch (SecurityException e) {
             fileLogger.fatal("Security manager already exists", e);
         }
