@@ -10,6 +10,7 @@ import org.intellimate.izou.events.LocalEventManager;
 import org.intellimate.izou.output.OutputManager;
 import org.intellimate.izou.resource.ResourceManager;
 import org.intellimate.izou.security.IzouSecurityManager;
+import org.intellimate.izou.system.SystemInitializer;
 import org.intellimate.izou.system.file.FileManager;
 import org.intellimate.izou.system.file.FilePublisher;
 import org.intellimate.izou.system.file.FileSystemManager;
@@ -41,6 +42,7 @@ public class Main {
     private final IzouLogger izouLogger;
     private final ThreadPoolManager threadPoolManager;
     private final IzouSecurityManager securityManager;
+    private final SystemInitializer systemInitializer;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     /**
@@ -80,6 +82,8 @@ public class Main {
      * @param addOns a List of AddOns to run
      */
     public Main(List<AddOnModel> addOns, boolean javaFX, boolean debug) {
+        systemInitializer = new SystemInitializer();
+        systemInitializer.initSystem();
         // Starts javaFX if desired
         if (javaFX) {
          jfxToolKitInit = new AtomicBoolean(false);

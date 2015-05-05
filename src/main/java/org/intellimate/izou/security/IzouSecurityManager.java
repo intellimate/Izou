@@ -9,11 +9,10 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FilePermission;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.SocketPermission;
 import java.security.Permission;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -26,11 +25,16 @@ import java.util.regex.Pattern;
 public class IzouSecurityManager extends SecurityManager {
     private static boolean exists = false;
     private boolean tempFileAccess = false;
+    private boolean tempAllowAll = false;
+    private boolean exitPermission = false;
     private final List<String> allowedReadDirectories;
+    private final List<String> allowedReadFiles;
+    private final List<String> allowedSocketConnections;
     private final List<String> allowedWriteDirectories;
     private final List<String> forbiddenProperties;
     private final String allowedReadFileTypesRegex;
     private final String allowedWriteFileTypesRegex;
+    private final SecurityBreachHandler breachHandler;
     private final Logger logger = LogManager.getLogger(this.getClass());
 
     /**
@@ -54,10 +58,22 @@ public class IzouSecurityManager extends SecurityManager {
      */
     private IzouSecurityManager() {
         super();
+        SecurityBreachHandler tempBreachHandler = null;
+        try {
+            tempBreachHandler = SecurityBreachHandler.createBreachHandler("intellimate.izou@gmail.com");
+        } catch (IllegalAccessException e) {
+            logger.fatal("Unable to create a SecurityBreachHandler, for that reason Izou might be attacked, "
+                    + "so exiting now.", e);
+            exitPermission = true;
+            System.exit(1);
+        }
+        breachHandler = tempBreachHandler;
         allowedReadDirectories = new ArrayList<>();
+        allowedReadFiles = new ArrayList<>();
         allowedWriteDirectories = new ArrayList<>();
         forbiddenProperties = new ArrayList<>();
-        allowedReadFileTypesRegex = "(txt|properties|xml|class|json|zip|ds_store|mf|jar|idx|log|dylib|mp3)";
+        allowedSocketConnections = new ArrayList<>();
+        allowedReadFileTypesRegex = "(txt|properties|xml|class|json|zip|ds_store|mf|jar|idx|log|dylib|mp3|dylib|certs)";
         allowedWriteFileTypesRegex = "(txt|properties|xml|json|idx|log)";
         init();
     }
@@ -74,10 +90,15 @@ public class IzouSecurityManager extends SecurityManager {
         forbiddenProperties.add("jdk.lang.process.launchmechanism");
 
         allowedReadDirectories.add(workingDir);
-        allowedReadDirectories.add(".m2");
         allowedReadDirectories.add("/Users/julianbrendl/Desktop");
+        allowedReadDirectories.addAll(Arrays.asList(System.getProperty("java.ext.dirs").split(":")));
+        allowedReadFiles.add("/dev/random");
+        allowedReadFiles.add("/dev/urandom");
         allowedReadDirectories.add(System.getProperty("java.home"));
-
+        allowedReadDirectories.add(System.getProperty("user.home"));
+        allowedSocketConnections.add(System.getProperty("host.name"));
+        allowedSocketConnections.add("local");
+        allowedSocketConnections.add("smtp");
         allowedWriteDirectories.add(workingDir);
     }
 
@@ -88,24 +109,15 @@ public class IzouSecurityManager extends SecurityManager {
      * @return the current class loader
      */
     private ClassLoader getCurrentClassLoader() {
-        Method privateStringMethod;
-        try {
-            privateStringMethod = SecurityManager.class.getDeclaredMethod("currentClassLoader0");
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-            return null;
+        Class[] classes = getClassContext();
+        for (int i = classes.length - 1; i >= 0; i--) {
+            if (classes[i].getClassLoader() instanceof IzouPluginClassLoader
+                    && !classes[i].getName().contains(IzouPluginClassLoader.PLUGIN_PACKAGE_PREFIX_IZOU_SDK)) {
+                return classes[i].getClassLoader();
+            }
         }
 
-        privateStringMethod.setAccessible(true);
-
-        ClassLoader loader = null;
-        try {
-            loader = (ClassLoader) privateStringMethod.invoke(this, null);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
-        }
-
-        return loader;
+        return null;
     }
 
     /**
@@ -122,6 +134,10 @@ public class IzouSecurityManager extends SecurityManager {
         }
         ClassLoader classLoader = getCurrentClassLoader();
 
+        if (classLoader == null) {
+            return;
+        }
+
         IzouPluginClassLoader izouClassLoader;
         if (classLoader instanceof IzouPluginClassLoader) {
             izouClassLoader = (IzouPluginClassLoader) classLoader;
@@ -129,18 +145,24 @@ public class IzouSecurityManager extends SecurityManager {
             return;
         }
 
+        for (String socket : allowedSocketConnections) {
+            if (perm.getName().contains(socket)) {
+                return;
+            }
+        }
+
         Properties addOnProperties = izouClassLoader.getPluginDescriptor().getAddOnProperties();
 
-        boolean canConnect;
+        boolean canConnect = false;
         try {
             canConnect = addOnProperties.get("socket_connection").equals("true")
                     && !addOnProperties.get("socket_usage_descripton").equals("null");
         } catch (NullPointerException e) {
-            throw new SecurityException("Access denied to " + perm.getName());
+            throwException(perm.getName());
         }
 
         if (!canConnect) {
-             throw new SecurityException("Access denied to " + perm.getName());
+            throwException(perm.getName());
         }
     }
 
@@ -161,7 +183,7 @@ public class IzouSecurityManager extends SecurityManager {
         String canonicalAction =  perm.getActions().intern().toLowerCase();
 
         if (canonicalName.contains("all files") || canonicalAction.equals("execute")) {
-            throw new SecurityException("Access denied to " + perm.getName());
+            throwException(perm.getName());
         }
 
         if (canonicalAction.equals("read") && fileReadCheck(canonicalName)) {
@@ -171,7 +193,7 @@ public class IzouSecurityManager extends SecurityManager {
             return;
         }
 
-        throw new SecurityException("Access denied to " + perm.getName());
+        throwException(perm.getName());
     }
 
     /**
@@ -190,6 +212,12 @@ public class IzouSecurityManager extends SecurityManager {
             return false;
         }
 
+        for (String file : allowedReadFiles) {
+            if (canonicalPath.contains(file)) {
+                return true;
+            }
+        }
+
         boolean allowedDirectory = false;
         for (String dir : allowedReadDirectories) {
             if (canonicalPath.contains(dir)) {
@@ -201,8 +229,11 @@ public class IzouSecurityManager extends SecurityManager {
             return false;
         }
 
-        String[] pathParts = canonicalPath.split("\\.");
-        String fileExtension = pathParts[pathParts.length - 1].toLowerCase();
+        String[] pathParts = canonicalPath.split(File.separator);
+        String lastPathPart = pathParts[pathParts.length - 1].toLowerCase();
+
+        String[] pathPeriodParts = lastPathPart.split("\\.");
+        String fileExtension = pathPeriodParts[pathPeriodParts.length - 1].toLowerCase();
 
         tempFileAccess = true;
         File file = new File(canonicalPath);
@@ -214,7 +245,7 @@ public class IzouSecurityManager extends SecurityManager {
 
         Pattern pattern = Pattern.compile(allowedReadFileTypesRegex);
         Matcher matcher = pattern.matcher(fileExtension);
-        return matcher.matches();
+        return matcher.matches() || fileExtension.equals(lastPathPart);
     }
 
     /**
@@ -260,14 +291,33 @@ public class IzouSecurityManager extends SecurityManager {
         return matcher.matches();
     }
 
+    /**
+     * Throws an exception with the argument of {@code argument}
+     * @param argument what the exception is about (Access denied to (argument goes here))
+     */
+    private void throwException(String argument) {
+        Exception exception =  new SecurityException("Access denied to " + argument);
+        tempAllowAll = true;
+        Class[] classStack = getClassContext();
+        breachHandler.handleBreach(exception, classStack);
+        tempAllowAll = false;
+        throw (SecurityException) exception;
+    }
+
     @Override
     public void checkPermission(Permission perm) {
+        if (tempAllowAll) {
+            return;
+        }
         checkFilePermission(perm);
         checkSocketPermission(perm);
     }
 
     @Override
     public void checkPropertyAccess(String key) {
+        if (tempAllowAll) {
+            return;
+        }
         String canonicalKey = key.intern().toLowerCase();
 
         boolean allowedProperty = true;
@@ -279,46 +329,58 @@ public class IzouSecurityManager extends SecurityManager {
         }
 
         if (!allowedProperty) {
-            throw new SecurityException("Access denied to " + key);
+            throwException(key);
         }
     }
 
     @Override
     public void checkExec(String cmd) {
-        throw new SecurityException("Access denied to " + cmd);
+        if (tempAllowAll) {
+            return;
+        }
+        throwException(cmd);
     }
 
     @Override
     public void checkExit(int status) {
-        throw new SecurityException("Access denied to exit");
+        if (!exitPermission && !tempAllowAll) {
+            throwException("exit");
+        }
     }
 
     @Override
     public void checkDelete(String file) {
+        if (tempAllowAll) {
+            return;
+        }
         super.checkDelete(file);
     }
 
     @Override
     public void checkAccess(ThreadGroup g) {
-        System.out.println("Checked");
+        if (tempAllowAll) {
+            return;
+        }
     }
 
     @Override
     public void checkAccess(Thread t) {
-        System.out.println("Checked");
+        if (tempAllowAll) {
+            return;
+        }
     }
 
     @Override
     public void checkRead(String file) {
-        if (!tempFileAccess && !fileReadCheck(file)) {
-            throw new SecurityException("Access denied to " + file);
+        if (!tempFileAccess && !tempAllowAll && !fileReadCheck(file)) {
+            throwException(file);
         }
     }
 
     @Override
     public void checkWrite(FileDescriptor fd) {
-        if (!tempFileAccess && !fileWriteCheck(fd.toString())) {
-            throw new SecurityException("Access denied to " + fd.toString());
+        if (!tempFileAccess && !tempAllowAll && !fileWriteCheck(fd.toString())) {
+            throwException(fd.toString());
         }
     }
 }

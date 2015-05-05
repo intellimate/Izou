@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration>
     <Appenders>
-        <File name="fileAppender" fileName="logs/intellimate.izou.log" append="true">
+        <File name="fileAppender" fileName="logs/org.intellimate.izou.log" append="true">
             <PatternLayout pattern="%d %-5p [%t] %C{10} (%F:%L) - %m%n"/>
         </File>
         <Console name="CONSOLE" target="SYSTEM_OUT">
