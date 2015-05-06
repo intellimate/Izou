@@ -145,25 +145,14 @@ public class Main {
             fileLogger.fatal("Failed to create the FileManager", e);
         }
         fileManager = fileManagerTemp;
-        
-        /*
-        try {
-            //TODO: move to SDK
-            if (fileManager != null) {
-                fileManager.registerFileDir(Paths.get(FileSystemManager.PROPERTIES_PATH),
-                        "local_events.properties", eventPropertiesManager);
-            }
-        } catch (IOException e) {
-            fileLogger.error("Unable to register the eventPropertiesManager", e);
-        }*/
 
         addOnManager = new AddOnManager(this);
-        if(addOns != null && !debug) {
+        if (addOns != null && !debug) {
             addOnManager.addAddOnsWithoutRegistering(addOns);
         } else if(addOns != null) {
             addOnManager.addAndRegisterAddOns(addOns);
         }
-        if(!debug) addOnManager.retrieveAndRegisterAddOns();
+        if (!debug) addOnManager.retrieveAndRegisterAddOns();
     }
 
     public static void main(String[] args) {
