@@ -255,6 +255,8 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
     public <T, X> List<CompletableFuture<X>> generateAllOutputExtensions(OutputPluginModel<T, X> outputPlugin,
                                                                                 T t, EventModel event) {
         IdentifiableSet<OutputExtensionModel<?, ?>> extensions = outputExtensions.get(outputPlugin.getID());
+        if (extensions == null)
+            return new ArrayList<>();
         return filterType(extensions, outputPlugin).stream()
                 .map(extension -> {
                     try {
