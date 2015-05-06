@@ -15,7 +15,16 @@ public class FileSystemManager extends IzouModule {
      * Path to log files
      */
     public static final String LOG_PATH = "." + File.separator + "logs" + File.separator;
-    public static final String FULL_WORKING_DIRECTORY = new File("./").getAbsolutePath();
+    public static final String FULL_WORKING_DIRECTORY;
+    static {
+        String path = null;
+        try {
+            path = new File(".").getCanonicalPath();
+        } catch (IOException e) {
+            // do whatever you have to do
+        }
+        FULL_WORKING_DIRECTORY = path;
+    }
 
     /**
      * path to the proterties files

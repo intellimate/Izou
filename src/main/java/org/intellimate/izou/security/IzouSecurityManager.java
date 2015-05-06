@@ -50,9 +50,6 @@ public class IzouSecurityManager extends SecurityManager {
 
     private void init() {
         String workingDir = FileSystemManager.FULL_WORKING_DIRECTORY;
-        while (!workingDir.endsWith(File.separator + "Izou" + File.separator)) {
-            workingDir = workingDir.substring(0, workingDir.length() - 1);
-        }
 
         allowedReadDirectories.add(workingDir);
         allowedReadDirectories.add("." + File.separator);
