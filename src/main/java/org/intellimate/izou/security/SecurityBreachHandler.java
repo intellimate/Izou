@@ -24,14 +24,18 @@ class SecurityBreachHandler {
      */
     public static SecurityBreachHandler createBreachHandler(String toAddress) throws IllegalAccessException {
         if (!exists) {
+            SecurityBreachHandler breachHandler = new SecurityBreachHandler(toAddress);
             exists = true;
-            return new SecurityBreachHandler(toAddress);
+            return breachHandler;
         }
 
-        throw new IllegalAccessException("Cannot create more than one instance of IzouSecurityManager");
+        throw new IllegalAccessException("Cannot create more than one instance of SecurityBreachHandler");
     }
 
-    private SecurityBreachHandler(String toAddress) {
+    private SecurityBreachHandler(String toAddress) throws IllegalAccessException {
+        if (exists) {
+            throw new IllegalAccessException("Cannot create more than one instance of SecurityBreachHandler");
+        }
         this.toAddress = toAddress;
     }
 

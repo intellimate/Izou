@@ -44,8 +44,9 @@ public class IzouSecurityManager extends SecurityManager {
      */
     public static IzouSecurityManager createSecurityManager() throws IllegalAccessException {
         if (!exists) {
+            IzouSecurityManager securityManager = new IzouSecurityManager();
             exists = true;
-            return new IzouSecurityManager();
+            return  securityManager;
         }
 
         throw new IllegalAccessException("Cannot create more than one instance of IzouSecurityManager");
@@ -54,8 +55,12 @@ public class IzouSecurityManager extends SecurityManager {
     /**
      * Creates a new IzouSecurityManager instance
      */
-    private IzouSecurityManager() {
+    private IzouSecurityManager() throws IllegalAccessException {
         super();
+        if (exists) {
+            throw new IllegalAccessException("Cannot create more than one instance of IzouSecurityManager");
+        }
+
         SecureAccess tempSecureAccess = null;
         try {
             tempSecureAccess = SecureAccess.createSecureAccess();
