@@ -57,7 +57,7 @@ class SecurityBreachHandler {
     private String generateContent(Exception excep, Class[] classesStack) {
         String intro = "An attempted security breach was discovered in Izou: \n\n\n";
         String exception = "EXCEPTION: \n\n";
-        exception += excep.getMessage();
+        exception += excep.getMessage() + "\n";
         StackTraceElement[] stackTraceElements = excep.getStackTrace();
         for (StackTraceElement element : stackTraceElements) {
             exception += element.toString() + "\n";

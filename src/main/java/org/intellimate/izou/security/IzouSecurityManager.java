@@ -105,15 +105,9 @@ public class IzouSecurityManager extends SecurityManager {
      */
     private ClassLoader getCurrentClassLoader() {
         Class[] classes = getClassContext();
-        String currentDir = "";
-        try {
-            currentDir = new File("./").getCanonicalPath();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         for (int i = classes.length - 1; i >= 0; i--) {
             if (classes[i].getClassLoader() instanceof IzouPluginClassLoader
-                    && !classes[i].getName().contains(currentDir)) {
+                    && !classes[i].getName().toLowerCase().contains("org.intellimate.izou.sdk")) {
                 return classes[i].getClassLoader();
             }
         }
@@ -294,7 +288,7 @@ public class IzouSecurityManager extends SecurityManager {
     private boolean checkForSecureAccess() {
         Class[] classContext = getClassContext();
         for (Class clazz : classContext) {
-            if (clazz.equals(SecureAccess.class)) {
+            if (clazz.equals(SecureAccess.class) || clazz.equals(SecurityBreachHandler.class)) {
                 return true;
             }
         }
