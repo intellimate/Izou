@@ -92,8 +92,6 @@ public class IzouSecurityManager extends SecurityManager {
         allowedReadDirectories.add(workingDir);
         allowedReadDirectories.add("/Users/julianbrendl/Desktop");
         allowedReadDirectories.addAll(Arrays.asList(System.getProperty("java.ext.dirs").split(":")));
-        allowedReadFiles.add("/dev/random");
-        allowedReadFiles.add("/dev/urandom");
         allowedReadDirectories.add(System.getProperty("java.home"));
         allowedReadDirectories.add(System.getProperty("user.home"));
         allowedSocketConnections.add(System.getProperty("host.name"));
@@ -112,7 +110,7 @@ public class IzouSecurityManager extends SecurityManager {
         Class[] classes = getClassContext();
         for (int i = classes.length - 1; i >= 0; i--) {
             if (classes[i].getClassLoader() instanceof IzouPluginClassLoader
-                    && !classes[i].getName().toLowerCase().contains("org.intellimate.izou.sdk")) {
+                    && !classes[i].getName().toLowerCase().contains("org.intellimate.izou.sdk")) { //TODO: exchange ID with PF4J Constant
                 return classes[i].getClassLoader();
             }
         }
