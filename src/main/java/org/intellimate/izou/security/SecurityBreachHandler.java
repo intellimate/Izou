@@ -9,7 +9,7 @@ import org.intellimate.izou.system.file.FileSystemManager;
  * The SecurityBreachHandler takes action when a security exception is thrown in the security manager to deal with the
  * attempted security breach.
  */
-public class SecurityBreachHandler {
+class SecurityBreachHandler {
     private final Logger logger = LogManager.getLogger(this.getClass());
     private final String toAddress;
     private static boolean exists = false;

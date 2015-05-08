@@ -24,8 +24,6 @@ import java.util.regex.Pattern;
  */
 public class IzouSecurityManager extends SecurityManager {
     private static boolean exists = false;
-    private boolean tempFileAccess = false;
-    private boolean tempAllowAll = false;
     private boolean exitPermission = false;
     private final List<String> allowedReadDirectories;
     private final List<String> allowedReadFiles;
@@ -34,7 +32,7 @@ public class IzouSecurityManager extends SecurityManager {
     private final List<String> forbiddenProperties;
     private final String allowedReadFileTypesRegex;
     private final String allowedWriteFileTypesRegex;
-    private final SecurityBreachHandler breachHandler;
+    private final SecureAccess secureAccess;
     private final Logger logger = LogManager.getLogger(this.getClass());
 
     /**
@@ -58,16 +56,16 @@ public class IzouSecurityManager extends SecurityManager {
      */
     private IzouSecurityManager() {
         super();
-        SecurityBreachHandler tempBreachHandler = null;
+        SecureAccess tempSecureAccess = null;
         try {
-            tempBreachHandler = SecurityBreachHandler.createBreachHandler("intellimate.izou@gmail.com");
+            tempSecureAccess = SecureAccess.createSecureAccess();
         } catch (IllegalAccessException e) {
-            logger.fatal("Unable to create a SecurityBreachHandler, for that reason Izou might be attacked, "
-                    + "so exiting now.", e);
+            logger.fatal("Unable to create a SecureAccess object because Izou might be under attack. "
+                    + "Exiting now.", e);
             exitPermission = true;
             System.exit(1);
         }
-        breachHandler = tempBreachHandler;
+        secureAccess = tempSecureAccess;
         allowedReadDirectories = new ArrayList<>();
         allowedReadFiles = new ArrayList<>();
         allowedWriteDirectories = new ArrayList<>();
@@ -238,13 +236,10 @@ public class IzouSecurityManager extends SecurityManager {
         String[] pathPeriodParts = lastPathPart.split("\\.");
         String fileExtension = pathPeriodParts[pathPeriodParts.length - 1].toLowerCase();
 
-        tempFileAccess = true;
-        File file = new File(canonicalPath);
-        if (!file.exists() || file.isDirectory()) {
-            tempFileAccess = false;
+        if (!secureAccess.checkForExistingFileOrDirectory(canonicalPath)
+                || secureAccess.checkForDirectory(canonicalPath)) {
             return true;
         }
-        tempFileAccess = false;
 
         Pattern pattern = Pattern.compile(allowedReadFileTypesRegex);
         Matcher matcher = pattern.matcher(fileExtension);
@@ -281,17 +276,29 @@ public class IzouSecurityManager extends SecurityManager {
         String[] pathParts = canonicalPath.split("\\.");
         String fileExtension = pathParts[pathParts.length - 1].toLowerCase();
 
-        tempFileAccess = true;
-        File file = new File(canonicalPath);
-        if (!file.exists() || file.isDirectory()) {
-            tempFileAccess = false;
+        if (!secureAccess.checkForExistingFileOrDirectory(canonicalPath)
+                || secureAccess.checkForDirectory(canonicalPath)) {
             return true;
         }
-        tempFileAccess = false;
 
         Pattern pattern = Pattern.compile(allowedWriteFileTypesRegex);
         Matcher matcher = pattern.matcher(fileExtension);
         return matcher.matches();
+    }
+
+    /**
+     * Checks if {@link SecureAccess} is included in the current class context, if so true is returned, else false
+     *
+     * @return true if {@link SecureAccess} is included in the current class context, else false
+     */
+    private boolean checkForSecureAccess() {
+        Class[] classContext = getClassContext();
+        for (Class clazz : classContext) {
+            if (clazz.equals(SecureAccess.class)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -300,16 +307,14 @@ public class IzouSecurityManager extends SecurityManager {
      */
     private void throwException(String argument) {
         Exception exception =  new SecurityException("Access denied to " + argument);
-        tempAllowAll = true;
         Class[] classStack = getClassContext();
-        breachHandler.handleBreach(exception, classStack);
-        tempAllowAll = false;
+        secureAccess.getBreachHandler().handleBreach(exception, classStack);
         throw (SecurityException) exception;
     }
 
     @Override
     public void checkPermission(Permission perm) {
-        if (tempAllowAll) {
+        if (checkForSecureAccess()) {
             return;
         }
         checkFilePermission(perm);
@@ -318,7 +323,7 @@ public class IzouSecurityManager extends SecurityManager {
 
     @Override
     public void checkPropertyAccess(String key) {
-        if (tempAllowAll) {
+        if (checkForSecureAccess()) {
             return;
         }
         String canonicalKey = key.intern().toLowerCase();
@@ -338,7 +343,7 @@ public class IzouSecurityManager extends SecurityManager {
 
     @Override
     public void checkExec(String cmd) {
-        if (tempAllowAll) {
+        if (checkForSecureAccess()) {
             return;
         }
         throwException(cmd);
@@ -346,43 +351,44 @@ public class IzouSecurityManager extends SecurityManager {
 
     @Override
     public void checkExit(int status) {
-        if (!exitPermission && !tempAllowAll) {
+        if (!exitPermission && !checkForSecureAccess()) {
             throwException("exit");
+        } else {
+            secureAccess.exitIzou();
         }
     }
 
     @Override
     public void checkDelete(String file) {
-        if (tempAllowAll) {
+        if (checkForSecureAccess()) {
             return;
         }
-        super.checkDelete(file);
     }
 
     @Override
     public void checkAccess(ThreadGroup g) {
-        if (tempAllowAll) {
+        if (checkForSecureAccess()) {
             return;
         }
     }
 
     @Override
     public void checkAccess(Thread t) {
-        if (tempAllowAll) {
+        if (checkForSecureAccess()) {
             return;
         }
     }
 
     @Override
     public void checkRead(String file) {
-        if (!tempFileAccess && !tempAllowAll && !fileReadCheck(file)) {
+        if (!checkForSecureAccess() && !fileReadCheck(file)) {
             throwException(file);
         }
     }
 
     @Override
     public void checkWrite(FileDescriptor fd) {
-        if (!tempFileAccess && !tempAllowAll && !fileWriteCheck(fd.toString())) {
+        if (!checkForSecureAccess() && !fileWriteCheck(fd.toString())) {
             throwException(fd.toString());
         }
     }
