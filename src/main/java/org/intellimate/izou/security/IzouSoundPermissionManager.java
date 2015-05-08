@@ -11,7 +11,7 @@ import java.util.List;
  * The IzouSoundPermissionManager manages conflicts between addOns regarding audio output. For example if two AddOns
  * want to play music, then the IzouSoundPermissionManager will decide who gets to play it.
  */
-public class IzouSoundPermissionManager extends IzouPermissionManager {
+public class IzouSoundPermissionManager extends SecurityModule {
     private final List<String> registeredAddOns;
     private String currentPlaybackID;
     private boolean isPlaying;
@@ -62,7 +62,7 @@ public class IzouSoundPermissionManager extends IzouPermissionManager {
     public boolean requestPlaybackPermission(String addOnID) {
         if (!isPlaying) {
             try {
-                currentPlaybackID = sha256(addOnID);
+                currentPlaybackID = sha3(addOnID);
             } catch (NoSuchAlgorithmException e) {
                 logger.error("Did not find sha256 algorithm", e);
             }
@@ -82,7 +82,7 @@ public class IzouSoundPermissionManager extends IzouPermissionManager {
      */
     public boolean returnPlaybackPermission(String addOnID) {
         try {
-            if (sha256(addOnID).equals(currentPlaybackID)) {
+            if (sha3(addOnID).equals(currentPlaybackID)) {
                 isPlaying = false;
                 currentPlaybackID = null;
                 return true;

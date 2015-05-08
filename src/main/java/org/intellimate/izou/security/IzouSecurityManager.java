@@ -107,9 +107,15 @@ public class IzouSecurityManager extends SecurityManager {
      */
     private ClassLoader getCurrentClassLoader() {
         Class[] classes = getClassContext();
+        String currentDir = "";
+        try {
+            currentDir = new File("./").getCanonicalPath();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         for (int i = classes.length - 1; i >= 0; i--) {
             if (classes[i].getClassLoader() instanceof IzouPluginClassLoader
-                    && !classes[i].getName().contains(IzouPluginClassLoader.PLUGIN_PACKAGE_PREFIX_IZOU_SDK)) {
+                    && !classes[i].getName().contains(currentDir)) {
                 return classes[i].getClassLoader();
             }
         }
