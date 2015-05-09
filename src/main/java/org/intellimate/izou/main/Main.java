@@ -129,7 +129,7 @@ public class Main {
         // Starting security manager
         SecurityManager securityManagerTemp;
         try {
-            securityManagerTemp = SecurityManager.createSecurityManager();
+            securityManagerTemp = SecurityManager.createSecurityManager(systemMail);
         } catch (IllegalAccessException e) {
             securityManagerTemp = null;
             fileLogger.fatal("Security manager already exists", e);
