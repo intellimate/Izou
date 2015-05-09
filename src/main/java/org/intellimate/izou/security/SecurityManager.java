@@ -2,9 +2,12 @@ package org.intellimate.izou.security;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.intellimate.izou.security.exceptions.IzouSocketPermissionException;
+import org.intellimate.izou.security.exceptions.IzouSoundPermissionException;
 import org.intellimate.izou.system.file.FileSystemManager;
 import ro.fortsoft.pf4j.IzouPluginClassLoader;
 
+import javax.sound.sampled.AudioPermission;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FilePermission;
@@ -14,7 +17,6 @@ import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,6 +35,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
     private final String allowedReadFileTypesRegex;
     private final String allowedWriteFileTypesRegex;
     private final SecureAccess secureAccess;
+    private final PermissionManager permissionManager;
     private final Logger logger = LogManager.getLogger(this.getClass());
 
     /**
@@ -70,6 +73,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
             exitPermission = true;
             System.exit(1);
         }
+        permissionManager = PermissionManager.createPermissionManager();
         secureAccess = tempSecureAccess;
         allowedReadDirectories = new ArrayList<>();
         allowedReadFiles = new ArrayList<>();
@@ -118,6 +122,27 @@ public final class SecurityManager extends java.lang.SecurityManager {
         return null;
     }
 
+    private void checkAudioPermission(Permission perm) throws IzouSoundPermissionException {
+        if (!(perm instanceof AudioPermission)) {
+            return;
+        }
+        ClassLoader classLoader = getCurrentClassLoader();
+
+        if (classLoader == null) {
+            return;
+        }
+
+        IzouPluginClassLoader izouClassLoader;
+        if (classLoader instanceof IzouPluginClassLoader) {
+            izouClassLoader = (IzouPluginClassLoader) classLoader;
+        } else {
+            return;
+        }
+
+        String addOnID = izouClassLoader.getPluginDescriptor().getPluginId();
+        permissionManager.getAudioPermissionModule().checkPermission(addOnID);
+    }
+
     /**
      * Checks if the permission {@code perm} is a {@link SocketPermission} and if so checks if the addOn has socket
      * connections properly enabled, else throws a {@link SecurityException}. If the permission is not a
@@ -126,7 +151,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
      * @param perm the permission to check
      * @throws SecurityException thrown if the permission is not granted
      */
-    private void checkSocketPermission(Permission perm) throws SecurityException {
+    private void checkSocketPermission(Permission perm) throws IzouSocketPermissionException {
         if (!(perm instanceof SocketPermission)) {
             return;
         }
@@ -149,19 +174,8 @@ public final class SecurityManager extends java.lang.SecurityManager {
             }
         }
 
-        Properties addOnProperties = izouClassLoader.getPluginDescriptor().getAddOnProperties();
-
-        boolean canConnect = false;
-        try {
-            canConnect = addOnProperties.get("socket_connection").equals("true")
-                    && !addOnProperties.get("socket_usage_descripton").equals("null");
-        } catch (NullPointerException e) {
-            throwException(perm.getName());
-        }
-
-        if (!canConnect) {
-            throwException(perm.getName());
-        }
+        String addOnID = izouClassLoader.getPluginDescriptor().getPluginId();
+        permissionManager.getSocketPermissionModule().checkPermission(addOnID);
     }
 
     /**
@@ -309,6 +323,15 @@ public final class SecurityManager extends java.lang.SecurityManager {
         throw (SecurityException) exception;
     }
 
+    /**
+     * Gets the {@link PermissionManager} in Izou
+     *
+     * @return the permission manager in Izou
+     */
+    public PermissionManager getPermissionManager() {
+        return permissionManager;
+    }
+
     @Override
     public void checkPermission(Permission perm) {
         if (checkForSecureAccess()) {
@@ -316,6 +339,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
         }
         checkFilePermission(perm);
         checkSocketPermission(perm);
+        checkAudioPermission(perm);
     }
 
     @Override

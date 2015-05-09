@@ -15,7 +15,7 @@ package org.intellimate.izou.security.exceptions;
  *     SecurityException is.
  * </p>
  */
-public class IzouPermissionException extends Exception {
+public class IzouPermissionException extends SecurityException {
 
     /**
      * Creates a new IzouPermissionException

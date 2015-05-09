@@ -2,48 +2,23 @@ package org.intellimate.izou.security;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
+import org.intellimate.izou.security.exceptions.IzouSoundPermissionException;
 
 /**
- * The IzouSoundPermissionManager manages conflicts between addOns regarding audio output. For example if two AddOns
+ * The SoundPermissionManager manages conflicts between addOns regarding audio output. For example if two AddOns
  * want to play music, then the IzouSoundPermissionManager will decide who gets to play it.
  */
-public final class SoundPermissionModule extends PermissionModule {
-    private final List<String> registeredAddOns;
+public final class AudioPermissionModule extends PermissionModule {
     private String currentPlaybackID;
     private boolean isPlaying;
     private final Logger logger = LogManager.getLogger(this.getClass());
 
-
     /**
-     * Creates a new instance of IzouSoundPermissionManager
+     * Creates a new instance of SoundPermissionManager
      */
-    public SoundPermissionModule() {
-        registeredAddOns = new ArrayList<>();
+    public AudioPermissionModule() {
         currentPlaybackID = null;
         isPlaying = false;
-    }
-
-    /**
-     * Adds an addOn to the registered addOns list. Only addOns on that list can request to play sound
-     *
-     * @param addOnID the ID of the addOn to add
-     */
-    public void registerAddOn(String addOnID) {
-        registeredAddOns.add(addOnID);
-    }
-
-    /**
-     * Checks if an addOn is registered to request audio playback
-     *
-     * @param addOnID the id of the addOn to check
-     * @return true if the addOn is registered to request audio playback, else false
-     */
-    public boolean isRegistered(String addOnID) {
-        return registeredAddOns.contains(addOnID);
     }
 
     /**
@@ -84,5 +59,13 @@ public final class SoundPermissionModule extends PermissionModule {
         }
 
         return false;
+    }
+
+    @Override
+    public void checkPermission(String addOnID) throws IzouSoundPermissionException {
+        if (!isRegistered(addOnID) || !isPlaying || !sha3(addOnID).equals(currentPlaybackID)) {
+            throw new IzouSoundPermissionException("Audio Permission Denied: " + addOnID + "is not registered to play "
+                    + "audio or there is already audio being played.");
+        }
     }
 }

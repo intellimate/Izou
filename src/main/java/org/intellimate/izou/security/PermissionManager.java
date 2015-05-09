@@ -1,10 +1,5 @@
 package org.intellimate.izou.security;
 
-import java.security.Permission;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
 /**
  * The PermissionManager handles all permission conflicts within Izou. For example, if two addOns want to play music at
  * the same time, the PermissionManager will interfere and decide who gets the play the music. The PermissionManager
@@ -13,10 +8,11 @@ import java.util.List;
  */
 public final class PermissionManager {
     private static boolean exists = false;
-    private HashMap<String, List<PermissionModule>> permissionModules;
+    private final AudioPermissionModule audioPermissionModule;
+    private final SocketPermissionModule socketPermissionModule;
 
     /**
-     * Creates an SecureAccess. There can only be one single SecureAccess, so calling this method twice
+     * Creates an PermissionManager. There can only be one single PermissionManager, so calling this method twice
      * will cause an illegal access exception.
      *
      * @return an IzouSecurityManager
@@ -33,7 +29,7 @@ public final class PermissionManager {
     }
 
     /**
-     * Creates a new SecureAccess instance if and only if none has been created yet
+     * Creates a new PermissionManager instance if and only if none has been created yet
      *
      * @throws IllegalAccessException thrown if this method is called more than once
      */
@@ -42,42 +38,25 @@ public final class PermissionManager {
             throw new IllegalAccessException("Cannot create more than one instance of PermissionManager");
         }
 
-        permissionModules = new HashMap<>();
+        audioPermissionModule = new AudioPermissionModule();
+        socketPermissionModule = new SocketPermissionModule();
     }
 
     /**
-     * Registers a permission module with the permission manager.
+     * Gets the AudioPermissionModule
      *
-     * @param sdkVersion the sdk version of the permission module
-     * @param module the permission module to register
+     * @return the AudioPermissionModule
      */
-    public void registerPermissionModule(String sdkVersion, PermissionModule module) {
-        if (permissionModules.get(sdkVersion) == null) {
-            List<PermissionModule> modules = new ArrayList<>();
-            modules.add(module);
-            permissionModules.put(sdkVersion, modules);
-        } else {
-            permissionModules.get(sdkVersion).add(module);
-        }
+    public AudioPermissionModule getAudioPermissionModule() {
+        return audioPermissionModule;
     }
 
     /**
-     * Checks if the given permission {@code permission} is somewhere allowed in the permission
-     * @param sdkVersion
-     * @param permission
-     * @return
+     * Gets the SocketPermissionModule
+     *
+     * @return the SocketPermissionModule
      */
-    boolean checkSDKPermissions(String sdkVersion, Permission permission) {
-        List<PermissionModule> modules = permissionModules.get(sdkVersion);
-        if (modules == null) {
-            return false;
-        }
-
-        boolean allowed = false;
-        for (PermissionModule module : modules) {
-            allowed = module.checkPermission(permission);
-        }
-
-        return allowed;
+    public SocketPermissionModule getSocketPermissionModule() {
+        return socketPermissionModule;
     }
 }

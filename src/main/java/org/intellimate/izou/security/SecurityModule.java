@@ -8,17 +8,16 @@ import org.bouncycastle.util.encoders.Hex;
 import java.io.UnsupportedEncodingException;
 
 /**
- * The PermissionManager manages conflicts between addOns. For example if two AddOns want to play music, then the
- * PermissionManager will sort out this conflict. It manages intra-izou problems, that means it does not worry about
- * general system security. That is what the {@link SecurityManager} does.
+ * SecurityModule implements basic security-relevant functions like hash functions or encryption and decryption
+ * functions.
  */
 public abstract class SecurityModule {
     private final Logger logger = LogManager.getLogger(this.getClass());
 
     /**
-     * Applies SHA-256 hash function on the {@code input} string
+     * Applies SHA-3 hash function on the {@code input} string
      *
-     * @param input the string to apply to SHA-256 hash on
+     * @param input the string to apply to SHA-3 hash on
      * @return the hashed input string
      */
     protected String sha3(String input) {
