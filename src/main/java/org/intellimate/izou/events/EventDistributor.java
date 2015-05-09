@@ -191,7 +191,7 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
         while(!stop) {
             try {
                 EventModel<?> event = events.take();
-                debug("EventFired: " + event.getID() + " from " + event.getSource().getID());
+                debug("EventFired: " + event.toString() + " from " + event.getSource().getID());
                 if (checkEventsControllers(event)) {
                     List<ResourceModel> resourceList = getMain().getResourceManager().generateResources(event);
                     event.addResources(resourceList);
