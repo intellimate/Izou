@@ -4,7 +4,7 @@ A digital companion
 Intro goes here
 
 ###Usage
-Getting started with Izou is not that easy, but we will do our best to make it as easy as possible. To get Izou up and running, just follow the directions in the **Getting Started** section. 
+Getting started with Izou is not that difficult, just follow the directions in the **Getting Started** section. 
 
 Izou was built to run on the Raspberry Pi and that is why we will give you everything you need to know to get Izou up and running on one. Yet as Izou is written in java, it can run on any java-enabled platform. That means we will not elaborate much on how to set up Izou on any other platform but the Raspberry Pi, but it should be pretty straight forward. The basic steps are the same. 
 
