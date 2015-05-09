@@ -323,10 +323,10 @@ public final class SecurityManager extends java.lang.SecurityManager {
      * @param argument what the exception is about (Access denied to (argument goes here))
      */
     private void throwException(String argument) {
-        Exception exception =  new SecurityException("Access denied to " + argument);
+        SecurityException exception =  new SecurityException("Access denied to " + argument);
         Class[] classStack = getClassContext();
         secureAccess.getBreachHandler().handleBreach(exception, classStack);
-        throw (SecurityException) exception;
+        throw exception;
     }
 
     /**
