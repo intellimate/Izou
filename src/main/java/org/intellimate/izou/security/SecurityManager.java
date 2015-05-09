@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.intellimate.izou.security.exceptions.IzouSocketPermissionException;
 import org.intellimate.izou.security.exceptions.IzouSoundPermissionException;
+import org.intellimate.izou.support.SystemMail;
 import org.intellimate.izou.system.file.FileSystemManager;
 import ro.fortsoft.pf4j.IzouPluginClassLoader;
 
@@ -36,18 +37,20 @@ public final class SecurityManager extends java.lang.SecurityManager {
     private final String allowedWriteFileTypesRegex;
     private final SecureAccess secureAccess;
     private final PermissionManager permissionManager;
+    private final SystemMail systemMail;
     private final Logger logger = LogManager.getLogger(this.getClass());
 
     /**
      * Creates a SecurityManager. There can only be one single SecurityManager, so calling this method twice
      * will cause an illegal access exception.
      *
+     * @param systemMail the system mail object in order to send e-mails to owner in case of emergency
      * @return a SecurityManager from Izou
      * @throws IllegalAccessException thrown if this method is called more than once
      */
-    public static SecurityManager createSecurityManager() throws IllegalAccessException {
+    public static SecurityManager createSecurityManager(SystemMail systemMail) throws IllegalAccessException {
         if (!exists) {
-            SecurityManager securityManager = new SecurityManager();
+            SecurityManager securityManager = new SecurityManager(systemMail);
             exists = true;
             return  securityManager;
         }
@@ -57,16 +60,19 @@ public final class SecurityManager extends java.lang.SecurityManager {
 
     /**
      * Creates a new IzouSecurityManager instance
+     *
+     * @param systemMail the system mail object in order to send e-mails to owner in case of emergency
      */
-    private SecurityManager() throws IllegalAccessException {
+    private SecurityManager(SystemMail systemMail) throws IllegalAccessException {
         super();
         if (exists) {
             throw new IllegalAccessException("Cannot create more than one instance of IzouSecurityManager");
         }
+        this.systemMail = systemMail;
 
         SecureAccess tempSecureAccess = null;
         try {
-            tempSecureAccess = SecureAccess.createSecureAccess();
+            tempSecureAccess = SecureAccess.createSecureAccess(systemMail);
         } catch (IllegalAccessException e) {
             logger.fatal("Unable to create a SecureAccess object because Izou might be under attack. "
                     + "Exiting now.", e);

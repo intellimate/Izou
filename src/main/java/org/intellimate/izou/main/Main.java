@@ -10,6 +10,7 @@ import org.intellimate.izou.events.LocalEventManager;
 import org.intellimate.izou.output.OutputManager;
 import org.intellimate.izou.resource.ResourceManager;
 import org.intellimate.izou.security.SecurityManager;
+import org.intellimate.izou.support.SystemMail;
 import org.intellimate.izou.system.SystemInitializer;
 import org.intellimate.izou.system.file.FileManager;
 import org.intellimate.izou.system.file.FilePublisher;
@@ -43,6 +44,7 @@ public class Main {
     private final ThreadPoolManager threadPoolManager;
     private final SecurityManager securityManager;
     private final SystemInitializer systemInitializer;
+    private final SystemMail systemMail;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     /**
@@ -106,6 +108,15 @@ public class Main {
          }
          fileLogger.debug("Done initializing JavaFX ToolKit");
         }
+
+        // Create system mail
+        SystemMail mailTemp = null;
+        try {
+            mailTemp = SystemMail.createSystemMail();
+        } catch (IllegalAccessException e) {
+            fileLogger.fatal("Unable to create a system mail object");
+        }
+        systemMail = mailTemp;
 
         // Setting up file system
         FileSystemManager fileSystemManager = new FileSystemManager(this);

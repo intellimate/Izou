@@ -15,7 +15,7 @@ public final class PermissionManager {
      * Creates an PermissionManager. There can only be one single PermissionManager, so calling this method twice
      * will cause an illegal access exception.
      *
-     * @return an IzouSecurityManager
+     * @return an PermissionManager
      * @throws IllegalAccessException thrown if this method is called more than once
      */
     static PermissionManager createPermissionManager() throws IllegalAccessException {

@@ -5,7 +5,7 @@ import org.intellimate.izou.security.exceptions.IzouSocketPermissionException;
 /**
  * The SocketPermissionModule stores addOns that registered themselves to use socket connections.
  */
-public class SocketPermissionModule extends PermissionModule {
+public final class SocketPermissionModule extends PermissionModule {
     @Override
     public void checkPermission(String addOnID) throws IzouSocketPermissionException {
         if (!isRegistered(addOnID)) {

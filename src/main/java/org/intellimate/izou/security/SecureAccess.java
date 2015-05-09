@@ -2,6 +2,7 @@ package org.intellimate.izou.security;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.intellimate.izou.support.SystemMail;
 
 import java.io.File;
 
@@ -13,18 +14,20 @@ import java.io.File;
 final class SecureAccess {
     private static boolean exists = false;
     private final SecurityBreachHandler breachHandler;
+    private final SystemMail systemMail;
     private final Logger logger = LogManager.getLogger(this.getClass());
 
     /**
      * Creates an SecureAccess. There can only be one single SecureAccess, so calling this method twice
      * will cause an illegal access exception.
      *
-     * @return an IzouSecurityManager
+     * @param systemMail the system mail object in order to send e-mails to owner in case of emergency
+     * @return a SecureAccess object
      * @throws IllegalAccessException thrown if this method is called more than once
      */
-    static SecureAccess createSecureAccess() throws IllegalAccessException {
+    static SecureAccess createSecureAccess(SystemMail systemMail) throws IllegalAccessException {
         if (!exists) {
-            SecureAccess secureAccess = new SecureAccess();
+            SecureAccess secureAccess = new SecureAccess(systemMail);
             exists = true;
             return secureAccess;
         }
@@ -37,14 +40,15 @@ final class SecureAccess {
      *
      * @throws IllegalAccessException thrown if this method is called more than once
      */
-    private SecureAccess() throws IllegalAccessException {
+    private SecureAccess(SystemMail systemMail) throws IllegalAccessException {
         if (exists) {
             throw new IllegalAccessException("Cannot create more than one instance of IzouSecurityManager");
         }
 
+        this.systemMail = systemMail;
         SecurityBreachHandler tempBreachHandler = null;
         try {
-            tempBreachHandler = SecurityBreachHandler.createBreachHandler("intellimate.izou@gmail.com");
+            tempBreachHandler = SecurityBreachHandler.createBreachHandler(systemMail, "intellimate.izou@gmail.com");
         } catch (IllegalAccessException e) {
             logger.fatal("Unable to create a SecurityBreachHandler because Izou might be under attack. "
                     + "Exiting now.", e);

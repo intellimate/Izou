@@ -14,20 +14,43 @@ import javax.mail.internet.MimeMultipart;
 import java.util.Properties;
 
 /**
- * The Mail class can be used to send emails from the izou system to preferably the owner of the system in order to
- * alert him about issues in Izou.
+ * The SystemMail class can be used to send emails from the Izou to preferably the owner of the Izou in order
+ * to alert him about issues regarding Izou.
  * <p>
  *     It is meant to serve as an emergency communication, and not as a way to send general information. To do that you
  *     can use the available addOns.
  * </p>
  */
-public class Mail {
+public class SystemMail {
+    private static boolean exists = false;
     private final Logger logger = LogManager.getLogger(this.getClass());
 
     /**
-     * Creates a new Mail object
+     * Creates a SystemMail. There can only be one single SystemMail, so calling this method twice
+     * will cause an illegal access exception.
+     *
+     * @return a Mail object
+     * @throws IllegalAccessException thrown if this method is called more than once
      */
-    public Mail() {
+    public static SystemMail createSystemMail() throws IllegalAccessException {
+        if (!exists) {
+            SystemMail permissionManager = new SystemMail();
+            exists = true;
+            return permissionManager;
+        }
+
+        throw new IllegalAccessException("Cannot create more than one instance of Mail");
+    }
+
+    /**
+     * Creates a new SystemMail instance if and only if none has been created yet
+     *
+     * @throws IllegalAccessException thrown if this method is called more than once
+     */
+    private SystemMail() throws IllegalAccessException {
+        if (exists) {
+            throw new IllegalAccessException("Cannot create more than one instance of Mail");
+        }
     }
 
     /**
