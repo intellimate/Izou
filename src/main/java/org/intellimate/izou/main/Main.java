@@ -9,7 +9,7 @@ import org.intellimate.izou.events.EventDistributor;
 import org.intellimate.izou.events.LocalEventManager;
 import org.intellimate.izou.output.OutputManager;
 import org.intellimate.izou.resource.ResourceManager;
-import org.intellimate.izou.security.IzouSecurityManager;
+import org.intellimate.izou.security.SecurityManager;
 import org.intellimate.izou.system.SystemInitializer;
 import org.intellimate.izou.system.file.FileManager;
 import org.intellimate.izou.system.file.FilePublisher;
@@ -41,7 +41,7 @@ public class Main {
     private final FilePublisher filePublisher;
     private final IzouLogger izouLogger;
     private final ThreadPoolManager threadPoolManager;
-    private final IzouSecurityManager securityManager;
+    private final SecurityManager securityManager;
     private final SystemInitializer systemInitializer;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
@@ -116,9 +116,9 @@ public class Main {
         }
 
         // Starting security manager
-        IzouSecurityManager securityManagerTemp;
+        SecurityManager securityManagerTemp;
         try {
-            securityManagerTemp = IzouSecurityManager.createSecurityManager();
+            securityManagerTemp = SecurityManager.createSecurityManager();
         } catch (IllegalAccessException e) {
             securityManagerTemp = null;
             fileLogger.fatal("Security manager already exists", e);

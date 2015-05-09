@@ -11,7 +11,7 @@ import java.util.List;
  * The IzouSoundPermissionManager manages conflicts between addOns regarding audio output. For example if two AddOns
  * want to play music, then the IzouSoundPermissionManager will decide who gets to play it.
  */
-public class IzouSoundPermissionManager extends SecurityModule {
+public final class SoundPermissionModule extends PermissionModule {
     private final List<String> registeredAddOns;
     private String currentPlaybackID;
     private boolean isPlaying;
@@ -21,7 +21,7 @@ public class IzouSoundPermissionManager extends SecurityModule {
     /**
      * Creates a new instance of IzouSoundPermissionManager
      */
-    public IzouSoundPermissionManager() {
+    public SoundPermissionModule() {
         registeredAddOns = new ArrayList<>();
         currentPlaybackID = null;
         isPlaying = false;
@@ -47,7 +47,7 @@ public class IzouSoundPermissionManager extends SecurityModule {
     }
 
     /**
-     * Requests permission to play sound, if the permission is granted, the {@link IzouSecurityManager} will let the
+     * Requests permission to play sound, if the permission is granted, the {@link SecurityManager} will let the
      * addOn with {@code addOnID} play sound, else it will block it.
      * <p>
      * There is always ONLY ONE permission that is given out to an addOn, (first come, first serve) and if the
@@ -61,11 +61,7 @@ public class IzouSoundPermissionManager extends SecurityModule {
      */
     public boolean requestPlaybackPermission(String addOnID) {
         if (!isPlaying) {
-            try {
-                currentPlaybackID = sha3(addOnID);
-            } catch (NoSuchAlgorithmException e) {
-                logger.error("Did not find sha256 algorithm", e);
-            }
+            currentPlaybackID = sha3(addOnID);
             isPlaying = true;
             return true;
         }
@@ -81,15 +77,12 @@ public class IzouSoundPermissionManager extends SecurityModule {
      * @return true if the permission was returned successfully, else false
      */
     public boolean returnPlaybackPermission(String addOnID) {
-        try {
-            if (sha3(addOnID).equals(currentPlaybackID)) {
-                isPlaying = false;
-                currentPlaybackID = null;
-                return true;
-            }
-        } catch (NoSuchAlgorithmException e) {
-            logger.error("Did not find sha256 algorithm", e);
+        if (sha3(addOnID).equals(currentPlaybackID)) {
+            isPlaying = false;
+            currentPlaybackID = null;
+            return true;
         }
+
         return false;
     }
 }

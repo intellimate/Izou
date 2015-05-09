@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
  * The IzouSecurityManager gives permission to all entitled components of Izou to execute or access files or commands.
  * It also blocks access to all potentially insecure actions.
  */
-public class IzouSecurityManager extends SecurityManager {
+public final class SecurityManager extends java.lang.SecurityManager {
     private static boolean exists = false;
     private boolean exitPermission = false;
     private final List<String> allowedReadDirectories;
@@ -36,15 +36,15 @@ public class IzouSecurityManager extends SecurityManager {
     private final Logger logger = LogManager.getLogger(this.getClass());
 
     /**
-     * Creates an IzouSecurityManager. There can only be one single IzouSecurityManager, so calling this method twice
+     * Creates a SecurityManager. There can only be one single SecurityManager, so calling this method twice
      * will cause an illegal access exception.
      *
-     * @return an IzouSecurityManager
+     * @return a SecurityManager from Izou
      * @throws IllegalAccessException thrown if this method is called more than once
      */
-    public static IzouSecurityManager createSecurityManager() throws IllegalAccessException {
+    public static SecurityManager createSecurityManager() throws IllegalAccessException {
         if (!exists) {
-            IzouSecurityManager securityManager = new IzouSecurityManager();
+            SecurityManager securityManager = new SecurityManager();
             exists = true;
             return  securityManager;
         }
@@ -55,7 +55,7 @@ public class IzouSecurityManager extends SecurityManager {
     /**
      * Creates a new IzouSecurityManager instance
      */
-    private IzouSecurityManager() throws IllegalAccessException {
+    private SecurityManager() throws IllegalAccessException {
         super();
         if (exists) {
             throw new IllegalAccessException("Cannot create more than one instance of IzouSecurityManager");

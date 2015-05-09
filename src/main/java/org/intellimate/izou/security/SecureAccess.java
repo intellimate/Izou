@@ -6,11 +6,11 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 
 /**
- * SecureAccess allows the {@link IzouSecurityManager} to access anything with full permission. If the secure access
+ * SecureAccess allows the {@link SecurityManager} to access anything with full permission. If the secure access
  * class is found in the current class context, any action will be allowed. However, only the security manager has
  * access to this class
  */
-class SecureAccess {
+final class SecureAccess {
     private static boolean exists = false;
     private final SecurityBreachHandler breachHandler;
     private final Logger logger = LogManager.getLogger(this.getClass());

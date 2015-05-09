@@ -9,7 +9,7 @@ import org.intellimate.izou.system.file.FileSystemManager;
  * The SecurityBreachHandler takes action when a security exception is thrown in the security manager to deal with the
  * attempted security breach.
  */
-class SecurityBreachHandler {
+final class SecurityBreachHandler {
     private final Logger logger = LogManager.getLogger(this.getClass());
     private final String toAddress;
     private static boolean exists = false;
@@ -22,7 +22,7 @@ class SecurityBreachHandler {
      * @return an SecurityBreachHandler
      * @throws IllegalAccessException thrown if this method is called more than once
      */
-    public static SecurityBreachHandler createBreachHandler(String toAddress) throws IllegalAccessException {
+    static SecurityBreachHandler createBreachHandler(String toAddress) throws IllegalAccessException {
         if (!exists) {
             SecurityBreachHandler breachHandler = new SecurityBreachHandler(toAddress);
             exists = true;
@@ -45,7 +45,7 @@ class SecurityBreachHandler {
      * @param e The exception that will be thrown
      * @param classesStack the current class stack
      */
-    public void handleBreach(Exception e, Class[] classesStack) {
+    void handleBreach(Exception e, Class[] classesStack) {
         String subject = "Izou Security Exception: " + e.getMessage();
         sendErrorReport(subject, e, classesStack);
     }
