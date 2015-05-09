@@ -95,7 +95,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
         // start (active/resolved) the plugins
         try {
             pluginManager.startPlugins();
-        } catch (Exception e) {
+        } catch (Exception | NoClassDefFoundError e) {
             error("Error while trying to start the PF4J-Plugins", e);
         }
         try {
