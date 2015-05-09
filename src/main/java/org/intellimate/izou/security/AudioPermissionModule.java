@@ -5,8 +5,8 @@ import org.apache.logging.log4j.Logger;
 import org.intellimate.izou.security.exceptions.IzouSoundPermissionException;
 
 /**
- * The SoundPermissionManager manages conflicts between addOns regarding audio output. For example if two AddOns
- * want to play music, then the IzouSoundPermissionManager will decide who gets to play it.
+ * The AudioPermissionModule handles conflicts between addOns regarding audio output. For example if two AddOns
+ * want to play music, then the AudioPermissionModule will decide who gets to play it.
  */
 public final class AudioPermissionModule extends PermissionModule {
     private String currentPlaybackID;
@@ -14,7 +14,7 @@ public final class AudioPermissionModule extends PermissionModule {
     private final Logger logger = LogManager.getLogger(this.getClass());
 
     /**
-     * Creates a new instance of SoundPermissionManager
+     * Creates a new instance of AudioPermissionModule
      */
     public AudioPermissionModule() {
         currentPlaybackID = null;
