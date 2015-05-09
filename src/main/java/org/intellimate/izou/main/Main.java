@@ -40,7 +40,7 @@ public class Main {
     private final FilePublisher filePublisher;
     private final IzouLogger izouLogger;
     private final ThreadPoolManager threadPoolManager;
-    private final IzouSecurityManager securityManager;
+    //private final IzouSecurityManager securityManager;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     /**
@@ -112,20 +112,20 @@ public class Main {
         }
 
         // Starting security manager
-        IzouSecurityManager securityManagerTemp;
-        try {
-            securityManagerTemp = IzouSecurityManager.createSecurityManager();
-        } catch (IllegalAccessException e) {
-            securityManagerTemp = null;
-            fileLogger.fatal("Security manager already exists", e);
-        }
-        securityManager = securityManagerTemp;
-        try {
-            System.setSecurityManager(securityManager);
-            System.setProperty("java.security.policy", "./izou_policy.policy");
-        } catch (SecurityException e) {
-            fileLogger.fatal("Security manager already exists", e);
-        }
+        //IzouSecurityManager securityManagerTemp;
+        //try {
+        //    securityManagerTemp = IzouSecurityManager.createSecurityManager();
+        //} catch (IllegalAccessException e) {
+        //    securityManagerTemp = null;
+        //    fileLogger.fatal("Security manager already exists", e);
+        //}
+        //securityManager = securityManagerTemp;
+        //try {
+        //    System.setSecurityManager(securityManager);
+        //    System.setProperty("java.security.policy", "./izou_policy.policy");
+        //} catch (SecurityException e) {
+        //    fileLogger.fatal("Security manager already exists", e);
+        //}
 
         threadPoolManager = new ThreadPoolManager(this);
         izouLogger = new IzouLogger();
