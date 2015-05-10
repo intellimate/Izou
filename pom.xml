@@ -72,10 +72,20 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+            <version>1.4</version>
+        </dependency>
+        <dependency>
             <groupId>org.intellimate.izou</groupId>
             <artifactId>pf4j</artifactId>
             <version>1.6</version>
             <!-- we are releasing a jar with dependencies, version changes require a new Izou Version -->
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>1.52</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>

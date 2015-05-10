@@ -5,6 +5,7 @@ import org.intellimate.izou.IdentifiableSet;
 import org.intellimate.izou.IzouModule;
 import org.intellimate.izou.identification.IllegalIDException;
 import org.intellimate.izou.main.Main;
+import org.intellimate.izou.security.exceptions.IzouPermissionException;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,9 +17,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @SuppressWarnings("WeakerAccess")
 public class ActivatorManager extends IzouModule implements AddonThreadPoolUser {
+    private final int MAX_CRASH = 100;
+    private final int MAX_PERMISSION_DENIED = 2;
     IdentifiableSet<ActivatorModel> activatorModels = new IdentifiableSet<>();
     ConcurrentHashMap<ActivatorModel, CompletableFuture> futures = new ConcurrentHashMap<>();
     ConcurrentHashMap<ActivatorModel, AtomicInteger> crashCounter = new ConcurrentHashMap<>();
+    ConcurrentHashMap<ActivatorModel, AtomicInteger> permissionDeniedCounter = new ConcurrentHashMap<>();
     
     public ActivatorManager(Main main) {
         super(main);
@@ -32,6 +36,7 @@ public class ActivatorManager extends IzouModule implements AddonThreadPoolUser 
     public void addActivator(ActivatorModel activatorModel) throws IllegalIDException {
         activatorModels.add(activatorModel);
         crashCounter.put(activatorModel, new AtomicInteger(0));
+        permissionDeniedCounter.put(activatorModel, new AtomicInteger(0));
         submitActivator(activatorModel);
     }
 
@@ -46,6 +51,7 @@ public class ActivatorManager extends IzouModule implements AddonThreadPoolUser 
             remove.cancel(true);
         }
         crashCounter.remove(activatorModel);
+        permissionDeniedCounter.remove(activatorModel);
     }
 
     /**
@@ -57,21 +63,44 @@ public class ActivatorManager extends IzouModule implements AddonThreadPoolUser 
             try {
                 return activatorModel.call();
             } catch (Throwable e) {
+                if (e instanceof IzouPermissionException) {
+                    error("Activator: " + activatorModel.getID() + " was denied permission.", e);
+
+                    // Return -1 if permission was denied by a permission module, in this case restart 2 times
+                    return -1;
+                } else if (e instanceof SecurityException) {
+                    error("Activator: " + activatorModel.getID() + " was denied access.", e);
+
+                    // Return 0 if access was denied by the security manager, in this case, do not restart
+                    return 0;
+                }
                 error("Activator: " + activatorModel.getID() + " crashed", e);
-                return true;
+
+                // Return 1 if the addOn did not crash because of security reasons, restart 100 times
+                return 1;
             }
         }).thenAccept(restart -> {
-            if (restart != null && !restart) {
+            if (restart != null && restart.equals(0)) {
                 debug("Activator: " + activatorModel.getID() + " returned false, will not restart");
-            } else {
+            } else if (restart != null && restart.equals(-1)) {
                 error("Activator: " + activatorModel.getID() + " returned not true");
-                if (crashCounter.get(activatorModel).get() < 100) {
+                if (permissionDeniedCounter.get(activatorModel).get() < MAX_PERMISSION_DENIED) {
+                    error("Until now activator: " + activatorModel.getID() + " was restarted: " +
+                            permissionDeniedCounter.get(activatorModel).get() + " times, attempting restart.");
+                    permissionDeniedCounter.get(activatorModel).incrementAndGet();
+                    submitActivator(activatorModel);
+                } else {
+                    error("Activator: " + activatorModel.getID() + " reached permission based restarting limit with " +
+                            permissionDeniedCounter.get(activatorModel).get() + " restarts.");
+                }
+            } else {
+                if (crashCounter.get(activatorModel).get() < MAX_CRASH) {
                     error("Until now activator: " + activatorModel.getID() + " was restarted: " +
                             crashCounter.get(activatorModel).get() + " times, attempting restart.");
                     crashCounter.get(activatorModel).incrementAndGet();
                     submitActivator(activatorModel);
                 } else {
-                    error("Activator: " + activatorModel.getID() + " reached restarting limit with " +
+                    error("Activator: " + activatorModel.getID() + " reached crash based restarting limit with " +
                             crashCounter.get(activatorModel).get() + " restarts.");
                 }
             }

@@ -1,5 +1,7 @@
 package org.intellimate.izou.system.file;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.intellimate.izou.IzouModule;
 import org.intellimate.izou.main.Main;
 
@@ -14,6 +16,7 @@ public class FileSystemManager extends IzouModule {
     /**
      * Path to log files
      */
+    private static final Logger logger = LogManager.getLogger(FileSystemManager.class);
     public static final String LOG_PATH = "." + File.separator + "logs" + File.separator;
     public static final String FULL_WORKING_DIRECTORY;
     static {
@@ -21,7 +24,7 @@ public class FileSystemManager extends IzouModule {
         try {
             path = new File(".").getCanonicalPath();
         } catch (IOException e) {
-            // do whatever you have to do
+            logger.error("Unable to get current canonical path", e);
         }
         FULL_WORKING_DIRECTORY = path;
     }

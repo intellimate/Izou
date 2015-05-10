@@ -9,7 +9,9 @@ import org.intellimate.izou.events.EventDistributor;
 import org.intellimate.izou.events.LocalEventManager;
 import org.intellimate.izou.output.OutputManager;
 import org.intellimate.izou.resource.ResourceManager;
-import org.intellimate.izou.security.IzouSecurityManager;
+import org.intellimate.izou.security.SecurityManager;
+import org.intellimate.izou.support.SystemMail;
+import org.intellimate.izou.system.SystemInitializer;
 import org.intellimate.izou.system.file.FileManager;
 import org.intellimate.izou.system.file.FilePublisher;
 import org.intellimate.izou.system.file.FileSystemManager;
@@ -40,7 +42,9 @@ public class Main {
     private final FilePublisher filePublisher;
     private final IzouLogger izouLogger;
     private final ThreadPoolManager threadPoolManager;
-    private final IzouSecurityManager securityManager;
+    private final SecurityManager securityManager;
+    private final SystemInitializer systemInitializer;
+    private final SystemMail systemMail;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     /**
@@ -80,6 +84,8 @@ public class Main {
      * @param addOns a List of AddOns to run
      */
     public Main(List<AddOnModel> addOns, boolean javaFX, boolean debug) {
+        systemInitializer = new SystemInitializer();
+        systemInitializer.initSystem();
         // Starts javaFX if desired
         if (javaFX) {
          jfxToolKitInit = new AtomicBoolean(false);
@@ -103,6 +109,15 @@ public class Main {
          fileLogger.debug("Done initializing JavaFX ToolKit");
         }
 
+        // Create system mail
+        SystemMail mailTemp = null;
+        try {
+            mailTemp = SystemMail.createSystemMail();
+        } catch (IllegalAccessException e) {
+            fileLogger.fatal("Unable to create a system mail object");
+        }
+        systemMail = mailTemp;
+
         // Setting up file system
         FileSystemManager fileSystemManager = new FileSystemManager(this);
         try {
@@ -112,9 +127,9 @@ public class Main {
         }
 
         // Starting security manager
-        IzouSecurityManager securityManagerTemp;
+        SecurityManager securityManagerTemp;
         try {
-            securityManagerTemp = IzouSecurityManager.createSecurityManager();
+            securityManagerTemp = SecurityManager.createSecurityManager(systemMail);
         } catch (IllegalAccessException e) {
             securityManagerTemp = null;
             fileLogger.fatal("Security manager already exists", e);
@@ -122,7 +137,6 @@ public class Main {
         securityManager = securityManagerTemp;
         try {
             System.setSecurityManager(securityManager);
-            System.setProperty("java.security.policy", "./izou_policy.policy");
         } catch (SecurityException e) {
             fileLogger.fatal("Security manager already exists", e);
         }
