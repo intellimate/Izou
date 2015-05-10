@@ -7,6 +7,7 @@ import org.intellimate.izou.security.exceptions.IzouSoundPermissionException;
 import org.intellimate.izou.support.SystemMail;
 import org.intellimate.izou.system.file.FileSystemManager;
 import ro.fortsoft.pf4j.IzouPluginClassLoader;
+import ro.fortsoft.pf4j.PluginDescriptor;
 
 import javax.sound.sampled.AudioPermission;
 import java.io.File;
@@ -119,8 +120,8 @@ public final class SecurityManager extends java.lang.SecurityManager {
     private ClassLoader getCurrentClassLoader() {
         Class[] classes = getClassContext();
         for (int i = classes.length - 1; i >= 0; i--) {
-            if (classes[i].getClassLoader() instanceof IzouPluginClassLoader
-                    && !classes[i].getName().toLowerCase().contains("org.intellimate.izou.sdk")) { //TODO: exchange ID with PF4J Constant
+            if (classes[i].getClassLoader() instanceof IzouPluginClassLoader && !classes[i].getName().toLowerCase()
+                    .contains(IzouPluginClassLoader.PLUGIN_PACKAGE_PREFIX_IZOU_SDK)) {
                 return classes[i].getClassLoader();
             }
         }
@@ -146,7 +147,25 @@ public final class SecurityManager extends java.lang.SecurityManager {
         }
 
         String addOnID = izouClassLoader.getPluginDescriptor().getPluginId();
-        permissionManager.getAudioPermissionModule().checkPermission(addOnID);
+        boolean accessGranted = permissionManager.getAudioPermissionModule().checkPermission(addOnID);
+
+        if (!accessGranted) {
+            PluginDescriptor descriptor = izouClassLoader.getPluginDescriptor();
+            boolean canConnect = false;
+            try {
+                canConnect = descriptor.getAddOnProperties().get("audio_output").equals("true")
+                        && !descriptor.getAddOnProperties().get("audio_usage_descripton").equals("null");
+            } catch (NullPointerException e) {
+                // Do nothing that is fine, it will just skip ahead and not register
+            }
+
+            if (canConnect) {
+                permissionManager.getAudioPermissionModule().registerAddOn(descriptor.getPluginId());
+            } else {
+                throw new IzouSoundPermissionException("Audio Permission Denied: " + addOnID + "is not registered to "
+                        + "play audio or there is already audio being played.");
+            }
+        }
     }
 
     /**
@@ -181,7 +200,26 @@ public final class SecurityManager extends java.lang.SecurityManager {
         }
 
         String addOnID = izouClassLoader.getPluginDescriptor().getPluginId();
-        permissionManager.getSocketPermissionModule().checkPermission(addOnID);
+        boolean accessGranted = permissionManager.getSocketPermissionModule().checkPermission(addOnID);
+
+        if (!accessGranted) {
+            PluginDescriptor descriptor = izouClassLoader.getPluginDescriptor();
+            boolean canConnect = false;
+            try {
+                canConnect = descriptor.getAddOnProperties().get("socket_connection").equals("true")
+                        && !descriptor.getAddOnProperties().get("socket_usage_descripton").equals("null");
+            } catch (NullPointerException e) {
+                // Do nothing that is fine, it will just skip ahead and not register
+            }
+
+            if (canConnect) {
+                permissionManager.getSocketPermissionModule().registerAddOn(descriptor.getPluginId());
+            } else {
+                throw new IzouSocketPermissionException("Socket Permission Denied: " + addOnID + "is not registered to "
+                        + "use socket connections, please add the required information to the addon_config.properties "
+                        + "file of your addOn.");
+            }
+        }
     }
 
     /**

@@ -62,10 +62,8 @@ public final class AudioPermissionModule extends PermissionModule {
     }
 
     @Override
-    public void checkPermission(String addOnID) throws IzouSoundPermissionException {
-        if (!isRegistered(addOnID) || !isPlaying || !sha3(addOnID).equals(currentPlaybackID)) {
-            throw new IzouSoundPermissionException("Audio Permission Denied: " + addOnID + "is not registered to play "
-                    + "audio or there is already audio being played.");
-        }
+    public boolean checkPermission(String addOnID) throws IzouSoundPermissionException {
+        return !(!isRegistered(addOnID) || !isPlaying || !sha3(addOnID).equals(currentPlaybackID));
+
     }
 }

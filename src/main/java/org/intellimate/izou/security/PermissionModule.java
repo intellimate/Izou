@@ -50,6 +50,7 @@ public abstract class PermissionModule extends SecurityModule {
      *
      * @param addOnID the ID of the addOn to check for
      * @throws IzouPermissionException thrown if the addOn is not allowed to access its requested service
+     * @return true if the addOn gets the permission granted, else false
      */
-    public abstract void checkPermission(String addOnID) throws IzouPermissionException;
+    public abstract boolean checkPermission(String addOnID) throws IzouPermissionException;
 }
