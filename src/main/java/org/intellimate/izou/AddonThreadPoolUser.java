@@ -71,7 +71,8 @@ public interface AddonThreadPoolUser extends MainProvider {
         if(notFinished) {
             futures.stream()
                     .filter(future -> !future.isDone())
-                    .peek(future -> error(future.toString()+ " timed out"))
+                    .peek(future -> error(future.toString()+ " timed out",
+                            new Exception(future.toString() + " timed out")))
                     .forEach(future -> future.cancel(true));
         }
         return futures.stream()

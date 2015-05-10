@@ -76,6 +76,13 @@ public final class Identification {
     }
 
     @Override
+    public String toString() {
+        return "Identification{" +
+                "identifiable=" + identifiable +
+                '}';
+    }
+
+    @Override
     public int hashCode() {
         return identifiable != null ? identifiable.hashCode() : 0;
     }

@@ -87,19 +87,24 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
             error("Error while trying to get the lib-directory" + e);
             return new ArrayList<>();
         }
-
+        debug("searching for addons in: " + libFile.toString());
         PluginManager pluginManager = new DefaultPluginManager(libFile);
         // load the plugins
+        debug("loading plugins");
         pluginManager.loadPlugins();
+        debug("loaded: " + pluginManager.getPlugins().toString());
 
         // start (active/resolved) the plugins
         try {
+            debug("starting plugins");
             pluginManager.startPlugins();
-        } catch (Exception e) {
+        } catch (Exception | NoClassDefFoundError e) {
             error("Error while trying to start the PF4J-Plugins", e);
         }
         try {
+            debug("retrieving addons from the plugins");
             List<AddOnModel> addOns = pluginManager.getExtensions(AddOnModel.class);
+            debug("retrieved: " + addOns.toString());
             addOns.stream()
                     .filter(addOn -> addOn.getClass().getClassLoader() instanceof IzouPluginClassLoader)
                     .forEach(addOn -> {

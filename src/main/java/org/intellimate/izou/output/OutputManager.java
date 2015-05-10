@@ -166,7 +166,7 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
     }
 
     private void processOutputPlugin(EventModel event, OutputPluginModel outputPlugin) {
-        debug("processing outputPlugin: " + outputPlugin.getID() + "for event: " + event.toString());
+        debug("processing outputPlugin: " + outputPlugin.getID() + " for event: " + event.getDescriptors().toString());
        final Lock lock = new ReentrantLock();
        final Condition processing = lock.newCondition();
 
