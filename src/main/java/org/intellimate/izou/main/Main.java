@@ -9,7 +9,6 @@ import org.intellimate.izou.events.EventDistributor;
 import org.intellimate.izou.events.LocalEventManager;
 import org.intellimate.izou.output.OutputManager;
 import org.intellimate.izou.resource.ResourceManager;
-import org.intellimate.izou.security.IzouSecurityManager;
 import org.intellimate.izou.system.file.FileManager;
 import org.intellimate.izou.system.file.FilePublisher;
 import org.intellimate.izou.system.file.FileSystemManager;
@@ -80,6 +79,8 @@ public class Main {
      * @param addOns a List of AddOns to run
      */
     public Main(List<AddOnModel> addOns, boolean javaFX, boolean debug) {
+        fileLogger.debug("starting izou");
+        fileLogger.debug("initializing");
         // Starts javaFX if desired
         if (javaFX) {
          jfxToolKitInit = new AtomicBoolean(false);
@@ -145,14 +146,20 @@ public class Main {
             fileLogger.fatal("Failed to create the FileManager", e);
         }
         fileManager = fileManagerTemp;
-
+        fileLogger.debug("finished initializing");
+        fileLogger.debug("adding addons");
         addOnManager = new AddOnManager(this);
         if (addOns != null && !debug) {
+            fileLogger.debug("adding addons from the parameter without registering");
             addOnManager.addAddOnsWithoutRegistering(addOns);
         } else if(addOns != null) {
+            fileLogger.debug("adding and registering addons from the parameter");
             addOnManager.addAndRegisterAddOns(addOns);
         }
-        if (!debug) addOnManager.retrieveAndRegisterAddOns();
+        if (!debug) {
+            fileLogger.debug("retrieving addons & registering them");
+            addOnManager.retrieveAndRegisterAddOns();
+        }
     }
 
     public static void main(String[] args) {
