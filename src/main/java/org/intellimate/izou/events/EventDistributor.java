@@ -157,10 +157,6 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
      * @return true if the event should be fired
      */
     private boolean checkEventsControllers(EventModel event) {
-        //TODO: move to SDK
-        /*
-        if (event.getID().equals(EventImpl.NOTIFICATION))
-            return true;*/
         boolean shouldExecute = true;
         for (EventsControllerModel controller : eventsControllers) {
             if (!controller.controlEventDispatcher(event)) {
@@ -205,9 +201,9 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
                     List<CompletableFuture> futures = listenersTemp.stream()
                             .map(eventListener -> submit(() -> eventListener.eventFired(event)))
                             .collect(Collectors.toList());
-
+                    EventModel<?> finalizedEvent = event.finalizeEvent();
                     timeOut(futures, 1000);
-                    getMain().getOutputManager().passDataToOutputPlugins(event);
+                    getMain().getOutputManager().passDataToOutputPlugins(finalizedEvent);
                 }
             } catch (InterruptedException e) {
                 log.warn(e);
