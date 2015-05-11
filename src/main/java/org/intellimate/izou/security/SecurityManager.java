@@ -151,15 +151,15 @@ public final class SecurityManager extends java.lang.SecurityManager {
 
         if (!accessGranted) {
             PluginDescriptor descriptor = izouClassLoader.getPluginDescriptor();
-            boolean canConnect = false;
+            boolean canPlay = false;
             try {
-                canConnect = descriptor.getAddOnProperties().get("audio_output").equals("true")
+                canPlay = descriptor.getAddOnProperties().get("audio_output").equals("true")
                         && !descriptor.getAddOnProperties().get("audio_usage_descripton").equals("null");
             } catch (NullPointerException e) {
                 // Do nothing that is fine, it will just skip ahead and not register
             }
 
-            if (canConnect) {
+            if (canPlay) {
                 permissionManager.getAudioPermissionModule().registerAddOn(descriptor.getPluginId());
             } else {
                 throw new IzouSoundPermissionException("Audio Permission Denied: " + addOnID + "is not registered to "
