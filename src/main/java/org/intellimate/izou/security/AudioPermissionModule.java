@@ -52,6 +52,7 @@ public final class AudioPermissionModule extends PermissionModule {
      * it is responsible for calling the {@link #returnPlaybackPermission(String)} method to signal it is done. Only
      * then can the next addOn play sound again.
      * </p>
+     *
      * @param addOnID the addOn id of the addOn that is requesting permission to play sound
      * @return true if the permission was granted, false if it was denied
      */
