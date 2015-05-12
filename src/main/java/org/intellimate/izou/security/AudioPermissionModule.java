@@ -4,6 +4,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.intellimate.izou.security.exceptions.IzouSoundPermissionException;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * The AudioPermissionModule handles conflicts between addOns regarding audio output. For example if two AddOns
  * want to play music, then the AudioPermissionModule will decide who gets to play it.
@@ -11,6 +14,7 @@ import org.intellimate.izou.security.exceptions.IzouSoundPermissionException;
 public final class AudioPermissionModule extends PermissionModule {
     private String currentPlaybackID;
     private boolean isPlaying;
+    private List<String> shortTermPermissions;
     private final Logger logger = LogManager.getLogger(this.getClass());
 
     /**
@@ -19,6 +23,23 @@ public final class AudioPermissionModule extends PermissionModule {
     public AudioPermissionModule() {
         currentPlaybackID = null;
         isPlaying = false;
+        shortTermPermissions = new ArrayList<>();
+    }
+
+    /**
+     * This method grants a one time audio permission for short sounds
+     * <p>
+     * If you want to play a short sound over another sound (for example a status tone or something else) you can use
+     * this method to get permission to play audio over currently playing audio. This method however does not pause the
+     * currently playing audio, it does not interfere with it at all. This method should only be used for sounds shorter
+     * than 30 seconds, however there is no way right now to stop your sound after 30 seconds, so please do not abuse
+     * this. You still need to be registered to play audio in order to use this method
+     * </p>
+     * @param addOnID the ID of the addOn you would like to grant short term audio permissison to
+     * @return true if it has been granted, else false
+     */
+    public boolean requestShortTermPermission(String addOnID) {
+        return isRegistered(addOnID) && shortTermPermissions.add(sha3(addOnID));
     }
 
     /**
@@ -63,6 +84,13 @@ public final class AudioPermissionModule extends PermissionModule {
 
     @Override
     public boolean checkPermission(String addOnID) throws IzouSoundPermissionException {
+        for (String hash : shortTermPermissions) {
+            if (hash.equals(sha3(addOnID))) {
+                shortTermPermissions.remove(hash);
+                return true;
+            }
+        }
+
         return !(!isRegistered(addOnID) || !isPlaying || !sha3(addOnID).equals(currentPlaybackID));
 
     }
