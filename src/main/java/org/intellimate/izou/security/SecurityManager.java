@@ -101,7 +101,6 @@ public final class SecurityManager extends java.lang.SecurityManager {
         forbiddenProperties.add("jdk.lang.process.launchmechanism");
 
         allowedReadDirectories.add(workingDir);
-        allowedReadDirectories.add("/Users/julianbrendl/Desktop");
         allowedReadDirectories.addAll(Arrays.asList(System.getProperty("java.ext.dirs").split(":")));
         allowedReadDirectories.add(System.getProperty("java.home"));
         allowedReadDirectories.add(System.getProperty("user.home"));
