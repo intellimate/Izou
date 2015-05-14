@@ -87,7 +87,8 @@ public final class SecurityManager extends java.lang.SecurityManager {
         allowedWriteDirectories = new ArrayList<>();
         forbiddenProperties = new ArrayList<>();
         allowedSocketConnections = new ArrayList<>();
-        allowedReadFileTypesRegex = "(txt|properties|xml|class|json|zip|ds_store|mf|jar|idx|log|dylib|mp3|dylib|certs)";
+        allowedReadFileTypesRegex = "(txt|properties|xml|class|json|zip|ds_store|mf|jar|idx|log|dylib|mp3|dylib|certs| "
+                + " so)";
         allowedWriteFileTypesRegex = "(txt|properties|xml|json|idx|log)";
         init();
     }
