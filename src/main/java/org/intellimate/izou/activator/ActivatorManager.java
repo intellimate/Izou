@@ -67,22 +67,22 @@ public class ActivatorManager extends IzouModule implements AddonThreadPoolUser 
                     error("Activator: " + activatorModel.getID() + " was denied permission.", e);
 
                     // Return -1 if permission was denied by a permission module, in this case restart 2 times
-                    return -1;
+                    return null;
                 } else if (e instanceof SecurityException) {
                     error("Activator: " + activatorModel.getID() + " was denied access.", e);
 
                     // Return 0 if access was denied by the security manager, in this case, do not restart
-                    return 0;
+                    return null;
                 }
                 error("Activator: " + activatorModel.getID() + " crashed", e);
 
                 // Return 1 if the addOn did not crash because of security reasons, restart 100 times
-                return 1;
+                return true;
             }
         }).thenAccept(restart -> {
-            if (restart != null && restart.equals(0)) {
+            if (restart != null && restart.equals(false)) {
                 debug("Activator: " + activatorModel.getID() + " returned false, will not restart");
-            } else if (restart != null && restart.equals(-1)) {
+            } else if (restart == null) {
                 error("Activator: " + activatorModel.getID() + " returned not true");
                 if (permissionDeniedCounter.get(activatorModel).get() < MAX_PERMISSION_DENIED) {
                     error("Until now activator: " + activatorModel.getID() + " was restarted: " +
