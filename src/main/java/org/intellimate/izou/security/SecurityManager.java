@@ -19,6 +19,7 @@ import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -84,6 +85,8 @@ public final class SecurityManager extends java.lang.SecurityManager {
         secureAccess = tempSecureAccess;
         allowedReadDirectories = new ArrayList<>();
         allowedReadFiles = new ArrayList<>();
+        allowedReadFiles.add("/dev/random");
+        allowedReadFiles.add("/dev/urandom");
         allowedWriteDirectories = new ArrayList<>();
         forbiddenProperties = new ArrayList<>();
         allowedSocketConnections = new ArrayList<>();
@@ -112,7 +115,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
     }
 
     /**
-     * Gets the current class loader through reflection, that is the class loader to which the class belongs that
+     * Gets the current class loader, that is the class loader to which the class belongs that
      * triggered the security manager call
      *
      * @return the current class loader
@@ -129,10 +132,16 @@ public final class SecurityManager extends java.lang.SecurityManager {
         return null;
     }
 
-    private void checkAudioPermission(Permission perm) throws IzouSoundPermissionException {
-        if (!(perm instanceof AudioPermission)) {
+    /**
+     * this method first performs some basic checks and then performs the specific check
+     * @param t permission or file
+     * @param specific the specific check
+     */
+    private <T> void check(T t, BiConsumer<T, IzouPluginClassLoader> specific) {
+        if (!shouldCheck()) {
             return;
         }
+
         ClassLoader classLoader = getCurrentClassLoader();
 
         if (classLoader == null) {
@@ -143,6 +152,25 @@ public final class SecurityManager extends java.lang.SecurityManager {
         if (classLoader instanceof IzouPluginClassLoader) {
             izouClassLoader = (IzouPluginClassLoader) classLoader;
         } else {
+            return;
+        }
+
+        specific.accept(t, izouClassLoader);
+    }
+
+    /**
+     * performs some basic checks to determine whether to check the permission
+     * @return true if should be checked, false if not
+     */
+    private boolean shouldCheck() {
+        if (checkForSecureAccess()) {
+            return false;
+        }
+        return true;
+    }
+
+    private void checkAudioPermission(Permission perm, IzouPluginClassLoader izouClassLoader) throws IzouSoundPermissionException {
+        if (!(perm instanceof AudioPermission)) {
             return;
         }
 
@@ -176,20 +204,8 @@ public final class SecurityManager extends java.lang.SecurityManager {
      * @param perm the permission to check
      * @throws SecurityException thrown if the permission is not granted
      */
-    private void checkSocketPermission(Permission perm) throws IzouSocketPermissionException {
+    private void checkSocketPermission(Permission perm, IzouPluginClassLoader izouClassLoader) throws IzouSocketPermissionException {
         if (!(perm instanceof SocketPermission)) {
-            return;
-        }
-        ClassLoader classLoader = getCurrentClassLoader();
-
-        if (classLoader == null) {
-            return;
-        }
-
-        IzouPluginClassLoader izouClassLoader;
-        if (classLoader instanceof IzouPluginClassLoader) {
-            izouClassLoader = (IzouPluginClassLoader) classLoader;
-        } else {
             return;
         }
 
@@ -230,7 +246,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
      * @param perm the permission to check
      * @throws SecurityException thrown if the permission is not granted
      */
-    private void checkFilePermission(Permission perm) throws SecurityException {
+    private void checkFilePermission(Permission perm, IzouPluginClassLoader izouClassLoader) throws SecurityException {
         if (!(perm instanceof FilePermission)) {
             return;
         }
@@ -239,38 +255,32 @@ public final class SecurityManager extends java.lang.SecurityManager {
         String canonicalAction =  perm.getActions().intern().toLowerCase();
 
         if (canonicalName.contains("all files") || canonicalAction.equals("execute")) {
-            throwException(perm.getName());
+            throw getException(perm.getName());
         }
-
-        if (canonicalAction.equals("read") && fileReadCheck(canonicalName)) {
-            return;
-        } else if (fileWriteCheck(canonicalName)) {
-            // If read or execute permission is not asked, default to write permission check, which grants less rights
-            return;
+        if (canonicalAction.equals("read")) {
+            fileReadCheck(canonicalName);
         }
-
-        throwException(perm.getName());
+        fileWriteCheck(canonicalName);
     }
 
     /**
      * Determines if the file at the given file path is safe to read from in all aspects, if so returns true, else false
      *
      * @param filePath the path to the file to read from
-     * @return true if the filepath is considered safe to read from, else false
      */
-    private boolean fileReadCheck(String filePath) {
+    private void fileReadCheck(String filePath) {
         File potentialFile = new File(filePath);
         String canonicalPath;
         try {
             canonicalPath = potentialFile.getCanonicalPath();
         } catch (IOException e) {
             logger.error("Error getting canonical path", e);
-            return false;
+            throw getException(filePath);
         }
 
         for (String file : allowedReadFiles) {
             if (canonicalPath.contains(file)) {
-                return true;
+                return;
             }
         }
 
@@ -282,7 +292,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
             }
         }
         if (!allowedDirectory) {
-            return false;
+            throw getException(filePath);
         }
 
         String[] pathParts = canonicalPath.split(File.separator);
@@ -293,28 +303,28 @@ public final class SecurityManager extends java.lang.SecurityManager {
 
         if (!secureAccess.checkForExistingFileOrDirectory(canonicalPath)
                 || secureAccess.checkForDirectory(canonicalPath)) {
-            return true;
+            return;
         }
 
         Pattern pattern = Pattern.compile(allowedReadFileTypesRegex);
         Matcher matcher = pattern.matcher(fileExtension);
-        return matcher.matches() || fileExtension.equals(lastPathPart);
+        if (!matcher.matches() || fileExtension.equals(lastPathPart))
+            throw getException(filePath);
     }
 
     /**
      * Determines if the file at the given file path is safe to write to in all aspects, if so returns true, else false
      *
      * @param filePath the path to the file to write to
-     * @return true if the filepath is considered safe to write to, else false
      */
-    private boolean fileWriteCheck(String filePath) {
+    private void fileWriteCheck(String filePath) {
         File potentialFile = new File(filePath);
         String canonicalPath;
         try {
             canonicalPath = potentialFile.getCanonicalPath();
         } catch (IOException e) {
             logger.error("Error getting canonical path", e);
-            return false;
+            throw getException(filePath);
         }
 
         boolean allowedDirectory = false;
@@ -325,7 +335,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
             }
         }
         if (!allowedDirectory) {
-            return false;
+            throw getException(filePath);
         }
 
         String[] pathParts = canonicalPath.split("\\.");
@@ -333,12 +343,13 @@ public final class SecurityManager extends java.lang.SecurityManager {
 
         if (!secureAccess.checkForExistingFileOrDirectory(canonicalPath)
                 || secureAccess.checkForDirectory(canonicalPath)) {
-            return true;
+            return;
         }
 
         Pattern pattern = Pattern.compile(allowedWriteFileTypesRegex);
         Matcher matcher = pattern.matcher(fileExtension);
-        return matcher.matches();
+        if (!matcher.matches())
+            throw getException(filePath);
     }
 
     /**
@@ -360,35 +371,26 @@ public final class SecurityManager extends java.lang.SecurityManager {
      * Throws an exception with the argument of {@code argument}
      * @param argument what the exception is about (Access denied to (argument goes here))
      */
-    private void throwException(String argument) {
+    private SecurityException getException(String argument) {
         SecurityException exception =  new SecurityException("Access denied to " + argument);
         Class[] classStack = getClassContext();
         secureAccess.getBreachHandler().handleBreach(exception, classStack);
-        throw exception;
-    }
-
-    /**
-     * Gets the {@link PermissionManager} in Izou
-     *
-     * @return the permission manager in Izou
-     */
-    public PermissionManager getPermissionManager() {
-        return permissionManager;
+        return exception;
     }
 
     @Override
     public void checkPermission(Permission perm) {
-        if (checkForSecureAccess()) {
-            return;
-        }
-        checkFilePermission(perm);
-        checkSocketPermission(perm);
-        checkAudioPermission(perm);
+        BiConsumer<Permission, IzouPluginClassLoader> checker = (permi, loader) -> {
+            if (permi instanceof FilePermission) checkFilePermission(permi, loader);
+            else if (permi instanceof SocketPermission) checkSocketPermission(permi, loader);
+            else checkAudioPermission(permi, loader);
+        };
+        check(perm, checker);
     }
 
     @Override
     public void checkPropertyAccess(String key) {
-        if (checkForSecureAccess()) {
+        if (!shouldCheck()) {
             return;
         }
         String canonicalKey = key.intern().toLowerCase();
@@ -402,22 +404,22 @@ public final class SecurityManager extends java.lang.SecurityManager {
         }
 
         if (!allowedProperty) {
-            throwException(key);
+            throw getException(key);
         }
     }
 
     @Override
     public void checkExec(String cmd) {
-        if (checkForSecureAccess()) {
+        if (!shouldCheck()) {
             return;
         }
-        throwException(cmd);
+        throw getException(cmd);
     }
 
     @Override
     public void checkExit(int status) {
         if (!exitPermission && !checkForSecureAccess()) {
-            throwException("exit");
+            throw getException("exit");
         } else {
             secureAccess.exitIzou();
         }
@@ -425,36 +427,32 @@ public final class SecurityManager extends java.lang.SecurityManager {
 
     @Override
     public void checkDelete(String file) {
-        if (checkForSecureAccess()) {
+        if (!shouldCheck()) {
             return;
         }
     }
 
     @Override
     public void checkAccess(ThreadGroup g) {
-        if (checkForSecureAccess()) {
+        if (!shouldCheck()) {
             return;
         }
     }
 
     @Override
     public void checkAccess(Thread t) {
-        if (checkForSecureAccess()) {
+        if (!shouldCheck()) {
             return;
         }
     }
 
     @Override
     public void checkRead(String file) {
-        if (!checkForSecureAccess() && !fileReadCheck(file)) {
-            throwException(file);
-        }
+        check(file, (file1, loader) -> fileReadCheck(file1));
     }
 
     @Override
     public void checkWrite(FileDescriptor fd) {
-        if (!checkForSecureAccess() && !fileWriteCheck(fd.toString())) {
-            throwException(fd.toString());
-        }
+        check(fd.toString(), (file, loader) -> fileWriteCheck(file));
     }
 }

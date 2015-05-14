@@ -1,19 +1,17 @@
 package org.intellimate.izou.addon;
 
+import org.apache.logging.log4j.Level;
 import org.intellimate.izou.AddonThreadPoolUser;
 import org.intellimate.izou.IdentifiableSet;
 import org.intellimate.izou.IzouModule;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.system.Context;
 import org.intellimate.izou.system.context.ContextImplementation;
-import org.apache.logging.log4j.Level;
 import ro.fortsoft.pf4j.DefaultPluginManager;
 import ro.fortsoft.pf4j.IzouPluginClassLoader;
 import ro.fortsoft.pf4j.PluginManager;
 import ro.fortsoft.pf4j.PluginWrapper;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -79,16 +77,8 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
      * @return the retrieved addOns
      */
     private List<AddOnModel> loadAddOns() {
-        File libFile;
-        try {
-            String libPath = new File(".").getCanonicalPath() + File.separator + "lib";
-            libFile = new File(libPath);
-        } catch (IOException e) {
-            error("Error while trying to get the lib-directory" + e);
-            return new ArrayList<>();
-        }
-        debug("searching for addons in: " + libFile.toString());
-        PluginManager pluginManager = new DefaultPluginManager(libFile);
+        debug("searching for addons in: " + getMain().getFileSystemManager().getLibLocation());
+        PluginManager pluginManager = new DefaultPluginManager(getMain().getFileSystemManager().getLibLocation());
         // load the plugins
         debug("loading plugins");
         pluginManager.loadPlugins();

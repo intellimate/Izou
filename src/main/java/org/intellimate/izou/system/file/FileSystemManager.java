@@ -7,6 +7,7 @@ import org.intellimate.izou.main.Main;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 
 /**
@@ -29,10 +30,11 @@ public class FileSystemManager extends IzouModule {
         FULL_WORKING_DIRECTORY = path;
     }
 
-    /**
-     * path to the proterties files
-     */
-    public static final String PROPERTIES_PATH = "." + File.separator + "properties" + File.separator;
+    private final File izouLocation;
+    private final File libLocation;
+    private final File resourceLocation;
+    private final File propertiesLocation;
+    private final File logsLocation;
 
     /**
      * creates a file system manager
@@ -40,6 +42,24 @@ public class FileSystemManager extends IzouModule {
      */
     public FileSystemManager(Main main) {
         super(main);
+        try {
+            File baseLocation;
+            if (Boolean.getBoolean("debug")) {
+                baseLocation = new File(".");
+                izouLocation = baseLocation;
+            } else {
+                baseLocation = new File(FileSystemManager.class.getProtectionDomain()
+                        .getCodeSource().getLocation().toURI().getPath());
+                izouLocation = baseLocation.getParentFile();
+            }
+            libLocation = new File(izouLocation.toString() + File.pathSeparator + "lib");
+            resourceLocation = new File(izouLocation.toString() + File.pathSeparator + "resources");
+            propertiesLocation = new File(izouLocation.toString() + File.pathSeparator + "properties");
+            logsLocation = new File(izouLocation.toString() + File.pathSeparator + "logs");
+        } catch (URISyntaxException e) {
+            error("unable to create the Izou-file system");
+            throw new IllegalStateException("unable to create the Izou-file system");
+        }
     }
 
     /**
@@ -60,10 +80,8 @@ public class FileSystemManager extends IzouModule {
      * @throws IOException could throw IOException because working with files
      */
     private void createLibFolder() throws IOException {
-        String libPath = new File(".").getCanonicalPath() + File.separator + "lib";
-        File libFile = new File(libPath);
-        if(!Files.exists(libFile.toPath()))
-            Files.createDirectories(libFile.toPath());
+        if(!Files.exists(libLocation.toPath()))
+            Files.createDirectories(libLocation.toPath());
     }
 
     /**
@@ -72,10 +90,8 @@ public class FileSystemManager extends IzouModule {
      * @throws IOException could throw IOException because working with files
      */
     private void createResourceFolder() throws IOException {
-        String resourcePath = new File(".").getCanonicalPath() + File.separator + "resources";
-        File resourceFile = new File(resourcePath);
-        if(!Files.exists(resourceFile.toPath()))
-            Files.createDirectories(resourceFile.toPath());
+        if(!Files.exists(resourceLocation.toPath()))
+            Files.createDirectories(resourceLocation.toPath());
     }
 
     /**
@@ -84,10 +100,8 @@ public class FileSystemManager extends IzouModule {
      * @throws IOException could throw IOException because working with files
      */
     private void createPropertiesFolder() throws IOException {
-        String propertiesPath = new File(".").getCanonicalPath() + File.separator + "properties";
-        File propertiesDir = new File(propertiesPath);
-        if(!Files.exists(propertiesDir.toPath()))
-            Files.createDirectories(propertiesDir.toPath());
+        if(!Files.exists(propertiesLocation.toPath()))
+            Files.createDirectories(propertiesLocation.toPath());
     }
 
     /**
@@ -96,9 +110,27 @@ public class FileSystemManager extends IzouModule {
      * @throws IOException could throw IOException because working with files
      */
     private void createLogsFolder() throws IOException {
-        String logPath = new File(".").getCanonicalPath() + File.separator + "logs";
-        File logFile = new File(logPath);
-        if(!Files.exists(logFile.toPath()))
-            Files.createDirectories(logFile.toPath());
+        if(!Files.exists(logsLocation.toPath()))
+            Files.createDirectories(logsLocation.toPath());
+    }
+
+    public File getIzouLocation() {
+        return izouLocation;
+    }
+
+    public File getLibLocation() {
+        return libLocation;
+    }
+
+    public File getResourceLocation() {
+        return resourceLocation;
+    }
+
+    public File getPropertiesLocation() {
+        return propertiesLocation;
+    }
+
+    public File getLogsLocation() {
+        return logsLocation;
     }
 }

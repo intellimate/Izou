@@ -46,6 +46,7 @@ public class Main {
     private final SystemInitializer systemInitializer;
     private final SystemMail systemMail;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
+    private FileSystemManager fileSystemManager;
 
     /**
      * Creates a new Main instance with debugging enabled (doesn't search the lib-folder)
@@ -121,7 +122,7 @@ public class Main {
         systemMail = mailTemp;
 
         // Setting up file system
-        FileSystemManager fileSystemManager = new FileSystemManager(this);
+        this.fileSystemManager = new FileSystemManager(this);
         try {
             fileSystemManager.createIzouFileSystem();
         } catch (IOException e) {
@@ -224,5 +225,9 @@ public class Main {
 
     public IzouLogger getIzouLogger() {
         return izouLogger;
+    }
+
+    public FileSystemManager getFileSystemManager() {
+        return fileSystemManager;
     }
 }
