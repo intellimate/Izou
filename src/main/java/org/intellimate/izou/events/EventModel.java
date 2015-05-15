@@ -22,34 +22,36 @@ public interface EventModel<X extends EventModel> extends Identifiable {
     String getType();
 
     /**
-     * returns the Source of the Event, e.g. the object who fired it.
+     * Returns the source of the event, e.g. the object who fired it.
+     *
      * @return an identifiable
      */
     Identification getSource();
 
     /**
-     * returns all the Resources the Event currently has
+     * Returns all the resources the event currently has
+     *
      * @return an instance of ListResourceContainer
      */
     ListResourceProvider getListResourceContainer();
 
     /**
-     * adds a Resource to the Container
+     * adds a resource to the container
      * @param resource an instance of the resource to add
      * @return the resulting Event (which is the same instance)
      */
     X addResource(ResourceModel resource);
 
     /**
-     * adds a List of Resources to the Container
+     * adds a list of resources to the container
      * @param resources a list containing all the resources
      * @return the resulting Event (which is the same instance)
      */
     X addResources(List<ResourceModel> resources);
 
     /**
-     * returns a List containing all the Descriptors.
-     * @return a List containing the Descriptors
+     * returns a list containing all the descriptors.
+     * @return a list containing the descriptors
      */
     List<String> getDescriptors();
 
@@ -68,22 +70,22 @@ public interface EventModel<X extends EventModel> extends Identifiable {
     boolean removeDescriptor(String descriptor);
 
     /**
-     * returns the immutable (except the resources) Event
+     * returns the immutable (except the resources) event
      * @return the EventModel
      */
     EventModel<X> finalizeEvent();
 
     /**
-     * returns a List containing all the Descriptors and the type.
-     * @return a List containing the Descriptors
+     * returns a list containing all the descriptors and the type.
+     * @return a list containing the descriptors
      */
     List<String> getAllInformations();
 
     /**
      * returns whether the event contains the specific descriptor.
      * this method also checks whether it matches the type.
-     * @param descriptor a String with the ID of the Descriptor
-     * @return boolean when the Event contains the descriptor, false when not.
+     * @param descriptor a string with the ID of the descriptor
+     * @return boolean when the event contains the descriptor, false when not.
      */
     boolean containsDescriptor(String descriptor);
 
