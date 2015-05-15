@@ -2,6 +2,7 @@ package org.intellimate.izou.security;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.exceptions.IzouSocketPermissionException;
 import org.intellimate.izou.security.exceptions.IzouSoundPermissionException;
 import org.intellimate.izou.support.SystemMail;
@@ -33,7 +34,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
     private final List<String> allowedReadDirectories;
     private final List<String> allowedReadFiles;
     private final List<String> allowedSocketConnections;
-    private final List<String> allowedWriteDirectories;
+    private final List<File> allowedWriteDirectories;
     private final List<String> forbiddenProperties;
     private final String allowedReadFileTypesRegex;
     private final String allowedWriteFileTypesRegex;
@@ -47,12 +48,13 @@ public final class SecurityManager extends java.lang.SecurityManager {
      * will cause an illegal access exception.
      *
      * @param systemMail the system mail object in order to send e-mails to owner in case of emergency
+     * @param main a reference to the main instance
      * @return a SecurityManager from Izou
      * @throws IllegalAccessException thrown if this method is called more than once
      */
-    public static SecurityManager createSecurityManager(SystemMail systemMail) throws IllegalAccessException {
+    public static SecurityManager createSecurityManager(SystemMail systemMail, Main main) throws IllegalAccessException {
         if (!exists) {
-            SecurityManager securityManager = new SecurityManager(systemMail);
+            SecurityManager securityManager = new SecurityManager(systemMail, main);
             exists = true;
             return  securityManager;
         }
@@ -64,8 +66,9 @@ public final class SecurityManager extends java.lang.SecurityManager {
      * Creates a new IzouSecurityManager instance
      *
      * @param systemMail the system mail object in order to send e-mails to owner in case of emergency
+     * @param main the instance of main
      */
-    private SecurityManager(SystemMail systemMail) throws IllegalAccessException {
+    private SecurityManager(SystemMail systemMail, Main main) throws IllegalAccessException {
         super();
         if (exists) {
             throw new IllegalAccessException("Cannot create more than one instance of IzouSecurityManager");
@@ -93,13 +96,14 @@ public final class SecurityManager extends java.lang.SecurityManager {
         allowedReadFileTypesRegex = "(txt|properties|xml|class|json|zip|ds_store|mf|jar|idx|log|dylib|mp3|dylib|certs|"
                 + "so)";
         allowedWriteFileTypesRegex = "(txt|properties|xml|json|idx|log)";
-        init();
+        init(main);
     }
 
     /**
      * Initializes some aspects of the security manager (giving default permissions etc.)
+     * @param main an instance of main
      */
-    private void init() {
+    private void init(Main main) {
         String workingDir = FileSystemManager.FULL_WORKING_DIRECTORY;
 
         forbiddenProperties.add("jdk.lang.process.launchmechanism");
@@ -111,7 +115,9 @@ public final class SecurityManager extends java.lang.SecurityManager {
         allowedSocketConnections.add(System.getProperty("host.name"));
         allowedSocketConnections.add("local");
         allowedSocketConnections.add("smtp");
-        allowedWriteDirectories.add(workingDir);
+        allowedWriteDirectories.add(main.getFileSystemManager().getLogsLocation());
+        allowedWriteDirectories.add(main.getFileSystemManager().getPropertiesLocation());
+        allowedWriteDirectories.add(main.getFileSystemManager().getResourceLocation());
     }
 
     /**
@@ -186,8 +192,8 @@ public final class SecurityManager extends java.lang.SecurityManager {
             } catch (NullPointerException e) {
                 // Do nothing that is fine, it will just skip ahead and not register
             }
-
             if (canPlay) {
+
                 permissionManager.getAudioPermissionModule().registerAddOn(descriptor.getPluginId());
             } else {
                 throw new IzouSoundPermissionException("Audio Permission Denied: " + addOnID + "is not registered to "

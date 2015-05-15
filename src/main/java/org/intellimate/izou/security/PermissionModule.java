@@ -1,9 +1,8 @@
 package org.intellimate.izou.security;
 
+import org.intellimate.izou.IdentifiableSet;
+import org.intellimate.izou.identification.Identifiable;
 import org.intellimate.izou.security.exceptions.IzouPermissionException;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A PermissionModule defines basic permissions in Izou. A permission in Izou is defined as service that is generally
@@ -17,40 +16,40 @@ import java.util.List;
  * </p>
  */
 public abstract class PermissionModule extends SecurityModule {
-    private final List<String> registeredAddOns;
+    private final IdentifiableSet<Identifiable> registeredAddOns;
 
     /**
      * Creates a new PermissionModule
      */
     PermissionModule() {
-        registeredAddOns = new ArrayList<>();
+        registeredAddOns = new IdentifiableSet<>();
     }
 
     /**
      * Adds an addOn to the registered addOns list for this PermissionModule
      *
-     * @param addOnID the ID of the addOn to add
+     * @param addon the Identifiable to add
      */
-    public void registerAddOn(String addOnID) {
-        registeredAddOns.add(addOnID);
+    public void registerAddOn(Identifiable addon) {
+        registeredAddOns.add(addon);
     }
 
     /**
      * Checks if an addOn is registered with this PermissionModule
      *
-     * @param addOnID the id of the addOn to check
+     * @param addon the identifiable to check
      * @return true if the addOn is registered, else false
      */
-    public boolean isRegistered(String addOnID) {
-        return registeredAddOns.contains(addOnID);
+    public boolean isRegistered(Identifiable addon) {
+        return registeredAddOns.contains(addon);
     }
 
     /**
      * Checks if the given addOn is allowed to access the requested service
      *
-     * @param addOnID the ID of the addOn to check for
+     * @param addon the identifiable to check
      * @throws IzouPermissionException thrown if the addOn is not allowed to access its requested service
      * @return true if the addOn gets the permission granted, else false
      */
-    public abstract boolean checkPermission(String addOnID) throws IzouPermissionException;
+    public abstract boolean checkPermission(Identifiable addon) throws IzouPermissionException;
 }

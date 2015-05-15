@@ -30,7 +30,8 @@ public class FileSystemManager extends IzouModule {
         FULL_WORKING_DIRECTORY = path;
     }
 
-    private final File izouLocation;
+    private final File izouParentLocation;
+    private final File izouJarLocation;
     private final File libLocation;
     private final File resourceLocation;
     private final File propertiesLocation;
@@ -43,19 +44,17 @@ public class FileSystemManager extends IzouModule {
     public FileSystemManager(Main main) {
         super(main);
         try {
-            File baseLocation;
+            izouJarLocation = new File(FileSystemManager.class.getProtectionDomain()
+                    .getCodeSource().getLocation().toURI().getPath());
             if (Boolean.getBoolean("debug")) {
-                baseLocation = new File(".");
-                izouLocation = baseLocation;
+                izouParentLocation = new File(".");
             } else {
-                baseLocation = new File(FileSystemManager.class.getProtectionDomain()
-                        .getCodeSource().getLocation().toURI().getPath());
-                izouLocation = baseLocation.getParentFile();
+                izouParentLocation = izouJarLocation.getParentFile();
             }
-            libLocation = new File(izouLocation.toString() + File.pathSeparator + "lib");
-            resourceLocation = new File(izouLocation.toString() + File.pathSeparator + "resources");
-            propertiesLocation = new File(izouLocation.toString() + File.pathSeparator + "properties");
-            logsLocation = new File(izouLocation.toString() + File.pathSeparator + "logs");
+            libLocation = new File(izouParentLocation.toString() + File.pathSeparator + "lib");
+            resourceLocation = new File(izouParentLocation.toString() + File.pathSeparator + "resources");
+            propertiesLocation = new File(izouParentLocation.toString() + File.pathSeparator + "properties");
+            logsLocation = new File(izouParentLocation.toString() + File.pathSeparator + "logs");
         } catch (URISyntaxException e) {
             error("unable to create the Izou-file system");
             throw new IllegalStateException("unable to create the Izou-file system");
@@ -114,8 +113,8 @@ public class FileSystemManager extends IzouModule {
             Files.createDirectories(logsLocation.toPath());
     }
 
-    public File getIzouLocation() {
-        return izouLocation;
+    public File getIzouParentLocation() {
+        return izouParentLocation;
     }
 
     public File getLibLocation() {
@@ -132,5 +131,9 @@ public class FileSystemManager extends IzouModule {
 
     public File getLogsLocation() {
         return logsLocation;
+    }
+
+    public File getIzouJarLocation() {
+        return izouJarLocation;
     }
 }

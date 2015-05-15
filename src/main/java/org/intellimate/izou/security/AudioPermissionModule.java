@@ -2,6 +2,9 @@ package org.intellimate.izou.security;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.intellimate.izou.IdentifiableSet;
+import org.intellimate.izou.addon.AddOnModel;
+import org.intellimate.izou.identification.Identifiable;
 import org.intellimate.izou.security.exceptions.IzouSoundPermissionException;
 
 import java.util.ArrayList;
@@ -12,9 +15,10 @@ import java.util.List;
  * want to play music, then the AudioPermissionModule will decide who gets to play it.
  */
 public final class AudioPermissionModule extends PermissionModule {
-    private String currentPlaybackID;
+    private Identifiable currentPlaybackID;
     private boolean isPlaying;
-    private List<String> shortTermPermissions;
+    private IdentifiableSet<AddOnModel> shortTermPermissions;
+    private IdentifiableSet<Addo>
     private final Logger logger = LogManager.getLogger(this.getClass());
 
     /**
@@ -23,7 +27,7 @@ public final class AudioPermissionModule extends PermissionModule {
     public AudioPermissionModule() {
         currentPlaybackID = null;
         isPlaying = false;
-        shortTermPermissions = new ArrayList<>();
+        shortTermPermissions = new IdentifiableSet<>();
     }
 
     /**
@@ -38,8 +42,8 @@ public final class AudioPermissionModule extends PermissionModule {
      * @param addOnID the ID of the addOn you would like to grant short term audio permissison to
      * @return true if it has been granted, else false
      */
-    public boolean requestShortTermPermission(String addOnID) {
-        return isRegistered(addOnID) && shortTermPermissions.add(sha3(addOnID));
+    public boolean requestShortTermPermission(AddOnModel addOnID) {
+        return isRegistered(addOnID) && shortTermPermissions.add(addOnID);
     }
 
     /**
@@ -53,12 +57,12 @@ public final class AudioPermissionModule extends PermissionModule {
      * then can the next addOn play sound again.
      * </p>
      *
-     * @param addOnID the addOn id of the addOn that is requesting permission to play sound
+     * @param addon the addOn that is requesting permission to play sound
      * @return true if the permission was granted, false if it was denied
      */
-    public boolean requestPlaybackPermission(String addOnID) {
+    public boolean requestPlaybackPermission(AddOnModel addon) {
         if (!isPlaying) {
-            currentPlaybackID = sha3(addOnID);
+            currentPlaybackID = addon;
             isPlaying = true;
             return true;
         }
@@ -73,7 +77,7 @@ public final class AudioPermissionModule extends PermissionModule {
      * @param addOnID the addOnID of the addOn requesting to return its audio permission
      * @return true if the permission was returned successfully, else false
      */
-    public boolean returnPlaybackPermission(String addOnID) {
+    public boolean returnPlaybackPermission(AddOnModel addon) {
         if (sha3(addOnID).equals(currentPlaybackID)) {
             isPlaying = false;
             currentPlaybackID = null;
@@ -85,6 +89,7 @@ public final class AudioPermissionModule extends PermissionModule {
 
     @Override
     public boolean checkPermission(String addOnID) throws IzouSoundPermissionException {
+
         for (String hash : shortTermPermissions) {
             if (hash.equals(sha3(addOnID))) {
                 shortTermPermissions.remove(hash);
