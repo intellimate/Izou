@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.intellimate.izou.security.exceptions.IzouSocketPermissionException;
 import org.intellimate.izou.security.exceptions.IzouSoundPermissionException;
+import org.intellimate.izou.security.storage.SecureStorage;
 import org.intellimate.izou.support.SystemMail;
 import org.intellimate.izou.system.file.FileSystemManager;
 import ro.fortsoft.pf4j.IzouPluginClassLoader;
@@ -38,6 +39,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
     private final String allowedWriteFileTypesRegex;
     private final SecureAccess secureAccess;
     private final PermissionManager permissionManager;
+    private final SecureStorage secureStorage;
     private final SystemMail systemMail;
     private final Logger logger = LogManager.getLogger(this.getClass());
 
@@ -82,6 +84,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
         }
         permissionManager = PermissionManager.createPermissionManager();
         secureAccess = tempSecureAccess;
+        secureStorage = SecureStorage.createSecureStorage();
         allowedReadDirectories = new ArrayList<>();
         allowedReadFiles = new ArrayList<>();
         allowedWriteDirectories = new ArrayList<>();

@@ -11,7 +11,7 @@ import java.io.UnsupportedEncodingException;
  * SecurityModule implements basic security-relevant functions like hash functions or encryption and decryption
  * functions.
  */
-public abstract class SecurityModule {
+public class SecurityModule {
     private final Logger logger = LogManager.getLogger(this.getClass());
 
     /**
@@ -20,7 +20,7 @@ public abstract class SecurityModule {
      * @param input the string to apply to SHA-3 hash on
      * @return the hashed input string
      */
-    protected String sha3(String input) {
+    public String sha3(String input) {
         String hash = "";
         try {
             SHA3.DigestSHA3 md = new SHA3.DigestSHA3(256);
