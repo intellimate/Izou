@@ -89,7 +89,14 @@ public final class SecurityManager extends java.lang.SecurityManager {
         }
         permissionManager = PermissionManager.createPermissionManager();
         secureAccess = tempSecureAccess;
-        secureStorage = SecureStorage.createSecureStorage();
+        SecureStorage tempSecureStorage = null;
+        try {
+            tempSecureStorage = SecureStorage.createSecureStorage();
+        } catch (Exception e) {
+            logger.fatal("An error occured during secure storage initializtion, quitting.", e);
+            secureAccess.exitIzou();
+        }
+        secureStorage = tempSecureStorage;
         allowedReadDirectories = new ArrayList<>();
         allowedReadFiles = new ArrayList<>();
         allowedWriteDirectories = new ArrayList<>();
@@ -373,7 +380,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
         Class[] classContext = getClassContext();
         for (Class clazz : classContext) {
             if (clazz.equals(SecureAccess.class) || clazz.equals(SecurityBreachHandler.class)
-                    || clazz.equals(SecurityModule.class)) {
+                    || clazz.equals(SecurityModule.class) || clazz.equals(SecureStorage.class)) {
                 return true;
             }
         }

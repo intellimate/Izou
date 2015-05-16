@@ -2,8 +2,17 @@ package org.intellimate.izou.security.storage;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.intellimate.izou.security.SecurityModule;
+import org.intellimate.izou.system.file.FileSystemManager;
 import ro.fortsoft.pf4j.PluginDescriptor;
 
+import javax.crypto.SecretKey;
+import java.io.*;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableEntryException;
+import java.security.cert.CertificateException;
 import java.util.HashMap;
 
 /**
@@ -43,12 +52,25 @@ public final class SecureStorage {
      *
      * @throws IllegalAccessException thrown if this method is called more than once
      */
-    private SecureStorage() throws IllegalAccessException {
+    private SecureStorage() throws IllegalAccessException, NullPointerException {
         if (exists) {
             throw new IllegalAccessException("Cannot create more than one instance of IzouSecurityManager");
         }
 
         containers = new HashMap<>();
+
+        SecretKey key = retrieveKey();
+
+        if (key == null) {
+            SecurityModule securityModule = new SecurityModule();
+            key = securityModule.generateKey();
+
+            if (key != null) {
+                storeKey(key);
+            } else {
+                throw new NullPointerException("Unable to create security key");
+            }
+        }
     }
 
     /**
@@ -70,5 +92,59 @@ public final class SecureStorage {
      */
     public SecureContainer retrieve(PluginDescriptor descriptor) {
         return containers.get(descriptor.getSecureID());
+    }
+
+    private SecretKey retrieveKey() {
+        SecretKey key = null;
+        try {
+            String workingDir = FileSystemManager.FULL_WORKING_DIRECTORY;
+            final String keyStoreFile = workingDir + File.separator + "system" + File.separator + "izou.keystore";
+            KeyStore keyStore = createKeyStore(keyStoreFile, "4b[X:+H4CS&avY<)");
+
+            KeyStore.PasswordProtection keyPassword = new KeyStore.PasswordProtection("Ev45j>eP}QTR?K9_".toCharArray());
+            KeyStore.Entry entry = keyStore.getEntry("izou_key", keyPassword);
+            key = ((KeyStore.SecretKeyEntry) entry).getSecretKey();
+        } catch(NullPointerException e) {
+            return null;
+        } catch (UnrecoverableEntryException | NoSuchAlgorithmException | KeyStoreException e) {
+            logger.error("Unable to retrieve key", e);
+        }
+
+        return key;
+    }
+
+    private void storeKey(SecretKey key) {
+        String workingDir = FileSystemManager.FULL_WORKING_DIRECTORY;
+        final String keyStoreFile = workingDir + File.separator + "system" + File.separator + "izou.keystore";
+        KeyStore keyStore = createKeyStore(keyStoreFile, "4b[X:+H4CS&avY<)");
+
+
+        try {
+            KeyStore.SecretKeyEntry keyStoreEntry = new KeyStore.SecretKeyEntry(key);
+            KeyStore.PasswordProtection keyPassword = new KeyStore.PasswordProtection("Ev45j>eP}QTR?K9_".toCharArray());
+            keyStore.setEntry("izou_key", keyStoreEntry, keyPassword);
+            keyStore.store(new FileOutputStream(keyStoreFile), "4b[X:+H4CS&avY<)".toCharArray());
+        } catch (NoSuchAlgorithmException | KeyStoreException
+                | CertificateException | IOException e) {
+            logger.error("Unable to store key", e);
+        }
+    }
+
+    private KeyStore createKeyStore(String fileName, String password)  {
+        File file = new File(fileName);
+        KeyStore keyStore = null;
+        try {
+            keyStore = KeyStore.getInstance("JCEKS");
+            if (file.exists()) {
+                keyStore.load(new FileInputStream(file), password.toCharArray());
+            } else {
+                keyStore.load(null, null);
+                keyStore.store(new FileOutputStream(fileName), password.toCharArray());
+            }
+        } catch (CertificateException | IOException | KeyStoreException | NoSuchAlgorithmException e) {
+            logger.error("Unable to create key store", e);
+        }
+
+        return keyStore;
     }
 }

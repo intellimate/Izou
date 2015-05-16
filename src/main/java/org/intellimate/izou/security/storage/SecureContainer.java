@@ -1,7 +1,8 @@
 package org.intellimate.izou.security.storage;
 
-import org.intellimate.izou.security.*;
 import org.intellimate.izou.security.SecurityManager;
+import org.intellimate.izou.security.SecurityModule;
+import ro.fortsoft.pf4j.PluginDescriptor;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -16,13 +17,15 @@ import java.util.HashMap;
  * </p>
  */
 public class SecureContainer implements Serializable {
-    private HashMap<String, String> storedData;
+    private HashMap<byte[], byte[]> storedData;
     private SecurityModule securityModule;
+    private PluginDescriptor descriptor;
 
     /**
      * Creates a new secure container
      */
-    public SecureContainer() {
+    public SecureContainer(PluginDescriptor descriptor) {
+        this.descriptor = descriptor;
         org.intellimate.izou.security.SecurityManager securityManager = (SecurityManager) System.getSecurityManager();
         securityModule = new SecurityModule();
     }
