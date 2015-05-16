@@ -17,6 +17,7 @@ import java.io.FilePermission;
 import java.io.IOException;
 import java.net.SocketPermission;
 import java.security.Permission;
+import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -71,6 +72,9 @@ public final class SecurityManager extends java.lang.SecurityManager {
         if (exists) {
             throw new IllegalAccessException("Cannot create more than one instance of IzouSecurityManager");
         }
+
+        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+
         this.systemMail = systemMail;
 
         SecureAccess tempSecureAccess = null;
@@ -352,7 +356,8 @@ public final class SecurityManager extends java.lang.SecurityManager {
     private boolean checkForSecureAccess() {
         Class[] classContext = getClassContext();
         for (Class clazz : classContext) {
-            if (clazz.equals(SecureAccess.class) || clazz.equals(SecurityBreachHandler.class)) {
+            if (clazz.equals(SecureAccess.class) || clazz.equals(SecurityBreachHandler.class)
+                    || clazz.equals(SecurityModule.class)) {
                 return true;
             }
         }

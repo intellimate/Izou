@@ -1,6 +1,7 @@
 package org.intellimate.izou.security.storage;
 
-import org.intellimate.izou.security.SecurityModule;
+import org.intellimate.izou.security.*;
+import org.intellimate.izou.security.SecurityManager;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -22,6 +23,7 @@ public class SecureContainer implements Serializable {
      * Creates a new secure container
      */
     public SecureContainer() {
+        org.intellimate.izou.security.SecurityManager securityManager = (SecurityManager) System.getSecurityManager();
         securityModule = new SecurityModule();
     }
 
@@ -33,7 +35,7 @@ public class SecureContainer implements Serializable {
      * @return true if the key-value pair was added successfully
      */
     public boolean securePut(String key, String value) {
-
+        return false;
     }
 
     /**
@@ -43,6 +45,6 @@ public class SecureContainer implements Serializable {
      * @return the value if it was found and decrypted successfully, else null
      */
     public boolean secureGet(String key) {
-
+        return false;
     }
 }
