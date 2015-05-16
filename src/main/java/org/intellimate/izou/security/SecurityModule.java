@@ -13,7 +13,7 @@ import java.security.NoSuchProviderException;
 import java.security.Security;
 
 /**
- * SecurityModule implements basic security-relevant functions like hash functions or encryption and decryption
+ * SecurityModule implements basic cryptographic functions like hash functions or encryption and decryption
  * functions.
  */
 public final class SecurityModule {
@@ -38,6 +38,15 @@ public final class SecurityModule {
         return hash;
     }
 
+    /**
+     * Applies an AES encryption on the string {@code plainText} with they given key
+     * <p>
+     *     Keys have to be generated using the {@link #generateKey()} function
+     * </p>
+     * @param plainText the string to encrypt
+     * @param key the key to use during the encryption
+     * @return a byte array containing the encrypted data
+     */
     public byte[] encryptAES(String plainText, SecretKey key) {
         byte[] byteCipherText = new byte[0];
 
@@ -53,8 +62,16 @@ public final class SecurityModule {
         return byteCipherText;
     }
 
+    /**
+     * Applies an AES decryption on the byte array {@code cipherBytes} with they given key. The key has to be the same
+     * key used during encryption, else null is returned
+     *
+     * @param cipherBytes the byte array to decrypt
+     * @param key the key to use during the decryption
+     * @return the decrypted string if everything was successful, else null
+     */
     public String decryptAES(byte[] cipherBytes, SecretKey key) {
-        String plainText = "";
+        String plainText = null;
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
         try {
             Cipher cipher = Cipher.getInstance("AES", "BC");
@@ -69,6 +86,11 @@ public final class SecurityModule {
         return plainText;
     }
 
+    /**
+     * Generates a key for the AES encryption
+     *
+     * @return a new key for the AES encryption
+     */
     public SecretKey generateKey() {
         SecretKey key = null;
         try {

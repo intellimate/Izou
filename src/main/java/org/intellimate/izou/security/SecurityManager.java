@@ -32,6 +32,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
     private static boolean exists = false;
     private boolean exitPermission = false;
     private final List<String> allowedReadDirectories;
+    private final List<String> deniedDirectories;
     private final List<String> allowedReadFiles;
     private final List<String> allowedSocketConnections;
     private final List<String> allowedWriteDirectories;
@@ -92,6 +93,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
         allowedReadDirectories = new ArrayList<>();
         allowedReadFiles = new ArrayList<>();
         allowedWriteDirectories = new ArrayList<>();
+        deniedDirectories = new ArrayList<>();
         forbiddenProperties = new ArrayList<>();
         allowedSocketConnections = new ArrayList<>();
         allowedReadFileTypesRegex = "(txt|properties|xml|class|json|zip|ds_store|mf|jar|idx|log|dylib|mp3|dylib|certs|"
@@ -116,6 +118,8 @@ public final class SecurityManager extends java.lang.SecurityManager {
         allowedSocketConnections.add("local");
         allowedSocketConnections.add("smtp");
         allowedWriteDirectories.add(workingDir);
+
+        deniedDirectories.add(workingDir + File.separator + "system");
     }
 
     /**
@@ -275,6 +279,12 @@ public final class SecurityManager extends java.lang.SecurityManager {
             return false;
         }
 
+        for (String dir : deniedDirectories) {
+            if (canonicalPath.contains(dir)) {
+                return false;
+            }
+        }
+
         for (String file : allowedReadFiles) {
             if (canonicalPath.contains(file)) {
                 return true;
@@ -322,6 +332,12 @@ public final class SecurityManager extends java.lang.SecurityManager {
         } catch (IOException e) {
             logger.error("Error getting canonical path", e);
             return false;
+        }
+
+        for (String dir : deniedDirectories) {
+            if (canonicalPath.contains(dir)) {
+                return false;
+            }
         }
 
         boolean allowedDirectory = false;
@@ -382,6 +398,15 @@ public final class SecurityManager extends java.lang.SecurityManager {
      */
     public PermissionManager getPermissionManager() {
         return permissionManager;
+    }
+
+    /**
+     * Gets the {@link SecureStorage} object in Izou
+     *
+     * @return the secure storage object in Izou
+     */
+    public SecureStorage getSecureStorage() {
+        return secureStorage;
     }
 
     @Override
