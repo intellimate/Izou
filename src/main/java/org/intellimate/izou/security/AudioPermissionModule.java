@@ -6,7 +6,6 @@ import org.intellimate.izou.identification.Identifiable;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.exceptions.IzouSoundPermissionException;
 import ro.fortsoft.pf4j.PluginDescriptor;
-import ro.fortsoft.pf4j.PluginWrapper;
 
 import javax.sound.sampled.AudioPermission;
 import java.security.Permission;
@@ -93,16 +92,7 @@ public final class AudioPermissionModule extends PermissionModule {
             }
         };
 
-        getMain().getAddOnManager().getPluginWrapper(addOn)
-                .map(PluginWrapper::getDescriptor)
-                .map(checkPlayPermission)
-                .ifPresent(allowedToPlay -> {
-                    if (allowedToPlay) {
-                        registerAddOn(addOn);
-                    } else {
-                        throw new IzouSoundPermissionException(permissionMessage);
-                    }
-                });
+        registerOrThrow(addOn, () -> new IzouSoundPermissionException(permissionMessage), checkPlayPermission);
     }
 
     /**

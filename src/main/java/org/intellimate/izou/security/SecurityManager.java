@@ -35,7 +35,6 @@ public final class SecurityManager extends java.lang.SecurityManager {
     private boolean exitPermission = false;
     private final List<String> allowedReadDirectories;
     private final List<String> allowedReadFiles;
-    private final List<String> allowedSocketConnections;
     private final List<File> allowedWriteDirectories;
     private final List<String> forbiddenProperties;
     private final String allowedReadFileTypesRegex;
@@ -88,7 +87,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
             exitPermission = true;
             System.exit(1);
         }
-        permissionManager = PermissionManager.createPermissionManager();
+        permissionManager = PermissionManager.createPermissionManager(main);
         secureAccess = tempSecureAccess;
         allowedReadDirectories = new ArrayList<>();
         allowedReadFiles = new ArrayList<>();
@@ -96,7 +95,6 @@ public final class SecurityManager extends java.lang.SecurityManager {
         allowedReadFiles.add("/dev/urandom");
         allowedWriteDirectories = new ArrayList<>();
         forbiddenProperties = new ArrayList<>();
-        allowedSocketConnections = new ArrayList<>();
         allowedReadFileTypesRegex = "(txt|properties|xml|class|json|zip|ds_store|mf|jar|idx|log|dylib|mp3|dylib|certs|"
                 + "so)";
         allowedWriteFileTypesRegex = "(txt|properties|xml|json|idx|log)";
@@ -111,14 +109,10 @@ public final class SecurityManager extends java.lang.SecurityManager {
         String workingDir = FileSystemManager.FULL_WORKING_DIRECTORY;
 
         forbiddenProperties.add("jdk.lang.process.launchmechanism");
-
         allowedReadDirectories.add(workingDir);
         allowedReadDirectories.addAll(Arrays.asList(System.getProperty("java.ext.dirs").split(":")));
         allowedReadDirectories.add(System.getProperty("java.home"));
         allowedReadDirectories.add(System.getProperty("user.home"));
-        allowedSocketConnections.add(System.getProperty("host.name"));
-        allowedSocketConnections.add("local");
-        allowedSocketConnections.add("smtp");
         allowedWriteDirectories.add(main.getFileSystemManager().getLogsLocation());
         allowedWriteDirectories.add(main.getFileSystemManager().getPropertiesLocation());
         allowedWriteDirectories.add(main.getFileSystemManager().getResourceLocation());
@@ -127,7 +121,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
     /**
      * Gets the current AddOnModel, that is the AddOnModel for the class loader to which the class belongs that
      * triggered the security manager call, or throws a IzouPermissionException
-     * @return AddOnModel or IzouPermissionException
+     * @return AddOnModel or IzouPermissionException if the call was made from an AddOn, or null if no AddOn is responsible
      * @throws IzouPermissionException if the AddOnModel is not found
      */
     private AddOnModel getOrThrowAddOnModel() throws IzouPermissionException {
@@ -140,6 +134,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
                         .orElseThrow(() -> new IzouPermissionException("No AddOn found for ClassLoader: " + classLoader));
             }
         }
+        return null;
     }
 
     /**
@@ -153,7 +148,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
         }
 
         AddOnModel addOn = getOrThrowAddOnModel();
-
+        if (addOn == null) return;
         specific.accept(t, addOn);
     }
 
@@ -168,54 +163,6 @@ public final class SecurityManager extends java.lang.SecurityManager {
         return true;
     }
 
-    private void checkAudioPermission(Permission perm, AddOnModel addOn) throws IzouSoundPermissionException {
-        if (!(perm instanceof AudioPermission)) {
-            return;
-        }
-    }
-
-    /**
-     * Checks if the permission {@code perm} is a {@link SocketPermission} and if so checks if the addOn has socket
-     * connections properly enabled, else throws a {@link SecurityException}. If the permission is not a
-     * SocketPermission, nothing is done as the permission has nothing to do with socket connections.
-     *
-     * @param perm the permission to check
-     * @throws SecurityException thrown if the permission is not granted
-     */
-    private void checkSocketPermission(Permission perm, IzouPluginClassLoader izouClassLoader) throws IzouSocketPermissionException {
-        if (!(perm instanceof SocketPermission)) {
-            return;
-        }
-
-        for (String socket : allowedSocketConnections) {
-            if (perm.getName().contains(socket)) {
-                return;
-            }
-        }
-
-        String addOnID = izouClassLoader.getPluginDescriptor().getPluginId();
-        boolean accessGranted = permissionManager.getSocketPermissionModule().checkPermission(addOnID);
-
-        if (!accessGranted) {
-            PluginDescriptor descriptor = izouClassLoader.getPluginDescriptor();
-            boolean canConnect = false;
-            try {
-                canConnect = descriptor.getAddOnProperties().get("socket_connection").equals("true")
-                        && !descriptor.getAddOnProperties().get("socket_usage_descripton").equals("null");
-            } catch (NullPointerException e) {
-                // Do nothing that is fine, it will just skip ahead and not register
-            }
-
-            if (canConnect) {
-                permissionManager.getSocketPermissionModule().registerAddOn(descriptor.getPluginId());
-            } else {
-                throw new IzouSocketPermissionException("Socket Permission Denied: " + addOnID + "is not registered to "
-                        + "use socket connections, please add the required information to the addon_config.properties "
-                        + "file of your addOn.");
-            }
-        }
-    }
-
     /**
      * Checks if the permission {@code perm} is a {@link FilePermission} and if so checks is the IO operation is
      * allowed, else throws a {@link SecurityException}. If the permission is not a FilePermission, nothing is done as
@@ -225,7 +172,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
      * @throws SecurityException thrown if the permission is not granted
      */
     private void checkFilePermission(Permission perm, IzouPluginClassLoader izouClassLoader) throws SecurityException {
-        if (!(perm instanceof FilePermission)) {
+        if (!()) {
             return;
         }
 
@@ -358,12 +305,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
 
     @Override
     public void checkPermission(Permission perm) {
-        BiConsumer<Permission, IzouPluginClassLoader> checker = (permission, loader) -> {
-            if (permission instanceof FilePermission) checkFilePermission(permission, loader);
-            else if (permission instanceof SocketPermission) checkSocketPermission(permission, loader);
-            else checkAudioPermission(permission, loader);
-        };
-        check(perm, checker);
+        check(perm, permissionManager::checkPermission);
     }
 
     @Override
@@ -426,11 +368,11 @@ public final class SecurityManager extends java.lang.SecurityManager {
 
     @Override
     public void checkRead(String file) {
-        check(file, (file1, loader) -> fileReadCheck(file1));
+        check(file, (file1, addon) -> fileReadCheck(file1));
     }
 
     @Override
     public void checkWrite(FileDescriptor fd) {
-        check(fd.toString(), (file, loader) -> fileWriteCheck(file));
+        check(fd.toString(), (file, addon) -> fileWriteCheck(file));
     }
 }

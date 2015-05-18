@@ -5,8 +5,12 @@ import org.intellimate.izou.IzouModule;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.exceptions.IzouPermissionException;
+import ro.fortsoft.pf4j.PluginDescriptor;
+import ro.fortsoft.pf4j.PluginWrapper;
 
 import java.security.Permission;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * A PermissionModule defines basic permissions in Izou. A permission in Izou is defined as service that is generally
@@ -64,4 +68,23 @@ public abstract class PermissionModule extends IzouModule {
      * @throws IzouPermissionException thrown if the addOn is not allowed to access its requested service
      */
     public abstract void checkPermission(Permission permission, AddOnModel addon) throws IzouPermissionException;
+
+    /**
+     * registers the addon if checkPermission returns true, else throws the exception provided by the exceptionSupplier.
+     * If the Addon was not added through PF4J it gets ignored
+     * @param addOn the addon to check
+     * @param checkPermission returns true if eligible for registering
+     */
+    protected <X extends IzouPermissionException> void registerOrThrow(AddOnModel addOn, Supplier<X> exceptionSupplier, Function<PluginDescriptor, Boolean> checkPermission) {
+        getMain().getAddOnManager().getPluginWrapper(addOn)
+                .map(PluginWrapper::getDescriptor)
+                .map(checkPermission)
+                .ifPresent(allowedToPlay -> {
+                    if (allowedToPlay) {
+                        registerAddOn(addOn);
+                    } else {
+                        throw exceptionSupplier.get();
+                    }
+                });
+    }
 }
