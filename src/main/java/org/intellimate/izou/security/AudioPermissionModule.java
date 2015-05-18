@@ -2,7 +2,10 @@ package org.intellimate.izou.security;
 
 import org.intellimate.izou.IdentifiableSet;
 import org.intellimate.izou.addon.AddOnModel;
+import org.intellimate.izou.events.EventModel;
+import org.intellimate.izou.events.EventsControllerModel;
 import org.intellimate.izou.identification.Identifiable;
+import org.intellimate.izou.identification.IllegalIDException;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.exceptions.IzouSoundPermissionException;
 import ro.fortsoft.pf4j.PluginDescriptor;
@@ -15,7 +18,7 @@ import java.util.function.Function;
  * The AudioPermissionModule handles conflicts between addOns regarding audio output. For example if two AddOns
  * want to play music, then the AudioPermissionModule will decide who gets to play it.
  */
-public final class AudioPermissionModule extends PermissionModule {
+public final class AudioPermissionModule extends PermissionModule implements EventsControllerModel {
     private Identifiable currentPlaybackID;
     private boolean isPlaying;
     private IdentifiableSet<AddOnModel> shortTermPermissions;
@@ -30,6 +33,12 @@ public final class AudioPermissionModule extends PermissionModule {
         currentPlaybackID = null;
         isPlaying = false;
         shortTermPermissions = new IdentifiableSet<>();
+        try {
+            main.getEventDistributor().registerEventsController(this);
+        } catch (IllegalIDException e) {
+            error("unable to register as EventsController!");
+            System.exit(1);
+        }
     }
 
     /**

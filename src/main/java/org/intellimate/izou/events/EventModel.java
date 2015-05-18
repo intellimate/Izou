@@ -54,26 +54,6 @@ public interface EventModel<X extends EventModel> extends Identifiable {
     List<String> getDescriptors();
 
     /**
-     * adds an descriptor.
-     * @param descriptor the descriptor to add
-     * @return true if added, false if not
-     */
-    boolean addDescriptor(String descriptor);
-
-    /**
-     * removes an descriptor.
-     * @param descriptor to remove
-     * @return true if removed, false if not
-     */
-    boolean removeDescriptor(String descriptor);
-
-    /**
-     * returns the immutable (except the resources) Event
-     * @return the EventModel
-     */
-    EventModel<X> finalizeEvent();
-
-    /**
      * returns a List containing all the Descriptors and the type.
      * @return a List containing the Descriptors
      */

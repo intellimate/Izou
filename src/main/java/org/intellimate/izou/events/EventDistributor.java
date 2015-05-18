@@ -157,14 +157,24 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
      * @return true if the event should be fired
      */
     private boolean checkEventsControllers(EventModel event) {
-        boolean shouldExecute = true;
-        for (EventsControllerModel controller : eventsControllers) {
-            if (!controller.controlEventDispatcher(event)) {
-                shouldExecute = false;
-                break;
-            }
+        List<CompletableFuture<Boolean>> collect = eventsControllers.stream()
+                .map(controller -> submit(() -> controller.controlEventDispatcher(event)))
+                .collect(Collectors.toList());
+        try {
+            collect = timeOut(collect, 1000);
+        } catch (InterruptedException e) {
+            debug("interrupted");
         }
-        return shouldExecute;
+        return collect.stream()
+                .map(future -> {
+                    try {
+                        return future.get();
+                    } catch (InterruptedException | ExecutionException e) {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .noneMatch(bool -> !bool);
     }
 
     public BlockingQueue<EventModel<?>> getEvents() {
