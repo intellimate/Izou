@@ -1,14 +1,16 @@
 package org.intellimate.izou.security;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.intellimate.izou.IdentifiableSet;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.identification.Identifiable;
+import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.exceptions.IzouSoundPermissionException;
+import ro.fortsoft.pf4j.PluginDescriptor;
+import ro.fortsoft.pf4j.PluginWrapper;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.sound.sampled.AudioPermission;
+import java.security.Permission;
+import java.util.function.Function;
 
 /**
  * The AudioPermissionModule handles conflicts between addOns regarding audio output. For example if two AddOns
@@ -18,16 +20,28 @@ public final class AudioPermissionModule extends PermissionModule {
     private Identifiable currentPlaybackID;
     private boolean isPlaying;
     private IdentifiableSet<AddOnModel> shortTermPermissions;
-    private IdentifiableSet<Addo>
-    private final Logger logger = LogManager.getLogger(this.getClass());
 
     /**
-     * Creates a new instance of AudioPermissionModule
+     * Creates a new PermissionModule
+     *
+     * @param main an isntance of main
      */
-    public AudioPermissionModule() {
+    AudioPermissionModule(Main main) {
+        super(main);
         currentPlaybackID = null;
         isPlaying = false;
         shortTermPermissions = new IdentifiableSet<>();
+    }
+
+    /**
+     * returns true if able to check permissions
+     *
+     * @param permission the permission to check
+     * @return true if able to, false if not
+     */
+    @Override
+    public boolean canCheckPermission(Permission permission) {
+        return permission instanceof AudioPermission;
     }
 
     /**
@@ -46,58 +60,61 @@ public final class AudioPermissionModule extends PermissionModule {
         return isRegistered(addOnID) && shortTermPermissions.add(addOnID);
     }
 
-    /**
-     * Requests permission to play sound, if the permission is granted, the {@link SecurityManager} will let the
-     * addOn with {@code addOnID} play sound, else it will block it.
-     * <p>
-     * There is always ONLY ONE permission that is given out to an addOn, (first come, first serve) and if the
-     * permission has already been given out, then the requesting addOn will have to wait until it is returned. Once
-     * the this method returns true, the requesting addOn will have been registered as the currently playing addOn, so
-     * it is responsible for calling the {@link #returnPlaybackPermission(String)} method to signal it is done. Only
-     * then can the next addOn play sound again.
-     * </p>
-     *
-     * @param addon the addOn that is requesting permission to play sound
-     * @return true if the permission was granted, false if it was denied
-     */
-    public boolean requestPlaybackPermission(AddOnModel addon) {
-        if (!isPlaying) {
-            currentPlaybackID = addon;
-            isPlaying = true;
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * If this method is called from the addOn currently playing sound, then the lock on that addOn is given up and
-     * anyone can request to play sound again. If the permission was successfully returned, true is returned and
-     * otherwise false. (For instance if {@code addOnID} does not match the currently playing addOn ID)
-     *
-     * @param addOnID the addOnID of the addOn requesting to return its audio permission
-     * @return true if the permission was returned successfully, else false
-     */
-    public boolean returnPlaybackPermission(AddOnModel addon) {
-        if (sha3(addOnID).equals(currentPlaybackID)) {
-            isPlaying = false;
-            currentPlaybackID = null;
-            return true;
-        }
-
-        return false;
-    }
-
     @Override
-    public boolean checkPermission(String addOnID) throws IzouSoundPermissionException {
-
-        for (String hash : shortTermPermissions) {
-            if (hash.equals(sha3(addOnID))) {
-                shortTermPermissions.remove(hash);
-                return true;
-            }
+    public void checkPermission(Permission permission, AddOnModel addOn) throws IzouSoundPermissionException {
+        if (currentPlaybackID.equals(addOn))
+            return;
+        if (!isPlaying && isRegistered(addOn)) {
+            isPlaying = true;
+            currentPlaybackID = addOn;
+            return;
         }
 
-        return !(!isRegistered(addOnID) || !isPlaying || !sha3(addOnID).equals(currentPlaybackID));
 
+        String permissionMessage = "Audio Permission Denied: " + addOn + "is not registered to "
+                + "play audio or there is already audio being played.";
+
+        registerOrThrow(addOn, permissionMessage);
+    }
+
+    /**
+     * registers the AddOn or throws the Exception
+     * @param addOn the AddOn to register
+     * @param permissionMessage the message of the exception
+     * @throws IzouSoundPermissionException if not eligible for registering
+     */
+    private void registerOrThrow(AddOnModel addOn, String permissionMessage) throws IzouSoundPermissionException{
+        Function<PluginDescriptor, Boolean> checkPlayPermission = descriptor -> {
+            try {
+                return descriptor.getAddOnProperties().get("audio_output").equals("true")
+                        && !descriptor.getAddOnProperties().get("audio_usage_descripton").equals("null");
+            } catch (NullPointerException e) {
+                return false;
+            }
+        };
+
+        getMain().getAddOnManager().getPluginWrapper(addOn)
+                .map(PluginWrapper::getDescriptor)
+                .map(checkPlayPermission)
+                .ifPresent(allowedToPlay -> {
+                    if (allowedToPlay) {
+                        registerAddOn(addOn);
+                    } else {
+                        throw new IzouSoundPermissionException(permissionMessage);
+                    }
+                });
+    }
+
+    /**
+     * checks if the Addon is able to play audio
+     * @param addOn the addon to check
+     * @throws IzouSoundPermissionException thrown if the addOn is not allowed to access its requested service
+     */
+    public void checkShortTimePermission(Permission permission, AddOnModel addOn) throws IzouSoundPermissionException {
+        if (!isRegistered(addOn)) {
+            String message = "Audio Permission Denied: " + addOn + "is not registered to "
+                    + "play audio.";
+            registerOrThrow(addOn, message);
+        }
     }
 }

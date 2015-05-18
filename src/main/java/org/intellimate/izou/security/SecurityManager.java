@@ -2,7 +2,9 @@ package org.intellimate.izou.security;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.main.Main;
+import org.intellimate.izou.security.exceptions.IzouPermissionException;
 import org.intellimate.izou.security.exceptions.IzouSocketPermissionException;
 import org.intellimate.izou.security.exceptions.IzouSoundPermissionException;
 import org.intellimate.izou.support.SystemMail;
@@ -42,6 +44,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
     private final PermissionManager permissionManager;
     private final SystemMail systemMail;
     private final Logger logger = LogManager.getLogger(this.getClass());
+    private final Main main;
 
     /**
      * Creates a SecurityManager. There can only be one single SecurityManager, so calling this method twice
@@ -74,6 +77,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
             throw new IllegalAccessException("Cannot create more than one instance of IzouSecurityManager");
         }
         this.systemMail = systemMail;
+        this.main = main;
 
         SecureAccess tempSecureAccess = null;
         try {
@@ -121,21 +125,21 @@ public final class SecurityManager extends java.lang.SecurityManager {
     }
 
     /**
-     * Gets the current class loader, that is the class loader to which the class belongs that
-     * triggered the security manager call
-     *
-     * @return the current class loader
+     * Gets the current AddOnModel, that is the AddOnModel for the class loader to which the class belongs that
+     * triggered the security manager call, or throws a IzouPermissionException
+     * @return AddOnModel or IzouPermissionException
+     * @throws IzouPermissionException if the AddOnModel is not found
      */
-    private ClassLoader getCurrentClassLoader() {
+    private AddOnModel getOrThrowAddOnModel() throws IzouPermissionException {
         Class[] classes = getClassContext();
         for (int i = classes.length - 1; i >= 0; i--) {
             if (classes[i].getClassLoader() instanceof IzouPluginClassLoader && !classes[i].getName().toLowerCase()
                     .contains(IzouPluginClassLoader.PLUGIN_PACKAGE_PREFIX_IZOU_SDK)) {
-                return classes[i].getClassLoader();
+                ClassLoader classLoader = classes[i].getClassLoader();
+                return main.getAddOnManager().getAddOnForClassLoader(classLoader)
+                        .orElseThrow(() -> new IzouPermissionException("No AddOn found for ClassLoader: " + classLoader));
             }
         }
-
-        return null;
     }
 
     /**
@@ -143,25 +147,14 @@ public final class SecurityManager extends java.lang.SecurityManager {
      * @param t permission or file
      * @param specific the specific check
      */
-    private <T> void check(T t, BiConsumer<T, IzouPluginClassLoader> specific) {
+    private <T> void check(T t, BiConsumer<T, AddOnModel> specific) {
         if (!shouldCheck()) {
             return;
         }
 
-        ClassLoader classLoader = getCurrentClassLoader();
+        AddOnModel addOn = getOrThrowAddOnModel();
 
-        if (classLoader == null) {
-            return;
-        }
-
-        IzouPluginClassLoader izouClassLoader;
-        if (classLoader instanceof IzouPluginClassLoader) {
-            izouClassLoader = (IzouPluginClassLoader) classLoader;
-        } else {
-            return;
-        }
-
-        specific.accept(t, izouClassLoader);
+        specific.accept(t, addOn);
     }
 
     /**
@@ -175,30 +168,9 @@ public final class SecurityManager extends java.lang.SecurityManager {
         return true;
     }
 
-    private void checkAudioPermission(Permission perm, IzouPluginClassLoader izouClassLoader) throws IzouSoundPermissionException {
+    private void checkAudioPermission(Permission perm, AddOnModel addOn) throws IzouSoundPermissionException {
         if (!(perm instanceof AudioPermission)) {
             return;
-        }
-
-        String addOnID = izouClassLoader.getPluginDescriptor().getPluginId();
-        boolean accessGranted = permissionManager.getAudioPermissionModule().checkPermission(addOnID);
-
-        if (!accessGranted) {
-            PluginDescriptor descriptor = izouClassLoader.getPluginDescriptor();
-            boolean canPlay = false;
-            try {
-                canPlay = descriptor.getAddOnProperties().get("audio_output").equals("true")
-                        && !descriptor.getAddOnProperties().get("audio_usage_descripton").equals("null");
-            } catch (NullPointerException e) {
-                // Do nothing that is fine, it will just skip ahead and not register
-            }
-            if (canPlay) {
-
-                permissionManager.getAudioPermissionModule().registerAddOn(descriptor.getPluginId());
-            } else {
-                throw new IzouSoundPermissionException("Audio Permission Denied: " + addOnID + "is not registered to "
-                        + "play audio or there is already audio being played.");
-            }
         }
     }
 
@@ -386,10 +358,10 @@ public final class SecurityManager extends java.lang.SecurityManager {
 
     @Override
     public void checkPermission(Permission perm) {
-        BiConsumer<Permission, IzouPluginClassLoader> checker = (permi, loader) -> {
-            if (permi instanceof FilePermission) checkFilePermission(permi, loader);
-            else if (permi instanceof SocketPermission) checkSocketPermission(permi, loader);
-            else checkAudioPermission(permi, loader);
+        BiConsumer<Permission, IzouPluginClassLoader> checker = (permission, loader) -> {
+            if (permission instanceof FilePermission) checkFilePermission(permission, loader);
+            else if (permission instanceof SocketPermission) checkSocketPermission(permission, loader);
+            else checkAudioPermission(permission, loader);
         };
         check(perm, checker);
     }

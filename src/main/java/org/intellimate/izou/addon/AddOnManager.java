@@ -13,7 +13,9 @@ import ro.fortsoft.pf4j.PluginManager;
 import ro.fortsoft.pf4j.PluginWrapper;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -22,6 +24,7 @@ import java.util.stream.Collectors;
  */
 public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
     private IdentifiableSet<AddOnModel> addOns = new IdentifiableSet<>();
+    private HashMap<AddOnModel, PluginWrapper> pluginWrappers = new HashMap<>();
     
     public AddOnManager(Main main) {
         super(main);
@@ -101,11 +104,42 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
                         IzouPluginClassLoader izouPluginClassLoader = (IzouPluginClassLoader) addOn.getClass().getClassLoader();
                         PluginWrapper plugin = pluginManager.getPlugin(izouPluginClassLoader.getPluginDescriptor().getPluginId());
                         addOn.setPlugin(plugin);
+                        pluginWrappers.put(addOn, plugin);
                     });
             return addOns;
         } catch (Exception e) {
             log.fatal("Error while trying to start the AddOns", e);
             return new ArrayList<>();
         }
+    }
+
+    /**
+     * returns the addOn loaded from the ClassLoader
+     * @param classLoader the classLoader
+     * @return the (optional) AddOnModel
+     */
+    public Optional<AddOnModel> getAddOnForClassLoader(ClassLoader classLoader) {
+        return addOns.stream()
+                .filter(addOnModel -> addOnModel.getClass().getClassLoader().equals(classLoader))
+                .findFirst();
+    }
+
+    /**
+     * returns the (optional) PluginWrapper for the AddonModel.
+     * If the return is empty, it means that the AddOn was not loaded through pf4j
+     * @param addOnModel the AddOnModel
+     * @return the PluginWrapper if loaded through pf4j or empty if added as an argument
+     */
+    public Optional<PluginWrapper> getPluginWrapper(AddOnModel addOnModel) {
+        return Optional.of(pluginWrappers.get(addOnModel));
+    }
+
+    /**
+     * checks whether the AddOn was loaded through pf4j
+     * @param addOnModel the AddOnModel to check
+     * @return true if loaded, false if not
+     */
+    public boolean loadedThroughPF4J (AddOnModel addOnModel) {
+        return pluginWrappers.get(addOnModel) != null;
     }
 }
