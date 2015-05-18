@@ -45,6 +45,14 @@ public abstract class PermissionModule extends IzouModule {
     }
 
     /**
+     * Throws an exception with the argument of {@code argument}
+     * @param argument what the exception is about (Access denied to (argument goes here))
+     */
+    SecurityException getException(String argument) {
+        return securityManager.getException(argument);
+    }
+
+    /**
      * returns true if able to check permissions
      * @param permission the permission to check
      * @return true if able to, false if not
@@ -96,16 +104,5 @@ public abstract class PermissionModule extends IzouModule {
                         throw exceptionSupplier.get();
                     }
                 });
-    }
-
-    /**
-     * Throws an exception with the argument of {@code argument}
-     * @param argument what the exception is about (Access denied to (argument goes here))
-     */
-    private SecurityException getException(String argument) {
-        SecurityException exception =  new SecurityException("Access denied to " + argument);
-        Class[] classStack = getClassContext();
-        secureAccess.getBreachHandler().handleBreach(exception, classStack);
-        return exception;
     }
 }

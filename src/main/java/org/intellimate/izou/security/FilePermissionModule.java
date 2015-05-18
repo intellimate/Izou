@@ -7,10 +7,13 @@ import org.intellimate.izou.system.file.FileSystemManager;
 
 import java.io.File;
 import java.io.FilePermission;
+import java.io.IOException;
 import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * The FilePermissionModule is used to check the access to files
@@ -82,5 +85,94 @@ public class FilePermissionModule extends PermissionModule {
             fileReadCheck(canonicalName);
         }
         fileWriteCheck(canonicalName);
+    }
+
+    /**
+     * Determines if the file at the given file path is safe to read from in all aspects, if so returns true, else false
+     *
+     * @param filePath the path to the file to read from
+     */
+    private void fileReadCheck(String filePath) {
+        File potentialFile = new File(filePath);
+        String canonicalPath;
+        try {
+            canonicalPath = potentialFile.getCanonicalPath();
+        } catch (IOException e) {
+            error("Error getting canonical path", e);
+            throw getException(filePath);
+        }
+
+        for (String file : allowedReadFiles) {
+            if (canonicalPath.contains(file)) {
+                return;
+            }
+        }
+
+        boolean allowedDirectory = false;
+        for (String dir : allowedReadDirectories) {
+            if (canonicalPath.contains(dir)) {
+                allowedDirectory = true;
+                break;
+            }
+        }
+        if (!allowedDirectory) {
+            throw getException(filePath);
+        }
+
+        String[] pathParts = canonicalPath.split(File.separator);
+        String lastPathPart = pathParts[pathParts.length - 1].toLowerCase();
+
+        String[] pathPeriodParts = lastPathPart.split("\\.");
+        String fileExtension = pathPeriodParts[pathPeriodParts.length - 1].toLowerCase();
+
+        if (!secureAccess.checkForExistingFileOrDirectory(canonicalPath)
+                || secureAccess.checkForDirectory(canonicalPath)) {
+            return;
+        }
+
+        Pattern pattern = Pattern.compile(allowedReadFileTypesRegex);
+        Matcher matcher = pattern.matcher(fileExtension);
+        if (!matcher.matches() || fileExtension.equals(lastPathPart))
+            throw getException(filePath);
+    }
+
+    /**
+     * Determines if the file at the given file path is safe to write to in all aspects, if so returns true, else false
+     *
+     * @param filePath the path to the file to write to
+     */
+    private void fileWriteCheck(String filePath) {
+        File potentialFile = new File(filePath);
+        String canonicalPath;
+        try {
+            canonicalPath = potentialFile.getCanonicalPath();
+        } catch (IOException e) {
+            error("Error getting canonical path", e);
+            throw getException(filePath);
+        }
+
+        boolean allowedDirectory = false;
+        for (String dir : allowedWriteDirectories) {
+            if (canonicalPath.contains(dir)) {
+                allowedDirectory = true;
+                break;
+            }
+        }
+        if (!allowedDirectory) {
+            throw getException(filePath);
+        }
+
+        String[] pathParts = canonicalPath.split("\\.");
+        String fileExtension = pathParts[pathParts.length - 1].toLowerCase();
+
+        if (!secureAccess.checkForExistingFileOrDirectory(canonicalPath)
+                || secureAccess.checkForDirectory(canonicalPath)) {
+            return;
+        }
+
+        Pattern pattern = Pattern.compile(allowedWriteFileTypesRegex);
+        Matcher matcher = pattern.matcher(fileExtension);
+        if (!matcher.matches())
+            throw getException(filePath);
     }
 }
