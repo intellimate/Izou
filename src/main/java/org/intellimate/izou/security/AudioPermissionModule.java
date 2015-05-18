@@ -25,8 +25,8 @@ public final class AudioPermissionModule extends PermissionModule {
      *
      * @param main an isntance of main
      */
-    AudioPermissionModule(Main main) {
-        super(main);
+    AudioPermissionModule(Main main, SecurityManager securityManager) {
+        super(main, securityManager);
         currentPlaybackID = null;
         isPlaying = false;
         shortTermPermissions = new IdentifiableSet<>();

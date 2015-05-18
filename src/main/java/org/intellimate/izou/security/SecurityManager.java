@@ -33,12 +33,6 @@ import java.util.regex.Pattern;
 public final class SecurityManager extends java.lang.SecurityManager {
     private static boolean exists = false;
     private boolean exitPermission = false;
-    private final List<String> allowedReadDirectories;
-    private final List<String> allowedReadFiles;
-    private final List<File> allowedWriteDirectories;
-    private final List<String> forbiddenProperties;
-    private final String allowedReadFileTypesRegex;
-    private final String allowedWriteFileTypesRegex;
     private final SecureAccess secureAccess;
     private final PermissionManager permissionManager;
     private final SystemMail systemMail;
@@ -87,35 +81,8 @@ public final class SecurityManager extends java.lang.SecurityManager {
             exitPermission = true;
             System.exit(1);
         }
-        permissionManager = PermissionManager.createPermissionManager(main);
+        permissionManager = new PermissionManager(main);
         secureAccess = tempSecureAccess;
-        allowedReadDirectories = new ArrayList<>();
-        allowedReadFiles = new ArrayList<>();
-        allowedReadFiles.add("/dev/random");
-        allowedReadFiles.add("/dev/urandom");
-        allowedWriteDirectories = new ArrayList<>();
-        forbiddenProperties = new ArrayList<>();
-        allowedReadFileTypesRegex = "(txt|properties|xml|class|json|zip|ds_store|mf|jar|idx|log|dylib|mp3|dylib|certs|"
-                + "so)";
-        allowedWriteFileTypesRegex = "(txt|properties|xml|json|idx|log)";
-        init(main);
-    }
-
-    /**
-     * Initializes some aspects of the security manager (giving default permissions etc.)
-     * @param main an instance of main
-     */
-    private void init(Main main) {
-        String workingDir = FileSystemManager.FULL_WORKING_DIRECTORY;
-
-        forbiddenProperties.add("jdk.lang.process.launchmechanism");
-        allowedReadDirectories.add(workingDir);
-        allowedReadDirectories.addAll(Arrays.asList(System.getProperty("java.ext.dirs").split(":")));
-        allowedReadDirectories.add(System.getProperty("java.home"));
-        allowedReadDirectories.add(System.getProperty("user.home"));
-        allowedWriteDirectories.add(main.getFileSystemManager().getLogsLocation());
-        allowedWriteDirectories.add(main.getFileSystemManager().getPropertiesLocation());
-        allowedWriteDirectories.add(main.getFileSystemManager().getResourceLocation());
     }
 
     /**
@@ -161,31 +128,6 @@ public final class SecurityManager extends java.lang.SecurityManager {
             return false;
         }
         return true;
-    }
-
-    /**
-     * Checks if the permission {@code perm} is a {@link FilePermission} and if so checks is the IO operation is
-     * allowed, else throws a {@link SecurityException}. If the permission is not a FilePermission, nothing is done as
-     * the permission has nothing to do with file IO.
-     *
-     * @param perm the permission to check
-     * @throws SecurityException thrown if the permission is not granted
-     */
-    private void checkFilePermission(Permission perm, IzouPluginClassLoader izouClassLoader) throws SecurityException {
-        if (!()) {
-            return;
-        }
-
-        String canonicalName = perm.getName().intern().toLowerCase();
-        String canonicalAction =  perm.getActions().intern().toLowerCase();
-
-        if (canonicalName.contains("all files") || canonicalAction.equals("execute")) {
-            throw getException(perm.getName());
-        }
-        if (canonicalAction.equals("read")) {
-            fileReadCheck(canonicalName);
-        }
-        fileWriteCheck(canonicalName);
     }
 
     /**
@@ -296,7 +238,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
      * Throws an exception with the argument of {@code argument}
      * @param argument what the exception is about (Access denied to (argument goes here))
      */
-    private SecurityException getException(String argument) {
+    SecurityException getException(String argument) {
         SecurityException exception =  new SecurityException("Access denied to " + argument);
         Class[] classStack = getClassContext();
         secureAccess.getBreachHandler().handleBreach(exception, classStack);

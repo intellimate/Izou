@@ -24,8 +24,8 @@ public final class SocketPermissionModule extends PermissionModule {
      *
      * @param main the instance of main
      */
-    SocketPermissionModule(Main main) {
-        super(main);
+    SocketPermissionModule(Main main, SecurityManager securityManager) {
+        super(main, securityManager);
         allowedSocketConnections = new ArrayList<>();
         //TODO: why????? I don't think this is save
         allowedSocketConnections.add(System.getProperty("host.name"));

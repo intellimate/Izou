@@ -16,46 +16,21 @@ import java.util.List;
  * looking for system security, look at the {@link SecurityManager}.
  */
 public final class PermissionManager extends IzouModule {
-    private static PermissionManager permissionManager = null;
     private final List<PermissionModule> standardCheck;
     private final AudioPermissionModule audioPermissionModule;
     private final SocketPermissionModule SocketPermissions;
-
-    /**
-     * if initialized returns the PermissionManager
-     * @return PermissionManager or null if not initialized
-     */
-    static PermissionManager getInstance() {
-        return permissionManager;
-    }
-
-    /**
-     * Creates an PermissionManager. There can only be one single PermissionManager, so calling this method twice
-     * will cause an illegal access exception.
-     *
-     * @return an PermissionManager
-     * @throws IllegalAccessException thrown if this method is called more than once
-     */
-    static PermissionManager createPermissionManager(Main main) throws IllegalAccessException {
-        if (permissionManager == null) {
-            PermissionManager permissionManager = new PermissionManager(main);
-            PermissionManager.permissionManager = permissionManager;
-            return permissionManager;
-        }
-
-        throw new IllegalAccessException("Cannot create more than one instance of PermissionManager");
-    }
 
     /**
      * Creates a new PermissionManager instance if and only if none has been created yet
      *
      * @throws IllegalAccessException thrown if this method is called more than once
      * @param main an instance of Main
+     * @param securityManager an instance of SecurityManager
      */
-    private PermissionManager(Main main) throws IllegalAccessException {
+    PermissionManager(Main main, SecurityManager securityManager) throws IllegalAccessException {
         super(main);
         standardCheck = new ArrayList<>();
-        audioPermissionModule = new AudioPermissionModule(main);
+        audioPermissionModule = new AudioPermissionModule(main, securityManager);
         standardCheck.add(audioPermissionModule);
         SocketPermissions = new SocketPermissionModule(main);
         standardCheck.add(SocketPermissions);

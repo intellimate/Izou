@@ -25,13 +25,23 @@ import java.util.function.Supplier;
  */
 public abstract class PermissionModule extends IzouModule {
     private final IdentifiableSet<AddOnModel> registeredAddOns;
+    private final SecurityManager securityManager;
 
     /**
      * Creates a new PermissionModule
      */
-    PermissionModule(Main main) {
+    PermissionModule(Main main, SecurityManager securityManager) {
         super(main);
         registeredAddOns = new IdentifiableSet<>();
+        this.securityManager = securityManager;
+    }
+
+    /**
+     * returns an instance of SecurityManager
+     * @return the SecurityManager
+     */
+    public SecurityManager getSecurityManager() {
+        return securityManager;
     }
 
     /**
@@ -86,5 +96,16 @@ public abstract class PermissionModule extends IzouModule {
                         throw exceptionSupplier.get();
                     }
                 });
+    }
+
+    /**
+     * Throws an exception with the argument of {@code argument}
+     * @param argument what the exception is about (Access denied to (argument goes here))
+     */
+    private SecurityException getException(String argument) {
+        SecurityException exception =  new SecurityException("Access denied to " + argument);
+        Class[] classStack = getClassContext();
+        secureAccess.getBreachHandler().handleBreach(exception, classStack);
+        return exception;
     }
 }
