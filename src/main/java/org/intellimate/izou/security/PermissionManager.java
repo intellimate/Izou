@@ -17,9 +17,8 @@ import java.util.List;
  */
 public final class PermissionManager extends IzouModule {
     private final List<PermissionModule> standardCheck;
-    private final AudioPermissionModule audioPermissionModule;
-    private final SocketPermissionModule SocketPermissions;
     private final FilePermissionModule filePermissionModule;
+    private final RootPermission rootPermission;
 
     /**
      * Creates a new PermissionManager instance if and only if none has been created yet
@@ -31,20 +30,11 @@ public final class PermissionManager extends IzouModule {
     PermissionManager(Main main, SecurityManager securityManager) throws IllegalAccessException {
         super(main);
         standardCheck = new ArrayList<>();
-        audioPermissionModule = new AudioPermissionModule(main, securityManager);
-        standardCheck.add(audioPermissionModule);
-        SocketPermissions = new SocketPermissionModule(main, securityManager);
-        standardCheck.add(SocketPermissions);
+        standardCheck.add(new AudioPermissionModule(main, securityManager));
+        standardCheck.add(new SocketPermissionModule(main, securityManager));
         filePermissionModule = new FilePermissionModule(main, securityManager);
+        rootPermission = new RootPermission(main, securityManager);
         standardCheck.add(filePermissionModule);
-    }
-
-    public AudioPermissionModule getAudioPermissionModule() {
-        return audioPermissionModule;
-    }
-
-    public SocketPermissionModule getSocketPermissions() {
-        return SocketPermissions;
     }
 
     public FilePermissionModule getFilePermissionModule() {
@@ -58,6 +48,13 @@ public final class PermissionManager extends IzouModule {
      * @throws IzouPermissionException if the permission was not granted
      */
     public void checkPermission(Permission perm, AddOnModel addOnModel) throws IzouPermissionException {
+        try {
+            rootPermission.checkPermission(perm, addOnModel);
+            //its root
+            return;
+        } catch (IzouPermissionException ignored) {
+            //its just not root
+        }
         for (PermissionModule permissionModule : standardCheck) {
             if (permissionModule.canCheckPermission(perm))
                 permissionModule.checkPermission(perm, addOnModel);

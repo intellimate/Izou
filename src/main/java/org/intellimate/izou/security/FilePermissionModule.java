@@ -85,7 +85,7 @@ public class FilePermissionModule extends PermissionModule {
         if (canonicalAction.equals("read")) {
             fileReadCheck(canonicalName);
         }
-        fileWriteCheck(canonicalName);
+        fileWriteCheck(canonicalName, addon);
     }
 
     /**
@@ -93,7 +93,7 @@ public class FilePermissionModule extends PermissionModule {
      *
      * @param filePath the path to the file to read from
      */
-    private void fileReadCheck(String filePath) {
+    void fileReadCheck(String filePath) {
         File potentialFile = new File(filePath);
         String canonicalPath;
         try {
@@ -141,8 +141,9 @@ public class FilePermissionModule extends PermissionModule {
      * Determines if the file at the given file path is safe to write to in all aspects, if so returns true, else false
      *
      * @param filePath the path to the file to write to
+     * @param addOnModel the AddonModel
      */
-    private void fileWriteCheck(String filePath) {
+    void fileWriteCheck(String filePath, AddOnModel addOnModel) {
         File request;
         try {
             request =  new File(filePath).getCanonicalFile();
@@ -151,10 +152,7 @@ public class FilePermissionModule extends PermissionModule {
             throw getException(filePath);
         }
 
-        if (forbiddenWriteDirectories.stream()
-                .anyMatch(compare -> request.toPath().startsWith(compare.toPath()))) {
-            throw getException(filePath);
-        }
+        isForbidden(request, addOnModel);
 
         if (allowedWriteDirectories.stream()
                 .noneMatch(compare -> request.toPath().startsWith(compare.toPath()))) {
@@ -170,5 +168,18 @@ public class FilePermissionModule extends PermissionModule {
         Matcher matcher = pattern.matcher(Files.getFileExtension(request.toString()));
         if (!matcher.matches())
             throw getException(filePath);
+    }
+
+    /**
+     * throws an Exception if the
+     * @param request the requested File
+     * @param addOnModel the AddonModel
+     */
+    private void isForbidden(File request, AddOnModel addOnModel) {
+        if (forbiddenWriteDirectories.stream()
+                .anyMatch(compare -> request.toPath().startsWith(compare.toPath()))) {
+            throw new IzouPermissionException("file: " + request.toString() + " is forbidden. Attempt made by: "
+                    + addOnModel.getID());
+        }
     }
 }

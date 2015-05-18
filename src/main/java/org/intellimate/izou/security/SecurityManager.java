@@ -5,26 +5,14 @@ import org.apache.logging.log4j.Logger;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.exceptions.IzouPermissionException;
-import org.intellimate.izou.security.exceptions.IzouSocketPermissionException;
-import org.intellimate.izou.security.exceptions.IzouSoundPermissionException;
 import org.intellimate.izou.support.SystemMail;
-import org.intellimate.izou.system.file.FileSystemManager;
 import ro.fortsoft.pf4j.IzouPluginClassLoader;
-import ro.fortsoft.pf4j.PluginDescriptor;
 
-import javax.sound.sampled.AudioPermission;
-import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FilePermission;
-import java.io.IOException;
-import java.net.SocketPermission;
 import java.security.Permission;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * The IzouSecurityManager gives permission to all entitled components of Izou to execute or access files or commands.
@@ -36,7 +24,6 @@ public final class SecurityManager extends java.lang.SecurityManager {
     private final SecureAccess secureAccess;
     private final PermissionManager permissionManager;
     private final SystemMail systemMail;
-    private final Logger logger = LogManager.getLogger(this.getClass());
     private final Main main;
     private final List<String> forbiddenProperties;
 
@@ -76,6 +63,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
         try {
             tempSecureAccess = SecureAccess.createSecureAccess(systemMail);
         } catch (IllegalAccessException e) {
+            Logger logger = LogManager.getLogger(this.getClass());
             logger.fatal("Unable to create a SecureAccess object because Izou might be under attack. "
                     + "Exiting now.", e);
             exitPermission = true;
@@ -88,8 +76,12 @@ public final class SecurityManager extends java.lang.SecurityManager {
         forbiddenProperties.add("jdk.lang.process.launchmechanism");
     }
 
-    public SecureAccess getSecureAccess() {
+    SecureAccess getSecureAccess() {
         return secureAccess;
+    }
+
+    PermissionManager getPermissionManager() {
+        return permissionManager;
     }
 
     /**
@@ -228,11 +220,11 @@ public final class SecurityManager extends java.lang.SecurityManager {
 
     @Override
     public void checkRead(String file) {
-        check(file, (file1, addon) -> fileReadCheck(file1));
+        check(file, (file1, addon) -> permissionManager.getFilePermissionModule().fileReadCheck(file1));
     }
 
     @Override
     public void checkWrite(FileDescriptor fd) {
-        check(fd.toString(), (file, addon) -> fileWriteCheck(file));
+        check(fd.toString(), permissionManager.getFilePermissionModule()::fileWriteCheck);
     }
 }

@@ -29,6 +29,8 @@ public abstract class PermissionModule extends IzouModule {
 
     /**
      * Creates a new PermissionModule
+     * @param main an instance of main
+     * @param securityManager an instance of securityManager
      */
     PermissionModule(Main main, SecurityManager securityManager) {
         super(main);
