@@ -19,6 +19,7 @@ public final class PermissionManager extends IzouModule {
     private final List<PermissionModule> standardCheck;
     private final AudioPermissionModule audioPermissionModule;
     private final SocketPermissionModule SocketPermissions;
+    private final FilePermissionModule filePermissionModule;
 
     /**
      * Creates a new PermissionManager instance if and only if none has been created yet
@@ -32,8 +33,10 @@ public final class PermissionManager extends IzouModule {
         standardCheck = new ArrayList<>();
         audioPermissionModule = new AudioPermissionModule(main, securityManager);
         standardCheck.add(audioPermissionModule);
-        SocketPermissions = new SocketPermissionModule(main);
+        SocketPermissions = new SocketPermissionModule(main, securityManager);
         standardCheck.add(SocketPermissions);
+        filePermissionModule = new FilePermissionModule(main, securityManager);
+        standardCheck.add(filePermissionModule);
     }
 
     public AudioPermissionModule getAudioPermissionModule() {
@@ -42,6 +45,10 @@ public final class PermissionManager extends IzouModule {
 
     public SocketPermissionModule getSocketPermissions() {
         return SocketPermissions;
+    }
+
+    public FilePermissionModule getFilePermissionModule() {
+        return filePermissionModule;
     }
 
     /**

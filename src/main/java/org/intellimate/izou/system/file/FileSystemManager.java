@@ -51,11 +51,11 @@ public class FileSystemManager extends IzouModule {
             } else {
                 izouParentLocation = izouJarLocation.getParentFile();
             }
-            libLocation = new File(izouParentLocation.toString() + File.pathSeparator + "lib");
-            resourceLocation = new File(izouParentLocation.toString() + File.pathSeparator + "resources");
-            propertiesLocation = new File(izouParentLocation.toString() + File.pathSeparator + "properties");
-            logsLocation = new File(izouParentLocation.toString() + File.pathSeparator + "logs");
-        } catch (URISyntaxException e) {
+            libLocation = new File(izouParentLocation.toString() + File.pathSeparator + "lib").getCanonicalFile();
+            resourceLocation = new File(izouParentLocation.toString() + File.pathSeparator + "resources").getCanonicalFile();
+            propertiesLocation = new File(izouParentLocation.toString() + File.pathSeparator + "properties").getCanonicalFile();
+            logsLocation = new File(izouParentLocation.toString() + File.pathSeparator + "logs").getCanonicalFile();
+        } catch (URISyntaxException | IOException e) {
             error("unable to create the Izou-file system");
             throw new IllegalStateException("unable to create the Izou-file system");
         }

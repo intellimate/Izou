@@ -1,5 +1,6 @@
 package org.intellimate.izou.security;
 
+import com.google.common.io.Files;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.exceptions.IzouPermissionException;
@@ -24,7 +25,7 @@ public class FilePermissionModule extends PermissionModule {
     private final List<String> allowedReadDirectories;
     private final List<String> allowedReadFiles;
     private final List<File> allowedWriteDirectories;
-    private final List<String> forbiddenProperties;
+    private final List<File> forbiddenWriteDirectories;
     private final String allowedReadFileTypesRegex;
     private final String allowedWriteFileTypesRegex;
 
@@ -37,14 +38,14 @@ public class FilePermissionModule extends PermissionModule {
         super(main, securityManager);
         allowedReadDirectories = new ArrayList<>();
         allowedReadFiles = new ArrayList<>();
+        forbiddenWriteDirectories = new ArrayList<>();
+        forbiddenWriteDirectories.add(main.getFileSystemManager().getLibLocation());
         allowedReadFiles.add("/dev/random");
         allowedReadFiles.add("/dev/urandom");
         allowedWriteDirectories = new ArrayList<>();
-        forbiddenProperties = new ArrayList<>();
         allowedReadFileTypesRegex = "(txt|properties|xml|class|json|zip|ds_store|mf|jar|idx|log|dylib|mp3|dylib|certs|"
                 + "so)";
         allowedWriteFileTypesRegex = "(txt|properties|xml|json|idx|log)";
-        forbiddenProperties.add("jdk.lang.process.launchmechanism");
         String workingDir = FileSystemManager.FULL_WORKING_DIRECTORY;
         allowedReadDirectories.add(workingDir);
         allowedReadDirectories.addAll(Arrays.asList(System.getProperty("java.ext.dirs").split(":")));
@@ -125,8 +126,8 @@ public class FilePermissionModule extends PermissionModule {
         String[] pathPeriodParts = lastPathPart.split("\\.");
         String fileExtension = pathPeriodParts[pathPeriodParts.length - 1].toLowerCase();
 
-        if (!secureAccess.checkForExistingFileOrDirectory(canonicalPath)
-                || secureAccess.checkForDirectory(canonicalPath)) {
+        if (!getSecurityManager().getSecureAccess().checkForExistingFileOrDirectory(canonicalPath)
+                || getSecurityManager().getSecureAccess().checkForDirectory(canonicalPath)) {
             return;
         }
 
@@ -142,36 +143,31 @@ public class FilePermissionModule extends PermissionModule {
      * @param filePath the path to the file to write to
      */
     private void fileWriteCheck(String filePath) {
-        File potentialFile = new File(filePath);
-        String canonicalPath;
+        File request;
         try {
-            canonicalPath = potentialFile.getCanonicalPath();
+            request =  new File(filePath).getCanonicalFile();
         } catch (IOException e) {
             error("Error getting canonical path", e);
             throw getException(filePath);
         }
 
-        boolean allowedDirectory = false;
-        for (String dir : allowedWriteDirectories) {
-            if (canonicalPath.contains(dir)) {
-                allowedDirectory = true;
-                break;
-            }
-        }
-        if (!allowedDirectory) {
+        if (forbiddenWriteDirectories.stream()
+                .anyMatch(compare -> request.toPath().startsWith(compare.toPath()))) {
             throw getException(filePath);
         }
 
-        String[] pathParts = canonicalPath.split("\\.");
-        String fileExtension = pathParts[pathParts.length - 1].toLowerCase();
+        if (allowedWriteDirectories.stream()
+                .noneMatch(compare -> request.toPath().startsWith(compare.toPath()))) {
+            throw getException(filePath);
+        }
 
-        if (!secureAccess.checkForExistingFileOrDirectory(canonicalPath)
-                || secureAccess.checkForDirectory(canonicalPath)) {
+        if (!getSecurityManager().getSecureAccess().checkForExistingFileOrDirectory(request.toString())
+                || getSecurityManager().getSecureAccess().checkForDirectory(request.toString())) {
             return;
         }
 
         Pattern pattern = Pattern.compile(allowedWriteFileTypesRegex);
-        Matcher matcher = pattern.matcher(fileExtension);
+        Matcher matcher = pattern.matcher(Files.getFileExtension(request.toString()));
         if (!matcher.matches())
             throw getException(filePath);
     }

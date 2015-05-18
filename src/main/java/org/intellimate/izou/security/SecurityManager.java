@@ -38,6 +38,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
     private final SystemMail systemMail;
     private final Logger logger = LogManager.getLogger(this.getClass());
     private final Main main;
+    private final List<String> forbiddenProperties;
 
     /**
      * Creates a SecurityManager. There can only be one single SecurityManager, so calling this method twice
@@ -54,7 +55,6 @@ public final class SecurityManager extends java.lang.SecurityManager {
             exists = true;
             return  securityManager;
         }
-
         throw new IllegalAccessException("Cannot create more than one instance of IzouSecurityManager");
     }
 
@@ -81,8 +81,15 @@ public final class SecurityManager extends java.lang.SecurityManager {
             exitPermission = true;
             System.exit(1);
         }
-        permissionManager = new PermissionManager(main);
+        permissionManager = new PermissionManager(main, this);
         secureAccess = tempSecureAccess;
+
+        forbiddenProperties = new ArrayList<>();
+        forbiddenProperties.add("jdk.lang.process.launchmechanism");
+    }
+
+    public SecureAccess getSecureAccess() {
+        return secureAccess;
     }
 
     /**
