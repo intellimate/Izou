@@ -4,7 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.intellimate.izou.security.exceptions.IzouSocketPermissionException;
 import org.intellimate.izou.security.exceptions.IzouSoundPermissionException;
-import org.intellimate.izou.security.storage.SecureStorage;
 import org.intellimate.izou.support.SystemMail;
 import org.intellimate.izou.system.file.FileSystemManager;
 import ro.fortsoft.pf4j.IzouPluginClassLoader;
@@ -17,7 +16,6 @@ import java.io.FilePermission;
 import java.io.IOException;
 import java.net.SocketPermission;
 import java.security.Permission;
-import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -32,7 +30,6 @@ public final class SecurityManager extends java.lang.SecurityManager {
     private static boolean exists = false;
     private boolean exitPermission = false;
     private final List<String> allowedReadDirectories;
-    private final List<String> deniedDirectories;
     private final List<String> allowedReadFiles;
     private final List<String> allowedSocketConnections;
     private final List<String> allowedWriteDirectories;
@@ -41,7 +38,6 @@ public final class SecurityManager extends java.lang.SecurityManager {
     private final String allowedWriteFileTypesRegex;
     private final SecureAccess secureAccess;
     private final PermissionManager permissionManager;
-    private final SecureStorage secureStorage;
     private final SystemMail systemMail;
     private final Logger logger = LogManager.getLogger(this.getClass());
 
@@ -73,9 +69,6 @@ public final class SecurityManager extends java.lang.SecurityManager {
         if (exists) {
             throw new IllegalAccessException("Cannot create more than one instance of IzouSecurityManager");
         }
-
-        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-
         this.systemMail = systemMail;
 
         SecureAccess tempSecureAccess = null;
@@ -89,18 +82,9 @@ public final class SecurityManager extends java.lang.SecurityManager {
         }
         permissionManager = PermissionManager.createPermissionManager();
         secureAccess = tempSecureAccess;
-        SecureStorage tempSecureStorage = null;
-        try {
-            tempSecureStorage = SecureStorage.createSecureStorage();
-        } catch (Exception e) {
-            logger.fatal("An error occured during secure storage initializtion, quitting.", e);
-            secureAccess.exitIzou();
-        }
-        secureStorage = tempSecureStorage;
         allowedReadDirectories = new ArrayList<>();
         allowedReadFiles = new ArrayList<>();
         allowedWriteDirectories = new ArrayList<>();
-        deniedDirectories = new ArrayList<>();
         forbiddenProperties = new ArrayList<>();
         allowedSocketConnections = new ArrayList<>();
         allowedReadFileTypesRegex = "(txt|properties|xml|class|json|zip|ds_store|mf|jar|idx|log|dylib|mp3|dylib|certs|"
@@ -125,8 +109,6 @@ public final class SecurityManager extends java.lang.SecurityManager {
         allowedSocketConnections.add("local");
         allowedSocketConnections.add("smtp");
         allowedWriteDirectories.add(workingDir);
-
-        deniedDirectories.add(workingDir + File.separator + "system");
     }
 
     /**
@@ -286,12 +268,6 @@ public final class SecurityManager extends java.lang.SecurityManager {
             return false;
         }
 
-        for (String dir : deniedDirectories) {
-            if (canonicalPath.contains(dir)) {
-                return false;
-            }
-        }
-
         for (String file : allowedReadFiles) {
             if (canonicalPath.contains(file)) {
                 return true;
@@ -341,12 +317,6 @@ public final class SecurityManager extends java.lang.SecurityManager {
             return false;
         }
 
-        for (String dir : deniedDirectories) {
-            if (canonicalPath.contains(dir)) {
-                return false;
-            }
-        }
-
         boolean allowedDirectory = false;
         for (String dir : allowedWriteDirectories) {
             if (canonicalPath.contains(dir)) {
@@ -379,8 +349,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
     private boolean checkForSecureAccess() {
         Class[] classContext = getClassContext();
         for (Class clazz : classContext) {
-            if (clazz.equals(SecureAccess.class) || clazz.equals(SecurityBreachHandler.class)
-                    || clazz.equals(SecurityModule.class) || clazz.equals(SecureStorage.class)) {
+            if (clazz.equals(SecureAccess.class) || clazz.equals(SecurityBreachHandler.class)) {
                 return true;
             }
         }
@@ -405,15 +374,6 @@ public final class SecurityManager extends java.lang.SecurityManager {
      */
     public PermissionManager getPermissionManager() {
         return permissionManager;
-    }
-
-    /**
-     * Gets the {@link SecureStorage} object in Izou
-     *
-     * @return the secure storage object in Izou
-     */
-    public SecureStorage getSecureStorage() {
-        return secureStorage;
     }
 
     @Override

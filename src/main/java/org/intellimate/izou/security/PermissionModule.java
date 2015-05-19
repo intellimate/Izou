@@ -16,7 +16,7 @@ import java.util.List;
  *     Thus {@code PermissionModule} implements a registration system for services like socket connection.
  * </p>
  */
-public abstract class PermissionModule {
+public abstract class PermissionModule extends SecurityModule {
     private final List<String> registeredAddOns;
 
     /**
