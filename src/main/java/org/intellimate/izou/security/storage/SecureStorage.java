@@ -119,6 +119,9 @@ public final class SecureStorage {
         return container;
     }
 
+    /**
+     * Saves the containers to ./system/data/containers.ser
+     */
     private void saveContainers() {
         String workingDir = FileSystemManager.FULL_WORKING_DIRECTORY;
         final String containerFile = workingDir + File.separator + "system" + File.separator + "data" + File.separator
@@ -134,6 +137,11 @@ public final class SecureStorage {
         }
     }
 
+    /**
+     * Retrieves the containers from ./system/data/containers.ser if the file is found, else returns null
+     *
+     * @return the containers from ./system/data/containers.ser if the file is found, else null
+     */
     private HashMap<String, SecureContainer> retrieveContainers() {
         HashMap<String, SecureContainer> containers = null;
         String workingDir = FileSystemManager.FULL_WORKING_DIRECTORY;
@@ -155,6 +163,11 @@ public final class SecureStorage {
         return containers;
     }
 
+    /**
+     * Retrieves the izou aes key stored in a keystore
+     *
+     * @return the izou aes key stored in a keystore
+     */
     private SecretKey retrieveKey() {
         SecretKey key = null;
         try {
@@ -174,6 +187,11 @@ public final class SecureStorage {
         return key;
     }
 
+    /**
+     * Stores the izou aes key in a keystore
+     *
+     * @param key the key to store
+     */
     private void storeKey(SecretKey key) {
         String workingDir = FileSystemManager.FULL_WORKING_DIRECTORY;
         final String keyStoreFile = workingDir + File.separator + "system" + File.separator + "izou.keystore";
@@ -191,6 +209,13 @@ public final class SecureStorage {
         }
     }
 
+    /**
+     * Creates a new keystore for the izou aes key
+     *
+     * @param fileName the path to the keystore
+     * @param password the password to use with the keystore
+     * @return the newly created keystore
+     */
     private KeyStore createKeyStore(String fileName, String password)  {
         File file = new File(fileName);
         KeyStore keyStore = null;
