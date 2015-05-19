@@ -16,6 +16,7 @@ public final class AudioPermissionModule extends PermissionModule {
     private boolean isPlaying;
     private List<String> shortTermPermissions;
     private final Logger logger = LogManager.getLogger(this.getClass());
+    private final SecurityModule securityModule;
 
     /**
      * Creates a new instance of AudioPermissionModule
@@ -24,6 +25,7 @@ public final class AudioPermissionModule extends PermissionModule {
         currentPlaybackID = null;
         isPlaying = false;
         shortTermPermissions = new ArrayList<>();
+        securityModule = new SecurityModule();
     }
 
     /**
@@ -39,7 +41,7 @@ public final class AudioPermissionModule extends PermissionModule {
      * @return true if it has been granted, else false
      */
     public boolean requestShortTermPermission(String addOnID) {
-        return isRegistered(addOnID) && shortTermPermissions.add(sha3(addOnID));
+        return isRegistered(addOnID) && shortTermPermissions.add(securityModule.sha3(addOnID));
     }
 
     /**
@@ -58,7 +60,7 @@ public final class AudioPermissionModule extends PermissionModule {
      */
     public boolean requestPlaybackPermission(String addOnID) {
         if (!isPlaying) {
-            currentPlaybackID = sha3(addOnID);
+            currentPlaybackID = securityModule.sha3(addOnID);
             isPlaying = true;
             return true;
         }
@@ -74,7 +76,7 @@ public final class AudioPermissionModule extends PermissionModule {
      * @return true if the permission was returned successfully, else false
      */
     public boolean returnPlaybackPermission(String addOnID) {
-        if (sha3(addOnID).equals(currentPlaybackID)) {
+        if (securityModule.sha3(addOnID).equals(currentPlaybackID)) {
             isPlaying = false;
             currentPlaybackID = null;
             return true;
@@ -86,13 +88,13 @@ public final class AudioPermissionModule extends PermissionModule {
     @Override
     public boolean checkPermission(String addOnID) throws IzouSoundPermissionException {
         for (String hash : shortTermPermissions) {
-            if (hash.equals(sha3(addOnID))) {
+            if (hash.equals(securityModule.sha3(addOnID))) {
                 shortTermPermissions.remove(hash);
                 return true;
             }
         }
 
-        return !(!isRegistered(addOnID) || !isPlaying || !sha3(addOnID).equals(currentPlaybackID));
+        return !(!isRegistered(addOnID) || !isPlaying || !securityModule.sha3(addOnID).equals(currentPlaybackID));
 
     }
 }
