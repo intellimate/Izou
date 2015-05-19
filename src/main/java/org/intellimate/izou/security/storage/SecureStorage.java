@@ -57,10 +57,7 @@ public final class SecureStorage {
             throw new IllegalAccessException("Cannot create more than one instance of IzouSecurityManager");
         }
 
-        containers = new HashMap<>();
-
         SecretKey key = retrieveKey();
-
         if (key == null) {
             SecurityModule securityModule = new SecurityModule();
             key = securityModule.generateKey();
@@ -70,6 +67,11 @@ public final class SecureStorage {
             } else {
                 throw new NullPointerException("Unable to create security key");
             }
+        }
+
+        containers = retrieveContainers();
+        if (containers == null) {
+            containers = new HashMap<>();
         }
     }
 
@@ -81,7 +83,19 @@ public final class SecureStorage {
      * @param container The secure container to be stored with an addOn
      */
     public void store(PluginDescriptor descriptor, SecureContainer container) {
+        HashMap<String, String> clearTextData = container.getClearTextData();
+        HashMap<byte[], byte[]> cryptData = container.getCryptData();
+
+        SecretKey secretKey = retrieveKey();
+        SecurityModule module = new SecurityModule();
+        for (String key : clearTextData.keySet()) {
+            cryptData.put(module.encryptAES(key, secretKey), module.encryptAES(clearTextData.get(key), secretKey));
+        }
+
+        container.setCryptData(cryptData);
+
         containers.put(descriptor.getSecureID(), container);
+        saveContainers();
     }
 
     /**
@@ -91,7 +105,54 @@ public final class SecureStorage {
      * @return  container The secure container that was retrieved
      */
     public SecureContainer retrieve(PluginDescriptor descriptor) {
-        return containers.get(descriptor.getSecureID());
+        SecureContainer container = containers.get(descriptor.getSecureID());
+        HashMap<byte[], byte[]> cryptData = container.getCryptData();
+        HashMap<String, String> clearTextData = container.getClearTextData();
+
+        SecretKey secretKey = retrieveKey();
+        SecurityModule module = new SecurityModule();
+        for (byte[] key : cryptData.keySet()) {
+            clearTextData.put(module.decryptAES(key, secretKey), module.decryptAES(cryptData.get(key), secretKey));
+        }
+
+        container.setClearTextData(clearTextData);
+        return container;
+    }
+
+    private void saveContainers() {
+        String workingDir = FileSystemManager.FULL_WORKING_DIRECTORY;
+        final String containerFile = workingDir + File.separator + "system" + File.separator + "data" + File.separator
+                + "containers.ser";
+        try {
+            FileOutputStream fileOut = new FileOutputStream(containerFile);
+            ObjectOutputStream out = new ObjectOutputStream(fileOut);
+            out.writeObject(containers);
+            out.close();
+            fileOut.close();
+        } catch(IOException e) {
+            logger.error("Unable to save containers to file", e);
+        }
+    }
+
+    private HashMap<String, SecureContainer> retrieveContainers() {
+        HashMap<String, SecureContainer> containers = null;
+        String workingDir = FileSystemManager.FULL_WORKING_DIRECTORY;
+        final String containerFile = workingDir + File.separator + "system" + File.separator + "data" + File.separator
+                + "containers.ser";
+        try {
+            FileInputStream fileIn = new FileInputStream(containerFile);
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+            Object o = in.readObject();
+            if (o instanceof HashMap) {
+                containers = (HashMap) o;
+            }
+            in.close();
+            fileIn.close();
+        } catch(IOException | ClassNotFoundException e) {
+            logger.error("Unable to save containers to file", e);
+        }
+
+        return containers;
     }
 
     private SecretKey retrieveKey() {

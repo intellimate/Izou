@@ -1,9 +1,5 @@
 package org.intellimate.izou.security.storage;
 
-import org.intellimate.izou.security.SecurityManager;
-import org.intellimate.izou.security.SecurityModule;
-import ro.fortsoft.pf4j.PluginDescriptor;
-
 import java.io.Serializable;
 import java.util.HashMap;
 
@@ -17,17 +13,15 @@ import java.util.HashMap;
  * </p>
  */
 public class SecureContainer implements Serializable {
-    private HashMap<byte[], byte[]> storedData;
-    private SecurityModule securityModule;
-    private PluginDescriptor descriptor;
+    private HashMap<byte[], byte[]> cryptData;
+    private HashMap<String, String> clearTextData;
 
     /**
      * Creates a new secure container
      */
-    public SecureContainer(PluginDescriptor descriptor) {
-        this.descriptor = descriptor;
-        org.intellimate.izou.security.SecurityManager securityManager = (SecurityManager) System.getSecurityManager();
-        securityModule = new SecurityModule();
+    public SecureContainer() {
+        cryptData = new HashMap<>();
+        clearTextData = new HashMap<>();
     }
 
     /**
@@ -35,10 +29,9 @@ public class SecureContainer implements Serializable {
      *
      * @param key the key to save
      * @param value the value to save the key with
-     * @return true if the key-value pair was added successfully
      */
-    public boolean securePut(String key, String value) {
-        return false;
+    public void securePut(String key, String value) {
+        clearTextData.put(key, value);
     }
 
     /**
@@ -47,7 +40,43 @@ public class SecureContainer implements Serializable {
      * @param key the key to retrieve {@code value} with
      * @return the value if it was found and decrypted successfully, else null
      */
-    public boolean secureGet(String key) {
-        return false;
+    public String secureGet(String key) {
+        return clearTextData.get(key);
+    }
+
+    /**
+     * Gets the clear text data array
+     *
+     * @return the clear text data array
+     */
+    public HashMap<String, String> getClearTextData() {
+        return clearTextData;
+    }
+
+    /**
+     * Sets the clear text data
+     *
+     * @param clearTextData the clear text data to set
+     */
+    public void setClearTextData(HashMap<String, String> clearTextData) {
+        this.clearTextData = clearTextData;
+    }
+
+    /**
+     * Gets the crypt data array
+     *
+     * @return the crypt data array
+     */
+    public HashMap<byte[], byte[]> getCryptData() {
+        return cryptData;
+    }
+
+    /**
+     * Sets the crypt data array
+     *
+     * @param cryptData the crypt data array to set
+     */
+    public void setCryptData(HashMap<byte[], byte[]> cryptData) {
+        this.cryptData = cryptData;
     }
 }
