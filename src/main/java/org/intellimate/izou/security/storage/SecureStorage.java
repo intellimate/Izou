@@ -88,8 +88,9 @@ public final class SecureStorage {
 
         SecretKey secretKey = retrieveKey();
         SecurityModule module = new SecurityModule();
-        for (String key : clearTextData.keySet()) {
-            cryptData.put(module.encryptAES(key, secretKey), module.encryptAES(clearTextData.get(key), secretKey));
+        for (byte[] key : cryptData.keySet()) {
+            clearTextData.put(module.decryptAES(key, secretKey), module.decryptAES(cryptData.get(key), secretKey));
+            cryptData.remove(key);
         }
 
         container.setCryptData(cryptData);
@@ -113,6 +114,7 @@ public final class SecureStorage {
         SecurityModule module = new SecurityModule();
         for (byte[] key : cryptData.keySet()) {
             clearTextData.put(module.decryptAES(key, secretKey), module.decryptAES(cryptData.get(key), secretKey));
+            cryptData.remove(key);
         }
 
         container.setClearTextData(clearTextData);
@@ -156,8 +158,10 @@ public final class SecureStorage {
             }
             in.close();
             fileIn.close();
+        } catch (FileNotFoundException e) {
+            return null;
         } catch(IOException | ClassNotFoundException e) {
-            logger.error("Unable to save containers to file", e);
+            logger.error("Unable to retrieve containers from file", e);
         }
 
         return containers;
