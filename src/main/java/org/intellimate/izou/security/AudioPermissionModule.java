@@ -116,4 +116,17 @@ public final class AudioPermissionModule extends PermissionModule implements Eve
             registerOrThrow(addOn, message);
         }
     }
+
+    /**
+     * Controls whether the fired Event should be dispatched to all the listeners
+     * <p>
+     * This method should execute quickly
+     *
+     * @param event the ID of the event
+     * @return true if events should be dispatched
+     */
+    @Override
+    public boolean controlEventDispatcher(EventModel event) {
+        return true;
+    }
 }

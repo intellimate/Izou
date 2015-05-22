@@ -90,7 +90,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
      * @return AddOnModel or IzouPermissionException if the call was made from an AddOn, or null if no AddOn is responsible
      * @throws IzouPermissionException if the AddOnModel is not found
      */
-    private AddOnModel getOrThrowAddOnModel() throws IzouPermissionException {
+    private AddOnModel getOrThrowAddOnModelForClassLoader() throws IzouPermissionException {
         Class[] classes = getClassContext();
         for (int i = classes.length - 1; i >= 0; i--) {
             if (classes[i].getClassLoader() instanceof IzouPluginClassLoader && !classes[i].getName().toLowerCase()
@@ -113,11 +113,10 @@ public final class SecurityManager extends java.lang.SecurityManager {
             return;
         }
 
-        AddOnModel addOn = getOrThrowAddOnModel();
+        AddOnModel addOn = getOrThrowAddOnModelForClassLoader();
         if (addOn == null) return;
         specific.accept(t, addOn);
     }
-
     /**
      * performs some basic checks to determine whether to check the permission
      * @return true if should be checked, false if not
@@ -220,7 +219,10 @@ public final class SecurityManager extends java.lang.SecurityManager {
 
     @Override
     public void checkRead(String file) {
-        check(file, (file1, addon) -> permissionManager.getFilePermissionModule().fileReadCheck(file1));
+        if (!shouldCheck()) {
+            return;
+        }
+        permissionManager.getFilePermissionModule().fileReadCheck(file);
     }
 
     @Override

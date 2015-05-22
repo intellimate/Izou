@@ -129,21 +129,6 @@ public class Main {
             fileLogger.fatal("Failed to create the FileSystemManager", e);
         }
 
-        // Starting security manager
-        SecurityManager securityManagerTemp;
-        try {
-            securityManagerTemp = SecurityManager.createSecurityManager(systemMail);
-        } catch (IllegalAccessException e) {
-            securityManagerTemp = null;
-            fileLogger.fatal("Security manager already exists", e);
-        }
-        securityManager = securityManagerTemp;
-        try {
-            System.setSecurityManager(securityManager);
-        } catch (SecurityException e) {
-            fileLogger.fatal("Security manager already exists", e);
-        }
-
         threadPoolManager = new ThreadPoolManager(this);
         izouLogger = new IzouLogger();
         outputManager = new OutputManager(this);
@@ -165,6 +150,22 @@ public class Main {
         fileLogger.debug("finished initializing");
         fileLogger.debug("adding addons");
         addOnManager = new AddOnManager(this);
+
+        // Starting security manager
+        SecurityManager securityManagerTemp;
+        try {
+            securityManagerTemp = SecurityManager.createSecurityManager(systemMail, this);
+        } catch (IllegalAccessException e) {
+            securityManagerTemp = null;
+            fileLogger.fatal("Security manager already exists", e);
+        }
+        securityManager = securityManagerTemp;
+        try {
+            System.setSecurityManager(securityManager);
+        } catch (SecurityException e) {
+            fileLogger.fatal("Security manager already exists", e);
+        }
+
         if (addOns != null && !debug) {
             fileLogger.debug("adding addons from the parameter without registering");
             addOnManager.addAddOnsWithoutRegistering(addOns);

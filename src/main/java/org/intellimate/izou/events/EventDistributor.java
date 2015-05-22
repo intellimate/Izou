@@ -211,9 +211,8 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
                     List<CompletableFuture> futures = listenersTemp.stream()
                             .map(eventListener -> submit(() -> eventListener.eventFired(event)))
                             .collect(Collectors.toList());
-                    EventModel<?> finalizedEvent = event.finalizeEvent();
                     timeOut(futures, 1000);
-                    getMain().getOutputManager().passDataToOutputPlugins(finalizedEvent);
+                    getMain().getOutputManager().passDataToOutputPlugins(event);
                 }
             } catch (InterruptedException e) {
                 log.warn(e);
