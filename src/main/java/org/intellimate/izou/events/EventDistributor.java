@@ -30,6 +30,16 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
     }
 
     /**
+     * fires the event.
+     * this method is intended to be only used inside Izou!
+     * @param eventModel the EventModel
+     */
+    public void fireEvent(EventModel eventModel) {
+        if(eventModel == null) return;
+        events.add(eventModel);
+    }
+
+    /**
      * with this method you can register EventPublisher add a Source of Events to the System.
      * <p>
      * This method represents a higher level of abstraction! Use the EventManager to fire Events!
@@ -197,6 +207,10 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
         while(!stop) {
             try {
                 EventModel<?> event = events.take();
+                if (!event.getSource().isCreatedFromInstance()) {
+                    error("event: " + event + "has invalid source");
+                    continue;
+                }
                 debug("EventFired: " + event.toString() + " from " + event.getSource().getID());
                 if (checkEventsControllers(event)) {
                     List<ResourceModel> resourceList = getMain().getResourceManager().generateResources(event);

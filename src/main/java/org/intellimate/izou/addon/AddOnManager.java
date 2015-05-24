@@ -71,7 +71,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
     private void initAddOns(IdentifiableSet<AddOnModel> addOns) {
         addOns.forEach(addOn -> {
             Context context = new ContextImplementation(addOn, main, Level.DEBUG.name());
-            addOn.initAddOn(context);
+            submit(() -> addOn.initAddOn(context));
         });
     }
 

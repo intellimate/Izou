@@ -2,16 +2,23 @@ package org.intellimate.izou.security;
 
 import org.intellimate.izou.IdentifiableSet;
 import org.intellimate.izou.addon.AddOnModel;
+import org.intellimate.izou.events.EventMinimalImpl;
 import org.intellimate.izou.events.EventModel;
 import org.intellimate.izou.events.EventsControllerModel;
 import org.intellimate.izou.identification.Identifiable;
+import org.intellimate.izou.identification.Identification;
+import org.intellimate.izou.identification.IdentificationManager;
 import org.intellimate.izou.identification.IllegalIDException;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.exceptions.IzouSoundPermissionException;
+import org.intellimate.izou.system.sound.SoundIDs;
 import ro.fortsoft.pf4j.PluginDescriptor;
 
 import javax.sound.sampled.AudioPermission;
 import java.security.Permission;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 /**
@@ -19,9 +26,10 @@ import java.util.function.Function;
  * want to play music, then the AudioPermissionModule will decide who gets to play it.
  */
 public final class AudioPermissionModule extends PermissionModule implements EventsControllerModel {
-    private Identifiable currentPlaybackID;
+    private Identification currentPlaybackID;
     private boolean isPlaying;
     private IdentifiableSet<AddOnModel> shortTermPermissions;
+    private Map<Identifiable, CompletableFuture> permissionsPending = new ConcurrentHashMap<>();
 
     /**
      * Creates a new PermissionModule
@@ -70,14 +78,8 @@ public final class AudioPermissionModule extends PermissionModule implements Eve
 
     @Override
     public void checkPermission(Permission permission, AddOnModel addOn) throws IzouSoundPermissionException {
-        if (currentPlaybackID.equals(addOn))
+        if (addOn.isOwner(currentPlaybackID))
             return;
-        if (!isPlaying && isRegistered(addOn)) {
-            isPlaying = true;
-            currentPlaybackID = addOn;
-            return;
-        }
-
 
         String permissionMessage = "Audio Permission Denied: " + addOn + "is not registered to "
                 + "play audio or there is already audio being played.";
@@ -127,6 +129,17 @@ public final class AudioPermissionModule extends PermissionModule implements Eve
      */
     @Override
     public boolean controlEventDispatcher(EventModel event) {
+        if (event.containsDescriptor(SoundIDs.StartEvent.descriptor)) {
+            if (isPlaying && !currentPlaybackID.equals(event.getSource())) {
+                IdentificationManager.getInstance().getIdentification(this)
+                        .map(id -> new EventMinimalImpl(SoundIDs.StopEvent.type, id, SoundIDs.StopEvent.descriptors))
+                        .ifPresent(stopEvent -> getMain().getEventDistributor().fireEvent(event));
+                return false;
+            } else if (!isPlaying) {
+                isPlaying = true;
+                currentPlaybackID = event.getSource();
+            }
+        }
         return true;
     }
 }

@@ -12,17 +12,11 @@ import javax.sound.sampled.Line;
  */
 @Aspect
 public class MixerAspect {
-    @Around("execution(Line javax.sound.sampled.Mixer.getLine(Line.Info info))")
+
+    @Around("execution(* javax.sound.sampled.AudioSystem.getLine(javax.sound.sampled.Line.Info))")
     public Object getLineAdvice(ProceedingJoinPoint pjp) throws Throwable {
         System.out.println("AspectJ");
         pjp.getArgs();
-        Line ret = (Line) pjp.proceed();
-        return ret;
-    }
-
-    @Around("execution(Line[] javax.sound.sampled.Mixer.getSourceLines())")
-    public Object getLinesAdvice(ProceedingJoinPoint pjp) throws Throwable {
-        System.out.println("AspectJ");
         Line ret = (Line) pjp.proceed();
         return ret;
     }

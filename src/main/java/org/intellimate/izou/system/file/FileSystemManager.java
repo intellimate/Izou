@@ -20,6 +20,13 @@ public class FileSystemManager extends IzouModule {
     private static final Logger logger = LogManager.getLogger(FileSystemManager.class);
     public static final String LOG_PATH = "." + File.separator + "logs" + File.separator;
     public static final String FULL_WORKING_DIRECTORY;
+
+    /**
+     * path to the proterties files
+     */
+    //TODO remove!
+    public static final String PROPERTIES_PATH = "." + File.separator + "properties" + File.separator;
+
     static {
         String path = null;
         try {
@@ -51,10 +58,10 @@ public class FileSystemManager extends IzouModule {
             } else {
                 izouParentLocation = izouJarLocation.getParentFile();
             }
-            libLocation = new File(izouParentLocation.toString() + File.pathSeparator + "lib").getCanonicalFile();
-            resourceLocation = new File(izouParentLocation.toString() + File.pathSeparator + "resources").getCanonicalFile();
-            propertiesLocation = new File(izouParentLocation.toString() + File.pathSeparator + "properties").getCanonicalFile();
-            logsLocation = new File(izouParentLocation.toString() + File.pathSeparator + "logs").getCanonicalFile();
+            libLocation = new File(izouParentLocation.toString() + File.separator + "lib").getCanonicalFile();
+            resourceLocation = new File(izouParentLocation.toString() + File.separator + "resources").getCanonicalFile();
+            propertiesLocation = new File(izouParentLocation.toString() + File.separator + "properties").getCanonicalFile();
+            logsLocation = new File(izouParentLocation.toString() + File.separator + "logs").getCanonicalFile();
         } catch (URISyntaxException | IOException e) {
             error("unable to create the Izou-file system");
             throw new IllegalStateException("unable to create the Izou-file system");

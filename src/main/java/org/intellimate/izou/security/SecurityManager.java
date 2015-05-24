@@ -109,11 +109,11 @@ public final class SecurityManager extends java.lang.SecurityManager {
      * @param specific the specific check
      */
     private <T> void check(T t, BiConsumer<T, AddOnModel> specific) {
-        if (!shouldCheck()) {
+        if (!secureAccess.doEvelevated(this::shouldCheck)) {
             return;
         }
 
-        AddOnModel addOn = getOrThrowAddOnModelForClassLoader();
+        AddOnModel addOn = secureAccess.doEvelevated(this::getOrThrowAddOnModelForClassLoader);
         if (addOn == null) return;
         specific.accept(t, addOn);
     }
@@ -219,7 +219,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
 
     @Override
     public void checkRead(String file) {
-        if (!shouldCheck()) {
+        if (!secureAccess.doEvelevated(this::shouldCheck)) {
             return;
         }
         permissionManager.getFilePermissionModule().fileReadCheck(file);

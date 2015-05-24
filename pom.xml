@@ -79,7 +79,7 @@
         <dependency>
             <groupId>org.intellimate.izou</groupId>
             <artifactId>pf4j</artifactId>
-            <version>1.6.1</version>
+            <version>1.7.38</version>
             <!-- we are releasing a jar with dependencies, version changes require a new Izou Version -->
         </dependency>
         <dependency>
@@ -96,6 +96,11 @@
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjweaver</artifactId>
             <version>1.8.5</version>
+        </dependency>
+        <dependency>
+            <groupId>aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+            <version>1.5.4</version>
         </dependency>
     </dependencies>
 

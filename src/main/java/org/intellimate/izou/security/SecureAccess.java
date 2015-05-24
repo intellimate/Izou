@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.intellimate.izou.support.SystemMail;
 
 import java.io.File;
+import java.util.function.Supplier;
 
 /**
  * SecureAccess allows the {@link SecurityManager} to access anything with full permission. If the secure access
@@ -91,5 +92,13 @@ final class SecureAccess {
      */
     boolean checkForExistingFileOrDirectory(String dir) {
         return new File(dir).exists();
+    }
+
+    <T> T doEvelevated(Supplier<T> supplier) {
+        return supplier.get();
+    }
+
+    void doElevated(Runnable run) {
+        run.run();
     }
 }
