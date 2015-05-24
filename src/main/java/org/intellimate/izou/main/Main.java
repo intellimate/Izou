@@ -42,6 +42,7 @@ public class Main {
     private final FilePublisher filePublisher;
     private final IzouLogger izouLogger;
     private final ThreadPoolManager threadPoolManager;
+    private final SecurityManager securityManager;
     private final SystemInitializer systemInitializer;
     private final SystemMail systemMail;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
@@ -86,30 +87,8 @@ public class Main {
     public Main(List<AddOnModel> addOns, boolean javaFX, boolean debug) {
         fileLogger.debug("Starting Izou");
         fileLogger.debug("Initializing...");
-
-<<<<<<< HEAD
-        // Setting up file system
-        this.fileSystemManager = new FileSystemManager(this);
-        try {
-            fileSystemManager.createIzouFileSystem();
-        } catch (IOException e) {
-            fileLogger.fatal("Failed to create the FileSystemManager", e);
-        }
-
-=======
-        // Initializing the system
         systemInitializer = initSystem();
 
-        // Starting security manager
-        startSecurity();
-
-        // Starting javaFX
-        setUpJavaFX(javaFX);
-
-        // Starting system mail service
-        systemMail = initMail();
-
->>>>>>> master
         threadPoolManager = new ThreadPoolManager(this);
         izouLogger = new IzouLogger();
         outputManager = new OutputManager(this);
@@ -127,19 +106,8 @@ public class Main {
         addOnManager = new AddOnManager(this);
 
         // Starting security manager
-        SecurityManager securityManagerTemp;
-        try {
-            securityManagerTemp = SecurityManager.createSecurityManager(systemMail, this);
-        } catch (IllegalAccessException e) {
-            securityManagerTemp = null;
-            fileLogger.fatal("Security manager already exists", e);
-        }
-        securityManager = securityManagerTemp;
-        try {
-            System.setSecurityManager(securityManager);
-        } catch (SecurityException e) {
-            fileLogger.fatal("Security manager already exists", e);
-        }
+        systemMail = initMail();
+        securityManager = startSecurity(systemMail);
 
         if (addOns != null && !debug) {
             fileLogger.debug("adding addons from the parameter without registering");
@@ -198,19 +166,20 @@ public class Main {
         }
     }
 
-    private void startSecurity() {
-        SecurityManager securityManager;
+    private SecurityManager startSecurity(SystemMail systemMail) {
+        SecurityManager securityManagerTemp;
         try {
-            securityManager = SecurityManager.createSecurityManager(systemMail);
+            securityManagerTemp = SecurityManager.createSecurityManager(systemMail, this);
         } catch (IllegalAccessException e) {
-            securityManager = null;
+            securityManagerTemp = null;
             fileLogger.fatal("Security manager already exists", e);
         }
         try {
-            System.setSecurityManager(securityManager);
+            System.setSecurityManager(securityManagerTemp);
         } catch (SecurityException e) {
             fileLogger.fatal("Security manager already exists", e);
         }
+        return securityManagerTemp;
     }
 
     private FileManager initFileManager() {
@@ -271,7 +240,7 @@ public class Main {
 
     private SystemInitializer initSystem() {
         // Setting up file system
-        FileSystemManager fileSystemManager = new FileSystemManager(this);
+        this.fileSystemManager = new FileSystemManager(this);
         try {
             fileSystemManager.createIzouFileSystem();
         } catch (IOException e) {
