@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.exceptions.IzouPermissionException;
+import org.intellimate.izou.security.storage.SecureStorage;
 import org.intellimate.izou.support.SystemMail;
 import ro.fortsoft.pf4j.IzouPluginClassLoader;
 
@@ -24,7 +25,8 @@ public final class SecurityManager extends java.lang.SecurityManager {
     private boolean exitPermission = false;
     private final SecureAccess secureAccess;
     private final PermissionManager permissionManager;
-    private final SecureStorage secureStorage;
+    //TODO: activate when everything is ready
+    //private final SecureStorage secureStorage;
     private final SystemMail systemMail;
     private final Main main;
     private final List<String> forbiddenProperties;
@@ -159,14 +161,15 @@ public final class SecurityManager extends java.lang.SecurityManager {
         return exception;
     }
 
-    /**
-     * Gets the {@link SecureStorage} object in Izou
-     *
-     * @return the secure storage object in Izou
-     */
-    public SecureStorage getSecureStorage() {
-        return secureStorage;
-    }
+    //TODO: activate when secure-storage is ready
+//    /**
+//     * Gets the {@link SecureStorage} object in Izou
+//     *
+//     * @return the secure storage object in Izou
+//     */
+//    public SecureStorage getSecureStorage() {
+//        return secureStorage;
+//    }
 
     @Override
     public void checkPermission(Permission perm) {
