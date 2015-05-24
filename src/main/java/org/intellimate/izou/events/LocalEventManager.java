@@ -102,6 +102,10 @@ public class LocalEventManager extends IzouModule implements Runnable {
             EventModel event;
             try {
                 event = events.take();
+                if (!event.getSource().isCreatedFromInstance()) {
+                    error("event: " + event + "has invalid source");
+                    continue;
+                }
                 try {
                     eventCallable.fire(event);
                 } catch (org.intellimate.izou.events.MultipleEventsException e) {

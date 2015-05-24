@@ -30,6 +30,16 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
     }
 
     /**
+     * fires the event.
+     * this method is intended to be only used inside Izou!
+     * @param eventModel the EventModel
+     */
+    public void fireEvent(EventModel eventModel) {
+        if(eventModel == null) return;
+        events.add(eventModel);
+    }
+
+    /**
      * with this method you can register EventPublisher add a Source of Events to the System.
      * <p>
      * This method represents a higher level of abstraction! Use the EventManager to fire Events!
@@ -157,14 +167,24 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
      * @return true if the event should be fired
      */
     private boolean checkEventsControllers(EventModel event) {
-        boolean shouldExecute = true;
-        for (EventsControllerModel controller : eventsControllers) {
-            if (!controller.controlEventDispatcher(event)) {
-                shouldExecute = false;
-                break;
-            }
+        List<CompletableFuture<Boolean>> collect = eventsControllers.stream()
+                .map(controller -> submit(() -> controller.controlEventDispatcher(event)))
+                .collect(Collectors.toList());
+        try {
+            collect = timeOut(collect, 1000);
+        } catch (InterruptedException e) {
+            debug("interrupted");
         }
-        return shouldExecute;
+        return collect.stream()
+                .map(future -> {
+                    try {
+                        return future.get();
+                    } catch (InterruptedException | ExecutionException e) {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .noneMatch(bool -> !bool);
     }
 
     public BlockingQueue<EventModel<?>> getEvents() {
@@ -187,6 +207,10 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
         while(!stop) {
             try {
                 EventModel<?> event = events.take();
+                if (!event.getSource().isCreatedFromInstance()) {
+                    error("event: " + event + "has invalid source");
+                    continue;
+                }
                 debug("EventFired: " + event.toString() + " from " + event.getSource().getID());
                 if (checkEventsControllers(event)) {
                     List<ResourceModel> resourceList = getMain().getResourceManager().generateResources(event);
@@ -201,9 +225,8 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
                     List<CompletableFuture> futures = listenersTemp.stream()
                             .map(eventListener -> submit(() -> eventListener.eventFired(event)))
                             .collect(Collectors.toList());
-                    EventModel<?> finalizedEvent = event.finalizeEvent();
                     timeOut(futures, 1000);
-                    getMain().getOutputManager().passDataToOutputPlugins(finalizedEvent);
+                    getMain().getOutputManager().passDataToOutputPlugins(event);
                 }
             } catch (InterruptedException e) {
                 log.warn(e);

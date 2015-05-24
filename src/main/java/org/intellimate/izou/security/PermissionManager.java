@@ -1,62 +1,63 @@
 package org.intellimate.izou.security;
 
+import org.intellimate.izou.IzouModule;
+import org.intellimate.izou.addon.AddOnModel;
+import org.intellimate.izou.main.Main;
+import org.intellimate.izou.security.exceptions.IzouPermissionException;
+
+import java.security.Permission;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * The PermissionManager handles all permission conflicts within Izou. For example, if two addOns want to play music at
  * the same time, the PermissionManager will interfere and decide who gets the play the music. The PermissionManager
  * has nothing to do with general system security, it is only there to avoid "collisions" between addOns. If you are
  * looking for system security, look at the {@link SecurityManager}.
  */
-public final class PermissionManager {
-    private static boolean exists = false;
-    private final AudioPermissionModule audioPermissionModule;
-    private final SocketPermissionModule socketPermissionModule;
-
-    /**
-     * Creates an PermissionManager. There can only be one single PermissionManager, so calling this method twice
-     * will cause an illegal access exception.
-     *
-     * @return an PermissionManager
-     * @throws IllegalAccessException thrown if this method is called more than once
-     */
-    static PermissionManager createPermissionManager() throws IllegalAccessException {
-        if (!exists) {
-            PermissionManager permissionManager = new PermissionManager();
-            exists = true;
-            return permissionManager;
-        }
-
-        throw new IllegalAccessException("Cannot create more than one instance of PermissionManager");
-    }
+public final class PermissionManager extends IzouModule {
+    private final List<PermissionModule> standardCheck;
+    private final FilePermissionModule filePermissionModule;
+    private final RootPermission rootPermission;
 
     /**
      * Creates a new PermissionManager instance if and only if none has been created yet
      *
      * @throws IllegalAccessException thrown if this method is called more than once
+     * @param main an instance of Main
+     * @param securityManager an instance of SecurityManager
      */
-    private PermissionManager() throws IllegalAccessException {
-        if (exists) {
-            throw new IllegalAccessException("Cannot create more than one instance of PermissionManager");
+    PermissionManager(Main main, SecurityManager securityManager) throws IllegalAccessException {
+        super(main);
+        standardCheck = new ArrayList<>();
+        standardCheck.add(new AudioPermissionModule(main, securityManager));
+        standardCheck.add(new SocketPermissionModule(main, securityManager));
+        filePermissionModule = new FilePermissionModule(main, securityManager);
+        rootPermission = new RootPermission(main, securityManager);
+        standardCheck.add(filePermissionModule);
+    }
+
+    public FilePermissionModule getFilePermissionModule() {
+        return filePermissionModule;
+    }
+
+    /**
+     * checks the permission
+     * @param perm the permission
+     * @param addOnModel the associated AddOnModel
+     * @throws IzouPermissionException if the permission was not granted
+     */
+    public void checkPermission(Permission perm, AddOnModel addOnModel) throws IzouPermissionException {
+        try {
+            rootPermission.checkPermission(perm, addOnModel);
+            //its root
+            return;
+        } catch (IzouPermissionException ignored) {
+            //its just not root
         }
-
-        audioPermissionModule = new AudioPermissionModule();
-        socketPermissionModule = new SocketPermissionModule();
-    }
-
-    /**
-     * Gets the AudioPermissionModule
-     *
-     * @return the AudioPermissionModule
-     */
-    public AudioPermissionModule getAudioPermissionModule() {
-        return audioPermissionModule;
-    }
-
-    /**
-     * Gets the SocketPermissionModule
-     *
-     * @return the SocketPermissionModule
-     */
-    public SocketPermissionModule getSocketPermissionModule() {
-        return socketPermissionModule;
+        for (PermissionModule permissionModule : standardCheck) {
+            if (permissionModule.canCheckPermission(perm))
+                permissionModule.checkPermission(perm, addOnModel);
+        }
     }
 }

@@ -6,31 +6,23 @@ import org.intellimate.izou.security.exceptions.IzouPermissionException;
 import org.intellimate.izou.security.exceptions.IzouSocketPermissionException;
 import ro.fortsoft.pf4j.PluginDescriptor;
 
-import java.net.SocketPermission;
+import java.io.FilePermission;
 import java.security.Permission;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Function;
 
 /**
- * The SocketPermissionModule stores addOns that registered themselves to use socket connections.
+ * @author LeanderK
+ * @version 1.0
  */
-public final class SocketPermissionModule extends PermissionModule {
-
-    private final List<String> allowedSocketConnections;
-
+public class RootPermission extends PermissionModule {
     /**
      * Creates a new PermissionModule
      *
-     * @param main the instance of main
+     * @param main an instance of main
+     * @param securityManager an instance of security-manager
      */
-    SocketPermissionModule(Main main, SecurityManager securityManager) {
+    RootPermission(Main main, SecurityManager securityManager) {
         super(main, securityManager);
-        allowedSocketConnections = new ArrayList<>();
-        //TODO: why????? I don't think this is save
-        allowedSocketConnections.add(System.getProperty("host.name"));
-        allowedSocketConnections.add("local");
-        allowedSocketConnections.add("smtp");
     }
 
     /**
@@ -41,7 +33,7 @@ public final class SocketPermissionModule extends PermissionModule {
      */
     @Override
     public boolean canCheckPermission(Permission permission) {
-        return permission instanceof SocketPermission;
+        return true;
     }
 
     /**
@@ -53,27 +45,24 @@ public final class SocketPermissionModule extends PermissionModule {
      */
     @Override
     public void checkPermission(Permission permission, AddOnModel addon) throws IzouPermissionException {
-        for (String socket : allowedSocketConnections) {
-            if (permission.getName().contains(socket)) {
-                return;
-            }
-        }
-
         if (isRegistered(addon))
             return;
 
+        if (permission instanceof FilePermission && !permission.getActions().intern().toLowerCase().equals("read")) {
+            String canonicalName = permission.getName().intern().toLowerCase();
+            getSecurityManager().getPermissionManager().getFilePermissionModule().fileWriteCheck(canonicalName, addon);
+        }
+
         Function<PluginDescriptor, Boolean> checkPermission = descriptor -> {
             try {
-                return descriptor.getAddOnProperties().get("socket_connection").equals("true")
-                        && !descriptor.getAddOnProperties().get("socket_usage_descripton").equals("null");
+                return descriptor.getAddOnProperties().get("root").equals("true");
             } catch (NullPointerException e) {
                 return false;
             }
         };
 
-        String exceptionMessage = "Socket Permission Denied: " + addon + "is not registered to "
-                + "use socket connections, please add the required information to the addon_config.properties "
-                + "file of your addOn.";
+        String exceptionMessage = "Root permission denied for: " + addon + "is not registered to "
+                + "use socket root connections.";
         registerOrThrow(addon, () -> new IzouSocketPermissionException(exceptionMessage), checkPermission);
     }
 }

@@ -45,6 +45,7 @@ public class Main {
     private final SystemInitializer systemInitializer;
     private final SystemMail systemMail;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
+    private FileSystemManager fileSystemManager;
 
     /**
      * Creates a new Main instance with debugging enabled (doesn't search the lib-folder)
@@ -86,6 +87,16 @@ public class Main {
         fileLogger.debug("Starting Izou");
         fileLogger.debug("Initializing...");
 
+<<<<<<< HEAD
+        // Setting up file system
+        this.fileSystemManager = new FileSystemManager(this);
+        try {
+            fileSystemManager.createIzouFileSystem();
+        } catch (IOException e) {
+            fileLogger.fatal("Failed to create the FileSystemManager", e);
+        }
+
+=======
         // Initializing the system
         systemInitializer = initSystem();
 
@@ -98,6 +109,7 @@ public class Main {
         // Starting system mail service
         systemMail = initMail();
 
+>>>>>>> master
         threadPoolManager = new ThreadPoolManager(this);
         izouLogger = new IzouLogger();
         outputManager = new OutputManager(this);
@@ -113,6 +125,22 @@ public class Main {
         fileLogger.debug("Done initializing.");
         fileLogger.debug("Adding addons..");
         addOnManager = new AddOnManager(this);
+
+        // Starting security manager
+        SecurityManager securityManagerTemp;
+        try {
+            securityManagerTemp = SecurityManager.createSecurityManager(systemMail, this);
+        } catch (IllegalAccessException e) {
+            securityManagerTemp = null;
+            fileLogger.fatal("Security manager already exists", e);
+        }
+        securityManager = securityManagerTemp;
+        try {
+            System.setSecurityManager(securityManager);
+        } catch (SecurityException e) {
+            fileLogger.fatal("Security manager already exists", e);
+        }
+
         if (addOns != null && !debug) {
             fileLogger.debug("adding addons from the parameter without registering");
             addOnManager.addAddOnsWithoutRegistering(addOns);
@@ -236,6 +264,10 @@ public class Main {
     public IzouLogger getIzouLogger() {
         return izouLogger;
     }
+
+    public FileSystemManager getFileSystemManager() {
+        return fileSystemManager;
+    }    
 
     private SystemInitializer initSystem() {
         // Setting up file system
