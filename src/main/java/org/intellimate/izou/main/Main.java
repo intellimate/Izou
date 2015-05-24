@@ -42,7 +42,6 @@ public class Main {
     private final FilePublisher filePublisher;
     private final IzouLogger izouLogger;
     private final ThreadPoolManager threadPoolManager;
-    private final SecurityManager securityManager;
     private final SystemInitializer systemInitializer;
     private final SystemMail systemMail;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
@@ -52,7 +51,7 @@ public class Main {
      * Creates a new Main instance with debugging enabled (doesn't search the lib-folder)
      *
      * @param javaFX true if javaFX should be started, false otherwise
-     * @param debug if true, izou will not load plugin from the lib-folder
+     * @param debug  if true, izou will not load plugin from the lib-folder
      */
     private Main(boolean javaFX, boolean debug) {
         this(null, javaFX, debug);
@@ -70,7 +69,7 @@ public class Main {
     /**
      * If you want to debug your Plugin, you can get an Main instance with this Method
      *
-     * @param debug if true, izou will not load plugin from the lib-folder
+     * @param debug  if true, izou will not load plugin from the lib-folder
      * @param addOns a List of AddOns to run
      */
     public Main(List<AddOnModel> addOns, boolean debug) {
@@ -81,46 +80,14 @@ public class Main {
      * If you want to debug your Plugin, you can get an Main instance with this Method
      *
      * @param javaFX true if javaFX should be started, false otherwise
-     * @param debug if true, izou will not load plugin from the lib-folder
+     * @param debug  if true, izou will not load plugin from the lib-folder
      * @param addOns a List of AddOns to run
      */
     public Main(List<AddOnModel> addOns, boolean javaFX, boolean debug) {
-        fileLogger.debug("starting izou");
-        fileLogger.debug("initializing");
-        systemInitializer = new SystemInitializer();
-        systemInitializer.initSystem();
-        // Starts javaFX if desired
-        if (javaFX) {
-         jfxToolKitInit = new AtomicBoolean(false);
-         JavaFXInitializer.initToolKit();
-         fileLogger.debug("Initializing JavaFX ToolKit");
+        fileLogger.debug("Starting Izou");
+        fileLogger.debug("Initializing...");
 
-         long startTime = System.currentTimeMillis();
-         long duration = 0;
-         while (!jfxToolKitInit.get() && duration < INIT_TIME_LIMIT) {
-             duration = System.currentTimeMillis() - startTime;
-             try {
-                 Thread.sleep(5000);
-             } catch (InterruptedException e) {
-                 fileLogger.error("Error happened while thread was sleeping", e);
-             }
-         }
-
-         if (!jfxToolKitInit.get()) {
-             fileLogger.error("Unable to Initialize JavaFX ToolKit");
-         }
-         fileLogger.debug("Done initializing JavaFX ToolKit");
-        }
-
-        // Create system mail
-        SystemMail mailTemp = null;
-        try {
-            mailTemp = SystemMail.createSystemMail();
-        } catch (IllegalAccessException e) {
-            fileLogger.fatal("Unable to create a system mail object");
-        }
-        systemMail = mailTemp;
-
+<<<<<<< HEAD
         // Setting up file system
         this.fileSystemManager = new FileSystemManager(this);
         try {
@@ -129,6 +96,20 @@ public class Main {
             fileLogger.fatal("Failed to create the FileSystemManager", e);
         }
 
+=======
+        // Initializing the system
+        systemInitializer = initSystem();
+
+        // Starting security manager
+        startSecurity();
+
+        // Starting javaFX
+        setUpJavaFX(javaFX);
+
+        // Starting system mail service
+        systemMail = initMail();
+
+>>>>>>> master
         threadPoolManager = new ThreadPoolManager(this);
         izouLogger = new IzouLogger();
         outputManager = new OutputManager(this);
@@ -139,16 +120,10 @@ public class Main {
         activatorManager = new ActivatorManager(this);
         filePublisher = new FilePublisher(this);
 
-        FileManager fileManagerTemp;
-        try {
-            fileManagerTemp = new FileManager(this);
-        } catch (IOException e) {
-            fileManagerTemp = null;
-            fileLogger.fatal("Failed to create the FileManager", e);
-        }
-        fileManager = fileManagerTemp;
-        fileLogger.debug("finished initializing");
-        fileLogger.debug("adding addons");
+        fileManager = initFileManager();
+
+        fileLogger.debug("Done initializing.");
+        fileLogger.debug("Adding addons..");
         addOnManager = new AddOnManager(this);
 
         // Starting security manager
@@ -169,7 +144,7 @@ public class Main {
         if (addOns != null && !debug) {
             fileLogger.debug("adding addons from the parameter without registering");
             addOnManager.addAddOnsWithoutRegistering(addOns);
-        } else if(addOns != null) {
+        } else if (addOns != null) {
             fileLogger.debug("adding and registering addons from the parameter");
             addOnManager.addAndRegisterAddOns(addOns);
         }
@@ -182,10 +157,72 @@ public class Main {
     public static void main(String[] args) {
         if (args.length > 0) {
             @SuppressWarnings("UnusedAssignment") Main main = new Main(Boolean.getBoolean(args[0]), false);
-        }
-        else {
+        } else {
             @SuppressWarnings("UnusedAssignment") Main main = new Main(false, false);
         }
+    }
+
+    private SystemMail initMail() {
+        // Create system mail
+        SystemMail mailTemp = null;
+        try {
+            mailTemp = SystemMail.createSystemMail();
+        } catch (IllegalAccessException e) {
+            fileLogger.fatal("Unable to create a system mail object");
+        }
+        return mailTemp;
+    }
+
+    private void setUpJavaFX(boolean javaFX) {
+        // Starts javaFX if desired
+        if (javaFX) {
+            jfxToolKitInit = new AtomicBoolean(false);
+            JavaFXInitializer.initToolKit();
+            fileLogger.debug("Initializing JavaFX ToolKit");
+
+            long startTime = System.currentTimeMillis();
+            long duration = 0;
+            while (!jfxToolKitInit.get() && duration < INIT_TIME_LIMIT) {
+                duration = System.currentTimeMillis() - startTime;
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    fileLogger.error("Error happened while thread was sleeping", e);
+                }
+            }
+
+            if (!jfxToolKitInit.get()) {
+                fileLogger.error("Unable to Initialize JavaFX ToolKit");
+            }
+            fileLogger.debug("Done initializing JavaFX ToolKit");
+        }
+    }
+
+    private void startSecurity() {
+        SecurityManager securityManager;
+        try {
+            securityManager = SecurityManager.createSecurityManager(systemMail);
+        } catch (IllegalAccessException e) {
+            securityManager = null;
+            fileLogger.fatal("Security manager already exists", e);
+        }
+        try {
+            System.setSecurityManager(securityManager);
+        } catch (SecurityException e) {
+            fileLogger.fatal("Security manager already exists", e);
+        }
+    }
+
+    private FileManager initFileManager() {
+        FileManager fileManagerTemp;
+        try {
+            fileManagerTemp = new FileManager(this);
+        } catch (IOException e) {
+            fileManagerTemp = null;
+            fileLogger.fatal("Failed to create the FileManager", e);
+        }
+
+        return fileManagerTemp;
     }
 
     public OutputManager getOutputManager() {
@@ -230,5 +267,19 @@ public class Main {
 
     public FileSystemManager getFileSystemManager() {
         return fileSystemManager;
+    }    
+
+    private SystemInitializer initSystem() {
+        // Setting up file system
+        FileSystemManager fileSystemManager = new FileSystemManager(this);
+        try {
+            fileSystemManager.createIzouFileSystem();
+        } catch (IOException e) {
+            fileLogger.fatal("Failed to create the FileSystemManager", e);
+        }
+
+        SystemInitializer systemInitializer = new SystemInitializer();
+        systemInitializer.initSystem();
+        return systemInitializer;
     }
 }

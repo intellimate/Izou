@@ -10,6 +10,7 @@ import ro.fortsoft.pf4j.IzouPluginClassLoader;
 
 import java.io.FileDescriptor;
 import java.security.Permission;
+import java.security.Security;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -23,6 +24,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
     private boolean exitPermission = false;
     private final SecureAccess secureAccess;
     private final PermissionManager permissionManager;
+    private final SecureStorage secureStorage;
     private final SystemMail systemMail;
     private final Main main;
     private final List<String> forbiddenProperties;
@@ -56,6 +58,9 @@ public final class SecurityManager extends java.lang.SecurityManager {
         if (exists) {
             throw new IllegalAccessException("Cannot create more than one instance of IzouSecurityManager");
         }
+
+        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+
         this.systemMail = systemMail;
         this.main = main;
 
@@ -71,7 +76,6 @@ public final class SecurityManager extends java.lang.SecurityManager {
         }
         permissionManager = new PermissionManager(main, this);
         secureAccess = tempSecureAccess;
-
         forbiddenProperties = new ArrayList<>();
         forbiddenProperties.add("jdk.lang.process.launchmechanism");
     }
@@ -136,7 +140,8 @@ public final class SecurityManager extends java.lang.SecurityManager {
     private boolean checkForSecureAccess() {
         Class[] classContext = getClassContext();
         for (Class clazz : classContext) {
-            if (clazz.equals(SecureAccess.class) || clazz.equals(SecurityBreachHandler.class)) {
+            if (clazz.equals(SecureAccess.class) || clazz.equals(SecurityBreachHandler.class)
+                    || clazz.equals(SecurityModule.class) || clazz.equals(SecureStorage.class)) {
                 return true;
             }
         }
@@ -152,6 +157,15 @@ public final class SecurityManager extends java.lang.SecurityManager {
         Class[] classStack = getClassContext();
         secureAccess.getBreachHandler().handleBreach(exception, classStack);
         return exception;
+    }
+
+    /**
+     * Gets the {@link SecureStorage} object in Izou
+     *
+     * @return the secure storage object in Izou
+     */
+    public SecureStorage getSecureStorage() {
+        return secureStorage;
     }
 
     @Override

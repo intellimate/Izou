@@ -78,6 +78,8 @@ public class FileSystemManager extends IzouModule {
         createResourceFolder();
         createPropertiesFolder();
         createLogsFolder();
+        createSystemFolder();
+        createSystemDataFolder();
     }
 
     /**
@@ -142,5 +144,29 @@ public class FileSystemManager extends IzouModule {
 
     public File getIzouJarLocation() {
         return izouJarLocation;
+    }
+
+    /**
+     * Create system folder
+     *
+     * @throws IOException could throw IOException because working with files
+     */
+    private void createSystemFolder() throws IOException {
+        String logPath = new File(".").getCanonicalPath() + File.separator + "system";
+        File logFile = new File(logPath);
+        if(!Files.exists(logFile.toPath()))
+            Files.createDirectories(logFile.toPath());
+    }
+
+    /**
+     * Create system/data folder
+     *
+     * @throws IOException could throw IOException because working with files
+     */
+    private void createSystemDataFolder() throws IOException {
+        String logPath = new File(".").getCanonicalPath() + File.separator + "system" + File.separator + "data";
+        File logFile = new File(logPath);
+        if(!Files.exists(logFile.toPath()))
+            Files.createDirectories(logFile.toPath());
     }
 }
