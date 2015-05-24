@@ -52,7 +52,7 @@ public final class SecureStorage {
      *
      * @throws IllegalAccessException thrown if this method is called more than once
      */
-    private SecureStorage() throws IllegalAccessException, NullPointerException {
+    public SecureStorage() throws IllegalAccessException, NullPointerException {
         if (exists) {
             throw new IllegalAccessException("Cannot create more than one instance of IzouSecurityManager");
         }
@@ -95,8 +95,7 @@ public final class SecureStorage {
 
         container.setCryptData(cryptData);
 
-        //TODO: SECURE-Things julian is coding
-        //containers.put(descriptor.getSecureID(), container);
+        containers.put(descriptor.getSecureID(), container);
         saveContainers();
     }
 
@@ -107,8 +106,7 @@ public final class SecureStorage {
      * @return  container The secure container that was retrieved
      */
     public SecureContainer retrieve(PluginDescriptor descriptor) {
-        //TODO: SECURE-Things julian is coding
-        /*SecureContainer container = containers.get(descriptor.getSecureID());
+        SecureContainer container = containers.get(descriptor.getSecureID());
         HashMap<byte[], byte[]> cryptData = container.getCryptData();
         HashMap<String, String> clearTextData = container.getClearTextData();
 
@@ -120,8 +118,7 @@ public final class SecureStorage {
         }
 
         container.setClearTextData(clearTextData);
-        return container;*/
-        return null;
+        return container;
     }
 
     /**

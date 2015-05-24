@@ -25,8 +25,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
     private boolean exitPermission = false;
     private final SecureAccess secureAccess;
     private final PermissionManager permissionManager;
-    //TODO: activate when everything is ready
-    //private final SecureStorage secureStorage;
+    private final SecureStorage secureStorage;
     private final SystemMail systemMail;
     private final Main main;
     private final List<String> forbiddenProperties;
@@ -65,6 +64,8 @@ public final class SecurityManager extends java.lang.SecurityManager {
 
         this.systemMail = systemMail;
         this.main = main;
+
+        secureStorage = SecureStorage.createSecureStorage();
 
         SecureAccess tempSecureAccess = null;
         try {
@@ -161,15 +162,14 @@ public final class SecurityManager extends java.lang.SecurityManager {
         return exception;
     }
 
-    //TODO: activate when secure-storage is ready
-//    /**
-//     * Gets the {@link SecureStorage} object in Izou
-//     *
-//     * @return the secure storage object in Izou
-//     */
-//    public SecureStorage getSecureStorage() {
-//        return secureStorage;
-//    }
+    /**
+     * Gets the {@link SecureStorage} object in Izou
+     *
+     * @return the secure storage object in Izou
+     */
+    public SecureStorage getSecureStorage() {
+        return secureStorage;
+    }
 
     @Override
     public void checkPermission(Permission perm) {
