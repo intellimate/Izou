@@ -5,7 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.exceptions.IzouPermissionException;
-import org.intellimate.izou.security.replaced.MixerAspectInitializer;
+import org.intellimate.izou.system.sound.replaced.MixerAspectInitializer;
 import org.intellimate.izou.security.storage.SecureStorage;
 import org.intellimate.izou.support.SystemMail;
 import ro.fortsoft.pf4j.IzouPluginClassLoader;
@@ -84,7 +84,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
         forbiddenProperties = new ArrayList<>();
         forbiddenProperties.add("jdk.lang.process.launchmechanism");
 
-        URL mixer = this.getClass().getClassLoader().getResource("org/intellimate/izou/security/replaced/MixerAspect.class");
+        URL mixer = this.getClass().getClassLoader().getResource("org/intellimate/izou/system/sound/replaced/MixerAspect.class");
         URL audioSystem = this.getClass().getClassLoader().getResource("javax/sound/sampled/AudioSystem.class");
         main.getAddOnManager().addAspectOrAffectedURL(mixer);
         main.getAddOnManager().addAspectOrAffectedURL(audioSystem);
@@ -105,7 +105,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
      * @return AddOnModel or IzouPermissionException if the call was made from an AddOn, or null if no AddOn is responsible
      * @throws IzouPermissionException if the AddOnModel is not found
      */
-    private AddOnModel getOrThrowAddOnModelForClassLoader() throws IzouPermissionException {
+    public AddOnModel getOrThrowAddOnModelForClassLoader() throws IzouPermissionException {
         Class[] classes = getClassContext();
         for (int i = classes.length - 1; i >= 0; i--) {
             if (classes[i].getClassLoader() instanceof IzouPluginClassLoader && !classes[i].getName().toLowerCase()
@@ -136,7 +136,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
      * performs some basic checks to determine whether to check the permission
      * @return true if should be checked, false if not
      */
-    private boolean shouldCheck() {
+    public boolean shouldCheck() {
         if (checkForSecureAccess()) {
             return false;
         }

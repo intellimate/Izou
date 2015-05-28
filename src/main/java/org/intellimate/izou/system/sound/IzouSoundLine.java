@@ -8,6 +8,7 @@ import javax.sound.sampled.Control;
 import javax.sound.sampled.Line;
 import javax.sound.sampled.LineListener;
 import javax.sound.sampled.LineUnavailableException;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 /**
@@ -16,7 +17,8 @@ import java.util.function.Consumer;
  */
 public class IzouSoundLine extends IzouModule implements Line, AutoCloseable {
     protected final Line line;
-    private final boolean isPermanent;
+    private Future<?> closingThread;
+    private boolean isPermanent;
     protected final SoundManager soundManager;
     private final AddOnModel addOnModel;
     private boolean isMuted;
@@ -27,19 +29,27 @@ public class IzouSoundLine extends IzouModule implements Line, AutoCloseable {
         this.line = line;
         this.isPermanent = isPermanent;
         this.addOnModel = addOnModel;
-        if (!isPermanent)
-            main.getThreadPoolManager().getIzouThreadPool().submit(() -> {
-                try {
-                    Thread.sleep(600000);
-                } catch (InterruptedException e) {
-                    error("interrupted while sleeping");
-                }
-                if (line.isOpen()) {
-                    debug("closing line " + line + "for Addon " + addOnModel);
-                    line.close();
-                }
-            });
+        if (!isPermanent) {
+            closingThread = getClosingThread(line, main, addOnModel);
+        } else {
+            closingThread = null;
+        }
         soundManager = null;
+    }
+
+    private Future<?> getClosingThread(Line line, Main main, AddOnModel addOnModel) {
+        return main.getThreadPoolManager().getIzouThreadPool().submit(() -> {
+            try {
+                Thread.sleep(600000);
+            } catch (InterruptedException e) {
+                error("interrupted while sleeping, canceling");
+                return;
+            }
+            if (line.isOpen()) {
+                debug("closing line " + line + "for Addon " + addOnModel);
+                line.close();
+            }
+        });
     }
 
     /**
@@ -183,6 +193,21 @@ public class IzouSoundLine extends IzouModule implements Line, AutoCloseable {
      */
     public boolean isPermanent() {
         return isPermanent;
+    }
+
+    void setToPermanent() {
+        if (isPermanent)
+            return;
+        closingThread.cancel(true);
+        closingThread = null;
+        isPermanent = true;
+    }
+
+    void setToNonPermanent() {
+        if (!isPermanent)
+            return;
+        closingThread = getClosingThread(line, main, addOnModel);
+        isPermanent = false;
     }
 
     /**
