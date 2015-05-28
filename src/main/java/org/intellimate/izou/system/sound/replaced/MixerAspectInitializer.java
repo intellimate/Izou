@@ -28,7 +28,7 @@ public class MixerAspectInitializer {
     }
 
     /**
-     * creates the appropriate
+     * creates the appropriate IzouSoundLine if the request originates from an AddOn.
      * @param line the line
      * @return an IzouSoundLine if an addon requested the line
      */

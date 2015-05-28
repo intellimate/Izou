@@ -3,6 +3,8 @@ package org.intellimate.izou.system.sound;
 import org.intellimate.izou.AddonThreadPoolUser;
 import org.intellimate.izou.IzouModule;
 import org.intellimate.izou.addon.AddOnModel;
+import org.intellimate.izou.events.EventModel;
+import org.intellimate.izou.events.EventsControllerModel;
 import org.intellimate.izou.main.Main;
 
 import java.lang.ref.WeakReference;
@@ -21,7 +23,7 @@ import java.util.stream.Collectors;
  * @author LeanderK
  * @version 1.0
  */
-public class SoundManager extends IzouModule implements AddonThreadPoolUser {
+public class SoundManager extends IzouModule implements AddonThreadPoolUser, EventsControllerModel {
     private ConcurrentHashMap<AddOnModel, List<WeakReference<IzouSoundLine>>> nonPermanent = new ConcurrentHashMap<>();
     private List<WeakReference<IzouSoundLine>> permanentLines = null;
     private AddOnModel permanentAddOn = null;
@@ -31,6 +33,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser {
 
     public SoundManager(Main main) {
         super(main);
+        main.getEventDistributor().registerEventsController(this);
     }
 
     private void tidy() {
@@ -128,5 +131,21 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser {
         }
         permissionWithoutUsageLimit = null;
         isUsing.set(false);
+    }
+
+    /**
+     * Controls whether the fired Event should be dispatched to all the listeners
+     * <p>
+     * This method should execute quickly
+     *
+     * @param event the ID of the event
+     * @return true if events should be dispatched
+     */
+    @Override
+    public boolean controlEventDispatcher(EventModel event) {
+        if (!event.containsDescriptor(SoundIDs.StartEvent.descriptor) ||
+                !event.containsDescriptor(SoundIDs.StopEvent.descriptor))
+            return true;
+
     }
 }
