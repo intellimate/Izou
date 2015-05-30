@@ -4,10 +4,7 @@ import org.intellimate.izou.IzouModule;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.main.Main;
 
-import javax.sound.sampled.Control;
-import javax.sound.sampled.Line;
-import javax.sound.sampled.LineListener;
-import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.*;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
@@ -21,8 +18,10 @@ public class IzouSoundLine extends IzouModule implements Line, AutoCloseable {
     private boolean isPermanent;
     protected final SoundManager soundManager;
     private final AddOnModel addOnModel;
-    private boolean isMuted;
+    private boolean isMuted = false;
     private Consumer<Void> closeCallback = null;
+    private boolean muteIfNonPermanent = true;
+    private Consumer<Void> muteCallback = null;
 
     public IzouSoundLine(Line line, Main main, boolean isPermanent, AddOnModel addOnModel) {
         super(main);
@@ -104,6 +103,8 @@ public class IzouSoundLine extends IzouModule implements Line, AutoCloseable {
      */
     @Override
     public void open() throws LineUnavailableException {
+        if (!line.isOpen() && !isPermanent && muteCallback != null)
+            muteCallback.accept(null);
         line.open();
     }
 
@@ -214,6 +215,7 @@ public class IzouSoundLine extends IzouModule implements Line, AutoCloseable {
      * gets the associated AddonModel
      * @return the AddonModel
      */
+    @SuppressWarnings("unused")
     public AddOnModel getAddOnModel() {
         return addOnModel;
     }
@@ -222,15 +224,42 @@ public class IzouSoundLine extends IzouModule implements Line, AutoCloseable {
      * returns whether the Line is muted
      * @return true if muted.
      */
+    @SuppressWarnings("unused")
     public boolean isMuted() {
         return isMuted;
     }
 
+    /**
+     * sets whether other Addons audio-inputs should be muted while this line is open (only works for non-permanent lines).
+     * The standard is true.
+     * @param muteIfNonPermanent true if muted, false if not
+     */
+    @SuppressWarnings("unused")
+    public void setMuteIfNonPermanent(boolean muteIfNonPermanent) {
+        this.muteIfNonPermanent = muteIfNonPermanent;
+    }
+
+    /**
+     * retruns whether other Addons audio-inputs should be muted while this line is open (only works for non-permanent lines).
+     * @return true if muted, false if not
+     */
+    public boolean isMuteIfNonPermanent() {
+        return muteIfNonPermanent;
+    }
+
     void setMuted(boolean isMuted) {
+        BooleanControl bc = (BooleanControl) line.getControl(BooleanControl.Type.MUTE);
+        if (bc != null) {
+            bc.setValue(isMuted); // true to mute the line, false to unmute
+        }
         this.isMuted = isMuted;
     }
 
     void registerCloseCallback(Consumer<Void> consumer) {
         this.closeCallback = consumer;
+    }
+
+    void registerMuteCallback(Consumer<Void> consumer) {
+        this.muteCallback = consumer;
     }
 }

@@ -139,9 +139,6 @@ public class IzouSoundSourceDataLine extends IzouSoundDataLine implements Source
      */
     @Override
     public int write(byte[] b, int off, int len) {
-        if (!isMuted())
-            return sourceDataLine.write(b, off, len);
-        else
-            return b.length;
+        return sourceDataLine.write(b, off, len);
     }
 }

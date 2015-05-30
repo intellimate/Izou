@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 /**
  * This class gets all the Events from all registered EventPublisher, generates Resources and passes them to the
- * OutputManager
+ * OutputManager. Can also be used to fire Events Concurrently.
  */
 public class EventDistributor extends IzouModule implements Runnable, AddonThreadPoolUser {
     private BlockingQueue<EventModel<?>> events = new LinkedBlockingQueue<>();
@@ -30,11 +30,17 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
     }
 
     /**
-     * fires the event.
-     * this method is intended to be only used inside Izou!
+     * fires the event concurrently, this is generally discouraged.
+     * <p>
+     * This method should not be used for normal Events, for for events which obey the following laws:<br>
+     * 1. they are time critical.<br>
+     * 2. addons are not expected to react in any way beside a small update<br>
+     * 3. they are few.<br>
+     * if your event matches the above laws, you may consider firing it concurrently.
+     * </p>
      * @param eventModel the EventModel
      */
-    public void fireEvent(EventModel eventModel) {
+    public void fireEventConcurrently(EventModel<?> eventModel) {
         if(eventModel == null) return;
         events.add(eventModel);
     }

@@ -132,8 +132,8 @@ public final class AudioPermissionModule extends PermissionModule implements Eve
         if (event.containsDescriptor(SoundIDs.StartEvent.descriptor)) {
             if (isPlaying && !currentPlaybackID.equals(event.getSource())) {
                 IdentificationManager.getInstance().getIdentification(this)
-                        .map(id -> new EventMinimalImpl(SoundIDs.StopEvent.type, id, SoundIDs.StopEvent.descriptors))
-                        .ifPresent(stopEvent -> getMain().getEventDistributor().fireEvent(event));
+                        .map(id -> new EventMinimalImpl(SoundIDs.EndedEvent.type, id, SoundIDs.EndedEvent.descriptors))
+                        .ifPresent(stopEvent -> getMain().getEventDistributor().fireEventConcurrently(event));
                 return false;
             } else if (!isPlaying) {
                 isPlaying = true;
