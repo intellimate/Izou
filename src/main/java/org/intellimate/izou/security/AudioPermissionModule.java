@@ -10,8 +10,9 @@ import java.security.Permission;
 import java.util.function.Function;
 
 /**
- * The AudioPermissionModule handles conflicts between addOns regarding audio output. For example if two AddOns
- * want to play music, then the AudioPermissionModule will decide who gets to play it.
+ * The Audio PermissionModule checks whether one is allowed to play music. It dos not orchestrate the different lines
+ * etc. See SoundManager for these functions.
+ * @see org.intellimate.izou.system.sound.SoundManager
  */
 public final class AudioPermissionModule extends PermissionModule {
 
@@ -60,18 +61,5 @@ public final class AudioPermissionModule extends PermissionModule {
         };
 
         registerOrThrow(addOn, () -> new IzouSoundPermissionException(permissionMessage), checkPlayPermission);
-    }
-
-    /**
-     * checks if the Addon is able to play audio
-     * @param addOn the addon to check
-     * @throws IzouSoundPermissionException thrown if the addOn is not allowed to access its requested service
-     */
-    public void checkShortTimePermission(Permission permission, AddOnModel addOn) throws IzouSoundPermissionException {
-        if (!isRegistered(addOn)) {
-            String message = "Audio Permission Denied: " + addOn + "is not registered to "
-                    + "play audio.";
-            registerOrThrow(addOn, message);
-        }
     }
 }
