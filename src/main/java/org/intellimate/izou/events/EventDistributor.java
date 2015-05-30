@@ -42,7 +42,7 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
      */
     public void fireEventConcurrently(EventModel<?> eventModel) {
         if(eventModel == null) return;
-        events.add(eventModel);
+        submit(() -> processEvent(eventModel));
     }
 
     /**
@@ -213,30 +213,42 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
         while(!stop) {
             try {
                 EventModel<?> event = events.take();
-                if (!event.getSource().isCreatedFromInstance()) {
-                    error("event: " + event + "has invalid source");
-                    continue;
-                }
-                debug("EventFired: " + event.toString() + " from " + event.getSource().getID());
-                if (checkEventsControllers(event)) {
-                    List<ResourceModel> resourceList = getMain().getResourceManager().generateResources(event);
-                    event.addResources(resourceList);
-                    List<EventListenerModel> listenersTemp = event.getAllInformations().parallelStream()
-                            .map(listeners::get)
-                            .filter(Objects::nonNull)
-                            .flatMap(Collection::stream)
-                            .distinct()
-                            .collect(Collectors.toList());
-
-                    List<CompletableFuture> futures = listenersTemp.stream()
-                            .map(eventListener -> submit(() -> eventListener.eventFired(event)))
-                            .collect(Collectors.toList());
-                    timeOut(futures, 1000);
-                    getMain().getOutputManager().passDataToOutputPlugins(event);
-                }
+                processEvent(event);
             } catch (InterruptedException e) {
-                log.warn(e);
+                log.warn("interrupted", e);
             }
+        }
+    }
+
+    /**
+     * process the Event
+     * @param event the event to process
+     */
+    private void processEvent(EventModel<?> event) {
+        if (!event.getSource().isCreatedFromInstance()) {
+            error("event: " + event + "has invalid source");
+            return;
+        }
+        debug("EventFired: " + event.toString() + " from " + event.getSource().getID());
+        if (checkEventsControllers(event)) {
+            List<ResourceModel> resourceList = getMain().getResourceManager().generateResources(event);
+            event.addResources(resourceList);
+            List<EventListenerModel> listenersTemp = event.getAllInformations().parallelStream()
+                    .map(listeners::get)
+                    .filter(Objects::nonNull)
+                    .flatMap(Collection::stream)
+                    .distinct()
+                    .collect(Collectors.toList());
+
+            List<CompletableFuture> futures = listenersTemp.stream()
+                    .map(eventListener -> submit(() -> eventListener.eventFired(event)))
+                    .collect(Collectors.toList());
+            try {
+                timeOut(futures, 1000);
+            } catch (InterruptedException e) {
+                error("interrupted", e);
+            }
+            getMain().getOutputManager().passDataToOutputPlugins(event);
         }
     }
 
