@@ -6,6 +6,7 @@ import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.events.EventModel;
 import org.intellimate.izou.events.EventsControllerModel;
 import org.intellimate.izou.main.Main;
+import org.intellimate.izou.security.exceptions.IzouPermissionException;
 
 import java.lang.ref.WeakReference;
 import java.time.LocalDateTime;
@@ -15,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -31,6 +33,8 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
     private AddOnModel permanentAddOn = null;
     //Addon has 10 sec to obtain an IzouSoundLine
     private LocalDateTime permissionWithoutUsageLimit = null;
+    private Future<Void> permissionWithoudUsageCloseThread = null;
+    private final Object permanentUserReadWriteLock = new Object();
     private AtomicBoolean isUsing = new AtomicBoolean(false);
 
     public SoundManager(Main main) {
@@ -80,11 +84,13 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
     private void closeCallback(AddOnModel addOnModel, IzouSoundLine izouSoundLine) {
         Predicate<WeakReference<IzouSoundLine>> removeFromList =
                 weakReference -> weakReference.get() != null && weakReference.get().equals(izouSoundLine);
-        if (permanentAddOn != null && permanentAddOn.equals(addOnModel) && permanentLines != null) {
-            permanentLines.removeIf(removeFromList);
-            if (permanentLines.isEmpty()) {
-                permanentLines = null;
-                permissionWithoutUsageLimit = LocalDateTime.now().plus(10, ChronoUnit.SECONDS);
+        synchronized (permanentUserReadWriteLock) {
+            if (permanentAddOn != null && permanentAddOn.equals(addOnModel) && permanentLines != null) {
+                permanentLines.removeIf(removeFromList);
+                if (permanentLines.isEmpty()) {
+                    permanentLines = null;
+                    permissionWithoutUsage();
+                }
             }
         }
         List<WeakReference<IzouSoundLine>> weakReferences = nonPermanent.get(addOnModel);
@@ -95,19 +101,51 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
     }
 
     /**
+     * creates a LocaleDateTime-Object 5 seconds in the Future and a Thread which will remove it, if it passes the threshold.
+     * the Thread
+     */
+    private void permissionWithoutUsage() {
+        synchronized (permanentUserReadWriteLock) {
+            permissionWithoutUsageLimit = LocalDateTime.now().plus(5, ChronoUnit.SECONDS);
+            permissionWithoudUsageCloseThread =  submit(() -> {
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    return;
+                }
+                endPermanent(permanentAddOn);
+            });
+        }
+    }
+
+    /**
+     * removes the LocaleDateTime and Thread (if exisiting)
+     */
+    private void endWaitingForUsage() {
+        synchronized (permanentUserReadWriteLock) {
+            if (permissionWithoutUsageLimit != null)
+                permissionWithoutUsageLimit = null;
+            if (permissionWithoudUsageCloseThread != null) {
+                permissionWithoudUsageCloseThread.cancel(true);
+                permissionWithoutUsageLimit = null;
+            }
+        }
+    }
+
+    /**
      * adds the IzouSoundLine as permanent
      * @param izouSoundLine the izouSoundLine to add
      */
     private void addPermanent(IzouSoundLine izouSoundLine) {
         if (!izouSoundLine.isPermanent())
             izouSoundLine.setToPermanent();
-        if (permissionWithoutUsageLimit == null) {
-            permissionWithoutUsageLimit = null;
+        synchronized (permanentUserReadWriteLock) {
+            endWaitingForUsage();
+            if (permanentLines == null) {
+                permanentLines = Collections.synchronizedList(new ArrayList<>());
+            }
+            permanentLines.add(new WeakReference<>(izouSoundLine));
         }
-        if (permanentLines == null) {
-            permanentLines = Collections.synchronizedList(new ArrayList<>());
-        }
-        permanentLines.add(new WeakReference<>(izouSoundLine));
     }
 
     /**
@@ -133,23 +171,30 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
     public boolean requestPermanent(AddOnModel addOnModel) {
         boolean notUsing = isUsing.compareAndSet(false, true);
         if (!notUsing) {
-            if (permissionWithoutUsageLimit != null && permissionWithoutUsageLimit.isBefore(LocalDateTime.now())) {
-                permissionWithoutUsageLimit = null;
-            } else {
-                return false;
+            synchronized (permanentUserReadWriteLock) {
+                if (permanentAddOn.equals(addOnModel))
+                    return true;
+                if (permissionWithoutUsageLimit != null && permissionWithoutUsageLimit.isBefore(LocalDateTime.now())) {
+                    endWaitingForUsage();
+                } else {
+                    return false;
+                }
+                permanentAddOn = addOnModel;
             }
         }
-        permanentAddOn = addOnModel;
-        List<WeakReference<IzouSoundLine>> weakReferences = nonPermanent.remove(addOnModel);
-        if (weakReferences == null) {
-            permissionWithoutUsageLimit = LocalDateTime.now().plus(10, ChronoUnit.SECONDS);
-        } else {
-            nonPermanent.remove(addOnModel);
-            permanentLines = weakReferences;
-            permanentLines.forEach(weakReferenceLine -> {
-                if (weakReferenceLine.get() != null)
-                    weakReferenceLine.get().setToPermanent();
-            });
+        synchronized (permanentUserReadWriteLock) {
+            permanentAddOn = addOnModel;
+            List<WeakReference<IzouSoundLine>> weakReferences = nonPermanent.remove(addOnModel);
+            if (weakReferences == null) {
+                permissionWithoutUsage();
+            } else {
+                nonPermanent.remove(addOnModel);
+                permanentLines = weakReferences;
+                permanentLines.forEach(weakReferenceLine -> {
+                    if (weakReferenceLine.get() != null)
+                        weakReferenceLine.get().setToPermanent();
+                });
+            }
         }
         return true;
     }
@@ -159,19 +204,21 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
      * @param addOnModel the addonModel to check
      */
     public void endPermanent(AddOnModel addOnModel) {
-        if (!isUsing.get())
+        if (!isUsing.get() || !permanentAddOn.equals(addOnModel))
             return;
-        permanentAddOn = null;
-        if (permanentLines != null) {
-            permanentLines.forEach(weakReferenceLine -> {
-                if (weakReferenceLine.get() != null)
-                    weakReferenceLine.get().setToNonPermanent();
-            });
-            nonPermanent.put(addOnModel, permanentLines);
-            permanentLines = null;
+        synchronized (permanentUserReadWriteLock) {
+            permanentAddOn = null;
+            if (permanentLines != null) {
+                permanentLines.forEach(weakReferenceLine -> {
+                    if (weakReferenceLine.get() != null)
+                        weakReferenceLine.get().setToNonPermanent();
+                });
+                nonPermanent.put(addOnModel, permanentLines);
+                permanentLines = null;
+            }
+            endWaitingForUsage();
+            isUsing.set(false);
         }
-        permissionWithoutUsageLimit = null;
-        isUsing.set(false);
     }
 
     /**
@@ -187,6 +234,22 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
         if (!event.containsDescriptor(SoundIDs.StartEvent.descriptor) ||
                 !event.containsDescriptor(SoundIDs.StopEvent.descriptor))
             return true;
-
+        if (event.containsDescriptor(SoundIDs.StartEvent.descriptor)) {
+            try {
+                AddOnModel addOnModel = getMain().getSecurityManager().getOrThrowAddOnModelForClassLoader();
+                return requestPermanent(addOnModel);
+            } catch (IzouPermissionException e) {
+                error("no AddonModel found for event: " + event);
+                return true;
+            }
+        } else {
+            try {
+                AddOnModel addOnModel = getMain().getSecurityManager().getOrThrowAddOnModelForClassLoader();
+                endPermanent(addOnModel);
+            } catch (IzouPermissionException e) {
+                error("no AddonModel found for event: " + event);
+            }
+        }
+        return true;
     }
 }
