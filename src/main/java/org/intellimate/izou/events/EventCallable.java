@@ -11,5 +11,5 @@ public interface EventCallable {
      * @param event the Event which should be fired
      * @throws MultipleEventsException IF the implementation doesn't allow multiple Events at once
      */
-    public void fire(EventModel event) throws MultipleEventsException;
+    void fire(EventModel event) throws MultipleEventsException;
 }

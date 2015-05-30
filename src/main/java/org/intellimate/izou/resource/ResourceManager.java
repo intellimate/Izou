@@ -115,7 +115,7 @@ public class ResourceManager extends IzouModule implements AddonThreadPoolUser {
                 //return true if resource has no provider, if not check provider
                 .filter(resourceS -> !resource.hasProvider() || resourceS.isOwner(resource.getProvider()))
                 .findFirst()
-                .map(resourceB -> submit(() -> resourceB.provideResource(Arrays.asList(resource), Optional.empty())));
+                .map(resourceB -> submit(() -> resourceB.provideResource(Collections.singletonList(resource), Optional.empty())));
     }
 
     /**
