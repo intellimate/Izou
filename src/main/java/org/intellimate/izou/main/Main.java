@@ -17,6 +17,7 @@ import org.intellimate.izou.system.file.FilePublisher;
 import org.intellimate.izou.system.file.FileSystemManager;
 import org.intellimate.izou.system.javafx.JavaFXInitializer;
 import org.intellimate.izou.system.logger.IzouLogger;
+import org.intellimate.izou.system.sound.SoundManager;
 import org.intellimate.izou.threadpool.ThreadPoolManager;
 
 import java.io.IOException;
@@ -44,6 +45,7 @@ public class Main {
     private final ThreadPoolManager threadPoolManager;
     private final SecurityManager securityManager;
     private final SystemInitializer systemInitializer;
+    private final SoundManager soundManager;
     private final SystemMail systemMail;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
     private FileSystemManager fileSystemManager;
@@ -98,6 +100,7 @@ public class Main {
         threadPoolManager.getIzouThreadPool().submit(localEventManager);
         activatorManager = new ActivatorManager(this);
         filePublisher = new FilePublisher(this);
+        soundManager = new SoundManager(this);
 
         fileManager = initFileManager();
 
@@ -192,6 +195,14 @@ public class Main {
         }
 
         return fileManagerTemp;
+    }
+
+    public SoundManager getSoundManager() {
+        return soundManager;
+    }
+
+    public SecurityManager getSecurityManager() {
+        return securityManager;
     }
 
     public OutputManager getOutputManager() {

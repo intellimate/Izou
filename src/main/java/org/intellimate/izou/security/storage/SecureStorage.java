@@ -94,8 +94,8 @@ public final class SecureStorage {
         }
 
         container.setCryptData(cryptData);
-
-        containers.put(descriptor.getSecureID(), container);
+        //TODO reactivate
+        //containers.put(descriptor.getSecureID(), container);
         saveContainers();
     }
 
@@ -106,7 +106,8 @@ public final class SecureStorage {
      * @return  container The secure container that was retrieved
      */
     public SecureContainer retrieve(PluginDescriptor descriptor) {
-        SecureContainer container = containers.get(descriptor.getSecureID());
+        //TODO reactivate
+        /*SecureContainer container = containers.get(descriptor.getSecureID());
         HashMap<byte[], byte[]> cryptData = container.getCryptData();
         HashMap<String, String> clearTextData = container.getClearTextData();
 
@@ -119,6 +120,8 @@ public final class SecureStorage {
 
         container.setClearTextData(clearTextData);
         return container;
+        */
+        return null;
     }
 
     /**

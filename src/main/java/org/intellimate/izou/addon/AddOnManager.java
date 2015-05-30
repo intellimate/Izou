@@ -12,6 +12,7 @@ import ro.fortsoft.pf4j.IzouPluginClassLoader;
 import ro.fortsoft.pf4j.PluginManager;
 import ro.fortsoft.pf4j.PluginWrapper;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
     private IdentifiableSet<AddOnModel> addOns = new IdentifiableSet<>();
     private HashMap<AddOnModel, PluginWrapper> pluginWrappers = new HashMap<>();
+    private List<URL> aspectsOrAffected = new ArrayList<>();
     
     public AddOnManager(Main main) {
         super(main);
@@ -81,7 +83,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
      */
     private List<AddOnModel> loadAddOns() {
         debug("searching for addons in: " + getMain().getFileSystemManager().getLibLocation());
-        PluginManager pluginManager = new DefaultPluginManager(getMain().getFileSystemManager().getLibLocation());
+        PluginManager pluginManager = new DefaultPluginManager(getMain().getFileSystemManager().getLibLocation(), aspectsOrAffected);
         // load the plugins
         debug("loading plugins");
         pluginManager.loadPlugins();
@@ -141,5 +143,13 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
      */
     public boolean loadedThroughPF4J (AddOnModel addOnModel) {
         return pluginWrappers.get(addOnModel) != null;
+    }
+
+    /**
+     * adds an aspect-or an affected class url to the list. Must be done before loading of the addons!
+     * @param url the url to add.
+     */
+    public void addAspectOrAffectedURL(URL url) {
+        aspectsOrAffected.add(url);
     }
 }

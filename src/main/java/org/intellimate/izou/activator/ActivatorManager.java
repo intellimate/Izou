@@ -7,6 +7,10 @@ import org.intellimate.izou.identification.IllegalIDException;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.exceptions.IzouPermissionException;
 
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -23,6 +27,7 @@ public class ActivatorManager extends IzouModule implements AddonThreadPoolUser 
     ConcurrentHashMap<ActivatorModel, CompletableFuture> futures = new ConcurrentHashMap<>();
     ConcurrentHashMap<ActivatorModel, AtomicInteger> crashCounter = new ConcurrentHashMap<>();
     ConcurrentHashMap<ActivatorModel, AtomicInteger> permissionDeniedCounter = new ConcurrentHashMap<>();
+    private List<URL> aspectsOrAffected = Collections.synchronizedList(new ArrayList<>());
     
     public ActivatorManager(Main main) {
         super(main);

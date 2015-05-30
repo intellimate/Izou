@@ -7,7 +7,7 @@ package org.intellimate.izou.identification;
  * @version 1.0
  */
 //This Exception is more of a placeholder, but in future version we will certainly check if an ID is valid
-public class IllegalIDException extends Exception {
+public class IllegalIDException extends RuntimeException {
     /**
      * Constructs a new exception with {@code null} as its detail message.
      * The cause is not initialized, and may subsequently be initialized by a

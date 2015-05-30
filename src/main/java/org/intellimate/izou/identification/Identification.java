@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
  * You can obtain an Instance through IdentificationManager.
  * This object is Immutable.
  */
+//TODO: belongs-to method! (to check if they originate from the same Addon. (related: internal Identification Helper to obtain Addon for Identification etc?)
 public final class Identification {
     private final Identifiable identifiable;
     private final boolean createdFromInstance;

@@ -32,11 +32,11 @@ public interface AddOnModel extends ExtensionPoint, Identifiable {
      * gets the associated Plugin.
      * @return the Plugin.
      */
-    public PluginWrapper getPlugin();
+    PluginWrapper getPlugin();
 
     /**
      * sets the Plugin IF it is not already set.
      * @param plugin the plugin
      */
-    public void setPlugin(PluginWrapper plugin);
+    void setPlugin(PluginWrapper plugin);
 }
