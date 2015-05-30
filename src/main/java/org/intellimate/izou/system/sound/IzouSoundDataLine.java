@@ -10,7 +10,7 @@ import javax.sound.sampled.DataLine;
  * @author LeanderK
  * @version 1.0
  */
-public class IzouSoundDataLine extends IzouSoundLine implements DataLine {
+public class IzouSoundDataLine extends IzouSoundLineBaseClass implements DataLine {
     private final DataLine dataLine;
 
     public IzouSoundDataLine(DataLine dataLine, Main main, boolean isPermanent, AddOnModel addOnModel) {

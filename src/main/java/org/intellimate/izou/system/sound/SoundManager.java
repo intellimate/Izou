@@ -77,7 +77,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
      * @param addOnModel the addOnModel where the IzouSoundLine belongs to
      * @param izouSoundLine the IzouSoundLine to add
      */
-    public void addIzouSoundLine(AddOnModel addOnModel, IzouSoundLine izouSoundLine) {
+    public void addIzouSoundLine(AddOnModel addOnModel, IzouSoundLineBaseClass izouSoundLine) {
         if (permanentAddOn != null && permanentAddOn.equals(addOnModel)) {
             addPermanent(izouSoundLine);
         } else {
@@ -198,7 +198,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
      * adds the IzouSoundLine as permanent
      * @param izouSoundLine the izouSoundLine to add
      */
-    private void addPermanent(IzouSoundLine izouSoundLine) {
+    private void addPermanent(IzouSoundLineBaseClass izouSoundLine) {
         if (!izouSoundLine.isPermanent())
             izouSoundLine.setToPermanent();
         synchronized (permanentUserReadWriteLock) {
@@ -215,7 +215,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
      * @param addOnModel the AddonModel to
      * @param izouSoundLine the IzouSoundLine to add
      */
-    private void addNonPermanent(AddOnModel addOnModel, IzouSoundLine izouSoundLine) {
+    private void addNonPermanent(AddOnModel addOnModel, IzouSoundLineBaseClass izouSoundLine) {
         if (izouSoundLine.isPermanent())
             izouSoundLine.setToNonPermanent();
         List<WeakReference<IzouSoundLine>> weakReferences = nonPermanent.get(addOnModel);

@@ -5,10 +5,9 @@ import org.apache.logging.log4j.Logger;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.exceptions.IzouPermissionException;
-import org.intellimate.izou.system.sound.IzouSoundDataLine;
-import org.intellimate.izou.system.sound.IzouSoundLine;
-import org.intellimate.izou.system.sound.IzouSoundSourceDataLine;
+import org.intellimate.izou.system.sound.*;
 
+import javax.sound.sampled.Clip;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.Line;
 import javax.sound.sampled.SourceDataLine;
@@ -40,13 +39,19 @@ public class MixerAspectInitializer {
             logger.debug("the SoundManager will not manage this line, obtained by system");
             return line;
         }
-        IzouSoundLine izouSoundLine;
+        IzouSoundLineBaseClass izouSoundLine;
         if (line instanceof SourceDataLine) {
-            izouSoundLine = new IzouSoundSourceDataLine((SourceDataLine)line, main, false, addOnModel);
+            if (line instanceof Clip) {
+                izouSoundLine = new IzouSoundLineClipAndSDLine((Clip) line, (SourceDataLine) line, main, false, addOnModel);
+            } else {
+                izouSoundLine = new IzouSoundSourceDataLine((SourceDataLine) line, main, false, addOnModel);
+            }
+        } else if (line instanceof Clip) {
+            izouSoundLine = new IzouSoundLineClip((Clip) line, main, false, addOnModel);
         } else if (line instanceof DataLine) {
             izouSoundLine = new IzouSoundDataLine((DataLine) line, main, false, addOnModel);
         } else {
-            izouSoundLine = new IzouSoundLine(line, main, false, addOnModel);
+            izouSoundLine = new IzouSoundLineBaseClass(line, main, false, addOnModel);
         }
         main.getSoundManager().addIzouSoundLine(addOnModel, izouSoundLine);
         return izouSoundLine;
