@@ -396,6 +396,23 @@ public class ContextImplementation implements Context {
             }
 
             /**
+             * fires the event concurrently, this is generally discouraged.
+             * <p>
+             * This method should not be used for normal Events, for for events which obey the following laws:<br>
+             * 1. they are time critical.<br>
+             * 2. addons are not expected to react in any way beside a small update<br>
+             * 3. they are few.<br>
+             * if your event matches the above laws, you may consider firing it concurrently.
+             * </p>
+             *
+             * @param eventModel the EventModel
+             */
+            @Override
+            public void fireEventConcurrently(EventModel<?> eventModel) {
+                main.getEventDistributor().fireEventConcurrently(eventModel);
+            }
+
+            /**
              * returns the ID of the Manager (EventsDistributor)
              */
             @Override

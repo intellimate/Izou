@@ -1,6 +1,7 @@
 package org.intellimate.izou.system.context;
 
 import org.intellimate.izou.events.EventCallable;
+import org.intellimate.izou.events.EventModel;
 import org.intellimate.izou.events.EventsControllerModel;
 import org.intellimate.izou.identification.Identification;
 import org.intellimate.izou.identification.IllegalIDException;
@@ -51,6 +52,19 @@ public interface EventsDistributor {
      * @param eventsController the EventController Interface to remove
      */
     void unregisterEventsController(EventsControllerModel eventsController);
+
+    /**
+     * fires the event concurrently, this is generally discouraged.
+     * <p>
+     * This method should not be used for normal Events, for for events which obey the following laws:<br>
+     * 1. they are time critical.<br>
+     * 2. addons are not expected to react in any way beside a small update<br>
+     * 3. they are few.<br>
+     * if your event matches the above laws, you may consider firing it concurrently.
+     * </p>
+     * @param eventModel the EventModel
+     */
+    void fireEventConcurrently(EventModel<?> eventModel);
 
     /**
      * returns the ID of the Manager (EventsDistributor)

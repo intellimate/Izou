@@ -302,7 +302,8 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
     /**
      * Controls whether the fired Event should be dispatched to all the listeners
      * <p>
-     * This method should execute quickly
+     * This method should execute quickly.
+     * </p>
      *
      * @param event the ID of the event
      * @return true if events should be dispatched
