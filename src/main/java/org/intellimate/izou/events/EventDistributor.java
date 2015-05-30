@@ -22,6 +22,8 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
     private final ConcurrentLinkedQueue<EventsControllerModel> eventsControllers = new ConcurrentLinkedQueue<>();
     //here are all the Listeners stored
     private final ConcurrentHashMap<String, ArrayList<EventListenerModel>> listeners = new ConcurrentHashMap<>();
+    //here are all the Listeners stored that get called when an Event finishes processing
+    private final ConcurrentHashMap<String, ArrayList<EventListenerModel>> finishListeners = new ConcurrentHashMap<>();
     private boolean stop = false;
 
     public EventDistributor(Main main) {
@@ -167,6 +169,74 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
     }
 
     /**
+     * Adds an listener for events that gets called when the event finished processing.
+     * <p>
+     * Be careful with this method, it will register the listener for ALL the informations found in the Event. If your
+     * event-type is a common event type, it will fire EACH time!.
+     * It will also register for all Descriptors individually!
+     * It will also ignore if this listener is already listening to an Event.
+     * Method is thread-safe.
+     * </p>
+     * @param event the Event to listen to (it will listen to all descriptors individually!)
+     * @param eventListener the ActivatorEventListener-interface for receiving activator events
+     * @throws IllegalIDException not yet implemented
+     */
+    @SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter"})
+    public void registerEventFinishedListener(EventModel event, EventListenerModel eventListener) throws IllegalIDException {
+        registerEventFinishedListener(event.getAllInformations(), eventListener);
+    }
+
+    /**
+     * Adds an listener for events that gets called when the event finished processing.
+     * <p>
+     * It will register for all ids individually!
+     * This method will ignore if this listener is already listening to an Event.
+     * Method is thread-safe.
+     * </p>
+     * @param ids this can be type, or descriptors etc.
+     * @param eventListener the ActivatorEventListener-interface for receiving activator events
+     */
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+    public void registerEventFinishedListener(List<String> ids, EventListenerModel eventListener) {
+        for(String id : ids) {
+            ArrayList<EventListenerModel> listenersList = finishListeners.get(id);
+            if (listenersList == null) {
+                finishListeners.put(id, new ArrayList<>());
+                listenersList = finishListeners.get(id);
+            }
+            if (!listenersList.contains(eventListener)) {
+                synchronized (listenersList) {
+                    listenersList.add(eventListener);
+                }
+            }
+        }
+    }
+
+    /**
+     * unregister an EventListener that got called when the event finished processing.
+     *
+     * It will unregister for all Descriptors individually!
+     * It will also ignore if this listener is not listening to an Event.
+     * Method is thread-safe.
+     *
+     * @param event the Event to stop listen to
+     * @param eventListener the ActivatorEventListener used to listen for events
+     * @throws IllegalArgumentException if Listener is already listening to the Event or the id is not allowed
+     */
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+    public void unregisterEventFinishedListener(EventModel<EventModel> event, EventListenerModel eventListener) throws IllegalArgumentException {
+        for (String id : event.getAllInformations()) {
+            ArrayList<EventListenerModel> listenersList = finishListeners.get(id);
+            if (listenersList == null) {
+                return;
+            }
+            synchronized (listenersList) {
+                listenersList.remove(eventListener);
+            }
+        }
+    }
+
+    /**
      * Checks whether to dispatch an event
      *
      * @param event the fired Event
@@ -249,6 +319,23 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
                 error("interrupted", e);
             }
             getMain().getOutputManager().passDataToOutputPlugins(event);
+
+            List<EventListenerModel> finishListenersTemp = event.getAllInformations().parallelStream()
+                    .map(finishListeners::get)
+                    .filter(Objects::nonNull)
+                    .flatMap(Collection::stream)
+                    .distinct()
+                    .collect(Collectors.toList());
+
+            futures = finishListenersTemp.stream()
+                    .map(eventListener -> submit(() -> eventListener.eventFired(event)))
+                    .collect(Collectors.toList());
+
+            try {
+                timeOut(futures, 1000);
+            } catch (InterruptedException e) {
+                error("interrupted", e);
+            }
         }
     }
 

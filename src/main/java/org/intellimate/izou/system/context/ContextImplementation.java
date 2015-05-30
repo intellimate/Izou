@@ -284,6 +284,57 @@ public class ContextImplementation implements Context {
         }
 
         /**
+         * Adds an listener for events that gets called when the event finished processing.
+         * <p>
+         * Be careful with this method, it will register the listener for ALL the informations found in the Event. If your
+         * event-type is a common event type, it will fire EACH time!.
+         * It will also register for all Descriptors individually!
+         * It will also ignore if this listener is already listening to an Event.
+         * Method is thread-safe.
+         * </p>
+         *
+         * @param event         the Event to listen to (it will listen to all descriptors individually!)
+         * @param eventListener the ActivatorEventListener-interface for receiving activator events
+         * @throws IllegalIDException not yet implemented
+         */
+        @Override
+        public void registerEventFinishedListener(EventModel event, EventListenerModel eventListener) throws IllegalIDException {
+            main.getEventDistributor().registerEventFinishedListener(event, eventListener);
+        }
+
+        /**
+         * Adds an listener for events that gets called when the event finished processing.
+         * <p>
+         * It will register for all ids individually!
+         * This method will ignore if this listener is already listening to an Event.
+         * Method is thread-safe.
+         * </p>
+         *
+         * @param ids           this can be type, or descriptors etc.
+         * @param eventListener the ActivatorEventListener-interface for receiving activator events
+         */
+        @Override
+        public void registerEventFinishedListener(List<String> ids, EventListenerModel eventListener) {
+            main.getEventDistributor().registerEventFinishedListener(ids, eventListener);
+        }
+
+        /**
+         * unregister an EventListener that got called when the event finished processing.
+         * <p>
+         * It will unregister for all Descriptors individually!
+         * It will also ignore if this listener is not listening to an Event.
+         * Method is thread-safe.
+         *
+         * @param event         the Event to stop listen to
+         * @param eventListener the ActivatorEventListener used to listen for events
+         * @throws IllegalArgumentException if Listener is already listening to the Event or the id is not allowed
+         */
+        @Override
+        public void unregisterEventFinishedListener(EventModel event, EventListenerModel eventListener) {
+            main.getEventDistributor().registerEventFinishedListener(event, eventListener);
+        }
+
+        /**
          * Registers with the LocalEventManager to fire an event.
          * <p>
          * Note: the same Event can be fired from multiple sources.
