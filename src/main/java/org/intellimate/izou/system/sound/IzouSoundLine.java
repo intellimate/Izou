@@ -8,6 +8,7 @@ import org.intellimate.izou.addon.AddOnModel;
  * @author LeanderK
  * @version 1.0
  */
+//TODO: TargetDataLine is not implemented yet
 public interface IzouSoundLine {
     /**
      * returns whether the line is permanently-available.
