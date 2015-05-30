@@ -123,9 +123,9 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
      */
     @Override
     public void close() {
-        line.close();
-        if (closeCallback != null)
+        if (line.isOpen() && closeCallback != null)
             closeCallback.accept(null);
+        line.close();
     }
 
     /**
