@@ -7,6 +7,7 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.DataLine;
 
 /**
+ * the delegation to DataLine.
  * @author LeanderK
  * @version 1.0
  */

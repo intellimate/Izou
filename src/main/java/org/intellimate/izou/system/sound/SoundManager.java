@@ -32,12 +32,12 @@ import java.util.stream.Collectors;
  */
 public class SoundManager extends IzouModule implements AddonThreadPoolUser, EventsControllerModel {
     //non-permanent and general fields
-    private ConcurrentHashMap<AddOnModel, List<WeakReference<IzouSoundLine>>> nonPermanent = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<AddOnModel, List<WeakReference<IzouSoundLineBaseClass>>> nonPermanent = new ConcurrentHashMap<>();
     //not null if this AddOn is currently muting the others Lines
     private AddOnModel muting = null;
 
     //permanent fields, there is a Read/Write lock!
-    private List<WeakReference<IzouSoundLine>> permanentLines = null;
+    private List<WeakReference<IzouSoundLineBaseClass>> permanentLines = null;
     private AddOnModel permanentAddOn = null;
     //gets filled when the event got fired
     private Identification knownIdentification = null;
@@ -58,7 +58,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
     private void tidy() {
         nonPermanent.entrySet().stream()
                 .map(entry -> {
-                    List<WeakReference<IzouSoundLine>> collect = entry.getValue().stream()
+                    List<WeakReference<IzouSoundLineBaseClass>> collect = entry.getValue().stream()
                             .filter(izouSoundLineWeakReference -> izouSoundLineWeakReference.get() != null)
                             .collect(Collectors.toList());
                     if (!collect.isEmpty()) {
@@ -104,7 +104,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
                     .filter(Objects::nonNull)
                     .forEach(izouSoundLine -> izouSoundLine.setMuted(true));
         }
-        List<WeakReference<IzouSoundLine>> weakReferences = nonPermanent.get(addOnModel);
+        List<WeakReference<IzouSoundLineBaseClass>> weakReferences = nonPermanent.get(addOnModel);
         if (weakReferences != null) {
             weakReferences.stream()
                     .map(Reference::get)
@@ -120,7 +120,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
      * @param izouSoundLine the izouSoundLine
      */
     private void closeCallback(AddOnModel addOnModel, IzouSoundLine izouSoundLine) {
-        Predicate<WeakReference<IzouSoundLine>> removeFromList =
+        Predicate<WeakReference<IzouSoundLineBaseClass>> removeFromList =
                 weakReference -> weakReference.get() != null && weakReference.get().equals(izouSoundLine);
         synchronized (permanentUserReadWriteLock) {
             if (permanentAddOn != null && permanentAddOn.equals(addOnModel) && permanentLines != null) {
@@ -131,7 +131,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
                 }
             }
         }
-        List<WeakReference<IzouSoundLine>> weakReferences = nonPermanent.get(addOnModel);
+        List<WeakReference<IzouSoundLineBaseClass>> weakReferences = nonPermanent.get(addOnModel);
         if (weakReferences != null) {
             weakReferences.removeIf(removeFromList);
             if (muting != null && muting.equals(addOnModel) && !weakReferences.stream()
@@ -218,7 +218,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
     private void addNonPermanent(AddOnModel addOnModel, IzouSoundLineBaseClass izouSoundLine) {
         if (izouSoundLine.isPermanent())
             izouSoundLine.setToNonPermanent();
-        List<WeakReference<IzouSoundLine>> weakReferences = nonPermanent.get(addOnModel);
+        List<WeakReference<IzouSoundLineBaseClass>> weakReferences = nonPermanent.get(addOnModel);
         if (weakReferences == null)
             weakReferences = Collections.synchronizedList(new ArrayList<>());
         nonPermanent.put(addOnModel, weakReferences);
@@ -251,7 +251,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
         synchronized (permanentUserReadWriteLock) {
             permanentAddOn = addOnModel;
             knownIdentification = source;
-            List<WeakReference<IzouSoundLine>> weakReferences = nonPermanent.remove(addOnModel);
+            List<WeakReference<IzouSoundLineBaseClass>> weakReferences = nonPermanent.remove(addOnModel);
             if (weakReferences == null) {
                 permissionWithoutUsage();
             } else {

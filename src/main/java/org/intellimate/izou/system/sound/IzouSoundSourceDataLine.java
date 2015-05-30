@@ -8,6 +8,7 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
 /**
+ * the delegation to SourceDataLine.
  * @author LeanderK
  * @version 1.0
  */

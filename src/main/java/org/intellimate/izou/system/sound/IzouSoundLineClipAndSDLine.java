@@ -7,6 +7,7 @@ import javax.sound.sampled.*;
 import java.io.IOException;
 
 /**
+ * the delegation to Clip and SourceDataLine.
  * @author LeanderK
  * @version 1.0
  */

@@ -9,6 +9,8 @@ import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 /**
+ * the base class for every IzouSoundLine, provides basic implementation of the Methods defined int IzouSoundLine and
+ * delegates to Line, AutoCloseable etc.
  * @author LeanderK
  * @version 1.0
  */

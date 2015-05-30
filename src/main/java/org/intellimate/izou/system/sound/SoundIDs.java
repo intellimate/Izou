@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * this class holds various descriptors used by the soundmanager to communicate with the Addons
+ * this class holds various descriptors used by the SoundManager to communicate with the Addons.
  * @author LeanderK
  * @version 1.0
  */
