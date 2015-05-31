@@ -1,6 +1,7 @@
 package org.intellimate.izou.system.sound;
 
 import org.intellimate.izou.addon.AddOnModel;
+import org.intellimate.izou.identification.Identification;
 
 /**
  * use this interface to communicate with Izou. Every Instance of Line you obtain via Mixer.getLine() implements this
@@ -23,6 +24,13 @@ public interface IzouSoundLine {
      */
     @SuppressWarnings("unused")
     AddOnModel getAddOnModel();
+
+    /**
+     * gets the ID responsible
+     * @return the the ID
+     */
+    @SuppressWarnings("unused")
+    Identification getResponsibleID();
 
     /**
      * returns whether the Line is muted

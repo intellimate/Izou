@@ -7,6 +7,7 @@ import org.intellimate.izou.events.EventMinimalImpl;
 import org.intellimate.izou.events.EventModel;
 import org.intellimate.izou.events.EventsControllerModel;
 import org.intellimate.izou.identification.Identification;
+import org.intellimate.izou.identification.IdentificationManager;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.exceptions.IzouPermissionException;
 
@@ -88,33 +89,6 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
     }
 
     /**
-     * mutes the other Addons
-     * @param addOnModel the addonModel responsible
-     */
-    private void muteOthers(AddOnModel addOnModel) {
-        nonPermanent.entrySet().stream()
-                .filter(entry -> !entry.getKey().equals(addOnModel))
-                .flatMap(entry -> entry.getValue().stream())
-                .map(Reference::get)
-                .filter(Objects::nonNull)
-                .forEach(izouSoundLine -> izouSoundLine.setMuted(true));
-        if (permanentAddOn != null && !permanentAddOn.equals(addOnModel) && permanentLines != null) {
-            permanentLines.stream()
-                    .map(Reference::get)
-                    .filter(Objects::nonNull)
-                    .forEach(izouSoundLine -> izouSoundLine.setMuted(true));
-        }
-        List<WeakReference<IzouSoundLineBaseClass>> weakReferences = nonPermanent.get(addOnModel);
-        if (weakReferences != null) {
-            weakReferences.stream()
-                    .map(Reference::get)
-                    .filter(Objects::nonNull)
-                    .forEach(izouSoundLine -> izouSoundLine.setMuted(false));
-        }
-        muting = addOnModel;
-    }
-
-    /**
      * the close-callback or the AddonModel, removes now redundant references
      * @param addOnModel the addOnModel where the IzouSoundLine belongs to
      * @param izouSoundLine the izouSoundLine
@@ -142,23 +116,6 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
                 unmute();
         }
         submit(this::tidy);
-    }
-
-    /**
-     * unmutes all
-     */
-    private void unmute() {
-        nonPermanent.entrySet().stream()
-                .flatMap(entry -> entry.getValue().stream())
-                .map(Reference::get)
-                .filter(Objects::nonNull)
-                .forEach(izouSoundLine -> izouSoundLine.setMuted(false));
-
-        if (permanentLines != null)
-            permanentLines.stream()
-                    .map(Reference::get)
-                    .filter(Objects::nonNull)
-                    .forEach(izouSoundLine -> izouSoundLine.setMuted(false));
     }
 
     /**
@@ -258,8 +215,10 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
                 nonPermanent.remove(addOnModel);
                 permanentLines = weakReferences;
                 permanentLines.forEach(weakReferenceLine -> {
-                    if (weakReferenceLine.get() != null)
+                    if (weakReferenceLine.get() != null) {
                         weakReferenceLine.get().setToPermanent();
+                        weakReferenceLine.get().setResponsibleID(source);
+                    }
                 });
             }
         }
@@ -297,6 +256,80 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
             EventModel event = new EventMinimalImpl(SoundIDs.EndedEvent.type, knownIdentification, SoundIDs.EndedEvent.descriptors);
             getMain().getEventDistributor().fireEventConcurrently(event);
         }
+    }
+
+    /**
+     * mutes the other Addons
+     * @param addOnModel the addonModel responsible
+     */
+    private void muteOthers(AddOnModel addOnModel) {
+        List<IzouSoundLineBaseClass> toMute = nonPermanent.entrySet().stream()
+                .filter(entry -> !entry.getKey().equals(addOnModel))
+                .flatMap(entry -> entry.getValue().stream())
+                .map(Reference::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        if (permanentAddOn != null && !permanentAddOn.equals(addOnModel) && permanentLines != null) {
+            toMute.addAll(
+                    permanentLines.stream()
+                    .map(Reference::get)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList())
+            );
+        }
+        mute(toMute);
+        List<WeakReference<IzouSoundLineBaseClass>> weakReferences = nonPermanent.get(addOnModel);
+        if (weakReferences != null) {
+            weakReferences.stream()
+                    .map(Reference::get)
+                    .filter(Objects::nonNull)
+                    .forEach(izouSoundLine -> izouSoundLine.setMuted(false));
+        }
+        muting = addOnModel;
+    }
+
+    /**
+     * mutes the list of soundLines and fires the Mute-Event
+     * @param soundLines the soundLines to mute
+     */
+    private void mute(List<IzouSoundLineBaseClass> soundLines) {
+        soundLines.forEach(soundLine -> soundLine.setMuted(true));
+        IdentificationManager.getInstance()
+                .getIdentification(this)
+                .map(id -> new EventMinimalImpl(SoundIDs.MuteEvent.type, id, SoundIDs.MuteEvent.descriptors))
+                .ifPresent(event -> getMain().getEventDistributor().fireEventConcurrently(event));
+    }
+
+    /**
+     * unmutes the list of soundLines and fires the UnMute-Event
+     * @param soundLines the soundlines to unmute
+     */
+    private void unMute(List<IzouSoundLineBaseClass> soundLines) {
+        soundLines.forEach(soundLine -> soundLine.setMuted(false));
+        IdentificationManager.getInstance()
+                .getIdentification(this)
+                .map(id -> new EventMinimalImpl(SoundIDs.UnMuteEvent.type, id, SoundIDs.UnMuteEvent.descriptors))
+                .ifPresent(event -> getMain().getEventDistributor().fireEventConcurrently(event));
+    }
+
+    /**
+     * unmutes all
+     */
+    private void unmute() {
+        List<IzouSoundLineBaseClass> unmute = nonPermanent.entrySet().stream()
+                .flatMap(entry -> entry.getValue().stream())
+                .map(Reference::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        if (permanentLines != null)
+            unmute.addAll(
+                    permanentLines.stream()
+                            .map(Reference::get)
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toList())
+            );
+        unMute(unmute);
     }
 
     /**

@@ -2,6 +2,7 @@ package org.intellimate.izou.system.sound;
 
 import org.intellimate.izou.IzouModule;
 import org.intellimate.izou.addon.AddOnModel;
+import org.intellimate.izou.identification.Identification;
 import org.intellimate.izou.main.Main;
 
 import javax.sound.sampled.*;
@@ -24,6 +25,7 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
     private Consumer<Void> closeCallback = null;
     private boolean muteIfNonPermanent = true;
     private Consumer<Void> muteCallback = null;
+    private Identification responsibleID;
 
     public IzouSoundLineBaseClass(Line line, Main main, boolean isPermanent, AddOnModel addOnModel) {
         super(main);
@@ -222,6 +224,20 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
     @SuppressWarnings("unused")
     public AddOnModel getAddOnModel() {
         return addOnModel;
+    }
+
+    /**
+     * gets the ID responsible
+     *
+     * @return the the ID
+     */
+    @Override
+    public Identification getResponsibleID() {
+        return responsibleID;
+    }
+
+    void setResponsibleID(Identification responsibleID) {
+        this.responsibleID = responsibleID;
     }
 
     /**
