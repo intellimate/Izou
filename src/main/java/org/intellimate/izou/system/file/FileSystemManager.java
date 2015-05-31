@@ -24,7 +24,8 @@ public class FileSystemManager extends IzouModule {
     /**
      * path to the proterties files
      */
-    //TODO remove!
+    //TODO remove!, Update: marked as deprecated
+    @Deprecated
     public static final String PROPERTIES_PATH = "." + File.separator + "properties" + File.separator;
 
     static {

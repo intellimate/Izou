@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * This is where our journey begins and all the Managers get initialized
  */
+//TODO add debug as property to get the filemanager working if debuggin an addon
 @SuppressWarnings("FieldCanBeLocal")
 public class Main {
     public static AtomicBoolean jfxToolKitInit;
