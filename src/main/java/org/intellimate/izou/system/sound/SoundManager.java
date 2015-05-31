@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
  * @author LeanderK
  * @version 1.0
  */
+//TODO: get this thing working without java-sound (for example if the addon uses native code, it will currently get an timeout).
 public class SoundManager extends IzouModule implements AddonThreadPoolUser, EventsControllerModel {
     //non-permanent and general fields
     private ConcurrentHashMap<AddOnModel, List<WeakReference<IzouSoundLineBaseClass>>> nonPermanent = new ConcurrentHashMap<>();
