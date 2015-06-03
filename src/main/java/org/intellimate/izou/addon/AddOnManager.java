@@ -1,8 +1,6 @@
 package org.intellimate.izou.addon;
 
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.intellimate.izou.AddonThreadPoolUser;
 import org.intellimate.izou.IdentifiableSet;
 import org.intellimate.izou.IzouModule;
@@ -19,7 +17,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.security.*;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -32,7 +33,6 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
     private IdentifiableSet<AddOnModel> addOns = new IdentifiableSet<>();
     private HashMap<AddOnModel, PluginWrapper> pluginWrappers = new HashMap<>();
     private List<URL> aspectsOrAffected = new ArrayList<>();
-    private final Logger logger = LogManager.getLogger(this.getClass());
     
     public AddOnManager(Main main) {
         super(main);
@@ -205,7 +205,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
             } catch(NullPointerException e) {
                 return;
             } catch (UnrecoverableEntryException | NoSuchAlgorithmException | KeyStoreException e) {
-                logger.error("Unable to retrieve key", e);
+                error("Unable to retrieve key", e);
             }
         }
 
@@ -225,14 +225,14 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
                             .toCharArray());
                     keyStore.setEntry(mapKey, keyStoreEntry, keyPassword);
                 } catch (KeyStoreException e) {
-                    logger.error("Unable to store key", e);
+                    error("Unable to store key", e);
                 }
             }
 
             try {
                 keyStore.store(new FileOutputStream(keyStoreFile), "4b[X:+H4CS&avY<)".toCharArray());
             } catch (KeyStoreException | IOException | CertificateException | NoSuchAlgorithmException e) {
-                logger.error("Unable to store key", e);
+                error("Unable to store key", e);
             }
         }
 
@@ -255,7 +255,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
                     keyStore.store(new FileOutputStream(fileName), password.toCharArray());
                 }
             } catch (CertificateException | IOException | KeyStoreException | NoSuchAlgorithmException e) {
-                logger.error("Unable to create key store", e);
+                error("Unable to create key store", e);
             }
 
             return keyStore;
