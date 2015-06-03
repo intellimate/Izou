@@ -94,8 +94,7 @@ public final class SecureStorage {
         }
 
         container.setCryptData(cryptData);
-        //TODO reactivate
-        //containers.put(descriptor.getSecureID(), container);
+        containers.put(descriptor.getSecureID(), container);
         saveContainers();
     }
 
@@ -106,8 +105,7 @@ public final class SecureStorage {
      * @return  container The secure container that was retrieved
      */
     public SecureContainer retrieve(PluginDescriptor descriptor) {
-        //TODO reactivate
-        /*SecureContainer container = containers.get(descriptor.getSecureID());
+        SecureContainer container = containers.get(descriptor.getSecureID());
         HashMap<byte[], byte[]> cryptData = container.getCryptData();
         HashMap<String, String> clearTextData = container.getClearTextData();
 
@@ -120,8 +118,6 @@ public final class SecureStorage {
 
         container.setClearTextData(clearTextData);
         return container;
-        */
-        return null;
     }
 
     /**
@@ -203,7 +199,6 @@ public final class SecureStorage {
         String workingDir = FileSystemManager.FULL_WORKING_DIRECTORY;
         final String keyStoreFile = workingDir + File.separator + "system" + File.separator + "izou.keystore";
         KeyStore keyStore = createKeyStore(keyStoreFile, "4b[X:+H4CS&avY<)");
-
 
         try {
             KeyStore.SecretKeyEntry keyStoreEntry = new KeyStore.SecretKeyEntry(key);

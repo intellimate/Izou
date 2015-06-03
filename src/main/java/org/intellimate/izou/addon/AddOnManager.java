@@ -1,22 +1,27 @@
 package org.intellimate.izou.addon;
 
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.intellimate.izou.AddonThreadPoolUser;
 import org.intellimate.izou.IdentifiableSet;
 import org.intellimate.izou.IzouModule;
 import org.intellimate.izou.main.Main;
+import org.intellimate.izou.security.SecurityModule;
 import org.intellimate.izou.system.Context;
 import org.intellimate.izou.system.context.ContextImplementation;
-import ro.fortsoft.pf4j.DefaultPluginManager;
-import ro.fortsoft.pf4j.IzouPluginClassLoader;
-import ro.fortsoft.pf4j.PluginManager;
-import ro.fortsoft.pf4j.PluginWrapper;
+import org.intellimate.izou.system.file.FileSystemManager;
+import ro.fortsoft.pf4j.*;
 
+import javax.crypto.SecretKey;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.security.*;
+import java.security.cert.CertificateException;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -27,6 +32,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
     private IdentifiableSet<AddOnModel> addOns = new IdentifiableSet<>();
     private HashMap<AddOnModel, PluginWrapper> pluginWrappers = new HashMap<>();
     private List<URL> aspectsOrAffected = new ArrayList<>();
+    private final Logger logger = LogManager.getLogger(this.getClass());
     
     public AddOnManager(Main main) {
         super(main);
@@ -100,14 +106,18 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
             debug("retrieving addons from the plugins");
             List<AddOnModel> addOns = pluginManager.getExtensions(AddOnModel.class);
             debug("retrieved: " + addOns.toString());
+            KeyManager keyManager = new KeyManager();
             addOns.stream()
                     .filter(addOn -> addOn.getClass().getClassLoader() instanceof IzouPluginClassLoader)
                     .forEach(addOn -> {
-                        IzouPluginClassLoader izouPluginClassLoader = (IzouPluginClassLoader) addOn.getClass().getClassLoader();
-                        PluginWrapper plugin = pluginManager.getPlugin(izouPluginClassLoader.getPluginDescriptor().getPluginId());
-                        addOn.setPlugin(plugin);
+                        IzouPluginClassLoader izouPluginClassLoader = (IzouPluginClassLoader) addOn.getClass()
+                                .getClassLoader();
+                        PluginWrapper plugin = pluginManager.getPlugin(izouPluginClassLoader.getPluginDescriptor()
+                                .getPluginId());
+                        keyManager.manageAddOnKey(plugin.getDescriptor());
                         pluginWrappers.put(addOn, plugin);
                     });
+            keyManager.saveAddOnKeys();
             return addOns;
         } catch (Exception e) {
             log.fatal("Error while trying to start the AddOns", e);
@@ -151,5 +161,104 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
      */
     public void addAspectOrAffectedURL(URL url) {
         aspectsOrAffected.add(url);
+    }
+
+    private class KeyManager {
+        private HashMap<String, SecretKey> addOnKeys;
+        boolean changed;
+
+        private KeyManager() {
+            addOnKeys = new HashMap<>();
+            retrieveAddonKeys();
+        }
+
+        private void manageAddOnKey(PluginDescriptor descriptor) {
+            SecretKey secretKey = addOnKeys.get(descriptor.getPluginId());
+
+            if (secretKey == null) {
+                SecurityModule module = new SecurityModule();
+                secretKey = module.generateKey();
+                addOnKeys.put(descriptor.getPluginId(), secretKey);
+                changed = true;
+            }
+
+            descriptor.setSecureID(secretKey);
+        }
+
+        private void retrieveAddonKeys() {
+            changed = false;
+
+            try {
+                String workingDir = FileSystemManager.FULL_WORKING_DIRECTORY;
+                final String keyStoreFile = workingDir + File.separator + "system" + File.separator + "izou.keystore";
+                KeyStore keyStore = createKeyStore(keyStoreFile, "4b[X:+H4CS&avY<)");
+
+                KeyStore.PasswordProtection keyPassword = new KeyStore.PasswordProtection("Ev45j>eP}QTR?K9_"
+                        .toCharArray());
+                Enumeration<String> aliases = keyStore.aliases();
+                while (aliases.hasMoreElements()) {
+                    String alias = aliases.nextElement();
+                    KeyStore.Entry entry = keyStore.getEntry(alias, keyPassword);
+                    SecretKey key = ((KeyStore.SecretKeyEntry) entry).getSecretKey();
+                    addOnKeys.put(alias, key);
+                }
+            } catch(NullPointerException e) {
+                return;
+            } catch (UnrecoverableEntryException | NoSuchAlgorithmException | KeyStoreException e) {
+                logger.error("Unable to retrieve key", e);
+            }
+        }
+
+        private void saveAddOnKeys() {
+            if (!changed) {
+                return;
+            }
+
+            String workingDir = FileSystemManager.FULL_WORKING_DIRECTORY;
+            final String keyStoreFile = workingDir + File.separator + "system" + File.separator + "addon_keys.keystore";
+            KeyStore keyStore = createKeyStore(keyStoreFile, "4b[X:+H4CS&avY<)");
+
+            for (String mapKey : addOnKeys.keySet()) {
+                try {
+                    KeyStore.SecretKeyEntry keyStoreEntry = new KeyStore.SecretKeyEntry(addOnKeys.get(mapKey));
+                    KeyStore.PasswordProtection keyPassword = new KeyStore.PasswordProtection("Ev45j>eP}QTR?K9_"
+                            .toCharArray());
+                    keyStore.setEntry(mapKey, keyStoreEntry, keyPassword);
+                } catch (KeyStoreException e) {
+                    logger.error("Unable to store key", e);
+                }
+            }
+
+            try {
+                keyStore.store(new FileOutputStream(keyStoreFile), "4b[X:+H4CS&avY<)".toCharArray())
+            } catch (KeyStoreException | IOException | CertificateException | NoSuchAlgorithmException e) {
+                logger.error("Unable to store key", e);
+            }
+        }
+
+        /**
+         * Creates a new keystore for the izou aes key
+         *
+         * @param fileName the path to the keystore
+         * @param password the password to use with the keystore
+         * @return the newly created keystore
+         */
+        private KeyStore createKeyStore(String fileName, String password)  {
+            File file = new File(fileName);
+            KeyStore keyStore = null;
+            try {
+                keyStore = KeyStore.getInstance("JCEKS");
+                if (file.exists()) {
+                    keyStore.load(new FileInputStream(file), password.toCharArray());
+                } else {
+                    keyStore.load(null, null);
+                    keyStore.store(new FileOutputStream(fileName), password.toCharArray());
+                }
+            } catch (CertificateException | IOException | KeyStoreException | NoSuchAlgorithmException e) {
+                logger.error("Unable to create key store", e);
+            }
+
+            return keyStore;
+        }
     }
 }
