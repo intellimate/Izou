@@ -27,7 +27,7 @@ import java.util.HashMap;
  */
 public final class SecureStorage {
     private static boolean exists = false;
-    private HashMap<String, SecureContainer> containers;
+    private HashMap<SecretKey, SecureContainer> containers;
     private final Logger logger = LogManager.getLogger(this.getClass());
 
     /**
@@ -143,8 +143,8 @@ public final class SecureStorage {
      *
      * @return the containers from ./system/data/containers.ser if the file is found, else null
      */
-    private HashMap<String, SecureContainer> retrieveContainers() {
-        HashMap<String, SecureContainer> containers = null;
+    private HashMap<SecretKey, SecureContainer> retrieveContainers() {
+        HashMap<SecretKey, SecureContainer> containers = null;
         String workingDir = FileSystemManager.FULL_WORKING_DIRECTORY;
         final String containerFile = workingDir + File.separator + "system" + File.separator + "data" + File.separator
                 + "containers.ser";
