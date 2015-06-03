@@ -230,7 +230,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
             }
 
             try {
-                keyStore.store(new FileOutputStream(keyStoreFile), "4b[X:+H4CS&avY<)".toCharArray())
+                keyStore.store(new FileOutputStream(keyStoreFile), "4b[X:+H4CS&avY<)".toCharArray());
             } catch (KeyStoreException | IOException | CertificateException | NoSuchAlgorithmException e) {
                 logger.error("Unable to store key", e);
             }
