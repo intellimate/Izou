@@ -170,6 +170,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
             }
             permanentLines.add(new WeakReference<>(izouSoundLine));
         }
+        //TODO: STOP the addon via the stop event
     }
 
     /**
