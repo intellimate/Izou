@@ -45,6 +45,8 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
     private Identification knownIdentification = null;
     //Addon has 10 sec to obtain an IzouSoundLine
     private LocalDateTime permissionWithoutUsageLimit = null;
+    //if true we can do nothing to check whether he closed.
+    private boolean isUsingNonJava = false;
     private Future<Void> permissionWithoutUsageCloseThread = null;
     private final Object permanentUserReadWriteLock = new Object();
     private AtomicBoolean isUsing = new AtomicBoolean(false);
@@ -124,6 +126,8 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
      * the Thread
      */
     private void permissionWithoutUsage() {
+        if (isUsingNonJava)
+            return;
         synchronized (permanentUserReadWriteLock) {
             permissionWithoutUsageLimit = LocalDateTime.now().plus(5, ChronoUnit.SECONDS);
             permissionWithoutUsageCloseThread =  submit(() -> {
@@ -187,9 +191,10 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
      * tries to register the AddonModel as permanent
      * @param addOnModel the AddonModel to register
      * @param source the Source which requested the usage
+     * @param nonJava true if it is not using java to play sounds
      * @return trie if registered, false if not
      */
-    public boolean requestPermanent(AddOnModel addOnModel, Identification source) {
+    public boolean requestPermanent(AddOnModel addOnModel, Identification source, boolean nonJava) {
         boolean notUsing = isUsing.compareAndSet(false, true);
         if (!notUsing) {
             synchronized (permanentUserReadWriteLock) {
@@ -209,16 +214,27 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
         synchronized (permanentUserReadWriteLock) {
             permanentAddOn = addOnModel;
             knownIdentification = source;
+            isUsingNonJava = nonJava;
+            permissionWithoutUsageLimit = null;
+            if (permissionWithoutUsageCloseThread != null)
+                permissionWithoutUsageCloseThread.cancel(true);
+            permissionWithoutUsageCloseThread = null;
+
             List<WeakReference<IzouSoundLineBaseClass>> weakReferences = nonPermanent.remove(addOnModel);
             if (weakReferences == null) {
-                permissionWithoutUsage();
+                if (isUsingNonJava) {
+                    permanentLines = new ArrayList<>();
+                } else {
+                    permissionWithoutUsage();
+                }
             } else {
                 nonPermanent.remove(addOnModel);
                 permanentLines = weakReferences;
                 permanentLines.forEach(weakReferenceLine -> {
-                    if (weakReferenceLine.get() != null) {
-                        weakReferenceLine.get().setToPermanent();
-                        weakReferenceLine.get().setResponsibleID(source);
+                    IzouSoundLineBaseClass izouSoundLineBaseClass = weakReferenceLine.get();
+                    if (izouSoundLineBaseClass != null) {
+                        izouSoundLineBaseClass.setToPermanent();
+                        izouSoundLineBaseClass.setResponsibleID(source);
                     }
                 });
             }
@@ -350,7 +366,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
         if (event.containsDescriptor(SoundIDs.StartEvent.descriptor)) {
             try {
                 AddOnModel addOnModel = getMain().getSecurityManager().getOrThrowAddOnModelForClassLoader();
-                return requestPermanent(addOnModel, event.getSource());
+                return requestPermanent(addOnModel, event.getSource(), event.containsDescriptor(SoundIDs.StartEvent.isUsingNonJava));
             } catch (IzouPermissionException e) {
                 error("no AddonModel found for event: " + event);
                 return true;

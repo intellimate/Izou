@@ -12,6 +12,8 @@ public class SoundIDs {
 
     public static class StartEvent {
         public static final String descriptor = "izou.sound.events.start";
+        //add this descriptor to the Event if you are using non-java code to play music
+        public static final String isUsingNonJava = "izou.sound.events.start.nonjava";
     }
 
     public static class EndedEvent {
