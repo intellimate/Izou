@@ -29,7 +29,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * This is where our journey begins and all the Managers get initialized
  */
-//TODO add debug as property to get the filemanager working if debuggin an addon
 @SuppressWarnings("FieldCanBeLocal")
 public class Main {
     public static AtomicBoolean jfxToolKitInit;
@@ -52,13 +51,13 @@ public class Main {
     private FileSystemManager fileSystemManager;
 
     /**
-     * Creates a new Main instance with debugging enabled (doesn't search the lib-folder)
+     * Creates a new Main instance with a optionally disabled lib-folder
      *
      * @param javaFX true if javaFX should be started, false otherwise
-     * @param debug  if true, izou will not load plugin from the lib-folder
+     * @param disableLibFolder  if true, izou will not load plugin from the lib-folder
      */
-    private Main(boolean javaFX, boolean debug) {
-        this(null, javaFX, debug);
+    private Main(boolean javaFX, boolean disableLibFolder) {
+        this(null, javaFX, disableLibFolder);
     }
 
     /**
@@ -73,24 +72,28 @@ public class Main {
     /**
      * If you want to debug your Plugin, you can get an Main instance with this Method
      *
-     * @param debug  if true, izou will not load plugin from the lib-folder
+     * @param disableLibFolder  if true, izou will not load plugin from the lib-folder
      * @param addOns a List of AddOns to run
      */
-    public Main(List<AddOnModel> addOns, boolean debug) {
-        this(addOns, false, debug);
+    public Main(List<AddOnModel> addOns, boolean disableLibFolder) {
+        this(addOns, false, disableLibFolder);
     }
 
     /**
      * If you want to debug your Plugin, you can get an Main instance with this Method
      *
      * @param javaFX true if javaFX should be started, false otherwise
-     * @param debug  if true, izou will not load plugin from the lib-folder
+     * @param disableLibFolder  if true, izou will not load plugin from the lib-folder
      * @param addOns a List of AddOns to run
      */
-    public Main(List<AddOnModel> addOns, boolean javaFX, boolean debug) {
+    public Main(List<AddOnModel> addOns, boolean javaFX, boolean disableLibFolder) {
         fileLogger.debug("Starting Izou");
         fileLogger.debug("Initializing...");
         systemInitializer = initSystem();
+        if (addOns != null) {
+            fileLogger.debug("setting to debug");
+            System.setProperty("debug", "true");
+        }
 
         threadPoolManager = new ThreadPoolManager(this);
         izouLogger = new IzouLogger();
@@ -113,14 +116,14 @@ public class Main {
         systemMail = initMail();
         securityManager = startSecurity(systemMail);
 
-        if (addOns != null && !debug) {
+        if (addOns != null && !disableLibFolder) {
             fileLogger.debug("adding addons from the parameter without registering");
             addOnManager.addAddOnsWithoutRegistering(addOns);
         } else if (addOns != null) {
             fileLogger.debug("adding and registering addons from the parameter");
             addOnManager.addAndRegisterAddOns(addOns);
         }
-        if (!debug) {
+        if (!disableLibFolder) {
             fileLogger.debug("retrieving addons & registering them");
             addOnManager.retrieveAndRegisterAddOns();
         }
