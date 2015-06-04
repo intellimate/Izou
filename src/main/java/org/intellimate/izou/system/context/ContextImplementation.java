@@ -20,6 +20,7 @@ import org.intellimate.izou.threadpool.TrackingExecutorService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.spi.ExtendedLogger;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
@@ -229,6 +230,46 @@ public class ContextImplementation implements Context {
         @Override
         public void unregister(FileSubscriber fileSubscriber) {
            main.getFilePublisher().unregister(fileSubscriber);
+        }
+
+        /**
+         * gets the File pointing towards the location of the lib-folder
+         *
+         * @return the File
+         */
+        @Override
+        public File getLibLocation() {
+            return main.getFileSystemManager().getLibLocation();
+        }
+
+        /**
+         * gets the File pointing towards the location of the resource-folder
+         *
+         * @return the File
+         */
+        @Override
+        public File getResourceLocation() {
+            return main.getFileSystemManager().getResourceLocation();
+        }
+
+        /**
+         * gets the File pointing towards the location of the properties-folder
+         *
+         * @return the File
+         */
+        @Override
+        public File getPropertiesLocation() {
+            return main.getFileSystemManager().getPropertiesLocation();
+        }
+
+        /**
+         * gets the File pointing towards the location of the logs-folder
+         *
+         * @return the File
+         */
+        @Override
+        public File getLogsLocation() {
+            return main.getFileSystemManager().getLogsLocation();
         }
     }
 

@@ -5,6 +5,7 @@ import org.intellimate.izou.identification.IllegalIDException;
 import org.intellimate.izou.system.file.FileSubscriber;
 import org.intellimate.izou.system.file.ReloadableFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -79,4 +80,28 @@ public interface Files {
      * @param fileSubscriber the fileSubscriber to unregister
      */
     void unregister(FileSubscriber fileSubscriber);
+
+    /**
+     * gets the File pointing towards the location of the lib-folder
+     * @return the File
+     */
+    File getLibLocation();
+
+    /**
+     * gets the File pointing towards the location of the resource-folder
+     * @return the File
+     */
+    File getResourceLocation();
+
+    /**
+     * gets the File pointing towards the location of the properties-folder
+     * @return the File
+     */
+    File getPropertiesLocation();
+
+    /**
+     * gets the File pointing towards the location of the logs-folder
+     * @return the File
+     */
+    File getLogsLocation();
 }
