@@ -169,6 +169,26 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
     }
 
     /**
+     * unregister an EventListener
+     *
+     * It will unregister for all registered descriptors.
+     * It will also ignore if this listener is not listening to an Event.
+     * Method is thread-safe.
+     *
+     * @param eventListener the ActivatorEventListener used to listen for events
+     * @throws IllegalArgumentException if Listener is already listening to the Event or the id is not allowed
+     */
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+    public void unregisterEventListener(EventListenerModel eventListener) throws IllegalArgumentException {
+        listeners.values().stream()
+                .forEach(list -> {
+                    synchronized (list) {
+                        list.removeIf(eventListenerModel -> eventListenerModel.equals(eventListener));
+                    }
+                });
+    }
+
+    /**
      * Adds an listener for events that gets called when the event finished processing.
      * <p>
      * Be careful with this method, it will register the listener for ALL the informations found in the Event. If your
@@ -234,6 +254,26 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
                 listenersList.remove(eventListener);
             }
         }
+    }
+
+    /**
+     * unregister an EventListener that got called when the event finished processing.
+     *
+     * It will unregister for all registered descriptors.
+     * It will also ignore if this listener is not listening to an Event.
+     * Method is thread-safe.
+     *
+     * @param eventListener the ActivatorEventListener used to listen for events
+     * @throws IllegalArgumentException if Listener is already listening to the Event or the id is not allowed
+     */
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+    public void unregisterEventFinishedListener(EventListenerModel eventListener) throws IllegalArgumentException {
+        finishListeners.values().stream()
+                .forEach(list -> {
+                    synchronized (list) {
+                        list.removeIf(eventListenerModel -> eventListenerModel.equals(eventListener));
+                    }
+                });
     }
 
     /**

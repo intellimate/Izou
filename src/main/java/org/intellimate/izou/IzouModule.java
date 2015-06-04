@@ -1,11 +1,11 @@
 package org.intellimate.izou;
 
-import org.intellimate.izou.identification.Identifiable;
-import org.intellimate.izou.identification.IdentificationManager;
-import org.intellimate.izou.main.Main;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.spi.AbstractLogger;
+import org.intellimate.izou.identification.Identifiable;
+import org.intellimate.izou.identification.IdentificationManager;
+import org.intellimate.izou.main.Main;
 
 /**
  * The base class for each IzouModule

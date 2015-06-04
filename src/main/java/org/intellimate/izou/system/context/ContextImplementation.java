@@ -284,6 +284,21 @@ public class ContextImplementation implements Context {
         }
 
         /**
+         * unregister an EventListener that gets called before the generation of the resources and the outputPlugins.
+         * <p>
+         * It will unregister for all Descriptors individually!
+         * It will also ignore if this listener is not listening to an Event.
+         * Method is thread-safe.
+         *
+         * @param eventListener the ActivatorEventListener used to listen for events
+         * @throws IllegalArgumentException if Listener is already listening to the Event or the id is not allowed
+         */
+        @Override
+        public void unregisterEventListener(EventListenerModel eventListener) {
+            main.getEventDistributor().unregisterEventListener(eventListener);
+        }
+
+        /**
          * Adds an listener for events that gets called when the event finished processing.
          * <p>
          * Be careful with this method, it will register the listener for ALL the informations found in the Event. If your
@@ -331,7 +346,22 @@ public class ContextImplementation implements Context {
          */
         @Override
         public void unregisterEventFinishedListener(EventModel event, EventListenerModel eventListener) {
-            main.getEventDistributor().registerEventFinishedListener(event, eventListener);
+            main.getEventDistributor().unregisterEventFinishedListener(event, eventListener);
+        }
+
+        /**
+         * unregister an EventListener that got called when the event finished processing.
+         * <p>
+         * It will unregister for all Descriptors individually!
+         * It will also ignore if this listener is not listening to an Event.
+         * Method is thread-safe.
+         *
+         * @param eventListener the ActivatorEventListener used to listen for events
+         * @throws IllegalArgumentException if Listener is already listening to the Event or the id is not allowed
+         */
+        @Override
+        public void unregisterEventFinishedListener(EventListenerModel eventListener) {
+            main.getEventDistributor().unregisterEventFinishedListener(eventListener);
         }
 
         /**
