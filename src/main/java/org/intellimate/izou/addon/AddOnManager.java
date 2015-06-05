@@ -163,15 +163,35 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
         aspectsOrAffected.add(url);
     }
 
+    /**
+     * The KeyManager in the AddOnManager loads or creates a {@link SecretKey} for each AddOn at addOn load time,
+     * depending if one already exists. It then distributes them to each addOn being loaded, and then finaly saves them
+     * again.
+     * <p>
+     *     This is necessary for the {@link org.intellimate.izou.security.storage.SecureStorage} in order to save
+     *     data matching to each addOn. This secret key serves as key to the data of an addOn being saved. In other
+     *     words, each addOn data is matched with the secret key instead of the plugin descriptor itself in order to
+     *     avoid serialization of the addon descriptor, which would entail a huge mess. So the secret key of each addOn
+     *     is pretty much a "signature" of each addOn, easily identifying it.
+     * </p>
+     */
     private class KeyManager {
         private HashMap<String, SecretKey> addOnKeys;
         boolean changed;
 
+        /**
+         * Creates a new KeyManager object
+         */
         private KeyManager() {
             addOnKeys = new HashMap<>();
             retrieveAddonKeys();
         }
 
+        /**
+         * Check if a SecretKey already exists for the plugin descriptor, if not creates a new one, and then gives it to
+         * the plugin descriptor.
+         * @param descriptor The plugin descriptor to give a SecretKey
+         */
         private void manageAddOnKey(PluginDescriptor descriptor) {
             SecretKey secretKey = addOnKeys.get(descriptor.getPluginId());
 
@@ -185,12 +205,17 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
             descriptor.setSecureID(secretKey);
         }
 
+        /**
+         * Retrieves all saved addOnKeys (they cannot change, since there are dependencies on them, so they are saved
+         * and retrieved)
+         */
         private void retrieveAddonKeys() {
             changed = false;
 
             try {
                 String workingDir = FileSystemManager.FULL_WORKING_DIRECTORY;
-                final String keyStoreFile = workingDir + File.separator + "system" + File.separator + "izou.keystore";
+                final String keyStoreFile = workingDir + File.separator + "system" + File.separator + "data"
+                        + File.separator + "addon_keys.keystore";
                 KeyStore keyStore = createKeyStore(keyStoreFile, "4b[X:+H4CS&avY<)");
 
                 KeyStore.PasswordProtection keyPassword = new KeyStore.PasswordProtection("Ev45j>eP}QTR?K9_"
@@ -209,13 +234,17 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
             }
         }
 
+        /**
+         * Save all addOnKeys in the instance variable {@code addOnKeys} in a keystore
+         */
         private void saveAddOnKeys() {
             if (!changed) {
                 return;
             }
 
             String workingDir = FileSystemManager.FULL_WORKING_DIRECTORY;
-            final String keyStoreFile = workingDir + File.separator + "system" + File.separator + "addon_keys.keystore";
+            final String keyStoreFile = workingDir + File.separator + "system" + File.separator + "data"
+                    + File.separator + "addon_keys.keystore";
             KeyStore keyStore = createKeyStore(keyStoreFile, "4b[X:+H4CS&avY<)");
 
             for (String mapKey : addOnKeys.keySet()) {
@@ -237,7 +266,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
         }
 
         /**
-         * Creates a new keystore for the izou aes key
+         * Creates a new keystore for addOn secret keys
          *
          * @param fileName the path to the keystore
          * @param password the password to use with the keystore
