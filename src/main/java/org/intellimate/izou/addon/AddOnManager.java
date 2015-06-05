@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -160,7 +161,14 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
      * @param url the url to add.
      */
     public void addAspectOrAffectedURL(URL url) {
-        aspectsOrAffected.add(url);
+        File file = new File(url.getFile());
+        if (!file.isDirectory())
+            file = file.getParentFile();
+        try {
+            aspectsOrAffected.add(file.toURI().toURL());
+        } catch (MalformedURLException e) {
+            error("malformed aspect", e);
+        }
     }
 
     /**
