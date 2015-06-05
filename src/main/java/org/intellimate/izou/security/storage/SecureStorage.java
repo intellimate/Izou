@@ -25,6 +25,7 @@ import java.util.HashMap;
  *     from addOns).
  * </p>
  */
+//TODO: @Julian why doesn't it extend IzouModule?
 public final class SecureStorage {
     private static boolean exists = false;
     private HashMap<SecretKey, SecureContainer> containers;

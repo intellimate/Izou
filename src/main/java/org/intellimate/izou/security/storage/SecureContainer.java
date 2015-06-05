@@ -12,6 +12,7 @@ import java.util.HashMap;
  *     stored, however there is no guarantee it is stored safely in that case.
  * </p>
  */
+//TODO: @Julian why doesn't it extend IzouModule?
 public class SecureContainer implements Serializable {
     private HashMap<byte[], byte[]> cryptData;
     private HashMap<String, String> clearTextData;

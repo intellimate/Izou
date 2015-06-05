@@ -18,15 +18,10 @@ public class FileSystemManager extends IzouModule {
      * Path to log files
      */
     private static final Logger logger = LogManager.getLogger(FileSystemManager.class);
+    @Deprecated //use the getters, static not possible anymore (due to platform differences)
     public static final String LOG_PATH = "." + File.separator + "logs" + File.separator;
+    @Deprecated //use the getters, static not possible anymore (due to platform differences)
     public static final String FULL_WORKING_DIRECTORY;
-
-    /**
-     * path to the proterties files
-     */
-    //TODO remove!, Update: marked as deprecated
-    @Deprecated
-    public static final String PROPERTIES_PATH = "." + File.separator + "properties" + File.separator;
 
     static {
         String path = null;
