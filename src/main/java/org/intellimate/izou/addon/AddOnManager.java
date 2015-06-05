@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
     private IdentifiableSet<AddOnModel> addOns = new IdentifiableSet<>();
     private HashMap<AddOnModel, PluginWrapper> pluginWrappers = new HashMap<>();
-    private List<URL> aspectsOrAffected = new ArrayList<>();
+    private Set<URL> aspectsOrAffected = new HashSet<>();
     
     public AddOnManager(Main main) {
         super(main);
@@ -90,7 +90,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
      */
     private List<AddOnModel> loadAddOns() {
         debug("searching for addons in: " + getMain().getFileSystemManager().getLibLocation());
-        PluginManager pluginManager = new DefaultPluginManager(getMain().getFileSystemManager().getLibLocation(), aspectsOrAffected);
+        PluginManager pluginManager = new DefaultPluginManager(getMain().getFileSystemManager().getLibLocation(), new ArrayList<>(aspectsOrAffected));
         // load the plugins
         debug("loading plugins");
         pluginManager.loadPlugins();
