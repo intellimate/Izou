@@ -79,7 +79,7 @@
         <dependency>
             <groupId>org.intellimate.izou</groupId>
             <artifactId>pf4j</artifactId>
-            <version>1.7.1</version>
+            <version>1.1.61</version>
             <!-- we are releasing a jar with dependencies, version changes require a new Izou Version -->
         </dependency>
         <dependency>
@@ -188,6 +188,15 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <failOnError>false</failOnError>
+                    <linksource>true</linksource>
+                    <reportOutputDirectory>${project.build.directory}/javadoc</reportOutputDirectory>
+                    <destDir>javadoc/</destDir>
+                    <source>1.8</source>
+                    <sourcepath>${basedir}/src/main/java/</sourcepath>
+                    <skip>false</skip>
+                </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -226,6 +235,54 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.0</version>
+                <configuration>
+                    <reportPlugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-project-info-reports-plugin</artifactId>
+                            <version>2.2</version>
+                            <configuration>
+                                <dependencyDetailsEnabled>true</dependencyDetailsEnabled>
+                                <dependencyLocationsEnabled>true</dependencyLocationsEnabled>
+                            </configuration>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-javadoc-plugin</artifactId>
+                            <version>2.7</version>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-surefire-report-plugin</artifactId>
+                            <version>2.6</version>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-checkstyle-plugin</artifactId>
+                            <version>2.6</version>
+                        </plugin>
+                    </reportPlugins>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-scm-publish-plugin</artifactId>
+                <version>1.1</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <!-- svn location for publication -->
+                    <pubScmUrl>scm:git:https://github.com/intellimate/Izou.git</pubScmUrl>
+                    <scmBranch>gh-pages</scmBranch>
+                    <checkinComment>Updated JavaDocs via Maven</checkinComment>
+                    <content>${project.build.directory}/javadoc</content>
+                    <siteOutputEncoding>UTF-8</siteOutputEncoding>
+                    <tryUpdate>true</tryUpdate>
+                </configuration>
             </plugin>
         </plugins>
     </build>
