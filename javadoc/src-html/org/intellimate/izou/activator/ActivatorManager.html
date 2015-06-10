@@ -1,0 +1,189 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package org.intellimate.izou.activator;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import org.intellimate.izou.AddonThreadPoolUser;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import org.intellimate.izou.IdentifiableSet;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import org.intellimate.izou.IzouModule;<a name="line.5"></a>
+<span class="sourceLineNo">006</span>import org.intellimate.izou.identification.IllegalIDException;<a name="line.6"></a>
+<span class="sourceLineNo">007</span>import org.intellimate.izou.main.Main;<a name="line.7"></a>
+<span class="sourceLineNo">008</span>import org.intellimate.izou.security.exceptions.IzouPermissionException;<a name="line.8"></a>
+<span class="sourceLineNo">009</span><a name="line.9"></a>
+<span class="sourceLineNo">010</span>import java.net.URL;<a name="line.10"></a>
+<span class="sourceLineNo">011</span>import java.util.ArrayList;<a name="line.11"></a>
+<span class="sourceLineNo">012</span>import java.util.Collections;<a name="line.12"></a>
+<span class="sourceLineNo">013</span>import java.util.List;<a name="line.13"></a>
+<span class="sourceLineNo">014</span>import java.util.concurrent.CompletableFuture;<a name="line.14"></a>
+<span class="sourceLineNo">015</span>import java.util.concurrent.ConcurrentHashMap;<a name="line.15"></a>
+<span class="sourceLineNo">016</span>import java.util.concurrent.atomic.AtomicInteger;<a name="line.16"></a>
+<span class="sourceLineNo">017</span><a name="line.17"></a>
+<span class="sourceLineNo">018</span>/**<a name="line.18"></a>
+<span class="sourceLineNo">019</span> * The ActivatorManager holds all the Activator-instances and runs them parallel in Threads.<a name="line.19"></a>
+<span class="sourceLineNo">020</span> * It automatically restarts Activators, which did finish exceptionally, up to 100 times.<a name="line.20"></a>
+<span class="sourceLineNo">021</span> */<a name="line.21"></a>
+<span class="sourceLineNo">022</span>@SuppressWarnings("WeakerAccess")<a name="line.22"></a>
+<span class="sourceLineNo">023</span>public class ActivatorManager extends IzouModule implements AddonThreadPoolUser {<a name="line.23"></a>
+<span class="sourceLineNo">024</span>    private final int MAX_CRASH = 100;<a name="line.24"></a>
+<span class="sourceLineNo">025</span>    private final int MAX_PERMISSION_DENIED = 2;<a name="line.25"></a>
+<span class="sourceLineNo">026</span>    IdentifiableSet&lt;ActivatorModel&gt; activatorModels = new IdentifiableSet&lt;&gt;();<a name="line.26"></a>
+<span class="sourceLineNo">027</span>    ConcurrentHashMap&lt;ActivatorModel, CompletableFuture&gt; futures = new ConcurrentHashMap&lt;&gt;();<a name="line.27"></a>
+<span class="sourceLineNo">028</span>    ConcurrentHashMap&lt;ActivatorModel, AtomicInteger&gt; crashCounter = new ConcurrentHashMap&lt;&gt;();<a name="line.28"></a>
+<span class="sourceLineNo">029</span>    ConcurrentHashMap&lt;ActivatorModel, AtomicInteger&gt; permissionDeniedCounter = new ConcurrentHashMap&lt;&gt;();<a name="line.29"></a>
+<span class="sourceLineNo">030</span>    private List&lt;URL&gt; aspectsOrAffected = Collections.synchronizedList(new ArrayList&lt;&gt;());<a name="line.30"></a>
+<span class="sourceLineNo">031</span>    <a name="line.31"></a>
+<span class="sourceLineNo">032</span>    public ActivatorManager(Main main) {<a name="line.32"></a>
+<span class="sourceLineNo">033</span>        super(main);<a name="line.33"></a>
+<span class="sourceLineNo">034</span>    }<a name="line.34"></a>
+<span class="sourceLineNo">035</span><a name="line.35"></a>
+<span class="sourceLineNo">036</span>    /**<a name="line.36"></a>
+<span class="sourceLineNo">037</span>     * adds an activator and automatically submits it to the Thread-Pool<a name="line.37"></a>
+<span class="sourceLineNo">038</span>     * @param activatorModel the activator to add<a name="line.38"></a>
+<span class="sourceLineNo">039</span>     * @throws IllegalIDException not yet implemented<a name="line.39"></a>
+<span class="sourceLineNo">040</span>     */<a name="line.40"></a>
+<span class="sourceLineNo">041</span>    public void addActivator(ActivatorModel activatorModel) throws IllegalIDException {<a name="line.41"></a>
+<span class="sourceLineNo">042</span>        activatorModels.add(activatorModel);<a name="line.42"></a>
+<span class="sourceLineNo">043</span>        crashCounter.put(activatorModel, new AtomicInteger(0));<a name="line.43"></a>
+<span class="sourceLineNo">044</span>        permissionDeniedCounter.put(activatorModel, new AtomicInteger(0));<a name="line.44"></a>
+<span class="sourceLineNo">045</span>        submitActivator(activatorModel);<a name="line.45"></a>
+<span class="sourceLineNo">046</span>    }<a name="line.46"></a>
+<span class="sourceLineNo">047</span><a name="line.47"></a>
+<span class="sourceLineNo">048</span>    /**<a name="line.48"></a>
+<span class="sourceLineNo">049</span>     * removes the activator and stops the Thread<a name="line.49"></a>
+<span class="sourceLineNo">050</span>     * @param activatorModel the activator to remove<a name="line.50"></a>
+<span class="sourceLineNo">051</span>     */<a name="line.51"></a>
+<span class="sourceLineNo">052</span>    public void removeActivator(ActivatorModel activatorModel) {<a name="line.52"></a>
+<span class="sourceLineNo">053</span>        activatorModels.remove(activatorModel);<a name="line.53"></a>
+<span class="sourceLineNo">054</span>        CompletableFuture remove = futures.remove(activatorModel);<a name="line.54"></a>
+<span class="sourceLineNo">055</span>        if (remove != null) {<a name="line.55"></a>
+<span class="sourceLineNo">056</span>            remove.cancel(true);<a name="line.56"></a>
+<span class="sourceLineNo">057</span>        }<a name="line.57"></a>
+<span class="sourceLineNo">058</span>        crashCounter.remove(activatorModel);<a name="line.58"></a>
+<span class="sourceLineNo">059</span>        permissionDeniedCounter.remove(activatorModel);<a name="line.59"></a>
+<span class="sourceLineNo">060</span>    }<a name="line.60"></a>
+<span class="sourceLineNo">061</span><a name="line.61"></a>
+<span class="sourceLineNo">062</span>    /**<a name="line.62"></a>
+<span class="sourceLineNo">063</span>     * submits the activator to the ThreadPool<a name="line.63"></a>
+<span class="sourceLineNo">064</span>     * @param activatorModel teh activator to submit<a name="line.64"></a>
+<span class="sourceLineNo">065</span>     */<a name="line.65"></a>
+<span class="sourceLineNo">066</span>    private void submitActivator(ActivatorModel activatorModel) {<a name="line.66"></a>
+<span class="sourceLineNo">067</span>        CompletableFuture&lt;Void&gt; future = submit(() -&gt; {<a name="line.67"></a>
+<span class="sourceLineNo">068</span>            try {<a name="line.68"></a>
+<span class="sourceLineNo">069</span>                return activatorModel.call();<a name="line.69"></a>
+<span class="sourceLineNo">070</span>            } catch (Throwable e) {<a name="line.70"></a>
+<span class="sourceLineNo">071</span>                if (e instanceof IzouPermissionException) {<a name="line.71"></a>
+<span class="sourceLineNo">072</span>                    error("Activator: " + activatorModel.getID() + " was denied permission.", e);<a name="line.72"></a>
+<span class="sourceLineNo">073</span><a name="line.73"></a>
+<span class="sourceLineNo">074</span>                    // Return null if permission was denied by a permission module, in this case restart 2 times<a name="line.74"></a>
+<span class="sourceLineNo">075</span>                    return null;<a name="line.75"></a>
+<span class="sourceLineNo">076</span>                } else if (e instanceof SecurityException) {<a name="line.76"></a>
+<span class="sourceLineNo">077</span>                    error("Activator: " + activatorModel.getID() + " was denied access.", e);<a name="line.77"></a>
+<span class="sourceLineNo">078</span><a name="line.78"></a>
+<span class="sourceLineNo">079</span>                    // Return false if access was denied by the security manager, in this case, do not restart<a name="line.79"></a>
+<span class="sourceLineNo">080</span>                    return false;<a name="line.80"></a>
+<span class="sourceLineNo">081</span>                }<a name="line.81"></a>
+<span class="sourceLineNo">082</span>                error("Activator: " + activatorModel.getID() + " crashed", e);<a name="line.82"></a>
+<span class="sourceLineNo">083</span><a name="line.83"></a>
+<span class="sourceLineNo">084</span>                // Return true if the addOn did not crash because of security reasons, restart 100 times<a name="line.84"></a>
+<span class="sourceLineNo">085</span>                return true;<a name="line.85"></a>
+<span class="sourceLineNo">086</span>            }<a name="line.86"></a>
+<span class="sourceLineNo">087</span>        }).thenAccept(restart -&gt; {<a name="line.87"></a>
+<span class="sourceLineNo">088</span>            if (restart != null &amp;&amp; restart.equals(false)) {<a name="line.88"></a>
+<span class="sourceLineNo">089</span>                debug("Activator: " + activatorModel.getID() + " returned false, will not restart");<a name="line.89"></a>
+<span class="sourceLineNo">090</span>            } else if (restart == null) {<a name="line.90"></a>
+<span class="sourceLineNo">091</span>                error("Activator: " + activatorModel.getID() + " returned not true");<a name="line.91"></a>
+<span class="sourceLineNo">092</span>                if (permissionDeniedCounter.get(activatorModel).get() &lt; MAX_PERMISSION_DENIED) {<a name="line.92"></a>
+<span class="sourceLineNo">093</span>                    error("Until now activator: " + activatorModel.getID() + " was restarted: " +<a name="line.93"></a>
+<span class="sourceLineNo">094</span>                            permissionDeniedCounter.get(activatorModel).get() + " times, attempting restart.");<a name="line.94"></a>
+<span class="sourceLineNo">095</span>                    permissionDeniedCounter.get(activatorModel).incrementAndGet();<a name="line.95"></a>
+<span class="sourceLineNo">096</span>                    submitActivator(activatorModel);<a name="line.96"></a>
+<span class="sourceLineNo">097</span>                } else {<a name="line.97"></a>
+<span class="sourceLineNo">098</span>                    error("Activator: " + activatorModel.getID() + " reached permission based restarting limit with " +<a name="line.98"></a>
+<span class="sourceLineNo">099</span>                            permissionDeniedCounter.get(activatorModel).get() + " restarts.");<a name="line.99"></a>
+<span class="sourceLineNo">100</span>                }<a name="line.100"></a>
+<span class="sourceLineNo">101</span>            } else {<a name="line.101"></a>
+<span class="sourceLineNo">102</span>                if (crashCounter.get(activatorModel).get() &lt; MAX_CRASH) {<a name="line.102"></a>
+<span class="sourceLineNo">103</span>                    error("Until now activator: " + activatorModel.getID() + " was restarted: " +<a name="line.103"></a>
+<span class="sourceLineNo">104</span>                            crashCounter.get(activatorModel).get() + " times, attempting restart.");<a name="line.104"></a>
+<span class="sourceLineNo">105</span>                    crashCounter.get(activatorModel).incrementAndGet();<a name="line.105"></a>
+<span class="sourceLineNo">106</span>                    submitActivator(activatorModel);<a name="line.106"></a>
+<span class="sourceLineNo">107</span>                } else {<a name="line.107"></a>
+<span class="sourceLineNo">108</span>                    error("Activator: " + activatorModel.getID() + " reached crash based restarting limit with " +<a name="line.108"></a>
+<span class="sourceLineNo">109</span>                            crashCounter.get(activatorModel).get() + " restarts.");<a name="line.109"></a>
+<span class="sourceLineNo">110</span>                }<a name="line.110"></a>
+<span class="sourceLineNo">111</span>            }<a name="line.111"></a>
+<span class="sourceLineNo">112</span>        });<a name="line.112"></a>
+<span class="sourceLineNo">113</span><a name="line.113"></a>
+<span class="sourceLineNo">114</span>        CompletableFuture existing = futures.put(activatorModel, future);<a name="line.114"></a>
+<span class="sourceLineNo">115</span>        if (existing != null &amp;&amp; !existing.isDone()) existing.cancel(true);<a name="line.115"></a>
+<span class="sourceLineNo">116</span>    }<a name="line.116"></a>
+<span class="sourceLineNo">117</span>}<a name="line.117"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

@@ -1,0 +1,318 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package org.intellimate.izou.system.sound;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import org.intellimate.izou.addon.AddOnModel;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import org.intellimate.izou.main.Main;<a name="line.4"></a>
+<span class="sourceLineNo">005</span><a name="line.5"></a>
+<span class="sourceLineNo">006</span>import javax.sound.sampled.AudioFormat;<a name="line.6"></a>
+<span class="sourceLineNo">007</span>import javax.sound.sampled.DataLine;<a name="line.7"></a>
+<span class="sourceLineNo">008</span><a name="line.8"></a>
+<span class="sourceLineNo">009</span>/**<a name="line.9"></a>
+<span class="sourceLineNo">010</span> * the delegation to DataLine.<a name="line.10"></a>
+<span class="sourceLineNo">011</span> * @author LeanderK<a name="line.11"></a>
+<span class="sourceLineNo">012</span> * @version 1.0<a name="line.12"></a>
+<span class="sourceLineNo">013</span> */<a name="line.13"></a>
+<span class="sourceLineNo">014</span>public class IzouSoundDataLine extends IzouSoundLineBaseClass implements DataLine {<a name="line.14"></a>
+<span class="sourceLineNo">015</span>    private final DataLine dataLine;<a name="line.15"></a>
+<span class="sourceLineNo">016</span><a name="line.16"></a>
+<span class="sourceLineNo">017</span>    public IzouSoundDataLine(DataLine dataLine, Main main, boolean isPermanent, AddOnModel addOnModel) {<a name="line.17"></a>
+<span class="sourceLineNo">018</span>        super(dataLine, main, isPermanent, addOnModel);<a name="line.18"></a>
+<span class="sourceLineNo">019</span>        this.dataLine = dataLine;<a name="line.19"></a>
+<span class="sourceLineNo">020</span>    }<a name="line.20"></a>
+<span class="sourceLineNo">021</span><a name="line.21"></a>
+<span class="sourceLineNo">022</span>    /**<a name="line.22"></a>
+<span class="sourceLineNo">023</span>     * Drains queued data from the line by continuing data I/O until the<a name="line.23"></a>
+<span class="sourceLineNo">024</span>     * data line's internal buffer has been emptied.<a name="line.24"></a>
+<span class="sourceLineNo">025</span>     * This method blocks until the draining is complete.  Because this is a<a name="line.25"></a>
+<span class="sourceLineNo">026</span>     * blocking method, it should be used with care.  If &lt;code&gt;drain()&lt;/code&gt;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>     * is invoked on a stopped line that has data in its queue, the method will<a name="line.27"></a>
+<span class="sourceLineNo">028</span>     * block until the line is running and the data queue becomes empty.  If<a name="line.28"></a>
+<span class="sourceLineNo">029</span>     * &lt;code&gt;drain()&lt;/code&gt; is invoked by one thread, and another continues to<a name="line.29"></a>
+<span class="sourceLineNo">030</span>     * fill the data queue, the operation will not complete.<a name="line.30"></a>
+<span class="sourceLineNo">031</span>     * This method always returns when the data line is closed.<a name="line.31"></a>
+<span class="sourceLineNo">032</span>     *<a name="line.32"></a>
+<span class="sourceLineNo">033</span>     * @see #flush()<a name="line.33"></a>
+<span class="sourceLineNo">034</span>     */<a name="line.34"></a>
+<span class="sourceLineNo">035</span>    @Override<a name="line.35"></a>
+<span class="sourceLineNo">036</span>    public void drain() {<a name="line.36"></a>
+<span class="sourceLineNo">037</span>        dataLine.drain();<a name="line.37"></a>
+<span class="sourceLineNo">038</span>    }<a name="line.38"></a>
+<span class="sourceLineNo">039</span><a name="line.39"></a>
+<span class="sourceLineNo">040</span>    /**<a name="line.40"></a>
+<span class="sourceLineNo">041</span>     * Flushes queued data from the line.  The flushed data is discarded.<a name="line.41"></a>
+<span class="sourceLineNo">042</span>     * In some cases, not all queued data can be discarded.  For example, a<a name="line.42"></a>
+<span class="sourceLineNo">043</span>     * mixer can flush data from the buffer for a specific input line, but any<a name="line.43"></a>
+<span class="sourceLineNo">044</span>     * unplayed data already in the output buffer (the result of the mix) will<a name="line.44"></a>
+<span class="sourceLineNo">045</span>     * still be played.  You can invoke this method after pausing a line (the<a name="line.45"></a>
+<span class="sourceLineNo">046</span>     * normal case) if you want to skip the "stale" data when you restart<a name="line.46"></a>
+<span class="sourceLineNo">047</span>     * playback or capture. (It is legal to flush a line that is not stopped,<a name="line.47"></a>
+<span class="sourceLineNo">048</span>     * but doing so on an active line is likely to cause a discontinuity in the<a name="line.48"></a>
+<span class="sourceLineNo">049</span>     * data, resulting in a perceptible click.)<a name="line.49"></a>
+<span class="sourceLineNo">050</span>     *<a name="line.50"></a>
+<span class="sourceLineNo">051</span>     * @see #stop()<a name="line.51"></a>
+<span class="sourceLineNo">052</span>     * @see #drain()<a name="line.52"></a>
+<span class="sourceLineNo">053</span>     */<a name="line.53"></a>
+<span class="sourceLineNo">054</span>    @Override<a name="line.54"></a>
+<span class="sourceLineNo">055</span>    public void flush() {<a name="line.55"></a>
+<span class="sourceLineNo">056</span>        dataLine.flush();<a name="line.56"></a>
+<span class="sourceLineNo">057</span>    }<a name="line.57"></a>
+<span class="sourceLineNo">058</span><a name="line.58"></a>
+<span class="sourceLineNo">059</span>    /**<a name="line.59"></a>
+<span class="sourceLineNo">060</span>     * Allows a line to engage in data I/O.  If invoked on a line<a name="line.60"></a>
+<span class="sourceLineNo">061</span>     * that is already running, this method does nothing.  Unless the data in<a name="line.61"></a>
+<span class="sourceLineNo">062</span>     * the buffer has been flushed, the line resumes I/O starting<a name="line.62"></a>
+<span class="sourceLineNo">063</span>     * with the first frame that was unprocessed at the time the line was<a name="line.63"></a>
+<span class="sourceLineNo">064</span>     * stopped. When audio capture or playback starts, a<a name="line.64"></a>
+<span class="sourceLineNo">065</span>     * &lt;code&gt;LineEvent.Type#START START&lt;/code&gt; event is generated.<a name="line.65"></a>
+<span class="sourceLineNo">066</span>     *<a name="line.66"></a>
+<span class="sourceLineNo">067</span>     * @see #stop()<a name="line.67"></a>
+<span class="sourceLineNo">068</span>     * @see #isRunning()<a name="line.68"></a>
+<span class="sourceLineNo">069</span>     */<a name="line.69"></a>
+<span class="sourceLineNo">070</span>    @Override<a name="line.70"></a>
+<span class="sourceLineNo">071</span>    public void start() {<a name="line.71"></a>
+<span class="sourceLineNo">072</span>        dataLine.start();<a name="line.72"></a>
+<span class="sourceLineNo">073</span>    }<a name="line.73"></a>
+<span class="sourceLineNo">074</span><a name="line.74"></a>
+<span class="sourceLineNo">075</span>    /**<a name="line.75"></a>
+<span class="sourceLineNo">076</span>     * Stops the line.  A stopped line should cease I/O activity.<a name="line.76"></a>
+<span class="sourceLineNo">077</span>     * If the line is open and running, however, it should retain the resources required<a name="line.77"></a>
+<span class="sourceLineNo">078</span>     * to resume activity.  A stopped line should retain any audio data in its buffer<a name="line.78"></a>
+<span class="sourceLineNo">079</span>     * instead of discarding it, so that upon resumption the I/O can continue where it left off,<a name="line.79"></a>
+<span class="sourceLineNo">080</span>     * if possible.  (This doesn't guarantee that there will never be discontinuities beyond the<a name="line.80"></a>
+<span class="sourceLineNo">081</span>     * current buffer, of course; if the stopped condition continues<a name="line.81"></a>
+<span class="sourceLineNo">082</span>     * for too long, input or output samples might be dropped.)  If desired, the retained data can be<a name="line.82"></a>
+<span class="sourceLineNo">083</span>     * discarded by invoking the &lt;code&gt;flush&lt;/code&gt; method.<a name="line.83"></a>
+<span class="sourceLineNo">084</span>     * When audio capture or playback stops, a &lt;code&gt;LineEvent.Type#STOP STOP&lt;/code&gt; event is generated.<a name="line.84"></a>
+<span class="sourceLineNo">085</span>     *<a name="line.85"></a>
+<span class="sourceLineNo">086</span>     * @see #start()<a name="line.86"></a>
+<span class="sourceLineNo">087</span>     * @see #isRunning()<a name="line.87"></a>
+<span class="sourceLineNo">088</span>     * @see #flush()<a name="line.88"></a>
+<span class="sourceLineNo">089</span>     */<a name="line.89"></a>
+<span class="sourceLineNo">090</span>    @Override<a name="line.90"></a>
+<span class="sourceLineNo">091</span>    public void stop() {<a name="line.91"></a>
+<span class="sourceLineNo">092</span>        dataLine.stop();<a name="line.92"></a>
+<span class="sourceLineNo">093</span>    }<a name="line.93"></a>
+<span class="sourceLineNo">094</span><a name="line.94"></a>
+<span class="sourceLineNo">095</span>    /**<a name="line.95"></a>
+<span class="sourceLineNo">096</span>     * Indicates whether the line is running.  The default is &lt;code&gt;false&lt;/code&gt;.<a name="line.96"></a>
+<span class="sourceLineNo">097</span>     * An open line begins running when the first data is presented in response to an<a name="line.97"></a>
+<span class="sourceLineNo">098</span>     * invocation of the &lt;code&gt;start&lt;/code&gt; method, and continues<a name="line.98"></a>
+<span class="sourceLineNo">099</span>     * until presentation ceases in response to a call to &lt;code&gt;stop&lt;/code&gt; or<a name="line.99"></a>
+<span class="sourceLineNo">100</span>     * because playback completes.<a name="line.100"></a>
+<span class="sourceLineNo">101</span>     * @return &lt;code&gt;true&lt;/code&gt; if the line is running, otherwise &lt;code&gt;false&lt;/code&gt;<a name="line.101"></a>
+<span class="sourceLineNo">102</span>     * @see #start()<a name="line.102"></a>
+<span class="sourceLineNo">103</span>     * @see #stop()<a name="line.103"></a>
+<span class="sourceLineNo">104</span>     */<a name="line.104"></a>
+<span class="sourceLineNo">105</span>    @Override<a name="line.105"></a>
+<span class="sourceLineNo">106</span>    public boolean isRunning() {<a name="line.106"></a>
+<span class="sourceLineNo">107</span>        return dataLine.isRunning();<a name="line.107"></a>
+<span class="sourceLineNo">108</span>    }<a name="line.108"></a>
+<span class="sourceLineNo">109</span><a name="line.109"></a>
+<span class="sourceLineNo">110</span>    /**<a name="line.110"></a>
+<span class="sourceLineNo">111</span>     * Indicates whether the line is engaging in active I/O (such as playback<a name="line.111"></a>
+<span class="sourceLineNo">112</span>     * or capture).  When an inactive line becomes active, it sends a<a name="line.112"></a>
+<span class="sourceLineNo">113</span>     * &lt;code&gt;LineEvent.Type#START START&lt;/code&gt; event to its listeners.  Similarly, when<a name="line.113"></a>
+<span class="sourceLineNo">114</span>     * an active line becomes inactive, it sends a<a name="line.114"></a>
+<span class="sourceLineNo">115</span>     * &lt;code&gt;LineEvent.Type#STOP STOP&lt;/code&gt; event.<a name="line.115"></a>
+<span class="sourceLineNo">116</span>     * @return &lt;code&gt;true&lt;/code&gt; if the line is actively capturing or rendering<a name="line.116"></a>
+<span class="sourceLineNo">117</span>     * sound, otherwise &lt;code&gt;false&lt;/code&gt;<a name="line.117"></a>
+<span class="sourceLineNo">118</span>     * @see #isOpen<a name="line.118"></a>
+<span class="sourceLineNo">119</span>     * @see #addLineListener<a name="line.119"></a>
+<span class="sourceLineNo">120</span>     * @see #removeLineListener<a name="line.120"></a>
+<span class="sourceLineNo">121</span>     */<a name="line.121"></a>
+<span class="sourceLineNo">122</span>    @Override<a name="line.122"></a>
+<span class="sourceLineNo">123</span>    public boolean isActive() {<a name="line.123"></a>
+<span class="sourceLineNo">124</span>        return dataLine.isActive();<a name="line.124"></a>
+<span class="sourceLineNo">125</span>    }<a name="line.125"></a>
+<span class="sourceLineNo">126</span><a name="line.126"></a>
+<span class="sourceLineNo">127</span>    /**<a name="line.127"></a>
+<span class="sourceLineNo">128</span>     * Obtains the current format (encoding, sample rate, number of channels,<a name="line.128"></a>
+<span class="sourceLineNo">129</span>     * etc.) of the data line's audio data.<a name="line.129"></a>
+<span class="sourceLineNo">130</span>     *<a name="line.130"></a>
+<span class="sourceLineNo">131</span>     * &lt;p&gt;If the line is not open and has never been opened, it returns<a name="line.131"></a>
+<span class="sourceLineNo">132</span>     * the default format. The default format is an implementation<a name="line.132"></a>
+<span class="sourceLineNo">133</span>     * specific audio format, or, if the &lt;code&gt;DataLine.Info&lt;/code&gt;<a name="line.133"></a>
+<span class="sourceLineNo">134</span>     * object, which was used to retrieve this &lt;code&gt;DataLine&lt;/code&gt;,<a name="line.134"></a>
+<span class="sourceLineNo">135</span>     * specifies at least one fully qualified audio format, the<a name="line.135"></a>
+<span class="sourceLineNo">136</span>     * last one will be used as the default format. Opening the<a name="line.136"></a>
+<span class="sourceLineNo">137</span>     * line with a specific audio format (e.g.<a name="line.137"></a>
+<span class="sourceLineNo">138</span>     * SourceDataLine#open(AudioFormat)) will override the<a name="line.138"></a>
+<span class="sourceLineNo">139</span>     * default format.<a name="line.139"></a>
+<span class="sourceLineNo">140</span>     *<a name="line.140"></a>
+<span class="sourceLineNo">141</span>     * @return current audio data format<a name="line.141"></a>
+<span class="sourceLineNo">142</span>     * @see AudioFormat<a name="line.142"></a>
+<span class="sourceLineNo">143</span>     */<a name="line.143"></a>
+<span class="sourceLineNo">144</span>    @Override<a name="line.144"></a>
+<span class="sourceLineNo">145</span>    public AudioFormat getFormat() {<a name="line.145"></a>
+<span class="sourceLineNo">146</span>        return dataLine.getFormat();<a name="line.146"></a>
+<span class="sourceLineNo">147</span>    }<a name="line.147"></a>
+<span class="sourceLineNo">148</span><a name="line.148"></a>
+<span class="sourceLineNo">149</span>    /**<a name="line.149"></a>
+<span class="sourceLineNo">150</span>     * Obtains the maximum number of bytes of data that will fit in the data line's<a name="line.150"></a>
+<span class="sourceLineNo">151</span>     * internal buffer.  For a source data line, this is the size of the buffer to<a name="line.151"></a>
+<span class="sourceLineNo">152</span>     * which data can be written.  For a target data line, it is the size of<a name="line.152"></a>
+<span class="sourceLineNo">153</span>     * the buffer from which data can be read.  Note that<a name="line.153"></a>
+<span class="sourceLineNo">154</span>     * the units used are bytes, but will always correspond to an integral<a name="line.154"></a>
+<span class="sourceLineNo">155</span>     * number of sample frames of audio data.<a name="line.155"></a>
+<span class="sourceLineNo">156</span>     *<a name="line.156"></a>
+<span class="sourceLineNo">157</span>     * @return the size of the buffer in bytes<a name="line.157"></a>
+<span class="sourceLineNo">158</span>     */<a name="line.158"></a>
+<span class="sourceLineNo">159</span>    @Override<a name="line.159"></a>
+<span class="sourceLineNo">160</span>    public int getBufferSize() {<a name="line.160"></a>
+<span class="sourceLineNo">161</span>        return dataLine.getBufferSize();<a name="line.161"></a>
+<span class="sourceLineNo">162</span>    }<a name="line.162"></a>
+<span class="sourceLineNo">163</span><a name="line.163"></a>
+<span class="sourceLineNo">164</span>    /**<a name="line.164"></a>
+<span class="sourceLineNo">165</span>     * Obtains the number of bytes of data currently available to the<a name="line.165"></a>
+<span class="sourceLineNo">166</span>     * application for processing in the data line's internal buffer.  For a<a name="line.166"></a>
+<span class="sourceLineNo">167</span>     * source data line, this is the amount of data that can be written to the<a name="line.167"></a>
+<span class="sourceLineNo">168</span>     * buffer without blocking.  For a target data line, this is the amount of data<a name="line.168"></a>
+<span class="sourceLineNo">169</span>     * available to be read by the application.  For a clip, this value is always<a name="line.169"></a>
+<span class="sourceLineNo">170</span>     * 0 because the audio data is loaded into the buffer when the clip is opened,<a name="line.170"></a>
+<span class="sourceLineNo">171</span>     * and persists without modification until the clip is closed.<a name="line.171"></a>
+<span class="sourceLineNo">172</span>     * &lt;p&gt;<a name="line.172"></a>
+<span class="sourceLineNo">173</span>     * Note that the units used are bytes, but will always<a name="line.173"></a>
+<span class="sourceLineNo">174</span>     * correspond to an integral number of sample frames of audio data.<a name="line.174"></a>
+<span class="sourceLineNo">175</span>     * &lt;p&gt;<a name="line.175"></a>
+<span class="sourceLineNo">176</span>     * An application is guaranteed that a read or<a name="line.176"></a>
+<span class="sourceLineNo">177</span>     * write operation of up to the number of bytes returned from<a name="line.177"></a>
+<span class="sourceLineNo">178</span>     * &lt;code&gt;available()&lt;/code&gt; will not block; however, there is no guarantee<a name="line.178"></a>
+<span class="sourceLineNo">179</span>     * that attempts to read or write more data will block.<a name="line.179"></a>
+<span class="sourceLineNo">180</span>     *<a name="line.180"></a>
+<span class="sourceLineNo">181</span>     * @return the amount of data available, in bytes<a name="line.181"></a>
+<span class="sourceLineNo">182</span>     */<a name="line.182"></a>
+<span class="sourceLineNo">183</span>    @Override<a name="line.183"></a>
+<span class="sourceLineNo">184</span>    public int available() {<a name="line.184"></a>
+<span class="sourceLineNo">185</span>        return dataLine.available();<a name="line.185"></a>
+<span class="sourceLineNo">186</span>    }<a name="line.186"></a>
+<span class="sourceLineNo">187</span><a name="line.187"></a>
+<span class="sourceLineNo">188</span>    /**<a name="line.188"></a>
+<span class="sourceLineNo">189</span>     * Obtains the current position in the audio data, in sample frames.<a name="line.189"></a>
+<span class="sourceLineNo">190</span>     * The frame position measures the number of sample<a name="line.190"></a>
+<span class="sourceLineNo">191</span>     * frames captured by, or rendered from, the line since it was opened.<a name="line.191"></a>
+<span class="sourceLineNo">192</span>     * This return value will wrap around after 2^31 frames. It is recommended<a name="line.192"></a>
+<span class="sourceLineNo">193</span>     * to use &lt;code&gt;getLongFramePosition&lt;/code&gt; instead.<a name="line.193"></a>
+<span class="sourceLineNo">194</span>     *<a name="line.194"></a>
+<span class="sourceLineNo">195</span>     * @return the number of frames already processed since the line was opened<a name="line.195"></a>
+<span class="sourceLineNo">196</span>     * @see #getLongFramePosition()<a name="line.196"></a>
+<span class="sourceLineNo">197</span>     */<a name="line.197"></a>
+<span class="sourceLineNo">198</span>    @Override<a name="line.198"></a>
+<span class="sourceLineNo">199</span>    public int getFramePosition() {<a name="line.199"></a>
+<span class="sourceLineNo">200</span>        return dataLine.getFramePosition();<a name="line.200"></a>
+<span class="sourceLineNo">201</span>    }<a name="line.201"></a>
+<span class="sourceLineNo">202</span><a name="line.202"></a>
+<span class="sourceLineNo">203</span>    /**<a name="line.203"></a>
+<span class="sourceLineNo">204</span>     * Obtains the current position in the audio data, in sample frames.<a name="line.204"></a>
+<span class="sourceLineNo">205</span>     * The frame position measures the number of sample<a name="line.205"></a>
+<span class="sourceLineNo">206</span>     * frames captured by, or rendered from, the line since it was opened.<a name="line.206"></a>
+<span class="sourceLineNo">207</span>     *<a name="line.207"></a>
+<span class="sourceLineNo">208</span>     * @return the number of frames already processed since the line was opened<a name="line.208"></a>
+<span class="sourceLineNo">209</span>     * @since 1.5<a name="line.209"></a>
+<span class="sourceLineNo">210</span>     */<a name="line.210"></a>
+<span class="sourceLineNo">211</span>    @Override<a name="line.211"></a>
+<span class="sourceLineNo">212</span>    public long getLongFramePosition() {<a name="line.212"></a>
+<span class="sourceLineNo">213</span>        return dataLine.getLongFramePosition();<a name="line.213"></a>
+<span class="sourceLineNo">214</span>    }<a name="line.214"></a>
+<span class="sourceLineNo">215</span><a name="line.215"></a>
+<span class="sourceLineNo">216</span>    /**<a name="line.216"></a>
+<span class="sourceLineNo">217</span>     * Obtains the current position in the audio data, in microseconds.<a name="line.217"></a>
+<span class="sourceLineNo">218</span>     * The microsecond position measures the time corresponding to the number<a name="line.218"></a>
+<span class="sourceLineNo">219</span>     * of sample frames captured by, or rendered from, the line since it was opened.<a name="line.219"></a>
+<span class="sourceLineNo">220</span>     * The level of precision is not guaranteed.  For example, an implementation<a name="line.220"></a>
+<span class="sourceLineNo">221</span>     * might calculate the microsecond position from the current frame position<a name="line.221"></a>
+<span class="sourceLineNo">222</span>     * and the audio sample frame rate.  The precision in microseconds would<a name="line.222"></a>
+<span class="sourceLineNo">223</span>     * then be limited to the number of microseconds per sample frame.<a name="line.223"></a>
+<span class="sourceLineNo">224</span>     *<a name="line.224"></a>
+<span class="sourceLineNo">225</span>     * @return the number of microseconds of data processed since the line was opened<a name="line.225"></a>
+<span class="sourceLineNo">226</span>     */<a name="line.226"></a>
+<span class="sourceLineNo">227</span>    @Override<a name="line.227"></a>
+<span class="sourceLineNo">228</span>    public long getMicrosecondPosition() {<a name="line.228"></a>
+<span class="sourceLineNo">229</span>        return dataLine.getMicrosecondPosition();<a name="line.229"></a>
+<span class="sourceLineNo">230</span>    }<a name="line.230"></a>
+<span class="sourceLineNo">231</span><a name="line.231"></a>
+<span class="sourceLineNo">232</span>    /**<a name="line.232"></a>
+<span class="sourceLineNo">233</span>     * Obtains the current volume level for the line.  This level is a measure<a name="line.233"></a>
+<span class="sourceLineNo">234</span>     * of the signal's current amplitude, and should not be confused with the<a name="line.234"></a>
+<span class="sourceLineNo">235</span>     * current setting of a gain control. The range is from 0.0 (silence) to<a name="line.235"></a>
+<span class="sourceLineNo">236</span>     * 1.0 (maximum possible amplitude for the sound waveform).  The units<a name="line.236"></a>
+<span class="sourceLineNo">237</span>     * measure linear amplitude, not decibels.<a name="line.237"></a>
+<span class="sourceLineNo">238</span>     *<a name="line.238"></a>
+<span class="sourceLineNo">239</span>     * @return the current amplitude of the signal in this line, or<a name="line.239"></a>
+<span class="sourceLineNo">240</span>     * &lt;code&gt;AudioSystem#NOT_SPECIFIED&lt;/code&gt;<a name="line.240"></a>
+<span class="sourceLineNo">241</span>     */<a name="line.241"></a>
+<span class="sourceLineNo">242</span>    @Override<a name="line.242"></a>
+<span class="sourceLineNo">243</span>    public float getLevel() {<a name="line.243"></a>
+<span class="sourceLineNo">244</span>        return dataLine.getLevel();<a name="line.244"></a>
+<span class="sourceLineNo">245</span>    }<a name="line.245"></a>
+<span class="sourceLineNo">246</span>}<a name="line.246"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>
