@@ -16,8 +16,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -33,7 +31,7 @@ import java.util.stream.Collectors;
 public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
     private IdentifiableSet<AddOnModel> addOns = new IdentifiableSet<>();
     private HashMap<AddOnModel, PluginWrapper> pluginWrappers = new HashMap<>();
-    private Set<URL> aspectsOrAffected = new HashSet<>();
+    private Set<AspectOrAffected> aspectOrAffectedSet = new HashSet<>();
     
     public AddOnManager(Main main) {
         super(main);
@@ -73,15 +71,22 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
         try {
             timeOut(futures, 3000);
         } catch (InterruptedException e) {
-            debug("interrupted while trying to mite out the addOns", e);
+            debug("interrupted while trying to time out the addOns", e);
         }
     }
 
     private void initAddOns(IdentifiableSet<AddOnModel> addOns) {
-        addOns.forEach(addOn -> {
-            Context context = new ContextImplementation(addOn, main, Level.DEBUG.name());
-            submit(() -> addOn.initAddOn(context));
-        });
+        List<CompletableFuture<Void>> futures = addOns.stream()
+                .map(addOn -> {
+                    Context context = new ContextImplementation(addOn, main, Level.DEBUG.name());
+                    return submit(() -> addOn.initAddOn(context));
+                })
+                .collect(Collectors.toList());
+        try {
+            timeOut(futures, 1000);
+        } catch (InterruptedException e) {
+            debug("interrupted while trying to time out the addOns", e);
+        }
     }
 
     /**
@@ -90,7 +95,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
      */
     private List<AddOnModel> loadAddOns() {
         debug("searching for addons in: " + getMain().getFileSystemManager().getLibLocation());
-        PluginManager pluginManager = new DefaultPluginManager(getMain().getFileSystemManager().getLibLocation(), new ArrayList<>(aspectsOrAffected));
+        PluginManager pluginManager = new DefaultPluginManager(getMain().getFileSystemManager().getLibLocation(), new ArrayList<>(aspectOrAffectedSet));
         // load the plugins
         debug("loading plugins");
         pluginManager.loadPlugins();
@@ -157,17 +162,12 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
     }
 
     /**
-     * adds an aspect-or an affected class url to the list. Must be done before loading of the addons!
-     * @param url the url to add.
+     * adds an aspect-class url to the list. Must be done before loading of the addons!
+     * @param aspectOrAffected the aspect or affected to add
      */
-    public void addAspectOrAffectedURL(URL url) {
-        File file = new File(url.getFile());
-        if (!file.isDirectory())
-            file = file.getParentFile();
-        try {
-            aspectsOrAffected.add(file.toURI().toURL());
-        } catch (MalformedURLException e) {
-            error("malformed aspect", e);
+    public void addAspectOrAffected(AspectOrAffected aspectOrAffected) {
+        if (!aspectOrAffectedSet.add(aspectOrAffected)) {
+            error("set is already containing an instance of " + aspectOrAffected);
         }
     }
 

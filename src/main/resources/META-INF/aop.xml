@@ -8,7 +8,7 @@
              packages. Also weave all types in the foo package that do
              not have the @NoWeave annotation. -->
         <include within="javax.*"/>
-        <include within="org.intellimate.izou.security.replaced.*"/>
+        <include within="org.intellimate.izou.system.sound.replaced.*"/>
         <include within="javax.sound.sampled.AudioSystem"/>
     </weaver>
 </aspectj>

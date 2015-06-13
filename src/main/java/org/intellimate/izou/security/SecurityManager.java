@@ -5,13 +5,11 @@ import org.apache.logging.log4j.Logger;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.exceptions.IzouPermissionException;
-import org.intellimate.izou.system.sound.replaced.MixerAspectInitializer;
 import org.intellimate.izou.security.storage.SecureStorage;
 import org.intellimate.izou.support.SystemMail;
 import ro.fortsoft.pf4j.IzouPluginClassLoader;
 
 import java.io.FileDescriptor;
-import java.net.URL;
 import java.security.Permission;
 import java.security.Security;
 import java.util.ArrayList;
@@ -83,12 +81,6 @@ public final class SecurityManager extends java.lang.SecurityManager {
         secureAccess = tempSecureAccess;
         forbiddenProperties = new ArrayList<>();
         forbiddenProperties.add("jdk.lang.process.launchmechanism");
-
-        URL mixer = this.getClass().getClassLoader().getResource("org/intellimate/izou/system/sound/replaced/MixerAspect.class");
-        URL audioSystem = this.getClass().getClassLoader().getResource("javax/sound/sampled/AudioSystem.class");
-        main.getAddOnManager().addAspectOrAffectedURL(mixer);
-        main.getAddOnManager().addAspectOrAffectedURL(audioSystem);
-        MixerAspectInitializer.init(main);
     }
 
     SecureAccess getSecureAccess() {

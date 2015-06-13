@@ -15,7 +15,7 @@
     <scm>
         <connection>scm:git:git@github.com:intellimate/Izou.git</connection>
         <developerConnection>scm:git:git@github.com:intellimate/Izou.git</developerConnection>
-        <url>https://github.com/intellimate/Izou</url>
+        <url>http://intellimate.github.io/Izou/</url>
     </scm>
 
     <properties>
@@ -79,7 +79,7 @@
         <dependency>
             <groupId>org.intellimate.izou</groupId>
             <artifactId>pf4j</artifactId>
-            <version>1.1.61</version>
+            <version>1.1.64</version>
             <!-- we are releasing a jar with dependencies, version changes require a new Izou Version -->
         </dependency>
         <dependency>
@@ -192,7 +192,7 @@
                     <failOnError>false</failOnError>
                     <linksource>true</linksource>
                     <reportOutputDirectory>${project.build.directory}/javadoc</reportOutputDirectory>
-                    <destDir>javadoc/</destDir>
+                    <destDir>apidocs/</destDir>
                     <source>1.8</source>
                     <sourcepath>${basedir}/src/main/java/</sourcepath>
                     <skip>false</skip>

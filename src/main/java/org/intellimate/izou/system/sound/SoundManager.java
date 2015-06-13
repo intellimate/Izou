@@ -9,10 +9,13 @@ import org.intellimate.izou.events.EventsControllerModel;
 import org.intellimate.izou.identification.Identification;
 import org.intellimate.izou.identification.IdentificationManager;
 import org.intellimate.izou.main.Main;
-import org.intellimate.izou.security.exceptions.IzouPermissionException;
+import ro.fortsoft.pf4j.AspectOrAffected;
 
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -22,6 +25,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -31,7 +35,7 @@ import java.util.stream.Collectors;
  * @author LeanderK
  * @version 1.0
  */
-//TODO: get this thing working without java-sound (for example if the addon uses native code, it will currently get an timeout).
+//TODO: native sound code enforcing (mute, stop(?) etc.)
 public class SoundManager extends IzouModule implements AddonThreadPoolUser, EventsControllerModel {
     //non-permanent and general fields
     private ConcurrentHashMap<AddOnModel, List<WeakReference<IzouSoundLineBaseClass>>> nonPermanent = new ConcurrentHashMap<>();
@@ -54,6 +58,28 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
     public SoundManager(Main main) {
         super(main);
         main.getEventDistributor().registerEventsController(this);
+
+        URL mixerURL = this.getClass().getClassLoader().getResource("org/intellimate/izou/system/sound/replaced/MixerAspect.class");
+        AspectOrAffected mixer = new AspectOrAffected(mixerURL,
+                "org.intellimate.izou.system.sound.replaced.MixerAspect",
+                aClass -> {
+                    try {
+                        Method init = aClass.getMethod("init", Main.class);
+                        init.invoke(null, main);
+                        return aClass;
+                    } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
+                        error("error while trying to initialize the MixerAspect");
+                        return aClass;
+                    }
+                },
+                true);
+        URL audioSystemURL = this.getClass().getClassLoader().getResource("javax/sound/sampled/AudioSystem.class");
+        AspectOrAffected audioSystem = new AspectOrAffected(audioSystemURL,
+                "javax.sound.sampled.AudioSystem",
+                Function.identity(),
+                false);
+        getMain().getAddOnManager().addAspectOrAffected(audioSystem);
+        getMain().getAddOnManager().addAspectOrAffected(mixer);
     }
 
     /**
@@ -82,6 +108,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
      * @param izouSoundLine the IzouSoundLine to add
      */
     public void addIzouSoundLine(AddOnModel addOnModel, IzouSoundLineBaseClass izouSoundLine) {
+        debug("adding soundLine " + izouSoundLine + " from " + addOnModel);
         if (permanentAddOn != null && permanentAddOn.equals(addOnModel)) {
             addPermanent(izouSoundLine);
         } else {
@@ -161,6 +188,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
      * @param izouSoundLine the izouSoundLine to add
      */
     private void addPermanent(IzouSoundLineBaseClass izouSoundLine) {
+        debug("adding " + izouSoundLine + "to permanent");
         if (!izouSoundLine.isPermanent())
             izouSoundLine.setToPermanent();
         synchronized (permanentUserReadWriteLock) {
@@ -179,6 +207,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
      * @param izouSoundLine the IzouSoundLine to add
      */
     private void addNonPermanent(AddOnModel addOnModel, IzouSoundLineBaseClass izouSoundLine) {
+        debug("adding " + izouSoundLine + " from " + addOnModel + " to non-permanent");
         if (izouSoundLine.isPermanent())
             izouSoundLine.setToNonPermanent();
         List<WeakReference<IzouSoundLineBaseClass>> weakReferences = nonPermanent.get(addOnModel);
@@ -196,8 +225,10 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
      * @return trie if registered, false if not
      */
     public boolean requestPermanent(AddOnModel addOnModel, Identification source, boolean nonJava) {
+        debug("requesting permanent for addon: " + addOnModel);
         boolean notUsing = isUsing.compareAndSet(false, true);
         if (!notUsing) {
+            debug("already used by " + permanentAddOn);
             synchronized (permanentUserReadWriteLock) {
                 if (permanentAddOn.equals(addOnModel)) {
                     if (knownIdentification == null)
@@ -361,24 +392,23 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
      */
     @Override
     public boolean controlEventDispatcher(EventModel event) {
-        if (!event.containsDescriptor(SoundIDs.StartEvent.descriptor) ||
+        if (!event.containsDescriptor(SoundIDs.StartEvent.descriptor) &&
                 !event.containsDescriptor(SoundIDs.EndedEvent.descriptor))
             return true;
         if (event.containsDescriptor(SoundIDs.StartEvent.descriptor)) {
-            try {
-                AddOnModel addOnModel = getMain().getSecurityManager().getOrThrowAddOnModelForClassLoader();
-                return requestPermanent(addOnModel, event.getSource(), event.containsDescriptor(SoundIDs.StartEvent.isUsingNonJava));
-            } catch (IzouPermissionException e) {
+            AddOnModel addOnModel = getMain().getInternalIdentificationManager().getAddonModel(event.getSource());
+            if (addOnModel == null) {
                 error("no AddonModel found for event: " + event);
                 return true;
             }
+            return requestPermanent(addOnModel, event.getSource(), event.containsDescriptor(SoundIDs.StartEvent.isUsingNonJava));
         } else {
-            try {
-                AddOnModel addOnModel = getMain().getSecurityManager().getOrThrowAddOnModelForClassLoader();
-                endPermanent(addOnModel);
-            } catch (IzouPermissionException e) {
+            AddOnModel addOnModel = getMain().getInternalIdentificationManager().getAddonModel(event.getSource());
+            if (addOnModel == null) {
                 error("no AddonModel found for event: " + event);
+                return true;
             }
+            endPermanent(addOnModel);
         }
         return true;
     }

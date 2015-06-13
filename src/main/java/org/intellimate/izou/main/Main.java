@@ -7,6 +7,7 @@ import org.intellimate.izou.addon.AddOnManager;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.events.EventDistributor;
 import org.intellimate.izou.events.LocalEventManager;
+import org.intellimate.izou.identification.InternalIdentificationManager;
 import org.intellimate.izou.output.OutputManager;
 import org.intellimate.izou.resource.ResourceManager;
 import org.intellimate.izou.security.SecurityManager;
@@ -33,6 +34,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class Main {
     public static AtomicBoolean jfxToolKitInit;
     private static final long INIT_TIME_LIMIT = 10000;
+    private final InternalIdentificationManager internalIdentificationManager;
     private final OutputManager outputManager;
     private final ResourceManager resourceManager;
     private final EventDistributor eventDistributor;
@@ -95,6 +97,8 @@ public class Main {
             System.setProperty("debug", "true");
         }
 
+        internalIdentificationManager = new InternalIdentificationManager(this);
+        addOnManager = new AddOnManager(this);
         threadPoolManager = new ThreadPoolManager(this);
         izouLogger = new IzouLogger();
         outputManager = new OutputManager(this);
@@ -110,7 +114,6 @@ public class Main {
 
         fileLogger.debug("Done initializing.");
         fileLogger.debug("Adding addons..");
-        addOnManager = new AddOnManager(this);
 
         // Starting security manager
         systemMail = initMail();
@@ -251,7 +254,11 @@ public class Main {
 
     public FileSystemManager getFileSystemManager() {
         return fileSystemManager;
-    }    
+    }
+
+    public InternalIdentificationManager getInternalIdentificationManager() {
+        return internalIdentificationManager;
+    }
 
     private SystemInitializer initSystem() {
         // Setting up file system
