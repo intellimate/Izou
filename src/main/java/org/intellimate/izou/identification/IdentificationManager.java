@@ -3,14 +3,16 @@ package org.intellimate.izou.identification;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 /**
  * You can register an Object with the IdentificationManager and receive an Identification Objects.
  */
 public final class IdentificationManager implements IdentificationManagerM {
-    private LinkedList<Identifiable> identifiables = new LinkedList<>();
+    private List<Identifiable> identifiables = Collections.synchronizedList(new ArrayList<>());
     private static IdentificationManager ourInstance = new IdentificationManager();
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
