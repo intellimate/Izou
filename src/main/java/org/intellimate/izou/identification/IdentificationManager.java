@@ -63,9 +63,9 @@ public final class IdentificationManager implements IdentificationManagerM {
      * @return true if registered/already registered or false if the ID is already existing
      */
     @Override
-    public boolean registerIdentification(Identifiable identifiable) {
-        if(identifiable == null || identifiable.getID() == null || identifiable.getID().isEmpty()) return false;
-        if(identifiables.contains(identifiable)  || identifiables.stream()
+    public synchronized boolean registerIdentification(Identifiable identifiable) {
+        if (identifiable == null || identifiable.getID() == null || identifiable.getID().isEmpty()) return false;
+        if (identifiables.contains(identifiable)  || identifiables.stream()
                 .anyMatch(identifiableS -> identifiableS.getID().equals(identifiable.getID())))
             return false;
         identifiables.add(identifiable);

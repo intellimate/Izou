@@ -69,7 +69,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
                 .map(addOn -> submit((Runnable) addOn::register))
                 .collect(Collectors.toList());
         try {
-            timeOut(futures, 3000);
+            timeOut(futures, 30000);
         } catch (InterruptedException e) {
             debug("interrupted while trying to time out the addOns", e);
         }

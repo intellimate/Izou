@@ -188,7 +188,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
      * @param izouSoundLine the izouSoundLine to add
      */
     private void addPermanent(IzouSoundLineBaseClass izouSoundLine) {
-        debug("adding " + izouSoundLine + "to permanent");
+        debug("adding " + izouSoundLine + " to permanent");
         if (!izouSoundLine.isPermanent())
             izouSoundLine.setToPermanent();
         synchronized (permanentUserReadWriteLock) {
@@ -270,6 +270,8 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
                     }
                 });
             }
+            if (muting.equals(addOnModel))
+                unmute();
         }
         return true;
     }
