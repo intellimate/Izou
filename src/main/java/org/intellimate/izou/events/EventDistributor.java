@@ -382,6 +382,7 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
                 error("interrupted", e);
             }
         } else {
+            debug("canceling: " + event.toString() + " from " + event.getSource().getID());
             submit(() -> event.lifecycleCallback(EventLifeCycle.CANCELED));
         }
     }
