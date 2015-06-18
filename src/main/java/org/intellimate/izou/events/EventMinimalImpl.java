@@ -7,6 +7,7 @@ import org.intellimate.izou.resource.ResourceModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * this is a minimal implementation of an Event. Do not use this outside Izou! It will change between Versions!
@@ -18,12 +19,22 @@ public class EventMinimalImpl implements EventModel<EventMinimalImpl> {
     private final Identification source;
     private final List<String> descriptors;
     private final ListResourceProvider listResourceContainer;
+    private final Consumer<EventLifeCycle> callback;
 
     public EventMinimalImpl(String type, Identification source, List<String> descriptors) {
         this.type = type;
         this.source = source;
         this.descriptors = descriptors;
         this.listResourceContainer = new ListResourceMinimalImpl();
+        callback = eventLifeCycle ->{};
+    }
+
+    public EventMinimalImpl(String type, Identification source, List<String> descriptors, Consumer<EventLifeCycle> callback) {
+        this.type = type;
+        this.source = source;
+        this.descriptors = descriptors;
+        this.listResourceContainer = new ListResourceMinimalImpl();
+        this.callback = callback;
     }
 
     /**
@@ -116,6 +127,17 @@ public class EventMinimalImpl implements EventModel<EventMinimalImpl> {
     @Override
     public EventBehaviourControllerModel getEventBehaviourController() {
         return null;
+    }
+
+    /**
+     * this method gets called when the different lifecycle-stages got reached.
+     * It is not blocking!
+     *
+     * @param eventLifeCycle the lifecycle reached.
+     */
+    @Override
+    public void lifecycleCallback(EventLifeCycle eventLifeCycle) {
+        callback.accept(eventLifeCycle);
     }
 
     /**

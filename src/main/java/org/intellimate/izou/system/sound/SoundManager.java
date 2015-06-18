@@ -124,6 +124,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
      * @param izouSoundLine the izouSoundLine
      */
     private void closeCallback(AddOnModel addOnModel, IzouSoundLine izouSoundLine) {
+        debug("removing soundline " + izouSoundLine + " from " + addOnModel);
         Predicate<WeakReference<IzouSoundLineBaseClass>> removeFromList =
                 weakReference -> weakReference.get() != null && weakReference.get().equals(izouSoundLine);
         synchronized (permanentUserReadWriteLock) {
