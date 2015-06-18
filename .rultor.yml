@@ -18,5 +18,4 @@ release:
   script: |-
     mvn versions:set "-DnewVersion=${tag}"
     git commit -am "${tag}"
-    mvn javadoc:javadoc scm-publish:publish-scm
     mvn -Dmaven.test.skip=true clean deploy --settings /home/r/settings.xml
