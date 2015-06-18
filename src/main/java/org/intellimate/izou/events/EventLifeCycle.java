@@ -5,7 +5,7 @@ package org.intellimate.izou.events;
  * @author LeanderK
  * @version 1.0
  */
-public enum EventLiveCycle {
+public enum EventLifeCycle {
     /**
      * gets called while the EventDistributor started the processing.
      */

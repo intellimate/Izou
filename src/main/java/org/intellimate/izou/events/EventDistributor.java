@@ -340,13 +340,13 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
             return;
         }
         debug("EventFired: " + event.toString() + " from " + event.getSource().getID());
-        submit(() -> event.lifecycleCallback(EventLiveCycle.START));
+        submit(() -> event.lifecycleCallback(EventLifeCycle.START));
         if (checkEventsControllers(event)) {
-            submit(() -> event.lifecycleCallback(EventLiveCycle.APPROVED));
-            submit(() -> event.lifecycleCallback(EventLiveCycle.RESOURCE));
+            submit(() -> event.lifecycleCallback(EventLifeCycle.APPROVED));
+            submit(() -> event.lifecycleCallback(EventLifeCycle.RESOURCE));
             List<ResourceModel> resourceList = getMain().getResourceManager().generateResources(event);
             event.addResources(resourceList);
-            submit(() -> event.lifecycleCallback(EventLiveCycle.LISTENERS));
+            submit(() -> event.lifecycleCallback(EventLifeCycle.LISTENERS));
             List<EventListenerModel> listenersTemp = event.getAllInformations().parallelStream()
                     .map(listeners::get)
                     .filter(Objects::nonNull)
@@ -362,9 +362,9 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
             } catch (InterruptedException e) {
                 error("interrupted", e);
             }
-            submit(() -> event.lifecycleCallback(EventLiveCycle.OUTPUT));
+            submit(() -> event.lifecycleCallback(EventLifeCycle.OUTPUT));
             getMain().getOutputManager().passDataToOutputPlugins(event);
-            submit(() -> event.lifecycleCallback(EventLiveCycle.ENDED));
+            submit(() -> event.lifecycleCallback(EventLifeCycle.ENDED));
             List<EventListenerModel> finishListenersTemp = event.getAllInformations().parallelStream()
                     .map(finishListeners::get)
                     .filter(Objects::nonNull)
@@ -382,7 +382,7 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
                 error("interrupted", e);
             }
         } else {
-            submit(() -> event.lifecycleCallback(EventLiveCycle.CANCELED));
+            submit(() -> event.lifecycleCallback(EventLifeCycle.CANCELED));
         }
     }
 

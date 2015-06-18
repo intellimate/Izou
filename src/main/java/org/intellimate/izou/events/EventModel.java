@@ -77,7 +77,7 @@ public interface EventModel<X extends EventModel> extends Identifiable {
     /**
      * this method gets called when the different lifecycle-stages got reached.
      * It is not blocking!
-     * @param eventLiveCycle the lifecycle reached.
+     * @param eventLifeCycle the lifecycle reached.
      */
-    void lifecycleCallback(EventLiveCycle eventLiveCycle);
+    void lifecycleCallback(EventLifeCycle eventLifeCycle);
 }
