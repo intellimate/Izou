@@ -122,6 +122,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
                                 .getPluginId());
                         keyManager.manageAddOnKey(plugin.getDescriptor());
                         pluginWrappers.put(addOn, plugin);
+                        addOn.setPlugin(plugin);
                     });
             keyManager.saveAddOnKeys();
             return addOns;
