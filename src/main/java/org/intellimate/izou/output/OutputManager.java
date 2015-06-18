@@ -204,7 +204,6 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
      * @param outputPlugin the OutputPlugin to search for
      * @return a List of Identifications
      */
-    //TODO: TEST!!!!
     public List<Identification> getAssociatedOutputExtension(OutputPluginModel<?, ?> outputPlugin) {
         IdentifiableSet<OutputExtensionModel<?, ?>> outputExtensions = this.outputExtensions.get(outputPlugin.getID());
         IdentificationManagerM identificationManager = IdentificationManager.getInstance();
@@ -251,7 +250,6 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
      * @param <X> the return type
      * @return a List of Future-Objects
      */
-    //TODO: Test! is it working?
     public <T, X> List<CompletableFuture<X>> generateAllOutputExtensions(OutputPluginModel<T, X> outputPlugin,
                                                                                 T t, EventModel event) {
         IdentifiableSet<OutputExtensionModel<?, ?>> extensions = outputExtensions.get(outputPlugin.getID());

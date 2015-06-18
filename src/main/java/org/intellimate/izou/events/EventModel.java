@@ -9,7 +9,6 @@ import java.util.List;
 
 /**
  * This class represents an Event, the main communication form for the AddOns.
- * After the call to finalizeEvent() the properties (except adding resources) should be immutable.
  * @author Leander Kurscheidt
  * @version 1.0
  */
@@ -74,4 +73,11 @@ public interface EventModel<X extends EventModel> extends Identifiable {
      * @return an instance of EventBehaviourController
      */
     EventBehaviourControllerModel getEventBehaviourController();
+
+    /**
+     * this method gets called when the different lifecycle-stages got reached.
+     * It is not blocking!
+     * @param eventLiveCycle the lifecycle reached.
+     */
+    void lifecycleCallback(EventLiveCycle eventLiveCycle);
 }

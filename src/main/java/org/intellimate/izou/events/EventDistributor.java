@@ -340,9 +340,13 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
             return;
         }
         debug("EventFired: " + event.toString() + " from " + event.getSource().getID());
+        submit(() -> event.lifecycleCallback(EventLiveCycle.START));
         if (checkEventsControllers(event)) {
+            submit(() -> event.lifecycleCallback(EventLiveCycle.APPROVED));
+            submit(() -> event.lifecycleCallback(EventLiveCycle.RESOURCE));
             List<ResourceModel> resourceList = getMain().getResourceManager().generateResources(event);
             event.addResources(resourceList);
+            submit(() -> event.lifecycleCallback(EventLiveCycle.LISTENERS));
             List<EventListenerModel> listenersTemp = event.getAllInformations().parallelStream()
                     .map(listeners::get)
                     .filter(Objects::nonNull)
@@ -358,8 +362,9 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
             } catch (InterruptedException e) {
                 error("interrupted", e);
             }
+            submit(() -> event.lifecycleCallback(EventLiveCycle.OUTPUT));
             getMain().getOutputManager().passDataToOutputPlugins(event);
-
+            submit(() -> event.lifecycleCallback(EventLiveCycle.ENDED));
             List<EventListenerModel> finishListenersTemp = event.getAllInformations().parallelStream()
                     .map(finishListeners::get)
                     .filter(Objects::nonNull)
@@ -376,6 +381,8 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
             } catch (InterruptedException e) {
                 error("interrupted", e);
             }
+        } else {
+            submit(() -> event.lifecycleCallback(EventLiveCycle.CANCELED));
         }
     }
 

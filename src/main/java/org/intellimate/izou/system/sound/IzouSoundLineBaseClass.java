@@ -28,7 +28,7 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
     private Identification responsibleID;
 
     public IzouSoundLineBaseClass(Line line, Main main, boolean isPermanent, AddOnModel addOnModel) {
-        super(main);
+        super(main, false);
         this.line = line;
         this.isPermanent = isPermanent;
         this.addOnModel = addOnModel;
