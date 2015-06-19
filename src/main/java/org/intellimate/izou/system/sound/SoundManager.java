@@ -335,7 +335,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
             weakReferences.stream()
                     .map(Reference::get)
                     .filter(Objects::nonNull)
-                    .forEach(izouSoundLine -> izouSoundLine.setMuted(false));
+                    .forEach(izouSoundLine -> izouSoundLine.setMutedFromSystem(false));
         }
         muting = addOnModel;
     }
@@ -345,7 +345,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
      * @param soundLines the soundLines to mute
      */
     private void mute(List<IzouSoundLineBaseClass> soundLines) {
-        soundLines.forEach(soundLine -> soundLine.setMuted(true));
+        soundLines.forEach(soundLine -> soundLine.setMutedFromSystem(true));
         IdentificationManager.getInstance()
                 .getIdentification(this)
                 .map(id -> new EventMinimalImpl(SoundIDs.MuteEvent.type, id, SoundIDs.MuteEvent.descriptors))
@@ -357,7 +357,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
      * @param soundLines the soundlines to unmute
      */
     private void unMute(List<IzouSoundLineBaseClass> soundLines) {
-        soundLines.forEach(soundLine -> soundLine.setMuted(false));
+        soundLines.forEach(soundLine -> soundLine.setMutedFromSystem(false));
         IdentificationManager.getInstance()
                 .getIdentification(this)
                 .map(id -> new EventMinimalImpl(SoundIDs.UnMuteEvent.type, id, SoundIDs.UnMuteEvent.descriptors))

@@ -37,7 +37,7 @@ public interface IzouSoundLine {
      * @return true if muted.
      */
     @SuppressWarnings("unused")
-    boolean isMuted();
+    boolean isMutedFromSystem();
 
     /**
      * sets whether other Addons audio-inputs should be muted while this line is open (only works for non-permanent lines).

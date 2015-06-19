@@ -64,7 +64,7 @@ public class ResourceManager extends IzouModule implements AddonThreadPoolUser {
                 .collect(Collectors.toList());
 
         try {
-            futures = timeOut(futures, 1000);
+            futures = timeOut(futures, 3000);
         } catch (InterruptedException e) {
             debug("interrupted while doing an time-out", e);
         }

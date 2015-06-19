@@ -21,7 +21,8 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
     private boolean isPermanent;
     protected final SoundManager soundManager;
     private final AddOnModel addOnModel;
-    private boolean isMuted = false;
+    private boolean isMutedFromSystem = false;
+    private boolean isMutedFromUser = false;
     private Consumer<Void> closeCallback = null;
     private boolean muteIfNonPermanent = true;
     private Consumer<Void> muteCallback = null;
@@ -170,7 +171,11 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
      */
     @Override
     public Control getControl(Control.Type control) {
-        throw new UnsupportedOperationException("method not available");
+        if (control.toString().equals(BooleanControl.Type.MUTE.toString())) {
+            return new FakeMuteControl();
+        } else {
+            return line.getControl(control);
+        }
     }
 
     /**
@@ -246,8 +251,8 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
      */
     @Override
     @SuppressWarnings("unused")
-    public boolean isMuted() {
-        return isMuted;
+    public boolean isMutedFromSystem() {
+        return isMutedFromSystem;
     }
 
     /**
@@ -270,12 +275,16 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
         return muteIfNonPermanent;
     }
 
-    void setMuted(boolean isMuted) {
+    void setMutedFromSystem(boolean isMuted) {
         BooleanControl bc = (BooleanControl) line.getControl(BooleanControl.Type.MUTE);
         if (bc != null) {
-            bc.setValue(isMuted); // true to mute the line, false to unmute
+            if (isMuted) {
+                bc.setValue(true); // true to mute the line, false to unmute
+            } else {
+                bc.setValue(isMutedFromUser); // true to mute the line, false to unmute
+            }
         }
-        this.isMuted = isMuted;
+        this.isMutedFromSystem = isMuted;
     }
 
     void registerCloseCallback(Consumer<Void> consumer) {
@@ -284,5 +293,61 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
 
     void registerMuteCallback(Consumer<Void> consumer) {
         this.muteCallback = consumer;
+    }
+
+    private class FakeMuteControl extends BooleanControl {
+        private final BooleanControl control;
+
+        /**
+         * Constructs a new boolean control object with the given parameters.
+         * The labels for the <code>true</code> and <code>false</code> states
+         * default to "true" and "false."
+         */
+        protected FakeMuteControl() {
+            super(BooleanControl.Type.MUTE, isMutedFromUser);
+            this.control = (BooleanControl) line.getControl(BooleanControl.Type.MUTE);
+        }
+
+        /**
+         * Sets the current value for the control.  The default
+         * implementation simply sets the value as indicated.
+         * Some controls require that their line be open before they can be affected
+         * by setting a value.
+         *
+         * @param value desired new value.
+         */
+        @Override
+        public void setValue(boolean value) {
+            isMutedFromUser = value;
+            if (!isMutedFromSystem) {
+                control.setValue(isMutedFromUser);
+            }
+        }
+
+        /**
+         * Obtains this control's current value.
+         *
+         * @return current value.
+         */
+        @Override
+        public boolean getValue() {
+            return isMutedFromUser;
+        }
+
+        /**
+         * Obtains the label for the specified state.
+         *
+         * @param state the state whose label will be returned
+         * @return the label for the specified state, such as "true" or "on"
+         * for <code>true</code>, or "false" or "off" for <code>false</code>.
+         */
+        @Override
+        public String getStateLabel(boolean state) {
+            if (state) {
+                return "true";
+            } else {
+                return "false";
+            }
+        }
     }
 }
