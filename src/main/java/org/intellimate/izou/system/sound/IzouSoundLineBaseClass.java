@@ -146,31 +146,45 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
     }
 
     /**
-     * currently not implemented, throws an UnsupportedOperationException.
-     * @return an error
+     * Obtains the set of controls associated with this line. Some controls may only be available when the line is open.
+     * If there are no controls, this method returns an array of length 0.
+     * The mute-control operation may be overridden by the System.
+     * @return the array of controls
+     * @see #isMutedFromSystem()
      */
     @Override
     public Control[] getControls() {
-        throw new UnsupportedOperationException("method not available");
+        Control[] controls = line.getControls();
+        for (int i = 0; i < controls.length; i++) {
+            Control control = controls[i];
+            if (control.getType().toString().equals(BooleanControl.Type.MUTE.toString())) {
+                controls[i] = new FakeMuteControl();
+            }
+        }
+        return controls;
     }
 
     /**
-     * currently not implemented, throws an UnsupportedOperationException.
-     * @param control the control to check
-     * @return an error
+     * Indicates whether the line supports a control of the specified type. Some controls may only be available when the line is open.
+     * @param control the type of the control for which support is queried
+     * @return true if at least one control of the specified type is supported, otherwise false.
      */
     @Override
     public boolean isControlSupported(Control.Type control) {
-        throw new UnsupportedOperationException("method not available");
+        return line.isControlSupported(control);
     }
 
     /**
-     * currently not implemented, throws an UnsupportedOperationException.
-     * @param control the control
-     * @return an error
+     * Obtains a control of the specified type, if there is any.
+     * Some controls may only be available when the line is open.
+     * The mute-control operation may be overridden by the System.
+     * @param control the type of the requested control
+     * @return a control of the specified type
+     * @throws IllegalArgumentException - if a control of the specified type is not supported
+     * @see #isMutedFromSystem()
      */
     @Override
-    public Control getControl(Control.Type control) {
+    public Control getControl(Control.Type control) throws IllegalArgumentException {
         if (control.toString().equals(BooleanControl.Type.MUTE.toString())) {
             return new FakeMuteControl();
         } else {
