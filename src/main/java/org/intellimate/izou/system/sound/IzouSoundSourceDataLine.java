@@ -58,6 +58,7 @@ public class IzouSoundSourceDataLine extends IzouSoundDataLine implements Source
      */
     @Override
     public void open(AudioFormat format, int bufferSize) throws LineUnavailableException {
+        opening();
         sourceDataLine.open(format, bufferSize);
     }
 
@@ -95,6 +96,7 @@ public class IzouSoundSourceDataLine extends IzouSoundDataLine implements Source
      */
     @Override
     public void open(AudioFormat format) throws LineUnavailableException {
+        opening();
         sourceDataLine.open(format);
     }
 
@@ -140,6 +142,15 @@ public class IzouSoundSourceDataLine extends IzouSoundDataLine implements Source
      */
     @Override
     public int write(byte[] b, int off, int len) {
-        return sourceDataLine.write(b, off, len);
+        if (isMutable) {
+            return sourceDataLine.write(b, off, len);
+        } else {
+            if (isMutedFromSystem) {
+                byte[] newArr = new byte[b.length];
+                return sourceDataLine.write(newArr, off, len);
+            } else {
+                return sourceDataLine.write(b, off, len);
+            }
+        }
     }
 }

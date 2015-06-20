@@ -26,6 +26,7 @@ public class SoundIDs {
         public static final String type = "response";
         public static final List<String> descriptors = Arrays.asList("notinterrupt", "izou.sound.events.mute");
         public static final String descriptor = "izou.sound.events.mute";
+        public static final String resourceSelector = "izou.common.resource.selector";
     }
 
     public static class UnMuteEvent {

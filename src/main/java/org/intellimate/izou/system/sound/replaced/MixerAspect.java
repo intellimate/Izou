@@ -62,7 +62,6 @@ public class MixerAspect {
 
     @Around("execution(* javax.sound.sampled.AudioSystem.getLine(javax.sound.sampled.Line.Info))")
     public Object getLineAdvice(ProceedingJoinPoint pjp) throws Throwable {
-        System.out.println("request to add line");
         pjp.getArgs();
         Line line = (Line) pjp.proceed();
         return MixerAspect.getAndRegisterLine(line);

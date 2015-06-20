@@ -55,6 +55,7 @@ public class IzouSoundLineClip extends IzouSoundDataLine implements Clip {
      */
     @Override
     public void open(AudioFormat format, byte[] data, int offset, int bufferSize) throws LineUnavailableException {
+        opening();
         clip.open(format, data, offset, bufferSize);
     }
 
@@ -92,6 +93,7 @@ public class IzouSoundLineClip extends IzouSoundDataLine implements Clip {
      */
     @Override
     public void open(AudioInputStream stream) throws LineUnavailableException, IOException {
+        opening();
         clip.open(stream);
     }
 

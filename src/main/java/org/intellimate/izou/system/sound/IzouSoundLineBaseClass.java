@@ -21,7 +21,8 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
     private boolean isPermanent;
     protected final SoundManager soundManager;
     private final AddOnModel addOnModel;
-    private boolean isMutedFromSystem = false;
+    protected final boolean isMutable;
+    protected boolean isMutedFromSystem = false;
     private boolean isMutedFromUser = false;
     private Consumer<Void> closeCallback = null;
     private boolean muteIfNonPermanent = true;
@@ -39,6 +40,14 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
             closingThread = null;
         }
         soundManager = null;
+        boolean mutable;
+        try {
+            line.getControl(BooleanControl.Type.MUTE);
+            mutable = true;
+        } catch (IllegalArgumentException e) {
+            mutable = false;
+        }
+        isMutable = mutable;
     }
 
     private Future<?> getClosingThread(Line line, Main main, AddOnModel addOnModel) {
@@ -108,9 +117,14 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
      */
     @Override
     public void open() throws LineUnavailableException {
+        opening();
+        line.open();
+    }
+
+    protected void opening() {
+        System.out.println("opening for " + addOnModel);
         if (!line.isOpen() && !isPermanent && muteCallback != null)
             muteCallback.accept(null);
-        line.open();
     }
 
     /**
@@ -126,8 +140,8 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
      */
     @Override
     public void close() {
-        if (line.isOpen() && closeCallback != null)
-            closeCallback.accept(null);
+        System.out.println("closing for " + addOnModel);
+        closeCallback.accept(null);
         line.close();
     }
 
@@ -290,12 +304,14 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
     }
 
     void setMutedFromSystem(boolean isMuted) {
-        BooleanControl bc = (BooleanControl) line.getControl(BooleanControl.Type.MUTE);
-        if (bc != null) {
-            if (isMuted) {
-                bc.setValue(true); // true to mute the line, false to unmute
-            } else {
-                bc.setValue(isMutedFromUser); // true to mute the line, false to unmute
+        if (isMutable) {
+            BooleanControl bc = (BooleanControl) line.getControl(BooleanControl.Type.MUTE);
+            if (bc != null) {
+                if (isMuted) {
+                    bc.setValue(true); // true to mute the line, false to unmute
+                } else {
+                    bc.setValue(isMutedFromUser); // true to mute the line, false to unmute
+                }
             }
         }
         this.isMutedFromSystem = isMuted;

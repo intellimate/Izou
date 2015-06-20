@@ -9,6 +9,7 @@ import org.intellimate.izou.events.EventsControllerModel;
 import org.intellimate.izou.identification.Identification;
 import org.intellimate.izou.identification.IdentificationManager;
 import org.intellimate.izou.main.Main;
+import org.intellimate.izou.resource.ResourceMinimalImpl;
 import ro.fortsoft.pf4j.AspectOrAffected;
 
 import java.lang.ref.Reference;
@@ -18,10 +19,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -35,12 +33,14 @@ import java.util.stream.Collectors;
  * @author LeanderK
  * @version 1.0
  */
-//TODO: native sound code enforcing (mute, stop(?) etc.)
+//TODO: native sound code enforcing (mute, stop(?) etc.
+//TODO: we must enforce sequential access (only one addon can defacto play sound). We can hide this using the IzouSoundLines (closing and opening the underlying lines).
 public class SoundManager extends IzouModule implements AddonThreadPoolUser, EventsControllerModel {
     //non-permanent and general fields
     private ConcurrentHashMap<AddOnModel, List<WeakReference<IzouSoundLineBaseClass>>> nonPermanent = new ConcurrentHashMap<>();
     //not null if this AddOn is currently muting the others Lines
-    private AddOnModel muting = null;
+    private MutingManager mutingManager = null;
+    private final Object mutingLock = new Object();
 
     //permanent fields, there is a Read/Write lock!
     private List<WeakReference<IzouSoundLineBaseClass>> permanentLines = null;
@@ -51,7 +51,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
     private LocalDateTime permissionWithoutUsageLimit = null;
     //if true we can do nothing to check whether he closed.
     private boolean isUsingNonJava = false;
-    private Future<Void> permissionWithoutUsageCloseThread = null;
+    private Future permissionWithoutUsageCloseThread = null;
     private final Object permanentUserReadWriteLock = new Object();
     private AtomicBoolean isUsing = new AtomicBoolean(false);
 
@@ -115,7 +115,17 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
             addNonPermanent(addOnModel, izouSoundLine);
         }
         izouSoundLine.registerCloseCallback(voit -> closeCallback(addOnModel, izouSoundLine));
-        izouSoundLine.registerMuteCallback(voit -> muteOthers(addOnModel));
+        izouSoundLine.registerMuteCallback(voit -> muteCallback(addOnModel, izouSoundLine));
+    }
+
+    protected void muteCallback(AddOnModel addOnModel, IzouSoundLineBaseClass izouSoundLine) {
+        synchronized (mutingLock) {
+            if (mutingManager != null && mutingManager.getMuting().equals(addOnModel)) {
+                mutingManager.add(izouSoundLine);
+            } else if (mutingManager == null || mutingManager.isTimeOut()) {
+                mutingManager = new MutingManager(this, addOnModel, izouSoundLine);
+            }
+        }
     }
 
     /**
@@ -139,33 +149,33 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
         List<WeakReference<IzouSoundLineBaseClass>> weakReferences = nonPermanent.get(addOnModel);
         if (weakReferences != null) {
             weakReferences.removeIf(removeFromList);
-            if (muting != null && muting.equals(addOnModel) && !weakReferences.stream()
-                    .map(WeakReference::get)
-                    .filter(Objects::nonNull)
-                    .findAny()
-                    .isPresent())
-                unmute();
+            synchronized (mutingLock) {
+                if (mutingManager != null && mutingManager.getMuting().equals(addOnModel)) {
+                    mutingManager = mutingManager.remove(izouSoundLine);
+                }
+            }
         }
         submit(this::tidy);
     }
 
     /**
-     * creates a LocaleDateTime-Object 5 seconds in the Future and a Thread which will remove it, if it passes the threshold.
+     * creates a LocaleDateTime-Object 10 seconds in the Future and a Thread which will remove it, if it passes the threshold.
      * the Thread
      */
     private void permissionWithoutUsage() {
         if (isUsingNonJava)
             return;
         synchronized (permanentUserReadWriteLock) {
-            permissionWithoutUsageLimit = LocalDateTime.now().plus(5, ChronoUnit.SECONDS);
-            permissionWithoutUsageCloseThread =  submit(() -> {
+            permissionWithoutUsageLimit = LocalDateTime.now().plus(10, ChronoUnit.SECONDS);
+            permissionWithoutUsageCloseThread =  getMain().getThreadPoolManager().getAddOnsThreadPool()
+                    .submit((Runnable)() -> {
                 try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    return;
+                    Thread.sleep(10000);
+                    firePermanentEndedNotification();
+                    endPermanent(permanentAddOn);
+                } catch (InterruptedException ignored) {
+                    ignored.printStackTrace();
                 }
-                endPermanent(permanentAddOn);
-                firePermanentEndedNotification();
             });
         }
     }
@@ -271,8 +281,12 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
                     }
                 });
             }
-            if (muting.equals(addOnModel))
-                unmute();
+            synchronized (mutingLock) {
+                if (mutingManager != null && mutingManager.getMuting().equals(addOnModel)) {
+                    mutingManager.cancel();
+                    mutingManager = null;
+                }
+            }
         }
         return true;
     }
@@ -282,7 +296,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
      * @param addOnModel the addonModel to check
      */
     public void endPermanent(AddOnModel addOnModel) {
-        if (!isUsing.get() || !permanentAddOn.equals(addOnModel))
+        if (!isUsing.get() || (permanentAddOn != null && !permanentAddOn.equals(addOnModel)))
             return;
         synchronized (permanentUserReadWriteLock) {
             permanentAddOn = null;
@@ -300,9 +314,6 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
         }
     }
 
-    /**
-     * fires the EndedEvent event.
-     */
     private void firePermanentEndedNotification() {
         if (knownIdentification != null) {
             EventModel event = new EventMinimalImpl(SoundIDs.EndedEvent.type, knownIdentification, SoundIDs.EndedEvent.descriptors);
@@ -314,22 +325,23 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
      * mutes the other Addons
      * @param addOnModel the addonModel responsible
      */
-    private void muteOthers(AddOnModel addOnModel) {
-        List<IzouSoundLineBaseClass> toMute = nonPermanent.entrySet().stream()
+    void muteOthers(AddOnModel addOnModel) {
+        Set<AddOnModel> toMute = nonPermanent.entrySet().stream()
                 .filter(entry -> !entry.getKey().equals(addOnModel))
                 .flatMap(entry -> entry.getValue().stream())
                 .map(Reference::get)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .peek(izouSoundLineBaseClass -> izouSoundLineBaseClass.setMutedFromSystem(true))
+                .map(IzouSoundLine::getAddOnModel)
+                .collect(Collectors.toSet());
         if (permanentAddOn != null && !permanentAddOn.equals(addOnModel) && permanentLines != null) {
-            toMute.addAll(
-                    permanentLines.stream()
-                    .map(Reference::get)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList())
-            );
+            toMute.add(addOnModel);
+            permanentLines.stream()
+                .map(Reference::get)
+                .filter(Objects::nonNull)
+                .forEach(izouSoundLineBaseClass -> izouSoundLineBaseClass.setMutedFromSystem(true));
         }
-        mute(toMute);
+        toMute.forEach(this::mute);
         List<WeakReference<IzouSoundLineBaseClass>> weakReferences = nonPermanent.get(addOnModel);
         if (weakReferences != null) {
             weakReferences.stream()
@@ -337,51 +349,41 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
                     .filter(Objects::nonNull)
                     .forEach(izouSoundLine -> izouSoundLine.setMutedFromSystem(false));
         }
-        muting = addOnModel;
     }
 
     /**
      * mutes the list of soundLines and fires the Mute-Event
-     * @param soundLines the soundLines to mute
+     * @param model the addonModel to mute
      */
-    private void mute(List<IzouSoundLineBaseClass> soundLines) {
-        soundLines.forEach(soundLine -> soundLine.setMutedFromSystem(true));
+    private void mute(AddOnModel model) {
         IdentificationManager.getInstance()
                 .getIdentification(this)
                 .map(id -> new EventMinimalImpl(SoundIDs.MuteEvent.type, id, SoundIDs.MuteEvent.descriptors))
-                .ifPresent(event -> getMain().getEventDistributor().fireEventConcurrently(event));
-    }
-
-    /**
-     * unmutes the list of soundLines and fires the UnMute-Event
-     * @param soundLines the soundlines to unmute
-     */
-    private void unMute(List<IzouSoundLineBaseClass> soundLines) {
-        soundLines.forEach(soundLine -> soundLine.setMutedFromSystem(false));
-        IdentificationManager.getInstance()
-                .getIdentification(this)
-                .map(id -> new EventMinimalImpl(SoundIDs.UnMuteEvent.type, id, SoundIDs.UnMuteEvent.descriptors))
+                .map(eventMinimal -> eventMinimal.addResource(
+                        new ResourceMinimalImpl<>(SoundIDs.MuteEvent.resourceSelector, eventMinimal.getSource(), model, null)))
                 .ifPresent(event -> getMain().getEventDistributor().fireEventConcurrently(event));
     }
 
     /**
      * unmutes all
      */
-    private void unmute() {
-        List<IzouSoundLineBaseClass> unmute = nonPermanent.entrySet().stream()
+    void unmute() {
+        nonPermanent.entrySet().stream()
                 .flatMap(entry -> entry.getValue().stream())
                 .map(Reference::get)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .forEach(izouSoundLineBaseClass -> izouSoundLineBaseClass.setMutedFromSystem(false));
 
         if (permanentLines != null)
-            unmute.addAll(
-                    permanentLines.stream()
-                            .map(Reference::get)
-                            .filter(Objects::nonNull)
-                            .collect(Collectors.toList())
-            );
-        unMute(unmute);
+            permanentLines.stream()
+                .map(Reference::get)
+                .filter(Objects::nonNull)
+                .forEach(izouSoundLineBaseClass -> izouSoundLineBaseClass.setMutedFromSystem(false));
+
+        IdentificationManager.getInstance()
+                .getIdentification(this)
+                .map(id -> new EventMinimalImpl(SoundIDs.UnMuteEvent.type, id, SoundIDs.UnMuteEvent.descriptors))
+                .ifPresent(event -> getMain().getEventDistributor().fireEventConcurrently(event));
     }
 
     /**

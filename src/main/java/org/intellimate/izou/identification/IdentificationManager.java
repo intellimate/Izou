@@ -11,6 +11,7 @@ import java.util.Optional;
 /**
  * You can register an Object with the IdentificationManager and receive an Identification Objects.
  */
+//FIXME: ConcurrentModification Exception with streams
 public final class IdentificationManager implements IdentificationManagerM {
     private List<Identifiable> identifiables = Collections.synchronizedList(new ArrayList<>());
     private static IdentificationManager ourInstance = new IdentificationManager();

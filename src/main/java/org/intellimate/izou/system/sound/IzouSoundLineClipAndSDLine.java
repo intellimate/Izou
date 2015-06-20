@@ -63,6 +63,7 @@ public class IzouSoundLineClipAndSDLine extends IzouSoundDataLine implements Cli
      */
     @Override
     public void open(AudioFormat format, int bufferSize) throws LineUnavailableException {
+        opening();
         sourceDataLine.open(format, bufferSize);
     }
 
@@ -104,6 +105,7 @@ public class IzouSoundLineClipAndSDLine extends IzouSoundDataLine implements Cli
      */
     @Override
     public void open(AudioFormat format) throws LineUnavailableException {
+        opening();
         sourceDataLine.open(format);
     }
 
@@ -152,7 +154,16 @@ public class IzouSoundLineClipAndSDLine extends IzouSoundDataLine implements Cli
      */
     @Override
     public int write(byte[] b, int off, int len) {
-        return sourceDataLine.write(b, off, len);
+        if (isMutable) {
+            return sourceDataLine.write(b, off, len);
+        } else {
+            if (isMutedFromSystem) {
+                byte[] newArr = new byte[b.length];
+                return sourceDataLine.write(newArr, off, len);
+            } else {
+                return sourceDataLine.write(b, off, len);
+            }
+        }
     }
 
     /**
@@ -191,6 +202,7 @@ public class IzouSoundLineClipAndSDLine extends IzouSoundDataLine implements Cli
      */
     @Override
     public void open(AudioFormat format, byte[] data, int offset, int bufferSize) throws LineUnavailableException {
+        opening();
         clip.open(format, data, offset, bufferSize);
     }
 
@@ -228,6 +240,7 @@ public class IzouSoundLineClipAndSDLine extends IzouSoundDataLine implements Cli
      */
     @Override
     public void open(AudioInputStream stream) throws LineUnavailableException, IOException {
+        opening();
         clip.open(stream);
     }
 

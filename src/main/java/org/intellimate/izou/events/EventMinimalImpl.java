@@ -6,6 +6,7 @@ import org.intellimate.izou.resource.ListResourceProvider;
 import org.intellimate.izou.resource.ResourceModel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -20,6 +21,7 @@ public class EventMinimalImpl implements EventModel<EventMinimalImpl> {
     private final List<String> descriptors;
     private final ListResourceProvider listResourceContainer;
     private final Consumer<EventLifeCycle> callback;
+    private final EventBehaviourControllerImpl eventBehaviourController;
 
     public EventMinimalImpl(String type, Identification source, List<String> descriptors) {
         this.type = type;
@@ -27,6 +29,7 @@ public class EventMinimalImpl implements EventModel<EventMinimalImpl> {
         this.descriptors = descriptors;
         this.listResourceContainer = new ListResourceMinimalImpl();
         callback = eventLifeCycle ->{};
+        eventBehaviourController = new EventBehaviourControllerImpl();
     }
 
     public EventMinimalImpl(String type, Identification source, List<String> descriptors, Consumer<EventLifeCycle> callback) {
@@ -35,6 +38,7 @@ public class EventMinimalImpl implements EventModel<EventMinimalImpl> {
         this.descriptors = descriptors;
         this.listResourceContainer = new ListResourceMinimalImpl();
         this.callback = callback;
+        eventBehaviourController = new EventBehaviourControllerImpl();
     }
 
     /**
@@ -119,6 +123,27 @@ public class EventMinimalImpl implements EventModel<EventMinimalImpl> {
         return descriptors.contains(descriptor) || type.equals(descriptor);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof EventMinimalImpl)) return false;
+
+        EventMinimalImpl that = (EventMinimalImpl) o;
+
+        if (type != null ? !type.equals(that.type) : that.type != null) return false;
+        if (source != null ? !source.equals(that.source) : that.source != null) return false;
+        return !(descriptors != null ? !descriptors.equals(that.descriptors) : that.descriptors != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = type != null ? type.hashCode() : 0;
+        result = 31 * result + (source != null ? source.hashCode() : 0);
+        result = 31 * result + (descriptors != null ? descriptors.hashCode() : 0);
+        return result;
+    }
+
     /**
      * returns the associated EventBehaviourController
      *
@@ -126,7 +151,8 @@ public class EventMinimalImpl implements EventModel<EventMinimalImpl> {
      */
     @Override
     public EventBehaviourControllerModel getEventBehaviourController() {
-        return null;
+        return eventBehaviourController;
+
     }
 
     /**
@@ -151,5 +177,24 @@ public class EventMinimalImpl implements EventModel<EventMinimalImpl> {
     @Override
     public String getID() {
         return type;
+    }
+
+    private class EventBehaviourControllerImpl implements EventBehaviourControllerModel {
+
+        /**
+         * generates the data to control the Event
+         * <p>
+         * The Identifications with the highest Integer get the priority.
+         * </p>
+         *
+         * @param identifications the Identifications of the OutputPlugins
+         * @return a HashMap, where the keys represent the associated Behaviour and the values the Identification;
+         */
+        @Override
+        public HashMap<Integer, List<Identification>> getOutputPluginBehaviour(List<Identification> identifications) {
+            HashMap<Integer, List<Identification>> hashMap = new HashMap<>();
+            hashMap.put(0, identifications);
+            return hashMap;
+        }
     }
 }
