@@ -2,7 +2,7 @@ package org.intellimate.izou.system.file;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.intellimate.izou.IzouModule;
+import org.intellimate.izou.util.IzouModule;
 import org.intellimate.izou.main.Main;
 
 import java.io.File;

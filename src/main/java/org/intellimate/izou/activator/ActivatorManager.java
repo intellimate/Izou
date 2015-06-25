@@ -1,8 +1,8 @@
 package org.intellimate.izou.activator;
 
-import org.intellimate.izou.AddonThreadPoolUser;
-import org.intellimate.izou.IdentifiableSet;
-import org.intellimate.izou.IzouModule;
+import org.intellimate.izou.util.AddonThreadPoolUser;
+import org.intellimate.izou.util.IdentifiableSet;
+import org.intellimate.izou.util.IzouModule;
 import org.intellimate.izou.identification.IllegalIDException;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.exceptions.IzouPermissionException;

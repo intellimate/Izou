@@ -1,9 +1,9 @@
 package org.intellimate.izou.addon;
 
 import org.apache.logging.log4j.Level;
-import org.intellimate.izou.AddonThreadPoolUser;
-import org.intellimate.izou.IdentifiableSet;
-import org.intellimate.izou.IzouModule;
+import org.intellimate.izou.util.AddonThreadPoolUser;
+import org.intellimate.izou.util.IdentifiableSet;
+import org.intellimate.izou.util.IzouModule;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.SecurityModule;
 import org.intellimate.izou.system.Context;

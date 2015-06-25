@@ -1,4 +1,4 @@
-package org.intellimate.izou;
+package org.intellimate.izou.util;
 
 import org.intellimate.izou.identification.Identifiable;
 

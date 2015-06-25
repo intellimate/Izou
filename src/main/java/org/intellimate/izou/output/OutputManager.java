@@ -1,9 +1,9 @@
 package org.intellimate.izou.output;
 
 import com.google.common.reflect.TypeToken;
-import org.intellimate.izou.AddonThreadPoolUser;
-import org.intellimate.izou.IdentifiableSet;
-import org.intellimate.izou.IzouModule;
+import org.intellimate.izou.util.AddonThreadPoolUser;
+import org.intellimate.izou.util.IdentifiableSet;
+import org.intellimate.izou.util.IzouModule;
 import org.intellimate.izou.events.EventModel;
 import org.intellimate.izou.identification.Identification;
 import org.intellimate.izou.identification.IdentificationManager;

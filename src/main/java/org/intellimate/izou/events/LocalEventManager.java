@@ -1,6 +1,6 @@
 package org.intellimate.izou.events;
 
-import org.intellimate.izou.IzouModule;
+import org.intellimate.izou.util.IzouModule;
 import org.intellimate.izou.identification.Identification;
 import org.intellimate.izou.identification.IdentificationManager;
 import org.intellimate.izou.identification.IdentificationManagerM;

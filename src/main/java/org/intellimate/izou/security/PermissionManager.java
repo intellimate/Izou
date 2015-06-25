@@ -1,6 +1,6 @@
 package org.intellimate.izou.security;
 
-import org.intellimate.izou.IzouModule;
+import org.intellimate.izou.util.IzouModule;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.exceptions.IzouPermissionException;

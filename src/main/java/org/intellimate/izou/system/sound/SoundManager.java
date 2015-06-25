@@ -1,7 +1,7 @@
 package org.intellimate.izou.system.sound;
 
-import org.intellimate.izou.AddonThreadPoolUser;
-import org.intellimate.izou.IzouModule;
+import org.intellimate.izou.util.AddonThreadPoolUser;
+import org.intellimate.izou.util.IzouModule;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.events.EventMinimalImpl;
 import org.intellimate.izou.events.EventModel;
