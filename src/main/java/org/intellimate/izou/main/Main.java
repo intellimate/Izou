@@ -53,7 +53,7 @@ public class Main {
     private FileSystemManager fileSystemManager;
 
     /**
-     * Creates a new Main instance with a optionally disabled lib-folder
+     * Creates a new Main instance with a optionally notDisabled lib-folder
      *
      * @param javaFX true if javaFX should be started, false otherwise
      * @param disableLibFolder  if true, izou will not load plugin from the lib-folder
@@ -63,7 +63,7 @@ public class Main {
     }
 
     /**
-     * If you want to debug your Plugin, you can get an Main instance with this Method, JavaFX is disabled
+     * If you want to debug your Plugin, you can get an Main instance with this Method, JavaFX is notDisabled
      *
      * @param addOns a List of AddOns to run
      */

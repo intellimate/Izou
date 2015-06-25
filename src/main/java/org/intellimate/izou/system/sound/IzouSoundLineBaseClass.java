@@ -6,6 +6,8 @@ import org.intellimate.izou.identification.Identification;
 import org.intellimate.izou.main.Main;
 
 import javax.sound.sampled.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
@@ -16,14 +18,20 @@ import java.util.function.Consumer;
  * @version 1.0
  */
 public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoCloseable, IzouSoundLine {
-    protected final Line line;
+    //information about the line
+    protected boolean notDisabled;
+    protected Line line;
+    protected final Line.Info info;
+    protected float gain;
+    protected boolean isMutedFromSystem = false;
+    protected boolean isMutedFromUser = false;
+
+
     private Future<?> closingThread;
     private boolean isPermanent;
     protected final SoundManager soundManager;
     private final AddOnModel addOnModel;
     protected final boolean isMutable;
-    protected boolean isMutedFromSystem = false;
-    private boolean isMutedFromUser = false;
     private Consumer<Void> closeCallback = null;
     private boolean muteIfNonPermanent = true;
     private Consumer<Void> muteCallback = null;
@@ -32,6 +40,7 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
     public IzouSoundLineBaseClass(Line line, Main main, boolean isPermanent, AddOnModel addOnModel) {
         super(main, false);
         this.line = line;
+        this.info = line.getLineInfo();
         this.isPermanent = isPermanent;
         this.addOnModel = addOnModel;
         if (!isPermanent) {
@@ -117,6 +126,7 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
      */
     @Override
     public void open() throws LineUnavailableException {
+        if (!line.isOpen())
         opening();
         line.open();
     }
@@ -169,13 +179,16 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
     @Override
     public Control[] getControls() {
         Control[] controls = line.getControls();
+        List<Control> fakeControls = new ArrayList<>(2);
         for (int i = 0; i < controls.length; i++) {
             Control control = controls[i];
             if (control.getType().toString().equals(BooleanControl.Type.MUTE.toString())) {
-                controls[i] = new FakeMuteControl();
+                fakeControls.add(new FakeMuteControl(this));
+            } else if (control.getType().toString().equals(FloatControl.Type.MASTER_GAIN.toString())) {
+                fakeControls.add(new FakeGainControl(this, (FloatControl) control));
             }
         }
-        return controls;
+        return fakeControls.toArray(new Control[fakeControls.size()]);
     }
 
     /**
@@ -192,17 +205,20 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
      * Obtains a control of the specified type, if there is any.
      * Some controls may only be available when the line is open.
      * The mute-control operation may be overridden by the System.
-     * @param control the type of the requested control
+     * @param type the type of the requested control
      * @return a control of the specified type
      * @throws IllegalArgumentException - if a control of the specified type is not supported
      * @see #isMutedFromSystem()
      */
     @Override
-    public Control getControl(Control.Type control) throws IllegalArgumentException {
-        if (control.toString().equals(BooleanControl.Type.MUTE.toString())) {
-            return new FakeMuteControl();
+    public Control getControl(Control.Type type) throws IllegalArgumentException {
+        if (type.toString().equals(BooleanControl.Type.MUTE.toString())) {
+            return new FakeMuteControl(this);
+        } else if (type.toString().equals(FloatControl.Type.MASTER_GAIN.toString())) {
+            Control control = line.getControl(type);
+            return new FakeGainControl(this, (FloatControl) control);
         } else {
-            return line.getControl(control);
+            return line.getControl(type);
         }
     }
 
@@ -325,59 +341,4 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
         this.muteCallback = consumer;
     }
 
-    private class FakeMuteControl extends BooleanControl {
-        private final BooleanControl control;
-
-        /**
-         * Constructs a new boolean control object with the given parameters.
-         * The labels for the <code>true</code> and <code>false</code> states
-         * default to "true" and "false."
-         */
-        protected FakeMuteControl() {
-            super(BooleanControl.Type.MUTE, isMutedFromUser);
-            this.control = (BooleanControl) line.getControl(BooleanControl.Type.MUTE);
-        }
-
-        /**
-         * Sets the current value for the control.  The default
-         * implementation simply sets the value as indicated.
-         * Some controls require that their line be open before they can be affected
-         * by setting a value.
-         *
-         * @param value desired new value.
-         */
-        @Override
-        public void setValue(boolean value) {
-            isMutedFromUser = value;
-            if (!isMutedFromSystem) {
-                control.setValue(isMutedFromUser);
-            }
-        }
-
-        /**
-         * Obtains this control's current value.
-         *
-         * @return current value.
-         */
-        @Override
-        public boolean getValue() {
-            return isMutedFromUser;
-        }
-
-        /**
-         * Obtains the label for the specified state.
-         *
-         * @param state the state whose label will be returned
-         * @return the label for the specified state, such as "true" or "on"
-         * for <code>true</code>, or "false" or "off" for <code>false</code>.
-         */
-        @Override
-        public String getStateLabel(boolean state) {
-            if (state) {
-                return "true";
-            } else {
-                return "false";
-            }
-        }
-    }
 }
