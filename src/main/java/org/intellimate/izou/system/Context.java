@@ -3,6 +3,7 @@ package org.intellimate.izou.system;
 import org.intellimate.izou.addon.AddOnModel;
 import org.apache.logging.log4j.spi.ExtendedLogger;
 import org.intellimate.izou.system.context.*;
+import org.intellimate.izou.system.context.System;
 
 /**
  * @author Leander Kurscheidt
@@ -50,6 +51,12 @@ public interface Context {
      * @return Output
      */
     Output getOutput();
+
+    /**
+     * retruns the API used to interact with Izou.
+     * @return System.
+     */
+    System getSystem();
 
     /**
      * gets addOn

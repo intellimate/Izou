@@ -1,14 +1,13 @@
 package org.intellimate.izou.addon;
 
 import org.apache.logging.log4j.Level;
-import org.intellimate.izou.util.AddonThreadPoolUser;
-import org.intellimate.izou.util.IdentifiableSet;
-import org.intellimate.izou.util.IzouModule;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.SecurityModule;
 import org.intellimate.izou.system.Context;
 import org.intellimate.izou.system.context.ContextImplementation;
-import org.intellimate.izou.system.file.FileSystemManager;
+import org.intellimate.izou.util.AddonThreadPoolUser;
+import org.intellimate.izou.util.IdentifiableSet;
+import org.intellimate.izou.util.IzouModule;
 import ro.fortsoft.pf4j.*;
 
 import javax.crypto.SecretKey;
@@ -32,7 +31,8 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
     private IdentifiableSet<AddOnModel> addOns = new IdentifiableSet<>();
     private HashMap<AddOnModel, PluginWrapper> pluginWrappers = new HashMap<>();
     private Set<AspectOrAffected> aspectOrAffectedSet = new HashSet<>();
-    
+    private List<Runnable> initializedCallback = new ArrayList<>();
+
     public AddOnManager(Main main) {
         super(main);
     }
@@ -43,6 +43,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
     public void retrieveAndRegisterAddOns() {
         addOns.addAll(loadAddOns());
         registerAllAddOns(addOns);
+        initialized();
     }
 
     /**
@@ -61,6 +62,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
     public void addAndRegisterAddOns(List<AddOnModel> addOns) {
         this.addOns.addAll(addOns);
         registerAllAddOns(this.addOns);
+        initialized();
     }
     
     public void registerAllAddOns(IdentifiableSet<AddOnModel> addOns) {
@@ -173,6 +175,22 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
     }
 
     /**
+     * adds an listener to the initialized state (all addons registered).
+     * @param runnable the runnable to add
+     */
+    public void addInitializedListener(Runnable runnable) {
+        initializedCallback.add(runnable);
+    }
+
+    /**
+     * called after the addons were initialized
+     */
+    private void initialized() {
+        initializedCallback.forEach(this::submit);
+        initializedCallback = new LinkedList<>();
+    }
+
+    /**
      * The KeyManager in the AddOnManager loads or creates a {@link SecretKey} for each AddOn at addOn load time,
      * depending if one already exists. It then distributes them to each addOn being loaded, and then finaly saves them
      * again.
@@ -222,9 +240,8 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
             changed = false;
 
             try {
-                String workingDir = FileSystemManager.FULL_WORKING_DIRECTORY;
-                final String keyStoreFile = workingDir + File.separator + "system" + File.separator + "data"
-                        + File.separator + "addon_keys.keystore";
+                final String keyStoreFile = getMain().getFileSystemManager().getSystemDataLocation() + File.separator
+                        + "addon_keys.keystore";
                 KeyStore keyStore = createKeyStore(keyStoreFile, "4b[X:+H4CS&avY<)");
 
                 KeyStore.PasswordProtection keyPassword = new KeyStore.PasswordProtection("Ev45j>eP}QTR?K9_"
@@ -250,9 +267,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
             if (!changed) {
                 return;
             }
-
-            String workingDir = FileSystemManager.FULL_WORKING_DIRECTORY;
-            final String keyStoreFile = workingDir + File.separator + "system" + File.separator + "data"
+            final String keyStoreFile = getMain().getFileSystemManager().getSystemDataLocation()
                     + File.separator + "addon_keys.keystore";
             KeyStore keyStore = createKeyStore(keyStoreFile, "4b[X:+H4CS&avY<)");
 
