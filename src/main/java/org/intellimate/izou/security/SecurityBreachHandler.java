@@ -2,14 +2,15 @@ package org.intellimate.izou.security;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.intellimate.izou.main.Main;
 import org.intellimate.izou.support.SystemMail;
-import org.intellimate.izou.system.file.FileSystemManager;
+import org.intellimate.izou.util.IzouModule;
 
 /**
  * The SecurityBreachHandler takes action when a security exception is thrown in the security manager to deal with the
  * attempted security breach.
  */
-final class SecurityBreachHandler {
+final class SecurityBreachHandler extends IzouModule {
     private final Logger logger = LogManager.getLogger(this.getClass());
     private final String toAddress;
     private final SystemMail systemMail;
@@ -19,15 +20,16 @@ final class SecurityBreachHandler {
      * Creates a SecurityBreachHandler. There can only be one single SecurityBreachHandler, so calling this method twice
      * will cause an illegal access exception.
      *
+     * @param main the main instance of izou
      * @param systemMail the system mail object in order to send e-mails to owner in case of emergency
      * @param toAddress the email address to send error reports to
      * @return an SecurityBreachHandler
      * @throws IllegalAccessException thrown if this method is called more than once
      */
-    static SecurityBreachHandler createBreachHandler(SystemMail systemMail, String toAddress)
+    static SecurityBreachHandler createBreachHandler(Main main, SystemMail systemMail, String toAddress)
             throws IllegalAccessException {
         if (!exists) {
-            SecurityBreachHandler breachHandler = new SecurityBreachHandler(systemMail, toAddress);
+            SecurityBreachHandler breachHandler = new SecurityBreachHandler(main, systemMail, toAddress);
             exists = true;
             return breachHandler;
         }
@@ -38,11 +40,13 @@ final class SecurityBreachHandler {
     /**
      Creates a new SecurityBreachHandler instance if and only if none has been created yet
      *
+     * @param main the main instance of izou
      * @param systemMail the system mail object in order to send e-mails to owner in case of emergency
      * @param toAddress the email address to send error reports to
      * @throws IllegalAccessException thrown if this method is called more than once
      */
-    private SecurityBreachHandler(SystemMail systemMail, String toAddress) throws IllegalAccessException {
+    private SecurityBreachHandler(Main main, SystemMail systemMail, String toAddress) throws IllegalAccessException {
+        super(main);
         if (exists) {
             throw new IllegalAccessException("Cannot create more than one instance of SecurityBreachHandler");
         }
@@ -64,7 +68,7 @@ final class SecurityBreachHandler {
     private void sendErrorReport(String subject, Exception e, Class[] classesStack) {
         String content = generateContent(e, classesStack);
         String logName = "org.intellimate.izou.log";
-        String logAttachment = FileSystemManager.LOG_PATH + logName;
+        String logAttachment = getMain().getFileSystemManager().getLogsLocation() + logName;
         systemMail.sendMail(toAddress, subject, content, logName, logAttachment);
     }
 

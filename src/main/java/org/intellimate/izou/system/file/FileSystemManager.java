@@ -18,20 +18,6 @@ public class FileSystemManager extends IzouModule {
      * Path to log files
      */
     private static final Logger logger = LogManager.getLogger(FileSystemManager.class);
-    @Deprecated //use the getters, static not possible anymore (due to platform differences)
-    public static final String LOG_PATH = "." + File.separator + "logs" + File.separator;
-    @Deprecated //use the getters, static not possible anymore (due to platform differences)
-    public static final String FULL_WORKING_DIRECTORY;
-
-    static {
-        String path = null;
-        try {
-            path = new File(".").getCanonicalPath();
-        } catch (IOException e) {
-            logger.error("Unable to get current canonical path", e);
-        }
-        FULL_WORKING_DIRECTORY = path;
-    }
 
     private final File izouParentLocation;
     private final File izouJarLocation;

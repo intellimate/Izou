@@ -2,8 +2,9 @@ package org.intellimate.izou.security.storage;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.SecurityModule;
-import org.intellimate.izou.system.file.FileSystemManager;
+import org.intellimate.izou.util.IzouModule;
 import ro.fortsoft.pf4j.PluginDescriptor;
 
 import javax.crypto.SecretKey;
@@ -25,8 +26,7 @@ import java.util.HashMap;
  *     from addOns).
  * </p>
  */
-//TODO: @Julian why doesn't it extend IzouModule?
-public final class SecureStorage {
+public final class SecureStorage extends IzouModule {
     private static boolean exists = false;
     private HashMap<SecretKey, SecureContainer> containers;
     private final Logger logger = LogManager.getLogger(this.getClass());
@@ -35,12 +35,13 @@ public final class SecureStorage {
      * Creates an SecureStorage. There can only be one single SecureStorage, so calling this method twice
      * will cause an illegal access exception.
      *
+     * @param main the main instance of izou
      * @return a SecureAccess object
      * @throws IllegalAccessException thrown if this method is called more than once
      */
-    public static SecureStorage createSecureStorage() throws IllegalAccessException {
+    public static SecureStorage createSecureStorage(Main main) throws IllegalAccessException {
         if (!exists) {
-            SecureStorage secureStorage = new SecureStorage();
+            SecureStorage secureStorage = new SecureStorage(main);
             exists = true;
             return secureStorage;
         }
@@ -51,9 +52,11 @@ public final class SecureStorage {
     /**
      * Creates a new SecureStorage instance if and only if none has been created yet
      *
+     * @param main the main instance of izou
      * @throws IllegalAccessException thrown if this method is called more than once
      */
-    public SecureStorage() throws IllegalAccessException, NullPointerException {
+    public SecureStorage(Main main) throws IllegalAccessException, NullPointerException {
+        super(main);
         if (exists) {
             throw new IllegalAccessException("Cannot create more than one instance of IzouSecurityManager");
         }
@@ -125,7 +128,7 @@ public final class SecureStorage {
      * Saves the containers to ./system/data/containers.ser
      */
     private void saveContainers() {
-        String workingDir = FileSystemManager.FULL_WORKING_DIRECTORY;
+        String workingDir = getMain().getFileSystemManager().getSystemLocation().getAbsolutePath();
         final String containerFile = workingDir + File.separator + "system" + File.separator + "data" + File.separator
                 + "containers.ser";
         try {
@@ -146,7 +149,7 @@ public final class SecureStorage {
      */
     private HashMap<SecretKey, SecureContainer> retrieveContainers() {
         HashMap<SecretKey, SecureContainer> containers = null;
-        String workingDir = FileSystemManager.FULL_WORKING_DIRECTORY;
+        String workingDir = getMain().getFileSystemManager().getSystemLocation().getAbsolutePath();
         final String containerFile = workingDir + File.separator + "system" + File.separator + "data" + File.separator
                 + "containers.ser";
         try {
@@ -175,7 +178,7 @@ public final class SecureStorage {
     private SecretKey retrieveKey() {
         SecretKey key = null;
         try {
-            String workingDir = FileSystemManager.FULL_WORKING_DIRECTORY;
+            String workingDir = getMain().getFileSystemManager().getSystemLocation().getAbsolutePath();
             final String keyStoreFile = workingDir + File.separator + "system" + File.separator + "izou.keystore";
             KeyStore keyStore = createKeyStore(keyStoreFile, "4b[X:+H4CS&avY<)");
 
@@ -197,7 +200,7 @@ public final class SecureStorage {
      * @param key the key to store
      */
     private void storeKey(SecretKey key) {
-        String workingDir = FileSystemManager.FULL_WORKING_DIRECTORY;
+        String workingDir = getMain().getFileSystemManager().getSystemLocation().getAbsolutePath();
         final String keyStoreFile = workingDir + File.separator + "system" + File.separator + "izou.keystore";
         KeyStore keyStore = createKeyStore(keyStoreFile, "4b[X:+H4CS&avY<)");
 

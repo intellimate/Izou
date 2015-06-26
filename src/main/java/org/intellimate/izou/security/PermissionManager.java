@@ -33,6 +33,7 @@ public final class PermissionManager extends IzouModule {
         standardCheck.add(new AudioPermissionModule(main, securityManager));
         standardCheck.add(new SocketPermissionModule(main, securityManager));
         filePermissionModule = new FilePermissionModule(main, securityManager);
+        standardCheck.add(new ReflectionPermissionModule(main, securityManager));
         rootPermission = new RootPermission(main, securityManager);
         standardCheck.add(filePermissionModule);
     }

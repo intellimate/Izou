@@ -65,11 +65,11 @@ public final class SecurityManager extends java.lang.SecurityManager {
         this.systemMail = systemMail;
         this.main = main;
 
-        secureStorage = SecureStorage.createSecureStorage();
+        secureStorage = SecureStorage.createSecureStorage(main);
 
         SecureAccess tempSecureAccess = null;
         try {
-            tempSecureAccess = SecureAccess.createSecureAccess(systemMail);
+            tempSecureAccess = SecureAccess.createSecureAccess(main, systemMail);
         } catch (IllegalAccessException e) {
             Logger logger = LogManager.getLogger(this.getClass());
             logger.fatal("Unable to create a SecureAccess object because Izou might be under attack. "
@@ -129,10 +129,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
      * @return true if should be checked, false if not
      */
     public boolean shouldCheck() {
-        if (checkForSecureAccess()) {
-            return false;
-        }
-        return true;
+        return !checkForSecureAccess();
     }
 
     /**
