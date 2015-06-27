@@ -4,7 +4,6 @@ import com.google.common.io.Files;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.exceptions.IzouPermissionException;
-import org.intellimate.izou.system.file.FileSystemManager;
 
 import java.io.File;
 import java.io.FilePermission;
@@ -46,11 +45,13 @@ public class FilePermissionModule extends PermissionModule {
         allowedReadFileTypesRegex = "(txt|properties|xml|class|json|zip|ds_store|mf|jar|idx|log|dylib|mp3|dylib|certs|"
                 + "so)";
         allowedWriteFileTypesRegex = "(txt|properties|xml|json|idx|log)";
-        String workingDir = FileSystemManager.FULL_WORKING_DIRECTORY;
-        allowedReadDirectories.add(workingDir);
         allowedReadDirectories.addAll(Arrays.asList(System.getProperty("java.ext.dirs").split(":")));
         allowedReadDirectories.add(System.getProperty("java.home"));
         allowedReadDirectories.add(System.getProperty("user.home"));
+        allowedReadDirectories.add(main.getFileSystemManager().getLogsLocation().getAbsolutePath());
+        allowedReadDirectories.add(main.getFileSystemManager().getPropertiesLocation().getAbsolutePath());
+        allowedReadDirectories.add(main.getFileSystemManager().getResourceLocation().getAbsolutePath());
+        allowedWriteDirectories.add(main.getFileSystemManager().getResourceLocation());
         allowedWriteDirectories.add(main.getFileSystemManager().getLogsLocation());
         allowedWriteDirectories.add(main.getFileSystemManager().getPropertiesLocation());
         allowedWriteDirectories.add(main.getFileSystemManager().getResourceLocation());
@@ -178,7 +179,7 @@ public class FilePermissionModule extends PermissionModule {
     private void isForbidden(File request, AddOnModel addOnModel) {
         if (forbiddenWriteDirectories.stream()
                 .anyMatch(compare -> request.toPath().startsWith(compare.toPath()))) {
-            throw new IzouPermissionException("file: " + request.toString() + " is forbidden. Attempt made by: "
+            throw getException("file: " + request.toString() + " is forbidden. Attempt made by: "
                     + addOnModel.getID());
         }
     }
