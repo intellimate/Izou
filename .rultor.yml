@@ -16,7 +16,8 @@ release:
       - LeanderK
       - jundl77
   script: |-
-    VERSION="tag" | sed 's|[`']||g'
+    VERSION="tag" | sed 's|[`]||g'
+    echo $VERSION
     mvn versions:set "-DnewVersion=${VERSION}"
     git commit -am "${VERSION}"
     mvn -Dmaven.test.skip=true clean deploy --settings /home/r/settings.xml
