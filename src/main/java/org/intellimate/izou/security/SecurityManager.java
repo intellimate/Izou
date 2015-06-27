@@ -205,8 +205,6 @@ public final class SecurityManager extends java.lang.SecurityManager {
     public void checkExit(int status) {
         if (!exitPermission && !checkForSecureAccess()) {
             throw getException("exit");
-        } else {
-            secureAccess.exitIzou();
         }
     }
 

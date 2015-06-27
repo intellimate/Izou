@@ -128,8 +128,8 @@ public final class SecureStorage extends IzouModule {
      * Saves the containers to ./system/data/containers.ser
      */
     private void saveContainers() {
-        final String containerFile = getMain().getFileSystemManager().getSystemDataLocation() + File.separator
-                + "containers.ser";
+        String workingDir = getMain().getFileSystemManager().getSystemDataLocation().getAbsolutePath();
+        final String containerFile = workingDir + File.separator + "containers.ser";
         try {
             FileOutputStream fileOut = new FileOutputStream(containerFile);
             ObjectOutputStream out = new ObjectOutputStream(fileOut);
@@ -148,7 +148,8 @@ public final class SecureStorage extends IzouModule {
      */
     private HashMap<SecretKey, SecureContainer> retrieveContainers() {
         HashMap<SecretKey, SecureContainer> containers = null;
-        final String containerFile = getMain().getFileSystemManager().getSystemDataLocation() + File.separator
+        String workingDir = getMain().getFileSystemManager().getSystemDataLocation().getAbsolutePath();
+        final String containerFile = workingDir + File.separator
                 + "containers.ser";
         try {
             FileInputStream fileIn = new FileInputStream(containerFile);
@@ -176,7 +177,8 @@ public final class SecureStorage extends IzouModule {
     private SecretKey retrieveKey() {
         SecretKey key = null;
         try {
-            final String keyStoreFile = getMain().getFileSystemManager().getSystemLocation() + File.separator + "izou.keystore";
+            String workingDir = getMain().getFileSystemManager().getSystemLocation().getAbsolutePath();
+            final String keyStoreFile = workingDir + File.separator + "izou.keystore";
             KeyStore keyStore = createKeyStore(keyStoreFile, "4b[X:+H4CS&avY<)");
 
             KeyStore.PasswordProtection keyPassword = new KeyStore.PasswordProtection("Ev45j>eP}QTR?K9_".toCharArray());

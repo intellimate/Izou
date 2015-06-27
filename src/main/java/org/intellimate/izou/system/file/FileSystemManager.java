@@ -46,8 +46,8 @@ public class FileSystemManager extends IzouModule {
             resourceLocation = new File(izouParentLocation.toString() + File.separator + "resources").getCanonicalFile();
             propertiesLocation = new File(izouParentLocation.toString() + File.separator + "properties").getCanonicalFile();
             logsLocation = new File(izouParentLocation.toString() + File.separator + "logs").getCanonicalFile();
-            systemLocation = new File(izouParentLocation +  File.separator + "system").getCanonicalFile();
-            systemDataLocation = new File(izouParentLocation +  File.separator + "system"
+            systemLocation = new File(izouParentLocation.toString() +  File.separator + "system").getCanonicalFile();
+            systemDataLocation = new File(izouParentLocation.toString() +  File.separator + "system"
                     + File.separator + "data").getCanonicalFile();
         } catch (URISyntaxException | IOException e) {
             error("unable to create the Izou-file system");
