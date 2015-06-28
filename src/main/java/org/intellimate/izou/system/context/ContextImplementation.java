@@ -143,7 +143,7 @@ public class ContextImplementation implements Context {
      */
     @Override
     public System getSystem() {
-        return null;
+        return system;
     }
 
     /**
