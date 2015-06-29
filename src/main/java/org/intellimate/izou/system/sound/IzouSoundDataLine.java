@@ -13,6 +13,7 @@ import javax.sound.sampled.DataLine;
  */
 public class IzouSoundDataLine extends IzouSoundLineBaseClass implements DataLine {
     private final DataLine dataLine;
+    boolean stop = false;
 
     public IzouSoundDataLine(DataLine dataLine, Main main, boolean isPermanent, AddOnModel addOnModel) {
         super(dataLine, main, isPermanent, addOnModel);
@@ -53,7 +54,11 @@ public class IzouSoundDataLine extends IzouSoundLineBaseClass implements DataLin
      */
     @Override
     public void flush() {
-        dataLine.flush();
+        if (notDisabled) {
+            dataLine.flush();
+        } else {
+            //TODO: interrupt in sourceDataLine
+        }
     }
 
     /**
@@ -69,7 +74,10 @@ public class IzouSoundDataLine extends IzouSoundLineBaseClass implements DataLin
      */
     @Override
     public void start() {
-        dataLine.start();
+        if (notDisabled) {
+            dataLine.start();
+        }
+        stop = false;
     }
 
     /**
@@ -89,7 +97,10 @@ public class IzouSoundDataLine extends IzouSoundLineBaseClass implements DataLin
      */
     @Override
     public void stop() {
-        dataLine.stop();
+        if (notDisabled) {
+            dataLine.stop();
+        }
+        stop = true;
     }
 
     /**
@@ -104,7 +115,10 @@ public class IzouSoundDataLine extends IzouSoundLineBaseClass implements DataLin
      */
     @Override
     public boolean isRunning() {
-        return dataLine.isRunning();
+        if (notDisabled) {
+            return dataLine.isRunning();
+        }
+        return stop;
     }
 
     /**

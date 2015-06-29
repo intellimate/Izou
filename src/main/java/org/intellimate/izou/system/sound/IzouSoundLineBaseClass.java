@@ -366,31 +366,40 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
             internEnd();
             line = null;
         } else {
-            line = internRestore();
-            if (gainSupported) {
-                try {
-                    FloatControl control = (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);
-                    control.setValue(gain);
-                } catch (IllegalArgumentException e) {
-                    log.error(e);
-                }
+            line = internRestoreGet();
+            internRestoreLineState();
+        }
+    }
+
+    protected void internEnd() {
+        line.close();
+        line = null;
+    }
+
+    protected void internRestoreLineState() {
+        if (gainSupported) {
+            try {
+                FloatControl control = (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);
+                control.setValue(gain);
+            } catch (IllegalArgumentException e) {
+                log.error(e);
             }
-            if (muteSupported) {
-                try {
-                    BooleanControl control = (BooleanControl) line.getControl(BooleanControl.Type.MUTE);
-                    control.setValue(isMutedFromUser);
-                } catch (IllegalArgumentException e) {
-                    log.error(e);
-                }
+        }
+        if (muteSupported) {
+            try {
+                BooleanControl control = (BooleanControl) line.getControl(BooleanControl.Type.MUTE);
+                control.setValue(isMutedFromUser);
+            } catch (IllegalArgumentException e) {
+                log.error(e);
             }
-            if (isOpen) {
-                try {
-                    internRestoreOpen();
-                } catch (LineUnavailableException e) {
-                    log.error(e);
-                    ended = true;
-                    line = null;
-                }
+        }
+        if (isOpen) {
+            try {
+                internRestoreOpen();
+            } catch (LineUnavailableException e) {
+                log.error(e);
+                ended = true;
+                line = null;
             }
         }
     }
@@ -399,12 +408,7 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
         line.open();
     }
 
-    protected void internEnd() {
-        line.close();
-        line = null;
-    }
-
-    protected Line internRestore() {
+    protected Line internRestoreGet() {
         try {
             return AudioSystem.getLine(info);
         } catch (LineUnavailableException e) {
