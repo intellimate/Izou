@@ -116,11 +116,11 @@ public final class SecurityManager extends java.lang.SecurityManager {
      * @param specific the specific check
      */
     private <T> void check(T t, BiConsumer<T, AddOnModel> specific) {
-        if (!secureAccess.doEvelevated(this::shouldCheck)) {
+        if (!secureAccess.doElevated(this::shouldCheck)) {
             return;
         }
 
-        AddOnModel addOn = secureAccess.doEvelevated(this::getOrThrowAddOnModelForClassLoader);
+        AddOnModel addOn = secureAccess.doElevated(this::getOrThrowAddOnModelForClassLoader);
         if (addOn == null) return;
         specific.accept(t, addOn);
     }
@@ -233,7 +233,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
     public void checkRead(String file) {
         if (file.endsWith("/org/intellimate/izou/security/SecurityModule.class"))
             return;
-        if (!secureAccess.doEvelevated(this::shouldCheck)) {
+        if (!secureAccess.doElevated(this::shouldCheck)) {
             return;
         }
         permissionManager.getFilePermissionModule().fileReadCheck(file);
