@@ -7,12 +7,18 @@ import javax.sound.sampled.*;
 import java.io.IOException;
 
 /**
- * delegates the Clip-Methods
+ * delegates the Clip-Methods.
+ * This class is not implemented correctly and should not be used in its current state.
  * @author LeanderK
  * @version 1.0
  */
 public class IzouSoundLineClip extends IzouSoundDataLine implements Clip {
     private final Clip clip;
+    //TODO: real implementation:
+    //after muting: getLongFramePosition()%getFrameLength() to get the position
+    //getLongFramePosition()/getFrameLength() to get the completed loops
+    //timestamp
+    //reopen
 
     public IzouSoundLineClip(Clip clip, Main main, boolean isPermanent, AddOnModel addOnModel) {
         super(clip, main, isPermanent, addOnModel);
@@ -55,8 +61,14 @@ public class IzouSoundLineClip extends IzouSoundDataLine implements Clip {
      */
     @Override
     public void open(AudioFormat format, byte[] data, int offset, int bufferSize) throws LineUnavailableException {
-        opening();
-        clip.open(format, data, offset, bufferSize);
+        if (!ended) {
+            if (isOpen) {
+                opening();
+            }
+            if (notDisabled)
+                clip.open(format, data, offset, bufferSize);
+            isOpen = true;
+        }
     }
 
     /**
@@ -93,8 +105,14 @@ public class IzouSoundLineClip extends IzouSoundDataLine implements Clip {
      */
     @Override
     public void open(AudioInputStream stream) throws LineUnavailableException, IOException {
-        opening();
-        clip.open(stream);
+        if (!ended) {
+            if (isOpen) {
+                opening();
+            }
+            if (notDisabled)
+                clip.open(stream);
+            isOpen = true;
+        }
     }
 
     /**

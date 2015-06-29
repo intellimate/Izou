@@ -4,6 +4,7 @@ import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.main.Main;
 
 import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
@@ -14,6 +15,8 @@ import javax.sound.sampled.SourceDataLine;
  */
 public class IzouSoundSourceDataLine extends IzouSoundDataLine implements SourceDataLine {
     private final SourceDataLine sourceDataLine;
+    private AudioFormat audioFormat = null;
+    private int bufferSize = -1;
 
     public IzouSoundSourceDataLine(SourceDataLine dataLine, Main main, boolean isPermanent, AddOnModel addOnModel) {
         super(dataLine, main, isPermanent, addOnModel);
@@ -58,8 +61,16 @@ public class IzouSoundSourceDataLine extends IzouSoundDataLine implements Source
      */
     @Override
     public void open(AudioFormat format, int bufferSize) throws LineUnavailableException {
-        opening();
-        sourceDataLine.open(format, bufferSize);
+        if (!ended) {
+            if (!isOpen) {
+                opening();
+                this.audioFormat = format;
+                this.bufferSize = bufferSize;
+            }
+            if (notDisabled)
+                sourceDataLine.open(format, bufferSize);
+            isOpen = true;
+        }
     }
 
     /**
@@ -96,8 +107,15 @@ public class IzouSoundSourceDataLine extends IzouSoundDataLine implements Source
      */
     @Override
     public void open(AudioFormat format) throws LineUnavailableException {
-        opening();
-        sourceDataLine.open(format);
+        if (!ended) {
+            if (!isOpen) {
+                opening();
+                this.audioFormat = format;
+            }
+            if (notDisabled)
+                sourceDataLine.open(format, bufferSize);
+            isOpen = true;
+        }
     }
 
     /**
@@ -142,15 +160,53 @@ public class IzouSoundSourceDataLine extends IzouSoundDataLine implements Source
      */
     @Override
     public int write(byte[] b, int off, int len) {
-        if (isMutable) {
-            return sourceDataLine.write(b, off, len);
-        } else {
-            if (isMutedFromSystem) {
-                byte[] newArr = new byte[b.length];
-                return sourceDataLine.write(newArr, off, len);
-            } else {
+        if (notDisabled) {
+            if (muteSupported) {
                 return sourceDataLine.write(b, off, len);
+            } else {
+                if (isMutedFromSystem || isMutedFromUser) {
+                    byte[] newArr = new byte[b.length];
+                    return sourceDataLine.write(newArr, off, len);
+                } else {
+                    return sourceDataLine.write(b, off, len);
+                }
             }
+        } else {
+            if (isOpen && audioFormat != null) {
+                int numChannels = audioFormat.getChannels();
+                if (numChannels == AudioSystem.NOT_SPECIFIED)
+                    numChannels = 2;
+                int numBytesPerSample = audioFormat.getSampleSizeInBits();
+                if (numBytesPerSample == AudioSystem.NOT_SPECIFIED)
+                    numBytesPerSample = 2;
+                float sampleRate = audioFormat.getSampleRate();
+                if (sampleRate == AudioSystem.NOT_SPECIFIED)
+                    sampleRate = 1600;
+
+                int numSamples = (len / numChannels) / numBytesPerSample;
+
+                long millis = (long) ((numSamples * 1000L) / sampleRate);
+                try {
+                    Thread.sleep(millis);
+                } catch (InterruptedException ignored) {
+                    log.debug("interrupted");
+                }
+                return len;
+            }
+        }
+        return len;
+    }
+
+    @Override
+    protected void internRestoreOpen() throws LineUnavailableException {
+        if (audioFormat != null) {
+            if (bufferSize != -1) {
+                sourceDataLine.open(audioFormat, bufferSize);
+            } else {
+                sourceDataLine.open(audioFormat);
+            }
+        } else {
+            super.internRestoreOpen();
         }
     }
 }

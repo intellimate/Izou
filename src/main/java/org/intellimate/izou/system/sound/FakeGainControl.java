@@ -20,6 +20,15 @@ class FakeGainControl extends FloatControl {
         this.floatControl = floatControl;
     }
 
+    protected FakeGainControl(IzouSoundLineBaseClass izouSoundLineBaseClass, ParameterHolder parameterHolder) {
+        super(parameterHolder.type, parameterHolder.minimum, parameterHolder.maximum,
+                parameterHolder.precision, parameterHolder.updatePeriod, parameterHolder.value,
+                parameterHolder.units, parameterHolder.minLabel, parameterHolder.midLabel,
+                parameterHolder.maxLabel);
+        this.izouSoundLineBaseClass = izouSoundLineBaseClass;
+        this.floatControl = null;
+    }
+
 
     /**
      * Sets the current value for the control.  The default implementation
@@ -179,5 +188,31 @@ class FakeGainControl extends FloatControl {
     @Override
     public Control.Type getType() {
         return floatControl.getType();
+    }
+
+    protected static class ParameterHolder {
+        final Type type;
+        final float minimum;
+        final float maximum;
+        final float precision;
+        final int updatePeriod;
+        final float value;
+        final String units;
+        final String minLabel;
+        final String midLabel;
+        final String maxLabel;
+
+        public ParameterHolder(FloatControl floatControl) {
+            type = (Type) floatControl.getType();
+            minimum = floatControl.getMinimum();
+            maximum = floatControl.getMaximum();
+            precision = floatControl.getPrecision();
+            updatePeriod = floatControl.getUpdatePeriod();
+            value = floatControl.getValue();
+            units = floatControl.getUnits();
+            minLabel = floatControl.getMinLabel();
+            midLabel = floatControl.getMidLabel();
+            maxLabel = floatControl.getMaxLabel();
+        }
     }
 }

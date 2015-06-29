@@ -14,7 +14,6 @@ import javax.sound.sampled.Clip;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.Line;
 import javax.sound.sampled.SourceDataLine;
-import java.util.Arrays;
 
 /**
  * @author LeanderK
@@ -63,8 +62,11 @@ public class MixerAspect {
 
     @Around("execution(* javax.sound.sampled.AudioSystem.getLine(javax.sound.sampled.Line.Info))")
     public Object getLineAdvice(ProceedingJoinPoint pjp) throws Throwable {
-        System.out.println("request for line " + Arrays.toString(pjp.getArgs()));
         Line line = (Line) pjp.proceed();
-        return MixerAspect.getAndRegisterLine(line);
+        if (line instanceof IzouSoundLineBaseClass) {
+            return line;
+        } else {
+            return MixerAspect.getAndRegisterLine(line);
+        }
     }
 }

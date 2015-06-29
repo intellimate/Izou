@@ -20,18 +20,22 @@ import java.util.function.Consumer;
 public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoCloseable, IzouSoundLine {
     //information about the line
     protected boolean notDisabled;
-    protected Line line;
+    protected Line line = null;
     protected final Line.Info info;
     protected float gain;
     protected boolean isMutedFromSystem = false;
     protected boolean isMutedFromUser = false;
+    protected final boolean gainSupported;
+    protected final FakeGainControl.ParameterHolder gainParameterHolder;
+    protected final boolean muteSupported;
+    protected boolean ended = false;
+    protected boolean isOpen = false;
 
 
     private Future<?> closingThread;
     private boolean isPermanent;
     protected final SoundManager soundManager;
     private final AddOnModel addOnModel;
-    protected final boolean isMutable;
     private Consumer<Void> closeCallback = null;
     private boolean muteIfNonPermanent = true;
     private Consumer<Void> muteCallback = null;
@@ -39,7 +43,7 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
 
     public IzouSoundLineBaseClass(Line line, Main main, boolean isPermanent, AddOnModel addOnModel) {
         super(main, false);
-        this.line = line;
+        //this.line = line;
         this.info = line.getLineInfo();
         this.isPermanent = isPermanent;
         this.addOnModel = addOnModel;
@@ -49,14 +53,21 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
             closingThread = null;
         }
         soundManager = null;
-        boolean mutable;
-        try {
-            line.getControl(BooleanControl.Type.MUTE);
-            mutable = true;
-        } catch (IllegalArgumentException e) {
-            mutable = false;
+        boolean gainSupport = false;
+        boolean muteSupport = false;
+        FakeGainControl.ParameterHolder parameterHolder = null;
+        Control[] controls = line.getControls();
+        for (Control control : controls) {
+            if (control.getType().toString().equals(BooleanControl.Type.MUTE.toString())) {
+                muteSupport = true;
+            } else if (control.getType().toString().equals(FloatControl.Type.MASTER_GAIN.toString())) {
+                gainSupport = true;
+                parameterHolder = new FakeGainControl.ParameterHolder((FloatControl) control);
+            }
         }
-        isMutable = mutable;
+        this.muteSupported = muteSupport;
+        this.gainSupported = gainSupport;
+        this.gainParameterHolder = parameterHolder;
     }
 
     private Future<?> getClosingThread(Line line, Main main, AddOnModel addOnModel) {
@@ -81,7 +92,7 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
      */
     @Override
     public Info getLineInfo() {
-        return line.getLineInfo();
+        return info;
     }
 
     /**
@@ -126,9 +137,14 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
      */
     @Override
     public void open() throws LineUnavailableException {
-        if (!line.isOpen())
-        opening();
-        line.open();
+        if (!ended) {
+            if (!isOpen) {
+                opening();
+            }
+            if (notDisabled)
+                line.open();
+            isOpen = true;
+        }
     }
 
     protected void opening() {
@@ -150,9 +166,16 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
      */
     @Override
     public void close() {
-        System.out.println("closing for " + addOnModel);
-        closeCallback.accept(null);
-        line.close();
+        if (!ended) {
+            if (isOpen) {
+                System.out.println("closing for " + addOnModel);
+                closeCallback.accept(null);
+                if (notDisabled)
+                    line.close();
+                isOpen = false;
+                ended = true;
+            }
+        }
     }
 
     /**
@@ -166,7 +189,7 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
      */
     @Override
     public boolean isOpen() {
-        return line.isOpen();
+        return isOpen;
     }
 
     /**
@@ -178,20 +201,31 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
      */
     @Override
     public Control[] getControls() {
-        Control[] controls = line.getControls();
-        List<Control> fakeControls = new ArrayList<>(2);
-        for (int i = 0; i < controls.length; i++) {
-            Control control = controls[i];
-            if (control.getType().toString().equals(BooleanControl.Type.MUTE.toString())) {
+        this.line = null;
+        if (notDisabled) {
+            List<Control> fakeControls = new ArrayList<>(2);
+            if (muteSupported) {
                 fakeControls.add(new FakeMuteControl(this));
-            } else if (control.getType().toString().equals(FloatControl.Type.MASTER_GAIN.toString())) {
+            }
+            if (gainSupported) {
+                Control control = line.getControl(FloatControl.Type.MASTER_GAIN);
                 fakeControls.add(new FakeGainControl(this, (FloatControl) control));
             }
+            return fakeControls.toArray(new Control[fakeControls.size()]);
+        } else {
+            List<Control> fakeControls = new ArrayList<>(2);
+            if (muteSupported) {
+                fakeControls.add(new FakeMuteControl(this));
+            }
+            if (gainSupported) {
+                fakeControls.add(new FakeGainControl(this, gainParameterHolder));
+            }
+            return fakeControls.toArray(new Control[fakeControls.size()]);
         }
-        return fakeControls.toArray(new Control[fakeControls.size()]);
     }
 
     /**
+     * CURRENTLY NOT IMPLEMENTED!<br>
      * Indicates whether the line supports a control of the specified type. Some controls may only be available when the line is open.
      * @param control the type of the control for which support is queried
      * @return true if at least one control of the specified type is supported, otherwise false.
@@ -215,14 +249,18 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
         if (type.toString().equals(BooleanControl.Type.MUTE.toString())) {
             return new FakeMuteControl(this);
         } else if (type.toString().equals(FloatControl.Type.MASTER_GAIN.toString())) {
-            Control control = line.getControl(type);
-            return new FakeGainControl(this, (FloatControl) control);
-        } else {
-            return line.getControl(type);
+            if (notDisabled) {
+                Control control = line.getControl(type);
+                return new FakeGainControl(this, (FloatControl) control);
+            } else {
+                return new FakeGainControl(this, gainParameterHolder);
+            }
         }
+        throw new IllegalArgumentException("control of the type " + type + " is not supported");
     }
 
     /**
+     * CURRENTLY NOT IMPLEMENTED!<br>
      * follows no predictable behaviour, can be seen as not implemented.
      * @param listener the listener
      */
@@ -232,6 +270,7 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
     }
 
     /**
+     * CURRENTLY NOT IMPLEMENTED!<br>
      * follows no predictable behaviour, can be seen as not implemented.
      * @param listener the listener
      */
@@ -320,17 +359,58 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
     }
 
     void setMutedFromSystem(boolean isMuted) {
-        if (isMutable) {
-            BooleanControl bc = (BooleanControl) line.getControl(BooleanControl.Type.MUTE);
-            if (bc != null) {
-                if (isMuted) {
-                    bc.setValue(true); // true to mute the line, false to unmute
-                } else {
-                    bc.setValue(isMutedFromUser); // true to mute the line, false to unmute
+        this.isMutedFromSystem = isMuted;
+        if (ended)
+            return;
+        if (isMuted) {
+            internEnd();
+            line = null;
+        } else {
+            line = internRestore();
+            if (gainSupported) {
+                try {
+                    FloatControl control = (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);
+                    control.setValue(gain);
+                } catch (IllegalArgumentException e) {
+                    log.error(e);
+                }
+            }
+            if (muteSupported) {
+                try {
+                    BooleanControl control = (BooleanControl) line.getControl(BooleanControl.Type.MUTE);
+                    control.setValue(isMutedFromUser);
+                } catch (IllegalArgumentException e) {
+                    log.error(e);
+                }
+            }
+            if (isOpen) {
+                try {
+                    internRestoreOpen();
+                } catch (LineUnavailableException e) {
+                    log.error(e);
+                    ended = true;
+                    line = null;
                 }
             }
         }
-        this.isMutedFromSystem = isMuted;
+    }
+
+    protected void internRestoreOpen() throws LineUnavailableException {
+        line.open();
+    }
+
+    protected void internEnd() {
+        line.close();
+        line = null;
+    }
+
+    protected Line internRestore() {
+        try {
+            return AudioSystem.getLine(info);
+        } catch (LineUnavailableException e) {
+            ended = true;
+            return null;
+        }
     }
 
     void registerCloseCallback(Consumer<Void> consumer) {

@@ -18,7 +18,11 @@ class FakeMuteControl extends BooleanControl {
     protected FakeMuteControl(IzouSoundLineBaseClass izouSoundLineBaseClass) {
         super(Type.MUTE, izouSoundLineBaseClass.isMutedFromUser);
         this.izouSoundLineBaseClass = izouSoundLineBaseClass;
-        this.control = (BooleanControl) izouSoundLineBaseClass.line.getControl(Type.MUTE);
+        if (izouSoundLineBaseClass.line != null) {
+            this.control = (BooleanControl) izouSoundLineBaseClass.line.getControl(Type.MUTE);
+        } else {
+            control = null;
+        }
     }
 
     /**
@@ -33,7 +37,8 @@ class FakeMuteControl extends BooleanControl {
     public void setValue(boolean value) {
         izouSoundLineBaseClass.isMutedFromUser = value;
         if (izouSoundLineBaseClass.isMutedFromSystem && !izouSoundLineBaseClass.notDisabled) {
-            control.setValue(izouSoundLineBaseClass.isMutedFromUser);
+            if (control != null)
+                control.setValue(izouSoundLineBaseClass.isMutedFromUser);
         }
     }
 

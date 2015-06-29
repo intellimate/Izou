@@ -8,6 +8,7 @@ import java.io.IOException;
 
 /**
  * the delegation to Clip and SourceDataLine.
+ * This class is not implemented correctly and should not be used in its current state.
  * @author LeanderK
  * @version 1.0
  */
@@ -154,7 +155,7 @@ public class IzouSoundLineClipAndSDLine extends IzouSoundDataLine implements Cli
      */
     @Override
     public int write(byte[] b, int off, int len) {
-        if (isMutable) {
+        if (muteSupported) {
             return sourceDataLine.write(b, off, len);
         } else {
             if (isMutedFromSystem) {
