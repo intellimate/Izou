@@ -107,7 +107,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
                         .orElseThrow(() -> new IzouPermissionException("No AddOn found for ClassLoader: " + classLoader));
             }
         }
-        return null;
+        throw new IzouPermissionException("No AddOn found for ClassLoader: " + classes[0].getClassLoader());
     }
 
     /**
@@ -116,13 +116,16 @@ public final class SecurityManager extends java.lang.SecurityManager {
      * @param specific the specific check
      */
     private <T> void check(T t, BiConsumer<T, AddOnModel> specific) {
-        if (!secureAccess.doEvelevated(this::shouldCheck)) {
+        if (!shouldCheck()) {
             return;
         }
 
-        AddOnModel addOn = secureAccess.doEvelevated(this::getOrThrowAddOnModelForClassLoader);
-        if (addOn == null) return;
-        specific.accept(t, addOn);
+        try {
+            AddOnModel addOn = secureAccess.doEvelevated(this::getOrThrowAddOnModelForClassLoader);
+            secureAccess.doElevated(() -> specific.accept(t, addOn));
+        } catch (Exception e) {
+            //not an addon
+        }
     }
     /**
      * performs some basic checks to determine whether to check the permission
@@ -233,10 +236,15 @@ public final class SecurityManager extends java.lang.SecurityManager {
     public void checkRead(String file) {
         if (file.endsWith("/org/intellimate/izou/security/SecurityModule.class"))
             return;
-        if (!secureAccess.doEvelevated(this::shouldCheck)) {
+        if (!shouldCheck()) {
             return;
         }
-        permissionManager.getFilePermissionModule().fileReadCheck(file);
+        try {
+            AddOnModel addon = getOrThrowAddOnModelForClassLoader();
+            permissionManager.getFilePermissionModule().fileReadCheck(file);
+        } catch (IzouPermissionException e) {
+            //not an addon
+        }
     }
 
     @Override
