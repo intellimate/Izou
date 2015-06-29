@@ -1,4 +1,3 @@
-org.intellimate.izou
 org.intellimate.izou.activator
 org.intellimate.izou.addon
 org.intellimate.izou.events
@@ -18,3 +17,4 @@ org.intellimate.izou.system.logger
 org.intellimate.izou.system.sound
 org.intellimate.izou.system.sound.replaced
 org.intellimate.izou.threadpool
+org.intellimate.izou.util
