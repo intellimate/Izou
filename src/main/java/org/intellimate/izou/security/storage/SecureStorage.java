@@ -3,7 +3,7 @@ package org.intellimate.izou.security.storage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.intellimate.izou.main.Main;
-import org.intellimate.izou.security.SecurityModule;
+import org.intellimate.izou.security.SecurityFunctions;
 import org.intellimate.izou.util.IzouModule;
 import ro.fortsoft.pf4j.PluginDescriptor;
 
@@ -63,8 +63,8 @@ public final class SecureStorage extends IzouModule {
 
         SecretKey key = retrieveKey();
         if (key == null) {
-            SecurityModule securityModule = new SecurityModule();
-            key = securityModule.generateKey();
+            SecurityFunctions securityFunctions = new SecurityFunctions();
+            key = securityFunctions.generateKey();
 
             if (key != null) {
                 storeKey(key);
@@ -91,7 +91,7 @@ public final class SecureStorage extends IzouModule {
         HashMap<byte[], byte[]> cryptData = container.getCryptData();
 
         SecretKey secretKey = retrieveKey();
-        SecurityModule module = new SecurityModule();
+        SecurityFunctions module = new SecurityFunctions();
         for (byte[] key : cryptData.keySet()) {
             clearTextData.put(module.decryptAES(key, secretKey), module.decryptAES(cryptData.get(key), secretKey));
             cryptData.remove(key);
@@ -114,7 +114,7 @@ public final class SecureStorage extends IzouModule {
         HashMap<String, String> clearTextData = container.getClearTextData();
 
         SecretKey secretKey = retrieveKey();
-        SecurityModule module = new SecurityModule();
+        SecurityFunctions module = new SecurityFunctions();
         for (byte[] key : cryptData.keySet()) {
             clearTextData.put(module.decryptAES(key, secretKey), module.decryptAES(cryptData.get(key), secretKey));
             cryptData.remove(key);

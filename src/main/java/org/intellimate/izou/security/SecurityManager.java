@@ -144,7 +144,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
         Class[] classContext = getClassContext();
         for (Class clazz : classContext) {
             if (clazz.equals(SecureAccess.class) || clazz.equals(SecurityBreachHandler.class)
-                    || clazz.equals(SecurityModule.class) || clazz.equals(SecureStorage.class)) {
+                    || clazz.equals(SecurityFunctions.class) || clazz.equals(SecureStorage.class)) {
                 return true;
             }
         }

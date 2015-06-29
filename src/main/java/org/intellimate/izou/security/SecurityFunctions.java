@@ -13,10 +13,10 @@ import java.security.NoSuchProviderException;
 import java.security.Security;
 
 /**
- * SecurityModule implements basic cryptographic functions like hash functions or encryption and decryption
+ * SecurityFunction implements basic cryptographic functions like hash functions or encryption and decryption
  * functions.
  */
-public final class SecurityModule {
+public final class SecurityFunctions {
     private final Logger logger = LogManager.getLogger(this.getClass());
 
     /**

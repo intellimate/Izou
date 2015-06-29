@@ -98,7 +98,7 @@ final class SecureAccess extends IzouModule {
         return new File(dir).exists();
     }
 
-    <T> T doEvelevated(Supplier<T> supplier) {
+    <T> T doElevated(Supplier<T> supplier) {
         return supplier.get();
     }
 

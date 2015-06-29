@@ -2,7 +2,7 @@ package org.intellimate.izou.addon;
 
 import org.apache.logging.log4j.Level;
 import org.intellimate.izou.main.Main;
-import org.intellimate.izou.security.SecurityModule;
+import org.intellimate.izou.security.SecurityFunctions;
 import org.intellimate.izou.system.Context;
 import org.intellimate.izou.system.context.ContextImplementation;
 import org.intellimate.izou.util.AddonThreadPoolUser;
@@ -223,7 +223,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
             SecretKey secretKey = addOnKeys.get(descriptor.getPluginId());
 
             if (secretKey == null) {
-                SecurityModule module = new SecurityModule();
+                SecurityFunctions module = new SecurityFunctions();
                 secretKey = module.generateKey();
                 addOnKeys.put(descriptor.getPluginId(), secretKey);
                 changed = true;
