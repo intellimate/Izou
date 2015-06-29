@@ -121,7 +121,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
         }
 
         try {
-            AddOnModel addOn = secureAccess.doEvelevated(this::getOrThrowAddOnModelForClassLoader);
+            AddOnModel addOn = secureAccess.doElevated(this::getOrThrowAddOnModelForClassLoader);
             secureAccess.doElevated(() -> specific.accept(t, addOn));
         } catch (Exception e) {
             //not an addon
