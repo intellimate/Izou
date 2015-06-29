@@ -1,10 +1,10 @@
 package org.intellimate.izou.security;
 
-import org.intellimate.izou.util.IdentifiableSet;
-import org.intellimate.izou.util.IzouModule;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.exceptions.IzouPermissionException;
+import org.intellimate.izou.util.IdentifiableSet;
+import org.intellimate.izou.util.IzouModule;
 import ro.fortsoft.pf4j.PluginDescriptor;
 import ro.fortsoft.pf4j.PluginWrapper;
 
@@ -95,12 +95,13 @@ public abstract class PermissionModule extends IzouModule {
      * @param addOn the addon to check
      * @param checkPermission returns true if eligible for registering
      */
-    protected <X extends IzouPermissionException> void registerOrThrow(AddOnModel addOn, Supplier<X> exceptionSupplier, Function<PluginDescriptor, Boolean> checkPermission) {
+    protected <X extends IzouPermissionException> void registerOrThrow(
+            AddOnModel addOn, Supplier<X> exceptionSupplier, Function<PluginDescriptor, Boolean> checkPermission) {
         getMain().getAddOnManager().getPluginWrapper(addOn)
                 .map(PluginWrapper::getDescriptor)
                 .map(checkPermission)
-                .ifPresent(allowedToPlay -> {
-                    if (allowedToPlay) {
+                .ifPresent(allowedToRun -> {
+                    if (allowedToRun) {
                         registerAddOn(addOn);
                     } else {
                         throw exceptionSupplier.get();
