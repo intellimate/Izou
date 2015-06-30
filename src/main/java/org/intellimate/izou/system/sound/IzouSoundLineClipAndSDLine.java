@@ -12,102 +12,22 @@ import java.io.IOException;
  * @author LeanderK
  * @version 1.0
  */
-public class IzouSoundLineClipAndSDLine extends IzouSoundDataLine implements Clip, SourceDataLine {
-    private final Clip clip;
-    private final SourceDataLine sourceDataLine;
+public class IzouSoundLineClipAndSDLine extends IzouSoundSourceDataLine implements Clip {
+    private Clip clip;
+    private SourceDataLine sourceDataLine;
+    private AudioFormat audioFormat;
+    private boolean clipOpen = false;
 
     public IzouSoundLineClipAndSDLine(Clip clip, SourceDataLine sourceDataLine, Main main, boolean isPermanent, AddOnModel addOnModel) {
-        super(clip, main, isPermanent, addOnModel);
+        super(sourceDataLine, main, isPermanent, addOnModel);
         this.clip = clip;
         this.sourceDataLine = sourceDataLine;
     }
 
-    /**
-     * Opens the line with the specified format and suggested buffer size,
-     * causing the line to acquire any required
-     * system resources and become operational.
-     * <p>
-     * The buffer size is specified in bytes, but must represent an integral
-     * number of sample frames.  Invoking this method with a requested buffer
-     * size that does not meet this requirement may result in an
-     * IllegalArgumentException.  The actual buffer size for the open line may
-     * differ from the requested buffer size.  The value actually set may be
-     * queried by subsequently calling <code>{@link DataLine#getBufferSize}</code>.
-     * <p>
-     * If this operation succeeds, the line is marked as open, and an
-     * <code>{@link LineEvent.Type#OPEN OPEN}</code> event is dispatched to the
-     * line's listeners.
-     * <p>
-     * Invoking this method on a line which is already open is illegal
-     * and may result in an <code>IllegalStateException</code>.
-     * <p>
-     * Note that some lines, once closed, cannot be reopened.  Attempts
-     * to reopen such a line will always result in a
-     * <code>LineUnavailableException</code>.
-     *
-     * @param format the desired audio format
-     * @param bufferSize the desired buffer size
-     * @throws LineUnavailableException if the line cannot be
-     * opened due to resource restrictions
-     * @throws IllegalArgumentException if the buffer size does not represent
-     * an integral number of sample frames,
-     * or if <code>format</code> is not fully specified or invalid
-     * @throws IllegalStateException if the line is already open
-     * @throws SecurityException if the line cannot be
-     * opened due to security restrictions
-     *
-     * @see #open(AudioFormat)
-     * @see Line#open
-     * @see Line#close
-     * @see Line#isOpen
-     * @see LineEvent
-     */
-    @Override
-    public void open(AudioFormat format, int bufferSize) throws LineUnavailableException {
-        opening();
-        sourceDataLine.open(format, bufferSize);
-    }
-
-    /**
-     * Opens the line with the specified format, causing the line to acquire any
-     * required system resources and become operational.
-     *
-     * <p>
-     * The implementation chooses a buffer size, which is measured in bytes but
-     * which encompasses an integral number of sample frames.  The buffer size
-     * that the system has chosen may be queried by subsequently calling
-     * <code>{@link DataLine#getBufferSize}</code>.
-     * <p>
-     * If this operation succeeds, the line is marked as open, and an
-     * <code>{@link LineEvent.Type#OPEN OPEN}</code> event is dispatched to the
-     * line's listeners.
-     * <p>
-     * Invoking this method on a line which is already open is illegal
-     * and may result in an <code>IllegalStateException</code>.
-     * <p>
-     * Note that some lines, once closed, cannot be reopened.  Attempts
-     * to reopen such a line will always result in a
-     * <code>LineUnavailableException</code>.
-     *
-     * @param format the desired audio format
-     * @throws LineUnavailableException if the line cannot be
-     * opened due to resource restrictions
-     * @throws IllegalArgumentException if <code>format</code>
-     * is not fully specified or invalid
-     * @throws IllegalStateException if the line is already open
-     * @throws SecurityException if the line cannot be
-     * opened due to security restrictions
-     *
-     * @see #open(AudioFormat, int)
-     * @see Line#open
-     * @see Line#close
-     * @see Line#isOpen
-     * @see LineEvent
-     */
-    @Override
-    public void open(AudioFormat format) throws LineUnavailableException {
-        opening();
-        sourceDataLine.open(format);
+    public IzouSoundLineClipAndSDLine(Line.Info lineInfo, Main main, boolean isPermanent, AddOnModel addOnModel) {
+        super(lineInfo, main, isPermanent, addOnModel);
+        clip = null;
+        sourceDataLine = null;
     }
 
     /**

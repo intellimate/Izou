@@ -34,7 +34,6 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
 
     private Future<?> closingThread;
     private boolean isPermanent;
-    protected final SoundManager soundManager;
     private final AddOnModel addOnModel;
     private Consumer<Void> closeCallback = null;
     private boolean muteIfNonPermanent = true;
@@ -43,16 +42,15 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
 
     public IzouSoundLineBaseClass(Line line, Main main, boolean isPermanent, AddOnModel addOnModel) {
         super(main, false);
-        //this.line = line;
+        this.line = line;
         this.info = line.getLineInfo();
         this.isPermanent = isPermanent;
         this.addOnModel = addOnModel;
         if (!isPermanent) {
-            closingThread = getClosingThread(line, main, addOnModel);
+            closingThread = getClosingThread(main, addOnModel);
         } else {
             closingThread = null;
         }
-        soundManager = null;
         boolean gainSupport = false;
         boolean muteSupport = false;
         FakeGainControl.ParameterHolder parameterHolder = null;
@@ -70,7 +68,23 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
         this.gainParameterHolder = parameterHolder;
     }
 
-    private Future<?> getClosingThread(Line line, Main main, AddOnModel addOnModel) {
+    public IzouSoundLineBaseClass(Info lineInfo, Main main, boolean isPermanent, AddOnModel addOnModel) {
+        super(main, false);
+        this.info = lineInfo;
+        this.line = null;
+        this.isPermanent = isPermanent;
+        this.addOnModel = addOnModel;
+        if (!isPermanent) {
+            closingThread = getClosingThread(main, addOnModel);
+        } else {
+            closingThread = null;
+        }
+        this.muteSupported = false;
+        this.gainSupported = false;
+        this.gainParameterHolder = null;
+    }
+
+    private Future<?> getClosingThread(Main main, AddOnModel addOnModel) {
         return main.getThreadPoolManager().getIzouThreadPool().submit(() -> {
             try {
                 Thread.sleep(600000);
@@ -78,10 +92,12 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
                 error("interrupted while sleeping, canceling");
                 return;
             }
-            if (line.isOpen()) {
+            if (line != null && line.isOpen()) {
                 debug("closing line " + line + "for Addon " + addOnModel);
                 line.close();
             }
+            ended = true;
+            isOpen = false;
         });
     }
 
@@ -141,8 +157,15 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
             if (!isOpen) {
                 opening();
             }
-            if (notDisabled)
-                line.open();
+            if (notDisabled) {
+                if (line != null) {
+                    line.open();
+                } else {
+                    Line line = AudioSystem.getLine(info);
+                    newLineInstance(line);
+                    this.line.open();
+                }
+            }
             isOpen = true;
         }
     }
@@ -201,7 +224,6 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
      */
     @Override
     public Control[] getControls() {
-        this.line = null;
         if (notDisabled) {
             List<Control> fakeControls = new ArrayList<>(2);
             if (muteSupported) {
@@ -300,7 +322,7 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
     void setToNonPermanent() {
         if (!isPermanent)
             return;
-        closingThread = getClosingThread(line, main, addOnModel);
+        closingThread = getClosingThread(main, addOnModel);
         isPermanent = false;
     }
 
@@ -425,4 +447,7 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
         this.muteCallback = consumer;
     }
 
+    protected void newLineInstance(Line line) {
+        this.line = line;
+    }
 }

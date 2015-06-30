@@ -10,10 +10,7 @@ import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.exceptions.IzouPermissionException;
 import org.intellimate.izou.system.sound.*;
 
-import javax.sound.sampled.Clip;
-import javax.sound.sampled.DataLine;
-import javax.sound.sampled.Line;
-import javax.sound.sampled.SourceDataLine;
+import javax.sound.sampled.*;
 
 /**
  * @author LeanderK
@@ -60,13 +57,45 @@ public class MixerAspect {
         return izouSoundLine;
     }
 
+    /**
+     * creates the appropriate IzouSoundLine if the request originates from an AddOn.
+     * @param lineInfo the lineInfo
+     * @return an IzouSoundLine if an addon requested the lineInfo
+     */
+    static Line createAndRegisterLine(Line.Info lineInfo) throws LineUnavailableException {
+        AddOnModel addOnModel;
+        try {
+            addOnModel = main.getSecurityManager().getOrThrowAddOnModelForClassLoader();
+        } catch (IzouPermissionException e) {
+            logger.debug("the SoundManager will not manage this lineInfo, obtained by system");
+            return AudioSystem.getLine(lineInfo);
+        }
+        Class<?> lineClazz = lineInfo.getLineClass();
+        IzouSoundLineBaseClass izouSoundLine;
+        if (SourceDataLine.class.isAssignableFrom(lineClazz)) {
+            if (Clip.class.isAssignableFrom(lineClazz)) {
+                izouSoundLine = new IzouSoundLineClipAndSDLine(lineInfo, main, false, addOnModel);
+            } else {
+                izouSoundLine = new IzouSoundSourceDataLine(lineInfo, main, false, addOnModel);
+            }
+        } else if (Clip.class.isAssignableFrom(lineClazz)) {
+            izouSoundLine = new IzouSoundLineClip(lineInfo, main, false, addOnModel);
+        } else if (DataLine.class.isAssignableFrom(lineClazz)) {
+            izouSoundLine = new IzouSoundDataLine(lineInfo, main, false, addOnModel);
+        } else {
+            izouSoundLine = new IzouSoundLineBaseClass(lineInfo, main, false, addOnModel);
+        }
+        main.getSoundManager().addIzouSoundLine(addOnModel, izouSoundLine);
+        return izouSoundLine;
+    }
+
     @Around("execution(* javax.sound.sampled.AudioSystem.getLine(javax.sound.sampled.Line.Info))")
     public Object getLineAdvice(ProceedingJoinPoint pjp) throws Throwable {
-        Line line = (Line) pjp.proceed();
-        if (line instanceof IzouSoundLineBaseClass) {
-            return line;
+        Line.Info info = (Line.Info) pjp.getArgs()[0];
+        if (AudioSystem.isLineSupported(info)) {
+            return MixerAspect.createAndRegisterLine(info);
         } else {
-            return MixerAspect.getAndRegisterLine(line);
+            throw new IllegalArgumentException("line for info:" + info + "not supported");
         }
     }
 }

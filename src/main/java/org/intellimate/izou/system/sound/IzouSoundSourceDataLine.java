@@ -3,10 +3,7 @@ package org.intellimate.izou.system.sound;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.main.Main;
 
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.SourceDataLine;
+import javax.sound.sampled.*;
 
 /**
  * the delegation to SourceDataLine.
@@ -14,13 +11,18 @@ import javax.sound.sampled.SourceDataLine;
  * @version 1.0
  */
 public class IzouSoundSourceDataLine extends IzouSoundDataLine implements SourceDataLine {
-    private final SourceDataLine sourceDataLine;
+    private SourceDataLine sourceDataLine;
     private AudioFormat audioFormat = null;
     private int bufferSize = -1;
 
     public IzouSoundSourceDataLine(SourceDataLine dataLine, Main main, boolean isPermanent, AddOnModel addOnModel) {
         super(dataLine, main, isPermanent, addOnModel);
         this.sourceDataLine = dataLine;
+    }
+
+    public IzouSoundSourceDataLine(Line.Info lineInfo, Main main, boolean isPermanent, AddOnModel addOnModel) {
+        super(lineInfo, main, isPermanent, addOnModel);
+        this.sourceDataLine = null;
     }
 
     /**
@@ -67,8 +69,15 @@ public class IzouSoundSourceDataLine extends IzouSoundDataLine implements Source
                 this.audioFormat = format;
                 this.bufferSize = bufferSize;
             }
-            if (notDisabled)
-                sourceDataLine.open(format, bufferSize);
+            if (notDisabled) {
+                if (sourceDataLine != null) {
+                    sourceDataLine.open(format, bufferSize);
+                } else {
+                    Line line = AudioSystem.getLine(info);
+                    newLineInstance(line);
+                    sourceDataLine.open(format, bufferSize);
+                }
+            }
             isOpen = true;
         }
     }
@@ -112,10 +121,23 @@ public class IzouSoundSourceDataLine extends IzouSoundDataLine implements Source
                 opening();
                 this.audioFormat = format;
             }
-            if (notDisabled)
-                sourceDataLine.open(format, bufferSize);
+            if (notDisabled) {
+                if (sourceDataLine != null) {
+                    sourceDataLine.open(format);
+                } else {
+                    Line line = AudioSystem.getLine(info);
+                    newLineInstance(line);
+                    sourceDataLine.open(format);
+                }
+            }
             isOpen = true;
         }
+    }
+
+    @Override
+    protected void newLineInstance(Line line) {
+        super.newLineInstance(line);
+        this.sourceDataLine = (SourceDataLine) line;
     }
 
     /**
@@ -160,7 +182,7 @@ public class IzouSoundSourceDataLine extends IzouSoundDataLine implements Source
      */
     @Override
     public int write(byte[] b, int off, int len) {
-        if (notDisabled) {
+        if (notDisabled && sourceDataLine != null) {
             if (muteSupported) {
                 return sourceDataLine.write(b, off, len);
             } else {

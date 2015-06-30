@@ -4,7 +4,9 @@ import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.main.Main;
 
 import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
+import javax.sound.sampled.Line;
 
 /**
  * the delegation to DataLine.
@@ -12,12 +14,17 @@ import javax.sound.sampled.DataLine;
  * @version 1.0
  */
 public class IzouSoundDataLine extends IzouSoundLineBaseClass implements DataLine {
-    private final DataLine dataLine;
+    private DataLine dataLine;
     boolean stop = false;
 
     public IzouSoundDataLine(DataLine dataLine, Main main, boolean isPermanent, AddOnModel addOnModel) {
         super(dataLine, main, isPermanent, addOnModel);
         this.dataLine = dataLine;
+    }
+
+    public IzouSoundDataLine(Line.Info lineInfo, Main main, boolean isPermanent, AddOnModel addOnModel) {
+        super(lineInfo, main, isPermanent, addOnModel);
+        dataLine = null;
     }
 
     /**
@@ -35,7 +42,9 @@ public class IzouSoundDataLine extends IzouSoundLineBaseClass implements DataLin
      */
     @Override
     public void drain() {
-        dataLine.drain();
+        //TODO implement correctly
+        if (dataLine != null)
+            dataLine.drain();
     }
 
     /**
@@ -55,7 +64,8 @@ public class IzouSoundDataLine extends IzouSoundLineBaseClass implements DataLin
     @Override
     public void flush() {
         if (notDisabled) {
-            dataLine.flush();
+            if (dataLine != null)
+                dataLine.flush();
         } else {
             //TODO: interrupt in sourceDataLine
         }
@@ -75,7 +85,8 @@ public class IzouSoundDataLine extends IzouSoundLineBaseClass implements DataLin
     @Override
     public void start() {
         if (notDisabled) {
-            dataLine.start();
+            if (dataLine != null)
+                dataLine.start();
         }
         stop = false;
     }
@@ -98,7 +109,8 @@ public class IzouSoundDataLine extends IzouSoundLineBaseClass implements DataLin
     @Override
     public void stop() {
         if (notDisabled) {
-            dataLine.stop();
+            if (dataLine != null)
+                dataLine.stop();
         }
         stop = true;
     }
@@ -115,7 +127,7 @@ public class IzouSoundDataLine extends IzouSoundLineBaseClass implements DataLin
      */
     @Override
     public boolean isRunning() {
-        if (notDisabled) {
+        if (notDisabled && dataLine != null) {
             return dataLine.isRunning();
         }
         return stop;
@@ -135,7 +147,11 @@ public class IzouSoundDataLine extends IzouSoundLineBaseClass implements DataLin
      */
     @Override
     public boolean isActive() {
-        return dataLine.isActive();
+        if (dataLine != null) {
+            return dataLine.isActive();
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -151,13 +167,22 @@ public class IzouSoundDataLine extends IzouSoundLineBaseClass implements DataLin
      * line with a specific audio format (e.g.
      * SourceDataLine#open(AudioFormat)) will override the
      * default format.
+     * retruns null if the line was not opened and the info provided none
      *
-     * @return current audio data format
+     * @return current audio data format or null if the line was not opened and the info provided none
      * @see AudioFormat
      */
     @Override
     public AudioFormat getFormat() {
-        return dataLine.getFormat();
+        if (dataLine != null) {
+            return dataLine.getFormat();
+        } else {
+            AudioFormat[] formats = ((DataLine.Info) info).getFormats();
+            for (AudioFormat format : formats) {
+                return format;
+            }
+        }
+        return null;
     }
 
     /**
@@ -167,12 +192,18 @@ public class IzouSoundDataLine extends IzouSoundLineBaseClass implements DataLin
      * the buffer from which data can be read.  Note that
      * the units used are bytes, but will always correspond to an integral
      * number of sample frames of audio data.
+     * return 100 if the line was not opened
      *
-     * @return the size of the buffer in bytes
+     * @return the size of the buffer in bytes or 100 if the line was not opened
      */
     @Override
     public int getBufferSize() {
-        return dataLine.getBufferSize();
+        if (dataLine != null) {
+            return dataLine.getBufferSize();
+        } else {
+            return 100;
+        }
+
     }
 
     /**
@@ -196,7 +227,12 @@ public class IzouSoundDataLine extends IzouSoundLineBaseClass implements DataLin
      */
     @Override
     public int available() {
-        return dataLine.available();
+        if (dataLine != null) {
+            return dataLine.available();
+        } else {
+            return -1;
+        }
+
     }
 
     /**
@@ -211,7 +247,11 @@ public class IzouSoundDataLine extends IzouSoundLineBaseClass implements DataLin
      */
     @Override
     public int getFramePosition() {
-        return dataLine.getFramePosition();
+        if (dataLine != null) {
+            return dataLine.getFramePosition();
+        } else {
+            return -1;
+        }
     }
 
     /**
@@ -224,7 +264,11 @@ public class IzouSoundDataLine extends IzouSoundLineBaseClass implements DataLin
      */
     @Override
     public long getLongFramePosition() {
-        return dataLine.getLongFramePosition();
+        if (dataLine != null) {
+            return dataLine.getLongFramePosition();
+        } else {
+            return -1;
+        }
     }
 
     /**
@@ -240,7 +284,11 @@ public class IzouSoundDataLine extends IzouSoundLineBaseClass implements DataLin
      */
     @Override
     public long getMicrosecondPosition() {
-        return dataLine.getMicrosecondPosition();
+        if (dataLine != null) {
+            return dataLine.getMicrosecondPosition();
+        } else {
+            return -1;
+        }
     }
 
     /**
@@ -255,6 +303,16 @@ public class IzouSoundDataLine extends IzouSoundLineBaseClass implements DataLin
      */
     @Override
     public float getLevel() {
-        return dataLine.getLevel();
+        if (dataLine != null) {
+            return dataLine.getLevel();
+        } else {
+            return AudioSystem.NOT_SPECIFIED;
+        }
+    }
+
+    @Override
+    protected void newLineInstance(Line line) {
+        super.newLineInstance(line);
+        this.dataLine = (DataLine) line;
     }
 }

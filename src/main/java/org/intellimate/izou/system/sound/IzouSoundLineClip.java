@@ -13,7 +13,7 @@ import java.io.IOException;
  * @version 1.0
  */
 public class IzouSoundLineClip extends IzouSoundDataLine implements Clip {
-    private final Clip clip;
+    private Clip clip;
     //TODO: real implementation:
     //after muting: getLongFramePosition()%getFrameLength() to get the position
     //getLongFramePosition()/getFrameLength() to get the completed loops
@@ -23,6 +23,11 @@ public class IzouSoundLineClip extends IzouSoundDataLine implements Clip {
     public IzouSoundLineClip(Clip clip, Main main, boolean isPermanent, AddOnModel addOnModel) {
         super(clip, main, isPermanent, addOnModel);
         this.clip = clip;
+    }
+
+    public IzouSoundLineClip(Line.Info lineInfo, Main main, boolean isPermanent, AddOnModel addOnModel) {
+        super(lineInfo, main, isPermanent, addOnModel);
+        this.clip = null;
     }
 
     /**
@@ -65,8 +70,15 @@ public class IzouSoundLineClip extends IzouSoundDataLine implements Clip {
             if (isOpen) {
                 opening();
             }
-            if (notDisabled)
-                clip.open(format, data, offset, bufferSize);
+            if (notDisabled) {
+                if (clip != null) {
+                    clip.open(format, data, offset, bufferSize);
+                } else {
+                    Line line = AudioSystem.getLine(info);
+                    newLineInstance(line);
+                    clip.open(format, data, offset, bufferSize);
+                }
+            }
             isOpen = true;
         }
     }
@@ -109,10 +121,23 @@ public class IzouSoundLineClip extends IzouSoundDataLine implements Clip {
             if (isOpen) {
                 opening();
             }
-            if (notDisabled)
-                clip.open(stream);
+            if (notDisabled) {
+                if (clip != null) {
+                    clip.open(stream);
+                } else {
+                    Line line = AudioSystem.getLine(info);
+                    newLineInstance(line);
+                    clip.open(stream);
+                }
+            }
             isOpen = true;
         }
+    }
+
+    @Override
+    protected void newLineInstance(Line line) {
+        super.newLineInstance(line);
+        this.clip = (Clip) line;
     }
 
     /**
@@ -123,7 +148,11 @@ public class IzouSoundLineClip extends IzouSoundDataLine implements Clip {
      */
     @Override
     public int getFrameLength() {
-        return clip.getFrameLength();
+        if (clip != null) {
+            return clip.getFrameLength();
+        } else {
+            return AudioSystem.NOT_SPECIFIED;
+        }
     }
 
     /**
@@ -134,7 +163,11 @@ public class IzouSoundLineClip extends IzouSoundDataLine implements Clip {
      */
     @Override
     public long getMicrosecondLength() {
-        return clip.getMicrosecondLength();
+        if (clip != null) {
+            return clip.getMicrosecondLength();
+        } else {
+            return AudioSystem.NOT_SPECIFIED;
+        }
     }
 
     /**
@@ -150,7 +183,8 @@ public class IzouSoundLineClip extends IzouSoundDataLine implements Clip {
      */
     @Override
     public void setFramePosition(int frames) {
-        clip.setFramePosition(frames);
+        if (clip != null)
+            clip.setFramePosition(frames);
     }
 
     /**
@@ -169,7 +203,8 @@ public class IzouSoundLineClip extends IzouSoundDataLine implements Clip {
      */
     @Override
     public void setMicrosecondPosition(long microseconds) {
-        clip.setMicrosecondPosition(microseconds);
+        if (clip != null)
+            clip.setMicrosecondPosition(microseconds);
     }
 
     /**
@@ -189,7 +224,8 @@ public class IzouSoundLineClip extends IzouSoundDataLine implements Clip {
      */
     @Override
     public void setLoopPoints(int start, int end) {
-        clip.setLoopPoints(start, end);
+        if (clip != null)
+            clip.setLoopPoints(start, end);
     }
 
     /**
@@ -218,6 +254,7 @@ public class IzouSoundLineClip extends IzouSoundDataLine implements Clip {
      */
     @Override
     public void loop(int count) {
-        clip.loop(count);
+        if (clip != null)
+            clip.loop(count);
     }
 }
