@@ -14,77 +14,15 @@ import java.io.IOException;
  */
 public class IzouSoundLineClipAndSDLine extends IzouSoundSourceDataLine implements Clip {
     private Clip clip;
-    private SourceDataLine sourceDataLine;
-    private AudioFormat audioFormat;
-    private boolean clipOpen = false;
 
     public IzouSoundLineClipAndSDLine(Clip clip, SourceDataLine sourceDataLine, Main main, boolean isPermanent, AddOnModel addOnModel) {
         super(sourceDataLine, main, isPermanent, addOnModel);
         this.clip = clip;
-        this.sourceDataLine = sourceDataLine;
     }
 
     public IzouSoundLineClipAndSDLine(Line.Info lineInfo, Main main, boolean isPermanent, AddOnModel addOnModel) {
         super(lineInfo, main, isPermanent, addOnModel);
         clip = null;
-        sourceDataLine = null;
-    }
-
-    /**
-     * Writes audio data to the mixer via this source data line.  The requested
-     * number of bytes of data are read from the specified array,
-     * starting at the given offset into the array, and written to the data
-     * line's buffer.  If the caller attempts to write more data than can
-     * currently be written (see <code>{@link DataLine#available available}</code>),
-     * this method blocks until the requested amount of data has been written.
-     * This applies even if the requested amount of data to write is greater
-     * than the data line's buffer size.  However, if the data line is closed,
-     * stopped, or flushed before the requested amount has been written,
-     * the method no longer blocks, but returns the number of bytes
-     * written thus far.
-     * <p>
-     * The number of bytes that can be written without blocking can be ascertained
-     * using the <code>{@link DataLine#available available}</code> method of the
-     * <code>DataLine</code> interface.  (While it is guaranteed that
-     * this number of bytes can be written without blocking, there is no guarantee
-     * that attempts to write additional data will block.)
-     * <p>
-     * The number of bytes to write must represent an integral number of
-     * sample frames, such that:
-     * <br>
-     * <center><code>[ bytes written ] % [frame size in bytes ] == 0</code></center>
-     * <br>
-     * The return value will always meet this requirement.  A request to write a
-     * number of bytes representing a non-integral number of sample frames cannot
-     * be fulfilled and may result in an <code>IllegalArgumentException</code>.
-     *
-     * @param b a byte array containing data to be written to the data line
-     * @param off the offset from the beginning of the array, in bytes
-     * @param len the length, in bytes, of the valid data in the array
-     * (in other words, the requested amount of data to write, in bytes)
-     * @return the number of bytes actually written
-     * @throws IllegalArgumentException if the requested number of bytes does
-     * not represent an integral number of sample frames,
-     * or if <code>len</code> is negative
-     * @throws ArrayIndexOutOfBoundsException if <code>off</code> is negative,
-     * or <code>off+len</code> is greater than the length of the array
-     * <code>b</code>.
-     *
-     * @see TargetDataLine#read
-     * @see DataLine#available
-     */
-    @Override
-    public int write(byte[] b, int off, int len) {
-        if (muteSupported) {
-            return sourceDataLine.write(b, off, len);
-        } else {
-            if (isMutedFromSystem) {
-                byte[] newArr = new byte[b.length];
-                return sourceDataLine.write(newArr, off, len);
-            } else {
-                return sourceDataLine.write(b, off, len);
-            }
-        }
     }
 
     /**
@@ -123,8 +61,21 @@ public class IzouSoundLineClipAndSDLine extends IzouSoundSourceDataLine implemen
      */
     @Override
     public void open(AudioFormat format, byte[] data, int offset, int bufferSize) throws LineUnavailableException {
-        opening();
-        clip.open(format, data, offset, bufferSize);
+        if (!ended) {
+            if (isOpen) {
+                opening();
+            }
+            if (notDisabled) {
+                if (clip != null) {
+                    clip.open(format, data, offset, bufferSize);
+                } else {
+                    Line line = AudioSystem.getLine(info);
+                    newLineInstance(line);
+                    clip.open(format, data, offset, bufferSize);
+                }
+            }
+            isOpen = true;
+        }
     }
 
     /**
@@ -161,8 +112,27 @@ public class IzouSoundLineClipAndSDLine extends IzouSoundSourceDataLine implemen
      */
     @Override
     public void open(AudioInputStream stream) throws LineUnavailableException, IOException {
-        opening();
-        clip.open(stream);
+        if (!ended) {
+            if (isOpen) {
+                opening();
+            }
+            if (notDisabled) {
+                if (clip != null) {
+                    clip.open(stream);
+                } else {
+                    Line line = AudioSystem.getLine(info);
+                    newLineInstance(line);
+                    clip.open(stream);
+                }
+            }
+            isOpen = true;
+        }
+    }
+
+    @Override
+    protected void newLineInstance(Line line) {
+        super.newLineInstance(line);
+        this.clip = (Clip) line;
     }
 
     /**
@@ -173,7 +143,11 @@ public class IzouSoundLineClipAndSDLine extends IzouSoundSourceDataLine implemen
      */
     @Override
     public int getFrameLength() {
-        return clip.getFrameLength();
+        if (clip != null) {
+            return clip.getFrameLength();
+        } else {
+            return AudioSystem.NOT_SPECIFIED;
+        }
     }
 
     /**
@@ -184,7 +158,11 @@ public class IzouSoundLineClipAndSDLine extends IzouSoundSourceDataLine implemen
      */
     @Override
     public long getMicrosecondLength() {
-        return clip.getMicrosecondLength();
+        if (clip != null) {
+            return clip.getMicrosecondLength();
+        } else {
+            return AudioSystem.NOT_SPECIFIED;
+        }
     }
 
     /**
@@ -200,7 +178,8 @@ public class IzouSoundLineClipAndSDLine extends IzouSoundSourceDataLine implemen
      */
     @Override
     public void setFramePosition(int frames) {
-        clip.setFramePosition(frames);
+        if (clip != null)
+            clip.setFramePosition(frames);
     }
 
     /**
@@ -219,7 +198,8 @@ public class IzouSoundLineClipAndSDLine extends IzouSoundSourceDataLine implemen
      */
     @Override
     public void setMicrosecondPosition(long microseconds) {
-        clip.setMicrosecondPosition(microseconds);
+        if (clip != null)
+            clip.setMicrosecondPosition(microseconds);
     }
 
     /**
@@ -239,7 +219,8 @@ public class IzouSoundLineClipAndSDLine extends IzouSoundSourceDataLine implemen
      */
     @Override
     public void setLoopPoints(int start, int end) {
-        clip.setLoopPoints(start, end);
+        if (clip != null)
+            clip.setLoopPoints(start, end);
     }
 
     /**
@@ -268,6 +249,7 @@ public class IzouSoundLineClipAndSDLine extends IzouSoundSourceDataLine implemen
      */
     @Override
     public void loop(int count) {
-        clip.loop(count);
+        if (clip != null)
+            clip.loop(count);
     }
 }
