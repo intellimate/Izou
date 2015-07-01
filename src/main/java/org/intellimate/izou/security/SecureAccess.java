@@ -98,10 +98,24 @@ final class SecureAccess extends IzouModule {
         return new File(dir).exists();
     }
 
+    /**
+     * computes the supplier with an elevated security level (eliminates checks).
+     * <p>
+     * Be careful not to expose this method to addons or call method from addons inside this supplier as
+     * they would also gain the elevated security level.
+     * </p>
+     * @param supplier the supplier to call
+     * @param <T> the Type
+     * @return the result
+     */
     <T> T doElevated(Supplier<T> supplier) {
         return supplier.get();
     }
 
+    /**
+     * runs the runnable with an elevated security level (eliminates checks).
+     * @param run the runnable to run.
+     */
     void doElevated(Runnable run) {
         run.run();
     }
