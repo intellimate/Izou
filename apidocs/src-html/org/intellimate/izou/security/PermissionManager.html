@@ -64,12 +64,11 @@
 <span class="sourceLineNo">056</span>        } catch (IzouPermissionException ignored) {<a name="line.56"></a>
 <span class="sourceLineNo">057</span>            //its just not root<a name="line.57"></a>
 <span class="sourceLineNo">058</span>        }<a name="line.58"></a>
-<span class="sourceLineNo">059</span>        for (PermissionModule permissionModule : standardCheck) {<a name="line.59"></a>
-<span class="sourceLineNo">060</span>            if (permissionModule.canCheckPermission(perm))<a name="line.60"></a>
-<span class="sourceLineNo">061</span>                permissionModule.checkPermission(perm, addOnModel);<a name="line.61"></a>
-<span class="sourceLineNo">062</span>        }<a name="line.62"></a>
-<span class="sourceLineNo">063</span>    }<a name="line.63"></a>
-<span class="sourceLineNo">064</span>}<a name="line.64"></a>
+<span class="sourceLineNo">059</span>        standardCheck.stream()<a name="line.59"></a>
+<span class="sourceLineNo">060</span>                .filter(permissionModule -&gt; permissionModule.canCheckPermission(perm))<a name="line.60"></a>
+<span class="sourceLineNo">061</span>                .forEach(permissionModule -&gt; permissionModule.checkPermission(perm, addOnModel));<a name="line.61"></a>
+<span class="sourceLineNo">062</span>    }<a name="line.62"></a>
+<span class="sourceLineNo">063</span>}<a name="line.63"></a>
 
 
 
