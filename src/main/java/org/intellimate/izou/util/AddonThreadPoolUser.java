@@ -1,4 +1,4 @@
-package org.intellimate.izou;
+package org.intellimate.izou.util;
 
 import java.util.Collection;
 import java.util.List;

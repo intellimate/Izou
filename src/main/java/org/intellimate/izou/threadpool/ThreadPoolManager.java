@@ -1,6 +1,6 @@
 package org.intellimate.izou.threadpool;
 
-import org.intellimate.izou.IzouModule;
+import org.intellimate.izou.util.IzouModule;
 import org.intellimate.izou.main.Main;
 
 import java.lang.reflect.Field;

@@ -42,6 +42,7 @@ public class ContextImplementation implements Context {
     private final ThreadPool threadPool;
     private final Activators activators = new ActivatorsImpl();
     private final Output output = new OutputImpl();
+    private final System system = new SystemImpl();
 
     /**
      * creates a new context for the addOn
@@ -133,6 +134,16 @@ public class ContextImplementation implements Context {
     @Override
     public Output getOutput() {
         return output;
+    }
+
+    /**
+     * retruns the API used to interact with Izou.
+     *
+     * @return System.
+     */
+    @Override
+    public System getSystem() {
+        return system;
     }
 
     /**
@@ -775,6 +786,18 @@ public class ContextImplementation implements Context {
                 throw new RuntimeException("unable to obtain ID for OutputManager");
             }
             return identification.get();
+        }
+    }
+
+    private class SystemImpl implements System {
+        /**
+         * this method registers an listener which will be fired when all the addons finished registering.
+         *
+         * @param runnable the runnable to register.
+         */
+        @Override
+        public void registerInitializedListener(Runnable runnable) {
+            main.getAddOnManager().addInitializedListener(runnable);
         }
     }
 }

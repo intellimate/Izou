@@ -1,7 +1,7 @@
 package org.intellimate.izou.system.file;
 
-import org.intellimate.izou.IdentificationSet;
-import org.intellimate.izou.IzouModule;
+import org.intellimate.izou.util.IdentificationSet;
+import org.intellimate.izou.util.IzouModule;
 import org.intellimate.izou.identification.Identification;
 import org.intellimate.izou.identification.IllegalIDException;
 import org.intellimate.izou.main.Main;

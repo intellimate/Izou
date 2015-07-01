@@ -2,7 +2,7 @@ package org.intellimate.izou.system.file;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.intellimate.izou.IzouModule;
+import org.intellimate.izou.util.IzouModule;
 import org.intellimate.izou.main.Main;
 
 import java.io.File;
@@ -18,20 +18,6 @@ public class FileSystemManager extends IzouModule {
      * Path to log files
      */
     private static final Logger logger = LogManager.getLogger(FileSystemManager.class);
-    @Deprecated //use the getters, static not possible anymore (due to platform differences)
-    public static final String LOG_PATH = "." + File.separator + "logs" + File.separator;
-    @Deprecated //use the getters, static not possible anymore (due to platform differences)
-    public static final String FULL_WORKING_DIRECTORY;
-
-    static {
-        String path = null;
-        try {
-            path = new File(".").getCanonicalPath();
-        } catch (IOException e) {
-            logger.error("Unable to get current canonical path", e);
-        }
-        FULL_WORKING_DIRECTORY = path;
-    }
 
     private final File izouParentLocation;
     private final File izouJarLocation;
@@ -39,6 +25,8 @@ public class FileSystemManager extends IzouModule {
     private final File resourceLocation;
     private final File propertiesLocation;
     private final File logsLocation;
+    private final File systemLocation;
+    private final File systemDataLocation;
 
     /**
      * creates a file system manager
@@ -58,6 +46,9 @@ public class FileSystemManager extends IzouModule {
             resourceLocation = new File(izouParentLocation.toString() + File.separator + "resources").getCanonicalFile();
             propertiesLocation = new File(izouParentLocation.toString() + File.separator + "properties").getCanonicalFile();
             logsLocation = new File(izouParentLocation.toString() + File.separator + "logs").getCanonicalFile();
+            systemLocation = new File(izouParentLocation.toString() +  File.separator + "system").getCanonicalFile();
+            systemDataLocation = new File(izouParentLocation.toString() +  File.separator + "system"
+                    + File.separator + "data").getCanonicalFile();
         } catch (URISyntaxException | IOException e) {
             error("unable to create the Izou-file system");
             throw new IllegalStateException("unable to create the Izou-file system");
@@ -118,6 +109,26 @@ public class FileSystemManager extends IzouModule {
             Files.createDirectories(logsLocation.toPath());
     }
 
+    /**
+     * Create system folder
+     *
+     * @throws IOException could throw IOException because working with files
+     */
+    private void createSystemFolder() throws IOException {
+        if(!Files.exists(systemLocation.toPath()))
+            Files.createDirectories(systemLocation.toPath());
+    }
+
+    /**
+     * Create system/data folder
+     *
+     * @throws IOException could throw IOException because working with files
+     */
+    private void createSystemDataFolder() throws IOException {
+        if(!Files.exists(systemDataLocation.toPath()))
+            Files.createDirectories(systemDataLocation.toPath());
+    }
+
     public File getIzouParentLocation() {
         return izouParentLocation;
     }
@@ -142,27 +153,11 @@ public class FileSystemManager extends IzouModule {
         return izouJarLocation;
     }
 
-    /**
-     * Create system folder
-     *
-     * @throws IOException could throw IOException because working with files
-     */
-    private void createSystemFolder() throws IOException {
-        String logPath = new File(".").getCanonicalPath() + File.separator + "system";
-        File logFile = new File(logPath);
-        if(!Files.exists(logFile.toPath()))
-            Files.createDirectories(logFile.toPath());
+    public File getSystemLocation() {
+        return systemLocation;
     }
 
-    /**
-     * Create system/data folder
-     *
-     * @throws IOException could throw IOException because working with files
-     */
-    private void createSystemDataFolder() throws IOException {
-        String logPath = new File(".").getCanonicalPath() + File.separator + "system" + File.separator + "data";
-        File logFile = new File(logPath);
-        if(!Files.exists(logFile.toPath()))
-            Files.createDirectories(logFile.toPath());
+    public File getSystemDataLocation() {
+        return systemDataLocation;
     }
 }

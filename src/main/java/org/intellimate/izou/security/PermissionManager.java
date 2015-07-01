@@ -1,6 +1,6 @@
 package org.intellimate.izou.security;
 
-import org.intellimate.izou.IzouModule;
+import org.intellimate.izou.util.IzouModule;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.exceptions.IzouPermissionException;
@@ -33,6 +33,7 @@ public final class PermissionManager extends IzouModule {
         standardCheck.add(new AudioPermissionModule(main, securityManager));
         standardCheck.add(new SocketPermissionModule(main, securityManager));
         filePermissionModule = new FilePermissionModule(main, securityManager);
+        standardCheck.add(new ReflectionPermissionModule(main, securityManager));
         rootPermission = new RootPermission(main, securityManager);
         standardCheck.add(filePermissionModule);
     }
@@ -55,9 +56,8 @@ public final class PermissionManager extends IzouModule {
         } catch (IzouPermissionException ignored) {
             //its just not root
         }
-        for (PermissionModule permissionModule : standardCheck) {
-            if (permissionModule.canCheckPermission(perm))
-                permissionModule.checkPermission(perm, addOnModel);
-        }
+        standardCheck.stream()
+                .filter(permissionModule -> permissionModule.canCheckPermission(perm))
+                .forEach(permissionModule -> permissionModule.checkPermission(perm, addOnModel));
     }
 }

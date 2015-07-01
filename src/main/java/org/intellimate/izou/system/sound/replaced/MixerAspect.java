@@ -7,10 +7,14 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.main.Main;
-import org.intellimate.izou.security.exceptions.IzouPermissionException;
 import org.intellimate.izou.system.sound.*;
 
 import javax.sound.sampled.*;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.DataLine;
+import javax.sound.sampled.Line;
+import javax.sound.sampled.SourceDataLine;
+import java.util.Optional;
 
 /**
  * @author LeanderK
@@ -33,12 +37,14 @@ public class MixerAspect {
      */
     static Line getAndRegisterLine(Line line) {
         AddOnModel addOnModel;
-        try {
-            addOnModel = main.getSecurityManager().getOrThrowAddOnModelForClassLoader();
-        } catch (IzouPermissionException e) {
+        Optional<AddOnModel> addOnModelForClassLoader = main.getSecurityManager().getAddOnModelForClassLoader();
+        if (!addOnModelForClassLoader.isPresent()) {
             logger.debug("the SoundManager will not manage this line, obtained by system");
             return line;
+        } else {
+            addOnModel = addOnModelForClassLoader.get();
         }
+
         IzouSoundLineBaseClass izouSoundLine;
         if (line instanceof SourceDataLine) {
             if (line instanceof Clip) {

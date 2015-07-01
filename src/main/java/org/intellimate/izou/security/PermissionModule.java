@@ -1,10 +1,10 @@
 package org.intellimate.izou.security;
 
-import org.intellimate.izou.IdentifiableSet;
-import org.intellimate.izou.IzouModule;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.exceptions.IzouPermissionException;
+import org.intellimate.izou.util.IdentifiableSet;
+import org.intellimate.izou.util.IzouModule;
 import ro.fortsoft.pf4j.PluginDescriptor;
 import ro.fortsoft.pf4j.PluginWrapper;
 
@@ -81,13 +81,13 @@ public abstract class PermissionModule extends IzouModule {
     }
 
     /**
-     * Checks if the given addOn is allowed to access the requested service and registers them if not yet registered.
+     * Checks if the given addOn is allowed to access the requested service.
      *
      * @param addon the identifiable to check
      * @param permission the Permission to check
-     * @throws IzouPermissionException thrown if the addOn is not allowed to access its requested service
+     * @throws SecurityException thrown if the addOn is not allowed to access its requested service
      */
-    public abstract void checkPermission(Permission permission, AddOnModel addon) throws IzouPermissionException;
+    public abstract void checkPermission(Permission permission, AddOnModel addon) throws SecurityException;
 
     /**
      * registers the addon if checkPermission returns true, else throws the exception provided by the exceptionSupplier.
@@ -95,12 +95,13 @@ public abstract class PermissionModule extends IzouModule {
      * @param addOn the addon to check
      * @param checkPermission returns true if eligible for registering
      */
-    protected <X extends IzouPermissionException> void registerOrThrow(AddOnModel addOn, Supplier<X> exceptionSupplier, Function<PluginDescriptor, Boolean> checkPermission) {
+    protected <X extends IzouPermissionException> void registerOrThrow(AddOnModel addOn, Supplier<X> exceptionSupplier,
+                                                                       Function<PluginDescriptor, Boolean> checkPermission) {
         getMain().getAddOnManager().getPluginWrapper(addOn)
                 .map(PluginWrapper::getDescriptor)
                 .map(checkPermission)
-                .ifPresent(allowedToPlay -> {
-                    if (allowedToPlay) {
+                .ifPresent(allowedToRun -> {
+                    if (allowedToRun) {
                         registerAddOn(addOn);
                     } else {
                         throw exceptionSupplier.get();

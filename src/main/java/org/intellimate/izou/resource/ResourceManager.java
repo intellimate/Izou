@@ -1,7 +1,7 @@
 package org.intellimate.izou.resource;
 
-import org.intellimate.izou.AddonThreadPoolUser;
-import org.intellimate.izou.IzouModule;
+import org.intellimate.izou.util.AddonThreadPoolUser;
+import org.intellimate.izou.util.IzouModule;
 import org.intellimate.izou.events.EventModel;
 import org.intellimate.izou.identification.IllegalIDException;
 import org.intellimate.izou.main.Main;

@@ -1,20 +1,17 @@
 package org.intellimate.izou.security;
 
-import com.google.common.io.Files;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.exceptions.IzouPermissionException;
-import org.intellimate.izou.system.file.FileSystemManager;
 
 import java.io.File;
 import java.io.FilePermission;
 import java.io.IOException;
+import java.net.URL;
 import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * The FilePermissionModule is used to check the access to files
@@ -26,6 +23,7 @@ public class FilePermissionModule extends PermissionModule {
     private final List<String> allowedReadFiles;
     private final List<File> allowedWriteDirectories;
     private final List<File> forbiddenWriteDirectories;
+    private final List<String> forbiddenWriteFilesNames;
     private final String allowedReadFileTypesRegex;
     private final String allowedWriteFileTypesRegex;
 
@@ -39,21 +37,40 @@ public class FilePermissionModule extends PermissionModule {
         allowedReadDirectories = new ArrayList<>();
         allowedReadFiles = new ArrayList<>();
         forbiddenWriteDirectories = new ArrayList<>();
-        forbiddenWriteDirectories.add(main.getFileSystemManager().getLibLocation());
+        forbiddenWriteFilesNames = new ArrayList<>();
+        forbiddenWriteFilesNames.add("addon_config.properties");
         allowedReadFiles.add("/dev/random");
         allowedReadFiles.add("/dev/urandom");
         allowedWriteDirectories = new ArrayList<>();
         allowedReadFileTypesRegex = "(txt|properties|xml|class|json|zip|ds_store|mf|jar|idx|log|dylib|mp3|dylib|certs|"
                 + "so)";
         allowedWriteFileTypesRegex = "(txt|properties|xml|json|idx|log)";
-        String workingDir = FileSystemManager.FULL_WORKING_DIRECTORY;
-        allowedReadDirectories.add(workingDir);
         allowedReadDirectories.addAll(Arrays.asList(System.getProperty("java.ext.dirs").split(":")));
         allowedReadDirectories.add(System.getProperty("java.home"));
-        allowedReadDirectories.add(System.getProperty("user.home"));
+        allowedReadDirectories.add(main.getFileSystemManager().getLogsLocation().getAbsolutePath());
+        allowedReadDirectories.add(main.getFileSystemManager().getPropertiesLocation().getAbsolutePath());
+        allowedReadDirectories.add(main.getFileSystemManager().getResourceLocation().getAbsolutePath());
+        allowedReadDirectories.add(main.getFileSystemManager().getIzouJarLocation().getAbsolutePath());
+        allowedReadDirectories.add(main.getFileSystemManager().getLibLocation().getAbsolutePath());
+        allowedWriteDirectories.add(main.getFileSystemManager().getResourceLocation());
         allowedWriteDirectories.add(main.getFileSystemManager().getLogsLocation());
         allowedWriteDirectories.add(main.getFileSystemManager().getPropertiesLocation());
         allowedWriteDirectories.add(main.getFileSystemManager().getResourceLocation());
+        allowedWriteDirectories.add(main.getFileSystemManager().getLibLocation());
+        if (getMain().getFileSystemManager().getIzouJarLocation().isDirectory()) {
+            allowedWriteDirectories.add(new File(getMain().getFileSystemManager().getIzouJarLocation() + File.separator + "META-INF" + File.separator + "services"));
+        } else {
+            URL metaInfo = this.getClass().getClassLoader().getResource("META-INF/services");
+            if (metaInfo != null)
+                allowedWriteDirectories.add(new File(metaInfo.getFile()));
+        }
+
+        if (Boolean.getBoolean("debug")) {
+            allowedReadDirectories.add(System.getProperty("user.home") + File.separator + ".m2");
+            allowedWriteDirectories.add(new File(System.getProperty("user.home") + File.separator + ".m2"));
+            allowedWriteDirectories.add(main.getFileSystemManager().getIzouJarLocation());
+            allowedWriteDirectories.add(new File(System.getProperty("java.home")));
+        }
     }
 
     /**
@@ -119,7 +136,7 @@ public class FilePermissionModule extends PermissionModule {
         if (!allowedDirectory) {
             throw getException(filePath);
         }
-
+        /*
         String[] pathParts = canonicalPath.split(File.separator);
         String lastPathPart = pathParts[pathParts.length - 1].toLowerCase();
 
@@ -134,7 +151,7 @@ public class FilePermissionModule extends PermissionModule {
         Pattern pattern = Pattern.compile(allowedReadFileTypesRegex);
         Matcher matcher = pattern.matcher(fileExtension);
         if (!matcher.matches() || fileExtension.equals(lastPathPart))
-            throw getException(filePath);
+            throw getException(filePath);*/
     }
 
     /**
@@ -154,8 +171,19 @@ public class FilePermissionModule extends PermissionModule {
 
         isForbidden(request, addOnModel);
 
+        boolean success = false;
         if (allowedWriteDirectories.stream()
-                .noneMatch(compare -> request.toPath().startsWith(compare.toPath()))) {
+                .anyMatch(compare -> request.toPath().startsWith(compare.toPath()))) {
+            success = true;
+        }
+
+        for (String name : forbiddenWriteFilesNames) {
+            if (request.getName().equals(name)) {
+                success = false;
+            }
+        }
+
+        if (!success) {
             throw getException(filePath);
         }
 
@@ -163,11 +191,11 @@ public class FilePermissionModule extends PermissionModule {
                 || getSecurityManager().getSecureAccess().checkForDirectory(request.toString())) {
             return;
         }
-
+        /*
         Pattern pattern = Pattern.compile(allowedWriteFileTypesRegex);
         Matcher matcher = pattern.matcher(Files.getFileExtension(request.toString()));
         if (!matcher.matches())
-            throw getException(filePath);
+            throw getException(filePath);*/
     }
 
     /**
@@ -178,7 +206,7 @@ public class FilePermissionModule extends PermissionModule {
     private void isForbidden(File request, AddOnModel addOnModel) {
         if (forbiddenWriteDirectories.stream()
                 .anyMatch(compare -> request.toPath().startsWith(compare.toPath()))) {
-            throw new IzouPermissionException("file: " + request.toString() + " is forbidden. Attempt made by: "
+            throw getException("file: " + request.toString() + " is forbidden. Attempt made by: "
                     + addOnModel.getID());
         }
     }

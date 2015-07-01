@@ -14,6 +14,7 @@ import java.security.Permission;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 
 /**
@@ -65,11 +66,11 @@ public final class SecurityManager extends java.lang.SecurityManager {
         this.systemMail = systemMail;
         this.main = main;
 
-        secureStorage = SecureStorage.createSecureStorage();
+        secureStorage = SecureStorage.createSecureStorage(main);
 
         SecureAccess tempSecureAccess = null;
         try {
-            tempSecureAccess = SecureAccess.createSecureAccess(systemMail);
+            tempSecureAccess = SecureAccess.createSecureAccess(main, systemMail);
         } catch (IllegalAccessException e) {
             Logger logger = LogManager.getLogger(this.getClass());
             logger.fatal("Unable to create a SecureAccess object because Izou might be under attack. "
@@ -97,17 +98,16 @@ public final class SecurityManager extends java.lang.SecurityManager {
      * @return AddOnModel or IzouPermissionException if the call was made from an AddOn, or null if no AddOn is responsible
      * @throws IzouPermissionException if the AddOnModel is not found
      */
-    public AddOnModel getOrThrowAddOnModelForClassLoader() throws IzouPermissionException {
+    public Optional<AddOnModel> getAddOnModelForClassLoader() {
         Class[] classes = getClassContext();
         for (int i = classes.length - 1; i >= 0; i--) {
             if (classes[i].getClassLoader() instanceof IzouPluginClassLoader && !classes[i].getName().toLowerCase()
                     .contains(IzouPluginClassLoader.PLUGIN_PACKAGE_PREFIX_IZOU_SDK)) {
                 ClassLoader classLoader = classes[i].getClassLoader();
-                return main.getAddOnManager().getAddOnForClassLoader(classLoader)
-                        .orElseThrow(() -> new IzouPermissionException("No AddOn found for ClassLoader: " + classLoader));
+                return main.getAddOnManager().getAddOnForClassLoader(classLoader);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     /**
@@ -116,23 +116,19 @@ public final class SecurityManager extends java.lang.SecurityManager {
      * @param specific the specific check
      */
     private <T> void check(T t, BiConsumer<T, AddOnModel> specific) {
-        if (!secureAccess.doEvelevated(this::shouldCheck)) {
+        if (!shouldCheck()) {
             return;
         }
-
-        AddOnModel addOn = secureAccess.doEvelevated(this::getOrThrowAddOnModelForClassLoader);
-        if (addOn == null) return;
-        specific.accept(t, addOn);
+        secureAccess.doElevated(this::getAddOnModelForClassLoader)
+            .ifPresent(addOnModel ->
+                    secureAccess.doElevated(() -> specific.accept(t, addOnModel)));
     }
     /**
      * performs some basic checks to determine whether to check the permission
      * @return true if should be checked, false if not
      */
     public boolean shouldCheck() {
-        if (checkForSecureAccess()) {
-            return false;
-        }
-        return true;
+        return !checkForSecureAccess();
     }
 
     /**
@@ -144,7 +140,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
         Class[] classContext = getClassContext();
         for (Class clazz : classContext) {
             if (clazz.equals(SecureAccess.class) || clazz.equals(SecurityBreachHandler.class)
-                    || clazz.equals(SecurityModule.class) || clazz.equals(SecureStorage.class)) {
+                    || clazz.equals(SecurityFunctions.class) || clazz.equals(SecureStorage.class)) {
                 return true;
             }
         }
@@ -208,8 +204,6 @@ public final class SecurityManager extends java.lang.SecurityManager {
     public void checkExit(int status) {
         if (!exitPermission && !checkForSecureAccess()) {
             throw getException("exit");
-        } else {
-            secureAccess.exitIzou();
         }
     }
 
@@ -238,7 +232,10 @@ public final class SecurityManager extends java.lang.SecurityManager {
     public void checkRead(String file) {
         if (file.endsWith("/org/intellimate/izou/security/SecurityModule.class"))
             return;
-        if (!secureAccess.doEvelevated(this::shouldCheck)) {
+        if (!shouldCheck()) {
+            return;
+        }
+        if (!getAddOnModelForClassLoader().isPresent()) {
             return;
         }
         permissionManager.getFilePermissionModule().fileReadCheck(file);

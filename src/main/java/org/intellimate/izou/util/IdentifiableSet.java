@@ -1,4 +1,4 @@
-package org.intellimate.izou;
+package org.intellimate.izou.util;
 
 import org.intellimate.izou.identification.Identifiable;
 
@@ -10,8 +10,8 @@ import java.util.Set;
 /**
  * Use this class if you want to store a Set of AddOnModules permanently.
  * <p>
- * The reason for this class is that in the future it might be needed to de-register an AddOn and with this class it is
- * easy to introduce this Feature.
+ * The reason for this class is that in the future it might be needed to unregister an AddOn and with this class it is
+ * easy to introduce this feature.
  * </p>
  * @author Leander Kurscheidt
  * @version 1.0
