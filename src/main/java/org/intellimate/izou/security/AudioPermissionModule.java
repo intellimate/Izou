@@ -2,6 +2,7 @@ package org.intellimate.izou.security;
 
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.main.Main;
+import org.intellimate.izou.security.exceptions.IzouPermissionException;
 import org.intellimate.izou.security.exceptions.IzouSoundPermissionException;
 import ro.fortsoft.pf4j.PluginDescriptor;
 
@@ -52,9 +53,14 @@ public final class AudioPermissionModule extends PermissionModule {
      */
     private void registerOrThrow(AddOnModel addOn, String permissionMessage) throws IzouSoundPermissionException{
         Function<PluginDescriptor, Boolean> checkPlayPermission = descriptor -> {
+            if (descriptor.getAddOnProperties() == null)
+                throw new IzouPermissionException("addon_config.properties not found for addon:" + addOn);
             try {
-                return descriptor.getAddOnProperties().get("audio_output").equals("true")
-                        && !descriptor.getAddOnProperties().get("audio_usage_descripton").equals("null");
+                return descriptor.getAddOnProperties().getProperty("audio_output") != null
+                        && descriptor.getAddOnProperties().getProperty("audio_output").trim().equals("true")
+                        && descriptor.getAddOnProperties().getProperty("audio_usage_descripton") != null
+                        && !descriptor.getAddOnProperties().getProperty("audio_usage_descripton").trim().equals("null")
+                        && !descriptor.getAddOnProperties().getProperty("audio_usage_descripton").trim().isEmpty();
             } catch (NullPointerException e) {
                 return false;
             }

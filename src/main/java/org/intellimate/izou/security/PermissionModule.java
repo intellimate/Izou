@@ -95,8 +95,8 @@ public abstract class PermissionModule extends IzouModule {
      * @param addOn the addon to check
      * @param checkPermission returns true if eligible for registering
      */
-    protected <X extends IzouPermissionException> void registerOrThrow(
-            AddOnModel addOn, Supplier<X> exceptionSupplier, Function<PluginDescriptor, Boolean> checkPermission) {
+    protected <X extends IzouPermissionException> void registerOrThrow(AddOnModel addOn, Supplier<X> exceptionSupplier,
+                                                                       Function<PluginDescriptor, Boolean> checkPermission) {
         getMain().getAddOnManager().getPluginWrapper(addOn)
                 .map(PluginWrapper::getDescriptor)
                 .map(checkPermission)

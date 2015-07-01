@@ -63,11 +63,14 @@ public final class SocketPermissionModule extends PermissionModule {
             return;
 
         Function<PluginDescriptor, Boolean> checkPermission = descriptor -> {
+            if (descriptor.getAddOnProperties() == null)
+                throw new IzouPermissionException("addon_config.properties not found for addon:" + addon);
             try {
-                return descriptor.getAddOnProperties().get("socket_connection") != null
-                        && descriptor.getAddOnProperties().get("socket_connection").equals("true")
-                        && descriptor.getAddOnProperties().get("socket_usage_descripton") != null
-                        && !descriptor.getAddOnProperties().get("socket_usage_descripton").equals("null");
+                return descriptor.getAddOnProperties().getProperty("socket_connection") != null
+                        && descriptor.getAddOnProperties().getProperty("socket_connection").trim().equals("true")
+                        && descriptor.getAddOnProperties().getProperty("socket_usage_descripton") != null
+                        && !descriptor.getAddOnProperties().getProperty("socket_usage_descripton").trim().equals("null")
+                        && !descriptor.getAddOnProperties().getProperty("socket_usage_descripton").trim().isEmpty();
             } catch (NullPointerException e) {
                 return false;
             }

@@ -56,9 +56,8 @@ public final class PermissionManager extends IzouModule {
         } catch (IzouPermissionException ignored) {
             //its just not root
         }
-        for (PermissionModule permissionModule : standardCheck) {
-            if (permissionModule.canCheckPermission(perm))
-                permissionModule.checkPermission(perm, addOnModel);
-        }
+        standardCheck.stream()
+                .filter(permissionModule -> permissionModule.canCheckPermission(perm))
+                .forEach(permissionModule -> permissionModule.checkPermission(perm, addOnModel));
     }
 }
