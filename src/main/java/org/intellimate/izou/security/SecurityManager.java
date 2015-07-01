@@ -4,7 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.main.Main;
-import org.intellimate.izou.security.exceptions.AddonNotFoundException;
 import org.intellimate.izou.security.exceptions.IzouPermissionException;
 import org.intellimate.izou.security.storage.SecureStorage;
 import org.intellimate.izou.support.SystemMail;
@@ -99,25 +98,6 @@ public final class SecurityManager extends java.lang.SecurityManager {
      * @return AddOnModel or IzouPermissionException if the call was made from an AddOn, or null if no AddOn is responsible
      * @throws IzouPermissionException if the AddOnModel is not found
      */
-    public AddOnModel getOrThrowAddOnModelForClassLoader() throws AddonNotFoundException {
-        Class[] classes = getClassContext();
-        for (int i = classes.length - 1; i >= 0; i--) {
-            if (classes[i].getClassLoader() instanceof IzouPluginClassLoader && !classes[i].getName().toLowerCase()
-                    .contains(IzouPluginClassLoader.PLUGIN_PACKAGE_PREFIX_IZOU_SDK)) {
-                ClassLoader classLoader = classes[i].getClassLoader();
-                return main.getAddOnManager().getAddOnForClassLoader(classLoader)
-                        .orElseThrow(() -> new AddonNotFoundException("No AddOn found for ClassLoader: " + classLoader));
-            }
-        }
-        throw new AddonNotFoundException("No AddOn found for ClassLoader: " + classes[0].getClassLoader());
-    }
-
-    /**
-     * Gets the current AddOnModel, that is the AddOnModel for the class loader to which the class belongs that
-     * triggered the security manager call, or throws a IzouPermissionException
-     * @return AddOnModel or IzouPermissionException if the call was made from an AddOn, or null if no AddOn is responsible
-     * @throws IzouPermissionException if the AddOnModel is not found
-     */
     public Optional<AddOnModel> getAddOnModelForClassLoader() {
         Class[] classes = getClassContext();
         for (int i = classes.length - 1; i >= 0; i--) {
@@ -140,8 +120,8 @@ public final class SecurityManager extends java.lang.SecurityManager {
             return;
         }
         secureAccess.doElevated(this::getAddOnModelForClassLoader)
-        .ifPresent(addOnModel ->
-                secureAccess.doElevated(() ->specific.accept(t, addOnModel)));
+            .ifPresent(addOnModel ->
+                    secureAccess.doElevated(() -> specific.accept(t, addOnModel)));
     }
     /**
      * performs some basic checks to determine whether to check the permission
@@ -255,12 +235,10 @@ public final class SecurityManager extends java.lang.SecurityManager {
         if (!shouldCheck()) {
             return;
         }
-        try {
-            AddOnModel addon = getOrThrowAddOnModelForClassLoader();
-            permissionManager.getFilePermissionModule().fileReadCheck(file);
-        } catch (AddonNotFoundException e) {
-            //not an addon
+        if (!getAddOnModelForClassLoader().isPresent()) {
+            return;
         }
+        permissionManager.getFilePermissionModule().fileReadCheck(file);
     }
 
     @Override
