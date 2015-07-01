@@ -66,15 +66,17 @@ public class MixerAspect {
     /**
      * creates the appropriate IzouSoundLine if the request originates from an AddOn.
      * @param lineInfo the lineInfo
+     * @param pjp the PointCut
      * @return an IzouSoundLine if an addon requested the lineInfo
      */
-    static Line createAndRegisterLine(Line.Info lineInfo) throws LineUnavailableException {
+    static Line createAndRegisterLine(Line.Info lineInfo, ProceedingJoinPoint pjp) throws Throwable {
         AddOnModel addOnModel;
-        try {
-            addOnModel = main.getSecurityManager().getOrThrowAddOnModelForClassLoader();
-        } catch (IzouPermissionException e) {
-            logger.debug("the SoundManager will not manage this lineInfo, obtained by system");
-            return AudioSystem.getLine(lineInfo);
+        Optional<AddOnModel> addOnModelForClassLoader = main.getSecurityManager().getAddOnModelForClassLoader();
+        if (!addOnModelForClassLoader.isPresent()) {
+            logger.debug("the SoundManager will not manage this line, obtained by system");
+            return (Line) pjp.proceed();
+        } else {
+            addOnModel = addOnModelForClassLoader.get();
         }
         Class<?> lineClazz = lineInfo.getLineClass();
         IzouSoundLineBaseClass izouSoundLine;
@@ -99,7 +101,7 @@ public class MixerAspect {
     public Object getLineAdvice(ProceedingJoinPoint pjp) throws Throwable {
         Line.Info info = (Line.Info) pjp.getArgs()[0];
         if (AudioSystem.isLineSupported(info)) {
-            return MixerAspect.createAndRegisterLine(info);
+            return MixerAspect.createAndRegisterLine(info, pjp);
         } else {
             throw new IllegalArgumentException("line for info:" + info + "not supported");
         }
