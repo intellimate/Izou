@@ -184,10 +184,12 @@ public class Main {
             securityManagerTemp = null;
             fileLogger.fatal("Security manager already exists", e);
         }
-        try {
-            System.setSecurityManager(securityManagerTemp);
-        } catch (SecurityException e) {
-            fileLogger.fatal("Security manager already exists", e);
+        if (!Boolean.getBoolean("noSecurity")) {
+            try {
+                System.setSecurityManager(securityManagerTemp);
+            } catch (SecurityException e) {
+                fileLogger.fatal("Security manager already exists", e);
+            }
         }
         return securityManagerTemp;
     }
