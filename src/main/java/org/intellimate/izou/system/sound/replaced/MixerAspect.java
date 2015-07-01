@@ -7,7 +7,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.main.Main;
-import org.intellimate.izou.security.exceptions.IzouPermissionException;
+import org.intellimate.izou.security.exceptions.AddonNotFoundException;
 import org.intellimate.izou.system.sound.*;
 
 import javax.sound.sampled.Clip;
@@ -38,7 +38,7 @@ public class MixerAspect {
         AddOnModel addOnModel;
         try {
             addOnModel = main.getSecurityManager().getOrThrowAddOnModelForClassLoader();
-        } catch (IzouPermissionException e) {
+        } catch (AddonNotFoundException e) {
             logger.debug("the SoundManager will not manage this line, obtained by system");
             return line;
         }

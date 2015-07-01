@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.main.Main;
+import org.intellimate.izou.security.exceptions.AddonNotFoundException;
 import org.intellimate.izou.security.exceptions.IzouPermissionException;
 import org.intellimate.izou.security.storage.SecureStorage;
 import org.intellimate.izou.support.SystemMail;
@@ -14,6 +15,7 @@ import java.security.Permission;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 
 /**
@@ -97,17 +99,35 @@ public final class SecurityManager extends java.lang.SecurityManager {
      * @return AddOnModel or IzouPermissionException if the call was made from an AddOn, or null if no AddOn is responsible
      * @throws IzouPermissionException if the AddOnModel is not found
      */
-    public AddOnModel getOrThrowAddOnModelForClassLoader() throws IzouPermissionException {
+    public AddOnModel getOrThrowAddOnModelForClassLoader() throws AddonNotFoundException {
         Class[] classes = getClassContext();
         for (int i = classes.length - 1; i >= 0; i--) {
             if (classes[i].getClassLoader() instanceof IzouPluginClassLoader && !classes[i].getName().toLowerCase()
                     .contains(IzouPluginClassLoader.PLUGIN_PACKAGE_PREFIX_IZOU_SDK)) {
                 ClassLoader classLoader = classes[i].getClassLoader();
                 return main.getAddOnManager().getAddOnForClassLoader(classLoader)
-                        .orElseThrow(() -> new IzouPermissionException("No AddOn found for ClassLoader: " + classLoader));
+                        .orElseThrow(() -> new AddonNotFoundException("No AddOn found for ClassLoader: " + classLoader));
             }
         }
-        throw new IzouPermissionException("No AddOn found for ClassLoader: " + classes[0].getClassLoader());
+        throw new AddonNotFoundException("No AddOn found for ClassLoader: " + classes[0].getClassLoader());
+    }
+
+    /**
+     * Gets the current AddOnModel, that is the AddOnModel for the class loader to which the class belongs that
+     * triggered the security manager call, or throws a IzouPermissionException
+     * @return AddOnModel or IzouPermissionException if the call was made from an AddOn, or null if no AddOn is responsible
+     * @throws IzouPermissionException if the AddOnModel is not found
+     */
+    public Optional<AddOnModel> getAddOnModelForClassLoader() {
+        Class[] classes = getClassContext();
+        for (int i = classes.length - 1; i >= 0; i--) {
+            if (classes[i].getClassLoader() instanceof IzouPluginClassLoader && !classes[i].getName().toLowerCase()
+                    .contains(IzouPluginClassLoader.PLUGIN_PACKAGE_PREFIX_IZOU_SDK)) {
+                ClassLoader classLoader = classes[i].getClassLoader();
+                return main.getAddOnManager().getAddOnForClassLoader(classLoader);
+            }
+        }
+        return Optional.empty();
     }
 
     /**
@@ -119,13 +139,9 @@ public final class SecurityManager extends java.lang.SecurityManager {
         if (!shouldCheck()) {
             return;
         }
-
-        try {
-            AddOnModel addOn = secureAccess.doElevated(this::getOrThrowAddOnModelForClassLoader);
-            secureAccess.doElevated(() -> specific.accept(t, addOn));
-        } catch (Exception e) {
-            //not an addon
-        }
+        secureAccess.doElevated(this::getAddOnModelForClassLoader)
+        .ifPresent(addOnModel ->
+                secureAccess.doElevated(() ->specific.accept(t, addOnModel)));
     }
     /**
      * performs some basic checks to determine whether to check the permission
@@ -242,7 +258,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
         try {
             AddOnModel addon = getOrThrowAddOnModelForClassLoader();
             permissionManager.getFilePermissionModule().fileReadCheck(file);
-        } catch (IzouPermissionException e) {
+        } catch (AddonNotFoundException e) {
             //not an addon
         }
     }

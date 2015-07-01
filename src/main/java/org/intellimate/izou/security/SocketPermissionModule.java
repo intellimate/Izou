@@ -64,7 +64,9 @@ public final class SocketPermissionModule extends PermissionModule {
 
         Function<PluginDescriptor, Boolean> checkPermission = descriptor -> {
             try {
-                return descriptor.getAddOnProperties().get("socket_connection").equals("true")
+                return descriptor.getAddOnProperties().get("socket_connection") != null
+                        && descriptor.getAddOnProperties().get("socket_connection").equals("true")
+                        && descriptor.getAddOnProperties().get("socket_usage_descripton") != null
                         && !descriptor.getAddOnProperties().get("socket_usage_descripton").equals("null");
             } catch (NullPointerException e) {
                 return false;
