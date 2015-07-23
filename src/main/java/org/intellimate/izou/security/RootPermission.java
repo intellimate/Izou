@@ -65,4 +65,24 @@ public class RootPermission extends PermissionModule {
                 + "use socket root connections.";
         registerOrThrow(addon, () -> new IzouSocketPermissionException(exceptionMessage), checkPermission);
     }
+
+    /**
+     * returns true if the AddonModel is root
+     * @param addOnModel the addOnModel to check
+     * @return true if root, false if not
+     */
+    public boolean isRoot(AddOnModel addOnModel) {
+        if (isRegistered(addOnModel)) {
+            return true;
+        }
+        try {
+            if (addOnModel.getPlugin().getDescriptor().getAddOnProperties().get("root").equals("true")) {
+                registerAddOn(addOnModel);
+                return true;
+            }
+        } catch (NullPointerException e) {
+            return false;
+        }
+        return false;
+    }
 }

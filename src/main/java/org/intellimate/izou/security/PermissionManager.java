@@ -42,6 +42,10 @@ public final class PermissionManager extends IzouModule {
         return filePermissionModule;
     }
 
+    public RootPermission getRootPermission() {
+        return rootPermission;
+    }
+
     /**
      * checks the permission
      * @param perm the permission

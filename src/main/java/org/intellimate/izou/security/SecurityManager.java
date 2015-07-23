@@ -238,7 +238,11 @@ public final class SecurityManager extends java.lang.SecurityManager {
         if (!getAddOnModelForClassLoader().isPresent()) {
             return;
         }
-        permissionManager.getFilePermissionModule().fileReadCheck(file);
+        if (!getAddOnModelForClassLoader()
+                .map(permissionManager.getRootPermission()::isRoot)
+                .orElse(false)) {
+            permissionManager.getFilePermissionModule().fileReadCheck(file);
+        }
     }
 
     @Override

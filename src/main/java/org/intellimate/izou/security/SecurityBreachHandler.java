@@ -6,6 +6,8 @@ import org.intellimate.izou.main.Main;
 import org.intellimate.izou.support.SystemMail;
 import org.intellimate.izou.util.IzouModule;
 
+import java.io.File;
+
 /**
  * The SecurityBreachHandler takes action when a security exception is thrown in the security manager to deal with the
  * attempted security breach.
@@ -68,7 +70,7 @@ final class SecurityBreachHandler extends IzouModule {
     private void sendErrorReport(String subject, Exception e, Class[] classesStack) {
         String content = generateContent(e, classesStack);
         String logName = "org.intellimate.izou.log";
-        String logAttachment = getMain().getFileSystemManager().getLogsLocation() + logName;
+        String logAttachment = getMain().getFileSystemManager().getLogsLocation() + File.separator+ logName;
         systemMail.sendMail(toAddress, subject, content, logName, logAttachment);
     }
 

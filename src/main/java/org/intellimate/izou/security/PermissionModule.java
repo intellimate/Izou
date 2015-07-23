@@ -66,7 +66,7 @@ public abstract class PermissionModule extends IzouModule {
      *
      * @param addon the Identifiable to add
      */
-    public void registerAddOn(AddOnModel addon) {
+    public synchronized void registerAddOn(AddOnModel addon) {
         registeredAddOns.add(addon);
     }
 
@@ -76,7 +76,7 @@ public abstract class PermissionModule extends IzouModule {
      * @param addon the identifiable to check
      * @return true if the addOn is registered, else false
      */
-    public boolean isRegistered(AddOnModel addon) {
+    public synchronized boolean isRegistered(AddOnModel addon) {
         return registeredAddOns.contains(addon);
     }
 
