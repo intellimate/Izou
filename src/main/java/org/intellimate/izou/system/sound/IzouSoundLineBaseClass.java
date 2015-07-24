@@ -1,15 +1,16 @@
 package org.intellimate.izou.system.sound;
 
-import org.intellimate.izou.util.IzouModule;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.identification.Identification;
 import org.intellimate.izou.main.Main;
+import org.intellimate.izou.util.IzouModule;
 
 import javax.sound.sampled.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * the base class for every IzouSoundLine, provides basic implementation of the Methods defined int IzouSoundLine and
@@ -39,6 +40,9 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
     private boolean muteIfNonPermanent = true;
     private Consumer<Void> muteCallback = null;
     private Identification responsibleID;
+
+    //debugging, they will be used if they are not null
+    Supplier<Line> debugGetLine = null;
 
     public IzouSoundLineBaseClass(Line line, Main main, boolean isPermanent, AddOnModel addOnModel) {
         super(main, false);
@@ -161,7 +165,12 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
                 if (line != null) {
                     line.open();
                 } else {
-                    Line line = AudioSystem.getLine(info);
+                    Line line;
+                    if (debugGetLine == null) {
+                        line = AudioSystem.getLine(info);
+                    } else {
+                        line = debugGetLine.get();
+                    }
                     newLineInstance(line);
                     this.line.open();
                 }
@@ -432,7 +441,12 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
 
     protected Line internRestoreGet() {
         try {
-            return AudioSystem.getLine(info);
+            if (debugGetLine == null) {
+                return AudioSystem.getLine(info);
+            } else {
+                return debugGetLine.get();
+            }
+
         } catch (LineUnavailableException e) {
             ended = true;
             return null;
