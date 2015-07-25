@@ -123,6 +123,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
             .ifPresent(addOnModel ->
                     secureAccess.doElevated(() -> specific.accept(t, addOnModel)));
     }
+
     /**
      * performs some basic checks to determine whether to check the permission
      * @return true if should be checked, false if not
@@ -243,6 +244,6 @@ public final class SecurityManager extends java.lang.SecurityManager {
 
     @Override
     public void checkWrite(FileDescriptor fd) {
-        check(fd.toString(), permissionManager.getFilePermissionModule()::fileWriteCheck);
+        //check(fd.toString(), permissionManager.getFilePermissionModule()::fileWriteCheck);
     }
 }

@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.security.Permission;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -19,13 +18,10 @@ import java.util.List;
  * @version 1.0
  */
 public class FilePermissionModule extends PermissionModule {
-    private final List<String> allowedReadDirectories;
-    private final List<String> allowedReadFiles;
+    private final List<String> forbiddenReadFiles;
     private final List<File> allowedWriteDirectories;
     private final List<File> forbiddenWriteDirectories;
     private final List<String> forbiddenWriteFilesNames;
-    private final String allowedReadFileTypesRegex;
-    private final String allowedWriteFileTypesRegex;
 
     /**
      * Creates a new PermissionModule
@@ -34,24 +30,11 @@ public class FilePermissionModule extends PermissionModule {
      */
     FilePermissionModule(Main main, SecurityManager securityManager) {
         super(main, securityManager);
-        allowedReadDirectories = new ArrayList<>();
-        allowedReadFiles = new ArrayList<>();
+        forbiddenReadFiles = new ArrayList<>();
         forbiddenWriteDirectories = new ArrayList<>();
         forbiddenWriteFilesNames = new ArrayList<>();
         forbiddenWriteFilesNames.add("addon_config.properties");
-        allowedReadFiles.add("/dev/random");
-        allowedReadFiles.add("/dev/urandom");
         allowedWriteDirectories = new ArrayList<>();
-        allowedReadFileTypesRegex = "(txt|properties|xml|class|json|zip|ds_store|mf|jar|idx|log|dylib|mp3|dylib|certs|"
-                + "so)";
-        allowedWriteFileTypesRegex = "(txt|properties|xml|json|idx|log)";
-        allowedReadDirectories.addAll(Arrays.asList(System.getProperty("java.ext.dirs").split(":")));
-        allowedReadDirectories.add(System.getProperty("java.home"));
-        allowedReadDirectories.add(main.getFileSystemManager().getLogsLocation().getAbsolutePath());
-        allowedReadDirectories.add(main.getFileSystemManager().getPropertiesLocation().getAbsolutePath());
-        allowedReadDirectories.add(main.getFileSystemManager().getResourceLocation().getAbsolutePath());
-        allowedReadDirectories.add(main.getFileSystemManager().getIzouJarLocation().getAbsolutePath());
-        allowedReadDirectories.add(main.getFileSystemManager().getLibLocation().getAbsolutePath());
         allowedWriteDirectories.add(main.getFileSystemManager().getResourceLocation());
         allowedWriteDirectories.add(main.getFileSystemManager().getLogsLocation());
         allowedWriteDirectories.add(main.getFileSystemManager().getPropertiesLocation());
@@ -66,7 +49,6 @@ public class FilePermissionModule extends PermissionModule {
         }
 
         if (Boolean.getBoolean("debug")) {
-            allowedReadDirectories.add(System.getProperty("user.home") + File.separator + ".m2");
             allowedWriteDirectories.add(new File(System.getProperty("user.home") + File.separator + ".m2"));
             allowedWriteDirectories.add(main.getFileSystemManager().getIzouJarLocation());
             allowedWriteDirectories.add(new File(System.getProperty("java.home")));
@@ -120,38 +102,9 @@ public class FilePermissionModule extends PermissionModule {
             throw getException(filePath);
         }
 
-        for (String file : allowedReadFiles) {
-            if (canonicalPath.contains(file)) {
-                return;
-            }
-        }
-
-        boolean allowedDirectory = false;
-        for (String dir : allowedReadDirectories) {
-            if (canonicalPath.contains(dir)) {
-                allowedDirectory = true;
-                break;
-            }
-        }
-        if (!allowedDirectory) {
+        if (forbiddenReadFiles.stream().anyMatch(canonicalPath::startsWith)) {
             throw getException(filePath);
         }
-        /*
-        String[] pathParts = canonicalPath.split(File.separator);
-        String lastPathPart = pathParts[pathParts.length - 1].toLowerCase();
-
-        String[] pathPeriodParts = lastPathPart.split("\\.");
-        String fileExtension = pathPeriodParts[pathPeriodParts.length - 1].toLowerCase();
-
-        if (!getSecurityManager().getSecureAccess().checkForExistingFileOrDirectory(canonicalPath)
-                || getSecurityManager().getSecureAccess().checkForDirectory(canonicalPath)) {
-            return;
-        }
-
-        Pattern pattern = Pattern.compile(allowedReadFileTypesRegex);
-        Matcher matcher = pattern.matcher(fileExtension);
-        if (!matcher.matches() || fileExtension.equals(lastPathPart))
-            throw getException(filePath);*/
     }
 
     /**
@@ -191,11 +144,6 @@ public class FilePermissionModule extends PermissionModule {
                 || getSecurityManager().getSecureAccess().checkForDirectory(request.toString())) {
             return;
         }
-        /*
-        Pattern pattern = Pattern.compile(allowedWriteFileTypesRegex);
-        Matcher matcher = pattern.matcher(Files.getFileExtension(request.toString()));
-        if (!matcher.matches())
-            throw getException(filePath);*/
     }
 
     /**

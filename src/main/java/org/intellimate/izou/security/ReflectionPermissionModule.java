@@ -13,27 +13,27 @@ import java.util.List;
  * The
  */
 public class ReflectionPermissionModule extends PermissionModule {
-    private List<Class> forbiddenReflections;
+    private List<String> forbiddenReflections;
 
     public ReflectionPermissionModule(Main main, SecurityManager securityManager) {
         super(main, securityManager);
         // Security package
         forbiddenReflections = new ArrayList<>();
-        forbiddenReflections.add(AudioPermissionModule.class);
-        forbiddenReflections.add(FilePermissionModule.class);
-        forbiddenReflections.add(PermissionManager.class);
-        forbiddenReflections.add(PermissionModule.class);
-        forbiddenReflections.add(ReflectionPermissionModule.class);
-        forbiddenReflections.add(RootPermission.class);
-        forbiddenReflections.add(SecureAccess.class);
-        forbiddenReflections.add(SecurityBreachHandler.class);
-        forbiddenReflections.add(SecurityManager.class);
-        forbiddenReflections.add(SecurityFunctions.class);
-        forbiddenReflections.add(SocketPermissionModule.class);
+        forbiddenReflections.add(AudioPermissionModule.class.toString());
+        forbiddenReflections.add(FilePermissionModule.class.toString());
+        forbiddenReflections.add(PermissionManager.class.toString());
+        forbiddenReflections.add(PermissionModule.class.toString());
+        forbiddenReflections.add(ReflectionPermissionModule.class.toString());
+        forbiddenReflections.add(RootPermission.class.toString());
+        forbiddenReflections.add(SecureAccess.class.toString());
+        forbiddenReflections.add(SecurityBreachHandler.class.toString());
+        forbiddenReflections.add(SecurityManager.class.toString());
+        forbiddenReflections.add(SecurityFunctions.class.toString());
+        forbiddenReflections.add(SocketPermissionModule.class.toString());
 
         // Other
-        forbiddenReflections.add(AddOnManager.class);
-        forbiddenReflections.add(Main.class);
+        forbiddenReflections.add(AddOnManager.class.toString());
+        forbiddenReflections.add(Main.class.toString());
     }
 
     @Override
@@ -43,9 +43,13 @@ public class ReflectionPermissionModule extends PermissionModule {
 
     @Override
     public void checkPermission(Permission permission, AddOnModel addon) throws SecurityException {
-        for (StackTraceElement elem : Thread.currentThread().getStackTrace()) {
-            if ("Test".equals(elem.getClassName()) && "badSetAccessible".equals(elem.getMethodName())) {
-                throw getException("Reflection not allowed here.");
+        for (Thread thread : Thread.getAllStackTraces().keySet()) {
+            for (StackTraceElement elem : thread.getStackTrace()) {
+                Class self = sun.reflect.Reflection.getCallerClass(1);
+                Class caller = sun.reflect.Reflection.getCallerClass(2);
+                if (self != caller && forbiddenReflections.contains(elem.getMethodName())) {
+                    throw getException("Reflection not allowed here.");
+                }
             }
         }
     }
