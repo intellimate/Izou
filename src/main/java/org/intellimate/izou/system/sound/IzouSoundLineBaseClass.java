@@ -263,7 +263,16 @@ public class IzouSoundLineBaseClass extends IzouModule implements Line, AutoClos
      */
     @Override
     public boolean isControlSupported(Control.Type control) {
-        return line.isControlSupported(control);
+        if(notDisabled) {
+            return line.isControlSupported(control);
+        }
+        if (control.toString().equals(BooleanControl.Type.MUTE.toString())) {
+            return muteSupported;
+        }
+        if (control.toString().equals(FloatControl.Type.MASTER_GAIN.toString())) {
+            return gainSupported;
+        }
+        return false;
     }
 
     /**

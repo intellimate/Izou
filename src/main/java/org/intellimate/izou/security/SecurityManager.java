@@ -127,6 +127,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
      * performs some basic checks to determine whether to check the permission
      * @return true if should be checked, false if not
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean shouldCheck() {
         return !checkForSecureAccess();
     }
@@ -136,6 +137,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
      *
      * @return true if {@link SecureAccess} is included in the current class context, else false
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private boolean checkForSecureAccess() {
         Class[] classContext = getClassContext();
         for (Class clazz : classContext) {

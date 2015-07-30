@@ -188,7 +188,7 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
         boolean finished = false;
         try {
             lock.lock();
-            finished = processing.await(100, TimeUnit.SECONDS);
+            finished = processing.await(2, TimeUnit.MINUTES);
         } catch (InterruptedException e) {
             error("Waiting for OutputPlugins interrupted", e);
         } finally {

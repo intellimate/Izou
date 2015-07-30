@@ -156,7 +156,7 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
      * @throws IllegalArgumentException if Listener is already listening to the Event or the id is not allowed
      */
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    public void unregisterEventListener(EventModel<EventModel> event, EventListenerModel eventListener) throws IllegalArgumentException {
+    public void unregisterEventListener(EventModel<?> event, EventListenerModel eventListener) throws IllegalArgumentException {
         for (String id : event.getAllInformations()) {
             ArrayList<EventListenerModel> listenersList = listeners.get(id);
             if (listenersList == null) {
@@ -244,7 +244,7 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
      * @throws IllegalArgumentException if Listener is already listening to the Event or the id is not allowed
      */
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    public void unregisterEventFinishedListener(EventModel<EventModel> event, EventListenerModel eventListener) throws IllegalArgumentException {
+    public void unregisterEventFinishedListener(EventModel<?> event, EventListenerModel eventListener) throws IllegalArgumentException {
         for (String id : event.getAllInformations()) {
             ArrayList<EventListenerModel> listenersList = finishListeners.get(id);
             if (listenersList == null) {

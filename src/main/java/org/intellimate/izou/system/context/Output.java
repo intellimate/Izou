@@ -61,7 +61,7 @@ public interface Output {
      * @param <X> the return type
      * @return a List of Future-Objects
      */
-    public <T, X> List<CompletableFuture<X>> generateAllOutputExtensions(OutputPluginModel<T, X> outputPlugin,
+    <T, X> List<CompletableFuture<X>> generateAllOutputExtensions(OutputPluginModel<T, X> outputPlugin,
                                                                                    T t, EventModel event);
 
     /**

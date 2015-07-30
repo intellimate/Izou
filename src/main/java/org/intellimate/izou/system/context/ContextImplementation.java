@@ -61,7 +61,6 @@ public class ContextImplementation implements Context {
         this.threadPool = new ThreadPoolImpl();
 
         IzouLogger izouLogger = main.getIzouLogger();
-        ExtendedLogger logger = null;
         if (izouLogger != null)
             this.logger = izouLogger.createFileLogger(addOn.getID(), logLevel);
         else {
