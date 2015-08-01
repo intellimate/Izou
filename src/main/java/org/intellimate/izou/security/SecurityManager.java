@@ -8,7 +8,6 @@ import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.exceptions.IzouPermissionException;
 import org.intellimate.izou.security.storage.SecureStorage;
 import org.intellimate.izou.support.SystemMail;
-import org.intellimate.izou.system.Context;
 import ro.fortsoft.pf4j.IzouPluginClassLoader;
 
 import java.io.FileDescriptor;
@@ -142,6 +141,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
      * performs some basic checks to determine whether to check the permission
      * @return true if should be checked, false if not
      */
+    // TODO: @leander, why does this just invert checkForSecureAccess? do we really need a method for this?
     public boolean shouldCheck() {
         return !checkForSecureAccess();
     }
@@ -171,21 +171,6 @@ public final class SecurityManager extends java.lang.SecurityManager {
         Class[] classContext = getClassContext();
         for (Class clazz : classContext) {
             if (clazz.getClassLoader() instanceof IzouPluginClassLoader) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Checks if the izou context is in the stack
-     *
-     * @return true if the izou context is in the stack
-     */
-    private boolean checkForIzouContextPresence() {
-        Class[] classContext = getClassContext();
-        for (Class clazz : classContext) {
-            if (clazz.equals(Context.class)) {
                 return true;
             }
         }
