@@ -2,11 +2,13 @@ package org.intellimate.izou.security;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.intellimate.izou.addon.AddOnManager;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.exceptions.IzouPermissionException;
 import org.intellimate.izou.security.storage.SecureStorage;
 import org.intellimate.izou.support.SystemMail;
+import org.intellimate.izou.system.Context;
 import ro.fortsoft.pf4j.IzouPluginClassLoader;
 
 import java.io.FileDescriptor;
@@ -23,13 +25,12 @@ import java.util.function.BiConsumer;
  */
 public final class SecurityManager extends java.lang.SecurityManager {
     private static boolean exists = false;
-    private boolean exitPermission = false;
     private final SecureAccess secureAccess;
     private final PermissionManager permissionManager;
-    private final SecureStorage secureStorage;
     private final SystemMail systemMail;
     private final Main main;
     private final List<String> forbiddenProperties;
+    private final List<String> forbiddenPackagesForAddOns;
 
     /**
      * Creates a SecurityManager. There can only be one single SecurityManager, so calling this method twice
@@ -66,7 +67,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
         this.systemMail = systemMail;
         this.main = main;
 
-        secureStorage = SecureStorage.createSecureStorage(main);
+        SecureStorage.createSecureStorage(main);
 
         SecureAccess tempSecureAccess = null;
         try {
@@ -75,13 +76,17 @@ public final class SecurityManager extends java.lang.SecurityManager {
             Logger logger = LogManager.getLogger(this.getClass());
             logger.fatal("Unable to create a SecureAccess object because Izou might be under attack. "
                     + "Exiting now.", e);
-            exitPermission = true;
-            System.exit(1);
+            getSecureAccess().doElevated(() -> System.exit(1));
         }
         permissionManager = new PermissionManager(main, this);
         secureAccess = tempSecureAccess;
         forbiddenProperties = new ArrayList<>();
         forbiddenProperties.add("jdk.lang.process.launchmechanism");
+
+        forbiddenPackagesForAddOns = new ArrayList<>();
+        forbiddenPackagesForAddOns.add(SecurityManager.class.getPackage().getName());
+        forbiddenPackagesForAddOns.add(IzouPermissionException.class.getPackage().getName());
+        forbiddenPackagesForAddOns.add(AddOnManager.class.getPackage().getName());
     }
 
     SecureAccess getSecureAccess() {
@@ -108,6 +113,15 @@ public final class SecurityManager extends java.lang.SecurityManager {
             }
         }
         return Optional.empty();
+    }
+
+    /**
+     * Makes the {@link #getClassContext()} method of the security manager available to the entire package
+     *
+     * @return look at {@link #getClassContext()}
+     */
+    Class[] getClassContextPkg() {
+        return getClassContext();
     }
 
     /**
@@ -149,6 +163,36 @@ public final class SecurityManager extends java.lang.SecurityManager {
     }
 
     /**
+     * Checks if addon components are in the stack (including sdk)
+     *
+     * @return true if addon components are in the stack (meaning they used the current application)
+     */
+    private boolean checkForAddOnAccess() {
+        Class[] classContext = getClassContext();
+        for (Class clazz : classContext) {
+            if (clazz.getClassLoader() instanceof IzouPluginClassLoader) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if the izou context is in the stack
+     *
+     * @return true if the izou context is in the stack
+     */
+    private boolean checkForIzouContextPresence() {
+        Class[] classContext = getClassContext();
+        for (Class clazz : classContext) {
+            if (clazz.equals(Context.class)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Throws an exception with the argument of {@code argument}
      * @param argument what the exception is about (Access denied to (argument goes here))
      */
@@ -157,15 +201,6 @@ public final class SecurityManager extends java.lang.SecurityManager {
         Class[] classStack = getClassContext();
         secureAccess.getBreachHandler().handleBreach(exception, classStack);
         return exception;
-    }
-
-    /**
-     * Gets the {@link SecureStorage} object in Izou
-     *
-     * @return the secure storage object in Izou
-     */
-    public SecureStorage getSecureStorage() {
-        return secureStorage;
     }
 
     @Override
@@ -203,7 +238,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
 
     @Override
     public void checkExit(int status) {
-        if (!exitPermission && !checkForSecureAccess()) {
+        if (!checkForSecureAccess()) {
             throw getException("exit");
         }
     }
@@ -244,6 +279,14 @@ public final class SecurityManager extends java.lang.SecurityManager {
 
     @Override
     public void checkWrite(FileDescriptor fd) {
-        //check(fd.toString(), permissionManager.getFilePermissionModule()::fileWriteCheck);
+        check(fd.toString(), permissionManager.getFilePermissionModule()::fileWriteCheck);
+    }
+
+    @Override
+    public void checkPackageAccess(String pkg) {
+        // Denies addOns access to packages in the list "forbiddenPackagesForAddOns"
+        if (forbiddenPackagesForAddOns.contains(pkg) && (!checkForSecureAccess() && checkForAddOnAccess())) {
+            throw getException("package: " + pkg);
+        }
     }
 }

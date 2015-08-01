@@ -28,6 +28,8 @@ import java.util.HashMap;
  */
 public final class SecureStorage extends IzouModule {
     private static boolean exists = false;
+    private static SecureStorage secureStorage;
+
     private HashMap<SecretKey, SecureContainer> containers;
     private final Logger logger = LogManager.getLogger(this.getClass());
 
@@ -43,10 +45,24 @@ public final class SecureStorage extends IzouModule {
         if (!exists) {
             SecureStorage secureStorage = new SecureStorage(main);
             exists = true;
+            SecureStorage.secureStorage = secureStorage;
             return secureStorage;
         }
 
         throw new IllegalAccessException("Cannot create more than one instance of IzouSecurityManager");
+    }
+
+    /**
+     * Gets the instance of the secure storage object or null if it has not been created yet
+     *
+     * @return the instance of the secure storage object or null if it has not been created yet
+     */
+    public synchronized static SecureStorage getInstance() {
+        if (exists) {
+            return SecureStorage.secureStorage;
+        }
+
+        return null;
     }
 
     /**

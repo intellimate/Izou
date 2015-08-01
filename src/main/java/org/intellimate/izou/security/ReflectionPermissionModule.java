@@ -3,6 +3,7 @@ package org.intellimate.izou.security;
 import org.intellimate.izou.addon.AddOnManager;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.main.Main;
+import ro.fortsoft.pf4j.IzouPluginClassLoader;
 
 import java.lang.reflect.ReflectPermission;
 import java.security.Permission;
@@ -43,13 +44,21 @@ public class ReflectionPermissionModule extends PermissionModule {
 
     @Override
     public void checkPermission(Permission permission, AddOnModel addon) throws SecurityException {
-        for (Thread thread : Thread.getAllStackTraces().keySet()) {
-            for (StackTraceElement elem : thread.getStackTrace()) {
-                Class self = sun.reflect.Reflection.getCallerClass(1);
-                Class caller = sun.reflect.Reflection.getCallerClass(2);
-                if (self != caller && forbiddenReflections.contains(elem.getMethodName())) {
-                    throw getException("Reflection not allowed here.");
-                }
+        boolean reflectionUsedInStack = false;
+        boolean addOnInStack = false;
+
+        SecurityManager securityManager = (SecurityManager) System.getSecurityManager();
+        Class[] classes = securityManager.getClassContextPkg();
+
+        for (Class clazz : classes) {
+            if (clazz.getPackage().getName().toLowerCase().contains("reflect")) {
+                reflectionUsedInStack = true;
+            } else if (clazz.getClassLoader() instanceof IzouPluginClassLoader) {
+                addOnInStack = true;
+            }
+
+            if (reflectionUsedInStack && addOnInStack) {
+                throw getException("reflection");
             }
         }
     }
