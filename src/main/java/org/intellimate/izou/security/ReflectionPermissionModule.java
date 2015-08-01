@@ -18,6 +18,7 @@ public class ReflectionPermissionModule extends PermissionModule {
     public ReflectionPermissionModule(Main main, SecurityManager securityManager) {
         super(main, securityManager);
         // Security package
+        //Leander: I don't think this is a good idea
         forbiddenReflections = new ArrayList<>();
         forbiddenReflections.add(AudioPermissionModule.class);
         forbiddenReflections.add(FilePermissionModule.class);
