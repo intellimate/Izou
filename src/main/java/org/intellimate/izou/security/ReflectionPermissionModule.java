@@ -1,40 +1,29 @@
 package org.intellimate.izou.security;
 
-import org.intellimate.izou.addon.AddOnManager;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.main.Main;
 import ro.fortsoft.pf4j.IzouPluginClassLoader;
 
 import java.lang.reflect.ReflectPermission;
 import java.security.Permission;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
- * The
+ * The ReflectionPermissionModule stops any illegal reflection calls on Izou.
+ * <p>
+ *     For example, if an addOn were to reflect on the secure access class to get root access, then the
+ *     ReflectionPermissionModule would stop that reflection.
+ * </p>
  */
 public class ReflectionPermissionModule extends PermissionModule {
-    private List<String> forbiddenReflections;
 
+    /**
+     * Creates a new ReflectionPermissionModule
+     *
+     * @param main the main class of Izou
+     * @param securityManager the security manager in Izou
+     */
     public ReflectionPermissionModule(Main main, SecurityManager securityManager) {
         super(main, securityManager);
-        // Security package
-        forbiddenReflections = new ArrayList<>();
-        forbiddenReflections.add(AudioPermissionModule.class.toString());
-        forbiddenReflections.add(FilePermissionModule.class.toString());
-        forbiddenReflections.add(PermissionManager.class.toString());
-        forbiddenReflections.add(PermissionModule.class.toString());
-        forbiddenReflections.add(ReflectionPermissionModule.class.toString());
-        forbiddenReflections.add(RootPermission.class.toString());
-        forbiddenReflections.add(SecureAccess.class.toString());
-        forbiddenReflections.add(SecurityBreachHandler.class.toString());
-        forbiddenReflections.add(SecurityManager.class.toString());
-        forbiddenReflections.add(SecurityFunctions.class.toString());
-        forbiddenReflections.add(SocketPermissionModule.class.toString());
-
-        // Other
-        forbiddenReflections.add(AddOnManager.class.toString());
-        forbiddenReflections.add(Main.class.toString());
     }
 
     @Override
