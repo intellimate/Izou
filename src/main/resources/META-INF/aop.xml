@@ -1,6 +1,6 @@
 <aspectj>
     <aspects>
-        <aspect name="org.intellimate.izou.system.sound.replaced.MixerAspect"/>
+        <aspect name="org.intellimate.izou.internal.system.sound.replaced.MixerAspect"/>
     </aspects>
 
     <weaver options="-Xset:weaveJavaxPackages=true -verbose -showWeaveInfo -debug">

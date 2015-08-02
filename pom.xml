@@ -136,7 +136,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>org.intellimate.izou.main.Main</mainClass>
+							<mainClass>org.intellimate.izou.internal.main.Main</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -146,7 +146,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>org.intellimate.izou.main.Main</mainClass>
+                            <mainClass>org.intellimate.izou.internal.main.Main</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

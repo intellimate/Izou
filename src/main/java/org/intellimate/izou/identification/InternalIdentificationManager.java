@@ -1,8 +1,8 @@
 package org.intellimate.izou.identification;
 
-import org.intellimate.izou.util.IzouModule;
+import org.intellimate.izou.internal.util.IzouModule;
 import org.intellimate.izou.addon.AddOnModel;
-import org.intellimate.izou.main.Main;
+import org.intellimate.izou.internal.main.Main;
 import ro.fortsoft.pf4j.IzouPluginClassLoader;
 
 /**

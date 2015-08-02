@@ -1,5 +1,7 @@
 package org.intellimate.izou.system.file;
 
+import org.intellimate.izou.internal.system.file.FilePublisher;
+
 /**
  * FileSubscribers are usually paired with {@link ReloadableFile} objects in the {@link FilePublisher}, where their
  * update method is triggered with a file change pertaining to the reloadable file.

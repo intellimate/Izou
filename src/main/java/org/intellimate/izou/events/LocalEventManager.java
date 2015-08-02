@@ -1,11 +1,11 @@
 package org.intellimate.izou.events;
 
-import org.intellimate.izou.util.IzouModule;
+import org.intellimate.izou.internal.util.IzouModule;
 import org.intellimate.izou.identification.Identification;
 import org.intellimate.izou.identification.IdentificationManager;
 import org.intellimate.izou.identification.IdentificationManagerM;
 import org.intellimate.izou.identification.IllegalIDException;
-import org.intellimate.izou.main.Main;
+import org.intellimate.izou.internal.main.Main;
 
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
