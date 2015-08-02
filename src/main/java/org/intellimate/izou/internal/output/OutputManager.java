@@ -2,9 +2,9 @@ package org.intellimate.izou.internal.output;
 
 import com.google.common.reflect.TypeToken;
 import org.intellimate.izou.events.EventModel;
-import org.intellimate.izou.identification.Identification;
+import org.intellimate.izou.internal.identification.Identification;
+import org.intellimate.izou.internal.identification.IdentificationManagerImpl;
 import org.intellimate.izou.identification.IdentificationManager;
-import org.intellimate.izou.identification.IdentificationManagerM;
 import org.intellimate.izou.identification.IllegalIDException;
 import org.intellimate.izou.internal.main.Main;
 import org.intellimate.izou.output.OutputExtensionModel;
@@ -108,7 +108,7 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
             outputExtensionList.add(outputExtension);
             outputExtensions.put(outputExtension.getPluginId(), outputExtensionList);
         }
-        IdentificationManager.getInstance().getIdentification(outputExtension)
+        IdentificationManagerImpl.getInstance().getIdentification(outputExtension)
                 .ifPresent(id -> outputPlugins.stream()
                         .filter(outputPlugin -> outputPlugin.getID().equals(outputExtension.getPluginId()))
                         .forEach(outputPlugin -> outputPlugin.outputExtensionAdded(id)));
@@ -124,7 +124,7 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
                 this.outputExtensions.get(outputExtension.getPluginId());
         if (outputExtensions != null)
             outputExtensions.remove(outputExtension);
-        IdentificationManager.getInstance().getIdentification(outputExtension)
+        IdentificationManagerImpl.getInstance().getIdentification(outputExtension)
                 .ifPresent(id -> outputPlugins.stream()
                         .filter(outputPlugin -> outputPlugin.getID().equals(outputExtension.getPluginId()))
                         .forEach(outputPlugin -> outputPlugin.outputExtensionRemoved(id)));
@@ -138,7 +138,7 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
      * @param event an Instance of Event
      */
     public void passDataToOutputPlugins(EventModel event) {
-        IdentificationManagerM identificationManager = IdentificationManager.getInstance();
+        IdentificationManager identificationManager = IdentificationManagerImpl.getInstance();
         List<Identification> allIds = outputPlugins.stream()
                 .map(identificationManager::getIdentification)
                 .filter(Optional::isPresent)
@@ -180,7 +180,7 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
             lock.unlock();
         };
 
-        ResourceMinimalImpl<Consumer<Boolean>> resource = IdentificationManager.getInstance().getIdentification(this)
+        ResourceMinimalImpl<Consumer<Boolean>> resource = IdentificationManagerImpl.getInstance().getIdentification(this)
                 .map(id -> new ResourceMinimalImpl<>(outputPlugin.getID(), id, consumer, null))
                 .orElse(new ResourceMinimalImpl<>(outputPlugin.getID(), null, consumer, null));
         event.getListResourceContainer().addResource(resource);
@@ -211,7 +211,7 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
      */
     public List<Identification> getAssociatedOutputExtension(OutputPluginModel<?, ?> outputPlugin) {
         IdentifiableSet<OutputExtensionModel<?, ?>> outputExtensions = this.outputExtensions.get(outputPlugin.getID());
-        IdentificationManagerM identificationManager = IdentificationManager.getInstance();
+        IdentificationManager identificationManager = IdentificationManagerImpl.getInstance();
         return filterType(outputExtensions, outputPlugin).stream()
                 .map(identificationManager::getIdentification)
                 .filter(Optional::isPresent)

@@ -4,7 +4,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.spi.AbstractLogger;
 import org.intellimate.izou.identification.Identifiable;
-import org.intellimate.izou.identification.IdentificationManager;
+import org.intellimate.izou.internal.identification.IdentificationManagerImpl;
 import org.intellimate.izou.internal.main.Main;
 
 /**
@@ -27,7 +27,7 @@ public abstract class IzouModule implements MainProvider, Identifiable {
     public IzouModule(Main main, boolean register) {
         this.main = main;
         if (register) {
-            if (!IdentificationManager.getInstance().registerIdentification(this)) {
+            if (!IdentificationManagerImpl.getInstance().registerIdentification(this)) {
                 log.fatal("unable to register! " + getClass().getCanonicalName());
             }
         }

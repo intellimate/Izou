@@ -4,7 +4,7 @@ import org.intellimate.izou.events.EventModel;
 import org.intellimate.izou.events.EventCallable;
 import org.intellimate.izou.events.EventListenerModel;
 import org.intellimate.izou.events.MultipleEventsException;
-import org.intellimate.izou.identification.Identification;
+import org.intellimate.izou.internal.identification.Identification;
 import org.intellimate.izou.identification.IllegalIDException;
 
 import java.util.List;

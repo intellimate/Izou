@@ -1,5 +1,7 @@
-package org.intellimate.izou.identification;
+package org.intellimate.izou.internal.identification;
 
+import org.intellimate.izou.identification.Identifiable;
+import org.intellimate.izou.internal.identification.Identification;
 import org.intellimate.izou.internal.util.IzouModule;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.internal.main.Main;

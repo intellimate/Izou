@@ -7,8 +7,8 @@ import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.events.EventMinimalImpl;
 import org.intellimate.izou.events.EventModel;
 import org.intellimate.izou.events.EventsControllerModel;
-import org.intellimate.izou.identification.Identification;
-import org.intellimate.izou.identification.IdentificationManager;
+import org.intellimate.izou.internal.identification.Identification;
+import org.intellimate.izou.internal.identification.IdentificationManagerImpl;
 import org.intellimate.izou.internal.main.Main;
 import org.intellimate.izou.internal.resource.ResourceMinimalImpl;
 import ro.fortsoft.pf4j.AspectOrAffected;
@@ -357,7 +357,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
      * @param model the addonModel to mute
      */
     private void mute(AddOnModel model) {
-        IdentificationManager.getInstance()
+        IdentificationManagerImpl.getInstance()
                 .getIdentification(this)
                 .map(id -> new EventMinimalImpl(SoundIDs.MuteEvent.type, id, SoundIDs.MuteEvent.descriptors))
                 .map(eventMinimal -> eventMinimal.addResource(
@@ -381,7 +381,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
                 .filter(Objects::nonNull)
                 .forEach(izouSoundLineBaseClass -> izouSoundLineBaseClass.setMutedFromSystem(false));
 
-        IdentificationManager.getInstance()
+        IdentificationManagerImpl.getInstance()
                 .getIdentification(this)
                 .map(id -> new EventMinimalImpl(SoundIDs.UnMuteEvent.type, id, SoundIDs.UnMuteEvent.descriptors))
                 .ifPresent(event -> getMain().getEventDistributor().fireEventConcurrently(event));

@@ -7,7 +7,7 @@ import org.intellimate.izou.internal.addon.AddOnManager;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.events.EventDistributor;
 import org.intellimate.izou.events.LocalEventManager;
-import org.intellimate.izou.identification.InternalIdentificationManager;
+import org.intellimate.izou.internal.identification.InternalIdentificationManager;
 import org.intellimate.izou.internal.output.OutputManager;
 import org.intellimate.izou.internal.resource.ResourceManager;
 import org.intellimate.izou.internal.security.SecurityManager;

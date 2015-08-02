@@ -1,7 +1,7 @@
 package org.intellimate.izou.resource;
 
 import org.intellimate.izou.identification.Identifiable;
-import org.intellimate.izou.identification.Identification;
+import org.intellimate.izou.internal.identification.Identification;
 
 /**
  * @author Leander Kurscheidt

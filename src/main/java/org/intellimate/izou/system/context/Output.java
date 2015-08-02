@@ -1,7 +1,7 @@
 package org.intellimate.izou.system.context;
 
 import org.intellimate.izou.events.EventModel;
-import org.intellimate.izou.identification.Identification;
+import org.intellimate.izou.internal.identification.Identification;
 import org.intellimate.izou.identification.IllegalIDException;
 import org.intellimate.izou.output.OutputExtensionModel;
 import org.intellimate.izou.output.OutputPluginModel;

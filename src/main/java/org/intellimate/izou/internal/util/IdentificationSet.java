@@ -1,8 +1,8 @@
 package org.intellimate.izou.internal.util;
 
 import org.intellimate.izou.identification.Identifiable;
-import org.intellimate.izou.identification.Identification;
-import org.intellimate.izou.identification.IdentificationManager;
+import org.intellimate.izou.internal.identification.Identification;
+import org.intellimate.izou.internal.identification.IdentificationManagerImpl;
 
 import java.util.*;
 
@@ -99,8 +99,8 @@ public class IdentificationSet<X> extends AbstractSet<X> implements Set<X>, Clon
      */
     private void init() {
         if (placeholder == null) {
-            IdentificationManager.getInstance().registerIdentification(this);
-            Optional<Identification> identification = IdentificationManager.getInstance().getIdentification(this);
+            IdentificationManagerImpl.getInstance().registerIdentification(this);
+            Optional<Identification> identification = IdentificationManagerImpl.getInstance().getIdentification(this);
             if (!identification.isPresent()) {
                 throw new IllegalStateException("Unable to obtain Identification");
             } else {

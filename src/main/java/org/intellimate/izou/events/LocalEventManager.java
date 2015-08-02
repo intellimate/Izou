@@ -1,9 +1,9 @@
 package org.intellimate.izou.events;
 
 import org.intellimate.izou.internal.util.IzouModule;
-import org.intellimate.izou.identification.Identification;
+import org.intellimate.izou.internal.identification.Identification;
+import org.intellimate.izou.internal.identification.IdentificationManagerImpl;
 import org.intellimate.izou.identification.IdentificationManager;
-import org.intellimate.izou.identification.IdentificationManagerM;
 import org.intellimate.izou.identification.IllegalIDException;
 import org.intellimate.izou.internal.main.Main;
 
@@ -26,7 +26,7 @@ public class LocalEventManager extends IzouModule implements Runnable {
 
     public LocalEventManager(Main main) {
         super(main);
-        IdentificationManagerM identificationManager = IdentificationManager.getInstance();
+        IdentificationManager identificationManager = IdentificationManagerImpl.getInstance();
         identificationManager.registerIdentification(this);
         Optional<EventCallable> eventCallable = identificationManager.getIdentification(this)
                 .flatMap(id -> {

@@ -4,8 +4,8 @@ import org.intellimate.izou.activator.ActivatorModel;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.events.*;
 import org.intellimate.izou.identification.Identifiable;
-import org.intellimate.izou.identification.Identification;
-import org.intellimate.izou.identification.IdentificationManager;
+import org.intellimate.izou.internal.identification.Identification;
+import org.intellimate.izou.internal.identification.IdentificationManagerImpl;
 import org.intellimate.izou.identification.IllegalIDException;
 import org.intellimate.izou.internal.main.Main;
 import org.intellimate.izou.output.OutputExtensionModel;
@@ -468,7 +468,7 @@ public class ContextImplementation implements Context {
          */
         @Override
         public Identification getManagerIdentification() {
-            Optional<Identification> identification = IdentificationManager.getInstance()
+            Optional<Identification> identification = IdentificationManagerImpl.getInstance()
                     .getIdentification(main.getLocalEventManager());
             if (!identification.isPresent()) {
                 //should not happen
@@ -552,7 +552,7 @@ public class ContextImplementation implements Context {
              */
             @Override
             public Identification getManagerIdentification() {
-                Optional<Identification> identification = IdentificationManager.getInstance()
+                Optional<Identification> identification = IdentificationManagerImpl.getInstance()
                         .getIdentification(main.getEventDistributor());
                 if (!identification.isPresent()) {
                     //should not happen
@@ -621,7 +621,7 @@ public class ContextImplementation implements Context {
          */
         @Override
         public Identification getManagerIdentification() {
-            Optional<Identification> identification = IdentificationManager.getInstance()
+            Optional<Identification> identification = IdentificationManagerImpl.getInstance()
                     .getIdentification(main.getResourceManager());
             if (!identification.isPresent()) {
                 //should not happen
@@ -660,7 +660,7 @@ public class ContextImplementation implements Context {
          */
         @Override
         public Identification getManagerIdentification() {
-            Optional<Identification> identification = IdentificationManager.getInstance()
+            Optional<Identification> identification = IdentificationManagerImpl.getInstance()
                     .getIdentification(main.getEventDistributor());
             if (!identification.isPresent()) {
                 //should not happen
@@ -695,7 +695,7 @@ public class ContextImplementation implements Context {
          */
         @Override
         public Identification getManagerIdentification() {
-            Optional<Identification> identification = IdentificationManager.getInstance()
+            Optional<Identification> identification = IdentificationManagerImpl.getInstance()
                     .getIdentification(main.getActivatorManager());
             if (!identification.isPresent()) {
                 //should not happen
@@ -781,7 +781,7 @@ public class ContextImplementation implements Context {
          */
         @Override
         public Identification getManagerIdentification() {
-            Optional<Identification> identification = IdentificationManager.getInstance()
+            Optional<Identification> identification = IdentificationManagerImpl.getInstance()
                     .getIdentification(main.getOutputManager());
             if (!identification.isPresent()) {
                 //should not happen

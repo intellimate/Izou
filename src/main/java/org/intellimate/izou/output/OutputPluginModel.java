@@ -3,7 +3,7 @@ package org.intellimate.izou.output;
 import com.google.common.reflect.TypeToken;
 import org.intellimate.izou.events.EventModel;
 import org.intellimate.izou.identification.Identifiable;
-import org.intellimate.izou.identification.Identification;
+import org.intellimate.izou.internal.identification.Identification;
 
 /**
  * The OutputPlugin class gets Event and then starts threads filled with output-extension tasks to create the final

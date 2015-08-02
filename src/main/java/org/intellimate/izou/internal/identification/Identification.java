@@ -1,7 +1,8 @@
-package org.intellimate.izou.identification;
+package org.intellimate.izou.internal.identification;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.intellimate.izou.identification.Identifiable;
 
 /**
  * Used to provide identification.
