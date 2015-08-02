@@ -2,14 +2,12 @@ package org.intellimate.izou.internal.security;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.intellimate.izou.internal.addon.AddOnManager;
 import org.intellimate.izou.addon.AddOnModel;
-import org.intellimate.izou.identification.IdentificationManager;
 import org.intellimate.izou.internal.main.Main;
-import org.intellimate.izou.security.SecurityFunctions;
 import org.intellimate.izou.internal.security.exceptions.IzouPermissionException;
-import org.intellimate.izou.security.storage.SecureStorage;
 import org.intellimate.izou.internal.support.SystemMail;
+import org.intellimate.izou.security.SecurityFunctions;
+import org.intellimate.izou.security.storage.SecureStorage;
 import ro.fortsoft.pf4j.IzouPluginClassLoader;
 
 import java.io.FileDescriptor;
@@ -26,12 +24,13 @@ import java.util.function.BiConsumer;
  */
 public final class SecurityManager extends java.lang.SecurityManager {
     private static boolean exists = false;
+    private static final String INTERNAL_PACKAGE = "org.intellimate.izou.internal";
+
     private final SecureAccess secureAccess;
     private final PermissionManager permissionManager;
     private final SystemMail systemMail;
     private final Main main;
     private final List<String> forbiddenProperties;
-    private final List<String> forbiddenPackagesForAddOns;
 
     /**
      * Creates a SecurityManager. There can only be one single SecurityManager, so calling this method twice
@@ -81,12 +80,6 @@ public final class SecurityManager extends java.lang.SecurityManager {
         secureAccess = tempSecureAccess;
         forbiddenProperties = new ArrayList<>();
         forbiddenProperties.add("jdk.lang.process.launchmechanism");
-
-        forbiddenPackagesForAddOns = new ArrayList<>();
-        forbiddenPackagesForAddOns.add(SecurityManager.class.getPackage().getName());
-        forbiddenPackagesForAddOns.add(IzouPermissionException.class.getPackage().getName());
-        forbiddenPackagesForAddOns.add(AddOnManager.class.getPackage().getName());
-        forbiddenPackagesForAddOns.add(IdentificationManager.class.getPackage().getName());
     }
 
     SecureAccess getSecureAccess() {
@@ -271,7 +264,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
     @Override
     public void checkPackageAccess(String pkg) {
         // Denies addOns access to packages in the list "forbiddenPackagesForAddOns"
-        if (forbiddenPackagesForAddOns.contains(pkg) && (!checkForSecureAccess() && checkForAddOnAccess())) {
+        if (pkg.contains(INTERNAL_PACKAGE) && (!checkForSecureAccess() && checkForAddOnAccess())) {
             throw getException("package: " + pkg);
         }
     }
