@@ -1,6 +1,6 @@
 package org.intellimate.izou.internal.resource;
 
-import org.intellimate.izou.internal.identification.Identification;
+import org.intellimate.izou.identification.Identification;
 import org.intellimate.izou.resource.ResourceModel;
 
 /**

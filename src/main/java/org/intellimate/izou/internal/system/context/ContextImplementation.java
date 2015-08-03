@@ -4,7 +4,7 @@ import org.intellimate.izou.activator.ActivatorModel;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.events.*;
 import org.intellimate.izou.identification.Identifiable;
-import org.intellimate.izou.internal.identification.Identification;
+import org.intellimate.izou.identification.Identification;
 import org.intellimate.izou.internal.identification.IdentificationManagerImpl;
 import org.intellimate.izou.identification.IllegalIDException;
 import org.intellimate.izou.internal.main.Main;
@@ -12,6 +12,7 @@ import org.intellimate.izou.output.OutputExtensionModel;
 import org.intellimate.izou.output.OutputPluginModel;
 import org.intellimate.izou.resource.ResourceModel;
 import org.intellimate.izou.resource.ResourceBuilderModel;
+import org.intellimate.izou.security.storage.SecureStorage;
 import org.intellimate.izou.system.Context;
 import org.intellimate.izou.system.context.*;
 import org.intellimate.izou.system.context.System;
@@ -146,6 +147,18 @@ public class ContextImplementation implements Context {
     @Override
     public System getSystem() {
         return system;
+    }
+
+    /**
+     * Gets the Secure Storage object of Izou. {@link SecureStorage} allows addOns to safely store data so that other
+     * addOns cannot access it. However while the data is encrypted, there is no guarantee that the end user cannot
+     * decrypt the data and access it. So be careful to not store any sensitive information here
+     *
+     * @return the Secure Storage object of Izou
+     */
+    @Override
+    public SecureStorage getSecureStorage() {
+        return main.getSecureStorageManager();
     }
 
     /**

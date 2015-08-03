@@ -3,6 +3,7 @@ package org.intellimate.izou.internal.identification;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.intellimate.izou.identification.Identifiable;
+import org.intellimate.izou.identification.Identification;
 
 /**
  * Used to provide identification.
@@ -10,30 +11,31 @@ import org.intellimate.izou.identification.Identifiable;
  * This object is Immutable.
  */
 //TODO: belongs-to method! (to check if they originate from the same Addon. (related: internal Identification Helper to obtain Addon for Identification etc?)
-public final class Identification {
+public final class IdentificationImpl implements Identification {
     private final Identifiable identifiable;
     private final boolean createdFromInstance;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
-    private Identification(Identifiable identifiable, boolean createdFromInstance) {
+    private IdentificationImpl(Identifiable identifiable, boolean createdFromInstance) {
         this.identifiable = identifiable;
         this.createdFromInstance = createdFromInstance;
     }
 
     protected static Identification createIdentification (Identifiable identifiable) {
         if(identifiable == null) return null;
-        return new Identification(identifiable, false);
+        return new IdentificationImpl(identifiable, false);
     }
 
     protected static Identification createIdentification (Identifiable identifiable, boolean createdFromInstance) {
         if(identifiable == null) return null;
-        return new Identification(identifiable, createdFromInstance);
+        return new IdentificationImpl(identifiable, createdFromInstance);
     }
 
     /**
      * returns the ID of the owner of the Identification
      * @return a String containing the ID
      */
+    @Override
     public String getID() {
         return identifiable.getID();
     }
@@ -69,7 +71,7 @@ public final class Identification {
         if(o instanceof Identifiable) {
             Identifiable that = (Identifiable) o;
             return identifiable.getID().equals(that.getID());
-        } else if (o instanceof Identification) {
+        } else if (o instanceof IdentificationImpl) {
             Identification that = (Identification) o;
             return equals(that);
         } else {

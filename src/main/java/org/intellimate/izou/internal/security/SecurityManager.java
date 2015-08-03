@@ -6,8 +6,7 @@ import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.internal.main.Main;
 import org.intellimate.izou.internal.security.exceptions.IzouPermissionException;
 import org.intellimate.izou.internal.support.SystemMail;
-import org.intellimate.izou.security.SecurityFunctions;
-import org.intellimate.izou.security.storage.SecureStorage;
+import org.intellimate.izou.internal.security.storage.SecureStorageManager;
 import ro.fortsoft.pf4j.IzouPluginClassLoader;
 
 import java.io.FileDescriptor;
@@ -149,7 +148,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
         Class[] classContext = getClassContext();
         for (Class clazz : classContext) {
             if (clazz.equals(SecureAccess.class) || clazz.equals(SecurityBreachHandler.class)
-                    || clazz.equals(SecurityFunctions.class) || clazz.equals(SecureStorage.class)) {
+                    || clazz.equals(SecurityFunctions.class) || clazz.equals(SecureStorageManager.class)) {
                 return true;
             }
         }

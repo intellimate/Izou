@@ -3,7 +3,8 @@ package org.intellimate.izou.internal.addon;
 import org.apache.logging.log4j.Level;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.internal.main.Main;
-import org.intellimate.izou.security.SecurityFunctions;
+import org.intellimate.izou.internal.security.SecurityFunctions;
+import org.intellimate.izou.internal.security.storage.SecureStorageManager;
 import org.intellimate.izou.system.Context;
 import org.intellimate.izou.internal.system.context.ContextImplementation;
 import org.intellimate.izou.internal.util.AddonThreadPoolUser;
@@ -196,7 +197,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
      * depending if one already exists. It then distributes them to each addOn being loaded, and then finaly saves them
      * again.
      * <p>
-     *     This is necessary for the {@link org.intellimate.izou.security.storage.SecureStorage} in order to save
+     *     This is necessary for the {@link SecureStorageManager} in order to save
      *     data matching to each addOn. This secret key serves as key to the data of an addOn being saved. In other
      *     words, each addOn data is matched with the secret key instead of the plugin descriptor itself in order to
      *     avoid serialization of the addon descriptor, which would entail a huge mess. So the secret key of each addOn

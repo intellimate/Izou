@@ -2,7 +2,7 @@ package org.intellimate.izou.internal.output;
 
 import com.google.common.reflect.TypeToken;
 import org.intellimate.izou.events.EventModel;
-import org.intellimate.izou.internal.identification.Identification;
+import org.intellimate.izou.identification.Identification;
 import org.intellimate.izou.internal.identification.IdentificationManagerImpl;
 import org.intellimate.izou.identification.IdentificationManager;
 import org.intellimate.izou.identification.IllegalIDException;

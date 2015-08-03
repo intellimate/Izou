@@ -1,7 +1,7 @@
 package org.intellimate.izou.system.sound;
 
 import org.intellimate.izou.addon.AddOnModel;
-import org.intellimate.izou.internal.identification.Identification;
+import org.intellimate.izou.identification.Identification;
 
 /**
  * use this interface to communicate with Izou. Every Instance of Line you obtain via Mixer.getLine() implements this

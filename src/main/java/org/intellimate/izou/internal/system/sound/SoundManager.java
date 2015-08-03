@@ -1,13 +1,13 @@
 package org.intellimate.izou.internal.system.sound;
 
+import org.intellimate.izou.internal.identification.IdentificationImpl;
 import org.intellimate.izou.system.sound.IzouSoundLine;
 import org.intellimate.izou.internal.util.AddonThreadPoolUser;
 import org.intellimate.izou.internal.util.IzouModule;
 import org.intellimate.izou.addon.AddOnModel;
-import org.intellimate.izou.events.EventMinimalImpl;
+import org.intellimate.izou.internal.events.EventMinimalImpl;
 import org.intellimate.izou.events.EventModel;
 import org.intellimate.izou.events.EventsControllerModel;
-import org.intellimate.izou.internal.identification.Identification;
 import org.intellimate.izou.internal.identification.IdentificationManagerImpl;
 import org.intellimate.izou.internal.main.Main;
 import org.intellimate.izou.internal.resource.ResourceMinimalImpl;
@@ -47,7 +47,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
     private List<WeakReference<IzouSoundLineBaseClass>> permanentLines = null;
     private AddOnModel permanentAddOn = null;
     //gets filled when the event got fired
-    private Identification knownIdentification = null;
+    private IdentificationImpl knownIdentification = null;
     //Addon has 10 sec to obtain an IzouSoundLine
     private LocalDateTime permissionWithoutUsageLimit = null;
     //if true we can do nothing to check whether he closed.
@@ -236,7 +236,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
      * @param nonJava true if it is not using java to play sounds
      * @return trie if registered, false if not
      */
-    public boolean requestPermanent(AddOnModel addOnModel, Identification source, boolean nonJava) {
+    public boolean requestPermanent(AddOnModel addOnModel, IdentificationImpl source, boolean nonJava) {
         debug("requesting permanent for addon: " + addOnModel);
         boolean notUsing = isUsing.compareAndSet(false, true);
         if (!notUsing) {

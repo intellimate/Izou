@@ -3,6 +3,7 @@ package org.intellimate.izou.internal.identification;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.intellimate.izou.identification.Identifiable;
+import org.intellimate.izou.identification.Identification;
 import org.intellimate.izou.identification.IdentificationManager;
 
 import java.util.ArrayList;
@@ -36,7 +37,7 @@ public final class IdentificationManagerImpl implements IdentificationManager {
     public Optional<Identification> getIdentification(Identifiable identifiable) {
         if(identifiables.stream()
                 .anyMatch(listIdentifiable -> listIdentifiable.getID().equals(identifiable.getID()))) {
-            return Optional.of(Identification.createIdentification(identifiable, true));
+            return Optional.of(IdentificationImpl.createIdentification(identifiable, true));
         }
         return Optional.empty();
     }
@@ -56,7 +57,7 @@ public final class IdentificationManagerImpl implements IdentificationManager {
         if(!result.isPresent()) {
             return Optional.empty();
         } else {
-            return Optional.of(Identification.createIdentification(result.get()));
+            return Optional.of(IdentificationImpl.createIdentification(result.get()));
         }
     }
 
@@ -73,5 +74,16 @@ public final class IdentificationManagerImpl implements IdentificationManager {
             return false;
         identifiables.add(identifiable);
         return true;
+    }
+
+    /**
+     * returns true if the Identification is valid, false if not
+     *
+     * @param identification the Identification to test
+     * @return true if valid, false if nit
+     */
+    @Override
+    public boolean verify(Identification identification) {
+        return identification instanceof IdentificationImpl;
     }
 }

@@ -1,6 +1,5 @@
 package org.intellimate.izou.identification;
 
-import org.intellimate.izou.internal.identification.Identification;
 import org.intellimate.izou.internal.identification.IdentificationManagerImpl;
 
 import java.util.Optional;
@@ -41,4 +40,11 @@ public interface IdentificationManager {
      * @return true if registered/already registered or false if the ID is already existing
      */
     boolean registerIdentification(Identifiable identifiable);
+
+    /**
+     * returns true if the Identification is valid, false if not
+     * @param identification the Identification to test
+     * @return true if valid, false if nit
+     */
+    boolean verify(Identification identification);
 }

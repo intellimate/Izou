@@ -5,14 +5,13 @@ import org.apache.logging.log4j.Logger;
 import org.intellimate.izou.internal.activator.ActivatorManager;
 import org.intellimate.izou.internal.addon.AddOnManager;
 import org.intellimate.izou.addon.AddOnModel;
-import org.intellimate.izou.events.EventDistributor;
-import org.intellimate.izou.events.LocalEventManager;
+import org.intellimate.izou.internal.events.EventDistributor;
+import org.intellimate.izou.internal.events.LocalEventManager;
 import org.intellimate.izou.internal.identification.InternalIdentificationManager;
 import org.intellimate.izou.internal.output.OutputManager;
 import org.intellimate.izou.internal.resource.ResourceManager;
 import org.intellimate.izou.internal.security.SecurityManager;
 import org.intellimate.izou.internal.support.SystemMail;
-import org.intellimate.izou.security.storage.SecureStorage;
 import org.intellimate.izou.internal.system.SystemInitializer;
 import org.intellimate.izou.internal.system.file.FileManager;
 import org.intellimate.izou.internal.system.file.FilePublisher;
@@ -21,6 +20,7 @@ import org.intellimate.izou.internal.javafx.JavaFXInitializer;
 import org.intellimate.izou.internal.system.logger.IzouLogger;
 import org.intellimate.izou.internal.system.sound.SoundManager;
 import org.intellimate.izou.internal.threadpool.ThreadPoolManager;
+import org.intellimate.izou.internal.security.storage.SecureStorageManager;
 
 import java.io.IOException;
 import java.util.List;
@@ -50,6 +50,7 @@ public class Main {
     private final SystemInitializer systemInitializer;
     private final SoundManager soundManager;
     private final SystemMail systemMail;
+    private final SecureStorageManager secureStorageManager;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
     private FileSystemManager fileSystemManager;
 
@@ -112,6 +113,8 @@ public class Main {
         soundManager = new SoundManager(this);
 
         fileManager = initFileManager();
+
+        secureStorageManager = new SecureStorageManager(this);
 
         fileLogger.debug("Done initializing.");
         fileLogger.debug("Adding addons..");
@@ -184,12 +187,6 @@ public class Main {
         } catch (IllegalAccessException e) {
             securityManagerTemp = null;
             fileLogger.fatal("Security manager already exists", e);
-        }
-
-        try {
-            SecureStorage.createSecureStorage(this);
-        } catch (IllegalAccessException e) {
-            fileLogger.fatal("SecureStorage already exists", e);
         }
 
         if (!Boolean.getBoolean("noSecurity")) {
@@ -269,6 +266,10 @@ public class Main {
 
     public InternalIdentificationManager getInternalIdentificationManager() {
         return internalIdentificationManager;
+    }
+
+    public SecureStorageManager getSecureStorageManager() {
+        return secureStorageManager;
     }
 
     private SystemInitializer initSystem() {

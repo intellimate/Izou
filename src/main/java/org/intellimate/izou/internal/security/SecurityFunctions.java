@@ -1,4 +1,4 @@
-package org.intellimate.izou.security;
+package org.intellimate.izou.internal.security;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

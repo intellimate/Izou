@@ -1,7 +1,7 @@
 package org.intellimate.izou.events;
 
 import org.intellimate.izou.identification.Identifiable;
-import org.intellimate.izou.internal.identification.Identification;
+import org.intellimate.izou.internal.identification.IdentificationImpl;
 import org.intellimate.izou.resource.ListResourceProvider;
 import org.intellimate.izou.resource.ResourceModel;
 
@@ -25,7 +25,7 @@ public interface EventModel<X extends EventModel> extends Identifiable {
      *
      * @return an identifiable
      */
-    Identification getSource();
+    IdentificationImpl getSource();
 
     /**
      * Returns all the resources the event currently has

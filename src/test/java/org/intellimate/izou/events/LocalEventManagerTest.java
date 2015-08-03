@@ -2,6 +2,7 @@ package org.intellimate.izou.events;
 
 import org.intellimate.izou.identification.Identification;
 import org.intellimate.izou.identification.IdentificationManager;
+import org.intellimate.izou.internal.events.LocalEventManager;
 import org.intellimate.izou.testHelper.IzouTest;
 import org.junit.Test;
 

@@ -1,7 +1,8 @@
 package org.intellimate.izou.internal.util;
 
 import org.intellimate.izou.identification.Identifiable;
-import org.intellimate.izou.internal.identification.Identification;
+import org.intellimate.izou.identification.Identification;
+import org.intellimate.izou.internal.identification.IdentificationImpl;
 import org.intellimate.izou.internal.identification.IdentificationManagerImpl;
 
 import java.util.*;
@@ -248,7 +249,7 @@ public class IdentificationSet<X> extends AbstractSet<X> implements Set<X>, Clon
      * @return the identification or an Empty Optional
      */
     public Optional<Identification> getIdentificationFor(X x) {
-        Identification identification = map.get(x);
+        IdentificationImpl identification = map.get(x);
         if (identification == null || identification.equals(placeholder)) {
             return Optional.empty();
         } else {

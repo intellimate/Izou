@@ -1,6 +1,6 @@
 package org.intellimate.izou.events;
 
-import org.intellimate.izou.internal.identification.Identification;
+import org.intellimate.izou.identification.Identification;
 
 import java.util.HashMap;
 import java.util.List;

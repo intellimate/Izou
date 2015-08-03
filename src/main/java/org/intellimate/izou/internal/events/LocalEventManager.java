@@ -1,7 +1,9 @@
-package org.intellimate.izou.events;
+package org.intellimate.izou.internal.events;
 
+import org.intellimate.izou.events.EventCallable;
+import org.intellimate.izou.events.EventModel;
 import org.intellimate.izou.internal.util.IzouModule;
-import org.intellimate.izou.internal.identification.Identification;
+import org.intellimate.izou.identification.Identification;
 import org.intellimate.izou.internal.identification.IdentificationManagerImpl;
 import org.intellimate.izou.identification.IdentificationManager;
 import org.intellimate.izou.identification.IllegalIDException;

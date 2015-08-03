@@ -1,6 +1,6 @@
 package org.intellimate.izou.system.context;
 
-import org.intellimate.izou.internal.identification.Identification;
+import org.intellimate.izou.identification.Identification;
 import org.intellimate.izou.identification.IllegalIDException;
 import org.intellimate.izou.resource.ResourceModel;
 import org.intellimate.izou.resource.ResourceBuilderModel;

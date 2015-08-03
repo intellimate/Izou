@@ -1,7 +1,5 @@
 package org.intellimate.izou.identification;
 
-import org.intellimate.izou.internal.identification.Identification;
-
 /**
  * Makes a class identifiable by forcing implementations to set an ID.
  */
