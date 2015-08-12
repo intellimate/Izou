@@ -158,15 +158,4 @@ public class LocalEventManager extends IzouModule implements Runnable {
             }
         }
     }
-
-    /**
-     * Exception thrown if there are multiple Events fired at the same time.
-     */
-    @SuppressWarnings("WeakerAccess")
-    @Deprecated
-    public static class MultipleEventsException extends Exception {
-        public MultipleEventsException() {
-            super("Multiple Events fired at the same time");
-        }
-    }
 }
