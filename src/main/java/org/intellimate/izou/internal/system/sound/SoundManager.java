@@ -381,7 +381,8 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
                 .filter(Objects::nonNull)
                 .forEach(izouSoundLineBaseClass -> izouSoundLineBaseClass.setMutedFromSystem(false));
 
-        //TODO: Identification vs IdentificationImpl issue again here, not sure which one to use
+        //TODO: getIdentification returns an Identification, yet the EventMinimalImpl takes a IdentificationImpl which
+        // is the issue..
         IdentificationManagerImpl.getInstance()
                 .getIdentification(this)
                 .map(id -> new EventMinimalImpl(SoundIDs.UnMuteEvent.type, id, SoundIDs.UnMuteEvent.descriptors))
