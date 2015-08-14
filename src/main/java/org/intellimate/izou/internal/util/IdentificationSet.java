@@ -249,6 +249,7 @@ public class IdentificationSet<X> extends AbstractSet<X> implements Set<X>, Clon
      * @return the identification or an Empty Optional
      */
     public Optional<Identification> getIdentificationFor(X x) {
+        // TODO: @Leander, Identification instead of IdentificationImpl?
         IdentificationImpl identification = map.get(x);
         if (identification == null || identification.equals(placeholder)) {
             return Optional.empty();
