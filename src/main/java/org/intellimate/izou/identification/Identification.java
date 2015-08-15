@@ -10,4 +10,10 @@ public interface Identification {
      * @return a String containing the ID
      */
     String getID();
+
+    /**
+     * this method returns whether this Identification Object was created by the owner
+     * @return true if created by the owner, false if not
+     */
+    boolean isCreatedFromInstance();
 }

@@ -4,7 +4,6 @@ import org.intellimate.izou.events.EventBehaviourControllerModel;
 import org.intellimate.izou.events.EventLifeCycle;
 import org.intellimate.izou.events.EventModel;
 import org.intellimate.izou.identification.Identification;
-import org.intellimate.izou.internal.identification.IdentificationImpl;
 import org.intellimate.izou.internal.resource.ListResourceMinimalImpl;
 import org.intellimate.izou.resource.ListResourceProvider;
 import org.intellimate.izou.resource.ResourceModel;
@@ -21,13 +20,13 @@ import java.util.function.Consumer;
  */
 public class EventMinimalImpl implements EventModel<EventMinimalImpl> {
     private final String type;
-    private final IdentificationImpl source;
+    private final Identification source;
     private final List<String> descriptors;
     private final ListResourceProvider listResourceContainer;
     private final Consumer<EventLifeCycle> callback;
     private final EventBehaviourControllerImpl eventBehaviourController;
 
-    public EventMinimalImpl(String type, IdentificationImpl source, List<String> descriptors) {
+    public EventMinimalImpl(String type, Identification source, List<String> descriptors) {
         this.type = type;
         this.source = source;
         this.descriptors = descriptors;
@@ -36,7 +35,7 @@ public class EventMinimalImpl implements EventModel<EventMinimalImpl> {
         eventBehaviourController = new EventBehaviourControllerImpl();
     }
 
-    public EventMinimalImpl(String type, IdentificationImpl source, List<String> descriptors, Consumer<EventLifeCycle> callback) {
+    public EventMinimalImpl(String type, Identification source, List<String> descriptors, Consumer<EventLifeCycle> callback) {
         this.type = type;
         this.source = source;
         this.descriptors = descriptors;
@@ -61,7 +60,7 @@ public class EventMinimalImpl implements EventModel<EventMinimalImpl> {
      * @return an identifiable
      */
     @Override
-    public IdentificationImpl getSource() {
+    public Identification getSource() {
         return source;
     }
 

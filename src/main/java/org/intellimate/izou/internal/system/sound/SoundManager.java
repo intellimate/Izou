@@ -1,16 +1,16 @@
 package org.intellimate.izou.internal.system.sound;
 
-import org.intellimate.izou.internal.identification.IdentificationImpl;
-import org.intellimate.izou.system.sound.IzouSoundLine;
-import org.intellimate.izou.internal.util.AddonThreadPoolUser;
-import org.intellimate.izou.internal.util.IzouModule;
 import org.intellimate.izou.addon.AddOnModel;
-import org.intellimate.izou.internal.events.EventMinimalImpl;
 import org.intellimate.izou.events.EventModel;
 import org.intellimate.izou.events.EventsControllerModel;
+import org.intellimate.izou.identification.Identification;
+import org.intellimate.izou.internal.events.EventMinimalImpl;
 import org.intellimate.izou.internal.identification.IdentificationManagerImpl;
 import org.intellimate.izou.internal.main.Main;
 import org.intellimate.izou.internal.resource.ResourceMinimalImpl;
+import org.intellimate.izou.internal.util.AddonThreadPoolUser;
+import org.intellimate.izou.internal.util.IzouModule;
+import org.intellimate.izou.system.sound.IzouSoundLine;
 import ro.fortsoft.pf4j.AspectOrAffected;
 
 import java.lang.ref.Reference;
@@ -47,7 +47,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
     private List<WeakReference<IzouSoundLineBaseClass>> permanentLines = null;
     private AddOnModel permanentAddOn = null;
     //gets filled when the event got fired
-    private IdentificationImpl knownIdentification = null;
+    private Identification knownIdentificationImpl = null;
     //Addon has 10 sec to obtain an IzouSoundLine
     private LocalDateTime permissionWithoutUsageLimit = null;
     //if true we can do nothing to check whether he closed.
@@ -236,15 +236,15 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
      * @param nonJava true if it is not using java to play sounds
      * @return trie if registered, false if not
      */
-    public boolean requestPermanent(AddOnModel addOnModel, IdentificationImpl source, boolean nonJava) {
+    public boolean requestPermanent(AddOnModel addOnModel, Identification source, boolean nonJava) {
         debug("requesting permanent for addon: " + addOnModel);
         boolean notUsing = isUsing.compareAndSet(false, true);
         if (!notUsing) {
             debug("already used by " + permanentAddOn);
             synchronized (permanentUserReadWriteLock) {
                 if (permanentAddOn.equals(addOnModel)) {
-                    if (knownIdentification == null)
-                        knownIdentification = source;
+                    if (knownIdentificationImpl == null)
+                        knownIdentificationImpl = source;
                     return true;
                 }
                 if (permissionWithoutUsageLimit != null && permissionWithoutUsageLimit.isBefore(LocalDateTime.now())) {
@@ -257,7 +257,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
         }
         synchronized (permanentUserReadWriteLock) {
             permanentAddOn = addOnModel;
-            knownIdentification = source;
+            knownIdentificationImpl = source;
             isUsingNonJava = nonJava;
             permissionWithoutUsageLimit = null;
             if (permissionWithoutUsageCloseThread != null)
@@ -301,7 +301,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
             return;
         synchronized (permanentUserReadWriteLock) {
             permanentAddOn = null;
-            knownIdentification = null;
+            knownIdentificationImpl = null;
             if (permanentLines != null) {
                 permanentLines.forEach(weakReferenceLine -> {
                     if (weakReferenceLine.get() != null)
@@ -316,8 +316,8 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
     }
 
     private void firePermanentEndedNotification() {
-        if (knownIdentification != null) {
-            EventModel event = new EventMinimalImpl(SoundIDs.EndedEvent.type, knownIdentification, SoundIDs.EndedEvent.descriptors);
+        if (knownIdentificationImpl != null) {
+            EventModel event = new EventMinimalImpl(SoundIDs.EndedEvent.type, knownIdentificationImpl, SoundIDs.EndedEvent.descriptors);
             getMain().getEventDistributor().fireEventConcurrently(event);
         }
     }
@@ -404,19 +404,13 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
                 !event.containsDescriptor(SoundIDs.EndedEvent.descriptor))
             return true;
         if (event.containsDescriptor(SoundIDs.StartEvent.descriptor)) {
-            AddOnModel addOnModel = getMain().getInternalIdentificationManager().getAddonModel(event.getSource());
-            if (addOnModel == null) {
-                error("no AddonModel found for event: " + event);
-                return true;
-            }
-            return requestPermanent(addOnModel, event.getSource(), event.containsDescriptor(SoundIDs.StartEvent.isUsingNonJava));
+            getMain().getInternalIdentificationManager().getAddonModel(event.getSource())
+                    .map(addOnModel -> requestPermanent(addOnModel, event.getSource(),
+                            event.containsDescriptor(SoundIDs.StartEvent.isUsingNonJava)))
+                    .orElse(true);
         } else {
-            AddOnModel addOnModel = getMain().getInternalIdentificationManager().getAddonModel(event.getSource());
-            if (addOnModel == null) {
-                error("no AddonModel found for event: " + event);
-                return true;
-            }
-            endPermanent(addOnModel);
+            getMain().getInternalIdentificationManager().getAddonModel(event.getSource())
+                    .ifPresent(this::endPermanent);
         }
         return true;
     }

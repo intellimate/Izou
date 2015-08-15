@@ -2,7 +2,6 @@ package org.intellimate.izou.internal.util;
 
 import org.intellimate.izou.identification.Identifiable;
 import org.intellimate.izou.identification.Identification;
-import org.intellimate.izou.internal.identification.IdentificationImpl;
 import org.intellimate.izou.internal.identification.IdentificationManagerImpl;
 
 import java.util.*;
@@ -15,9 +14,9 @@ import java.util.*;
  * @version 1.0
  */
 public class IdentificationSet<X> extends AbstractSet<X> implements Set<X>, Cloneable, Identifiable {
-    private HashMap<X, Identification> map;
+    private HashMap<X, org.intellimate.izou.identification.Identification> map;
     private boolean allowElementsWithoutIdentification = false;
-    private static Identification placeholder = null;
+    private static org.intellimate.izou.identification.Identification placeholder = null;
 
     /**
      * Constructs a new, empty set;
@@ -101,7 +100,7 @@ public class IdentificationSet<X> extends AbstractSet<X> implements Set<X>, Clon
     private void init() {
         if (placeholder == null) {
             IdentificationManagerImpl.getInstance().registerIdentification(this);
-            Optional<Identification> identification = IdentificationManagerImpl.getInstance().getIdentification(this);
+            Optional<org.intellimate.izou.identification.Identification> identification = IdentificationManagerImpl.getInstance().getIdentification(this);
             if (!identification.isPresent()) {
                 throw new IllegalStateException("Unable to obtain Identification");
             } else {
@@ -194,7 +193,7 @@ public class IdentificationSet<X> extends AbstractSet<X> implements Set<X>, Clon
      * @param identification the identification
      * @return true if this set did not already contain the specified element
      */
-    public boolean add(X x, Identification identification) {
+    public boolean add(X x, org.intellimate.izou.identification.Identification identification) {
         return map.put(x, identification) == null;
     }
 
@@ -236,7 +235,7 @@ public class IdentificationSet<X> extends AbstractSet<X> implements Set<X>, Clon
     public Object clone() {
         try {
             IdentificationSet<X> newSet = (IdentificationSet<X>) super.clone();
-            newSet.map = (HashMap<X, Identification>) map.clone();
+            newSet.map = (HashMap<X, org.intellimate.izou.identification.Identification>) map.clone();
             return newSet;
         } catch (CloneNotSupportedException e) {
             throw new InternalError();
@@ -248,9 +247,8 @@ public class IdentificationSet<X> extends AbstractSet<X> implements Set<X>, Clon
      * @param x the Element
      * @return the identification or an Empty Optional
      */
-    public Optional<Identification> getIdentificationFor(X x) {
-        // TODO: @Leander, Identification instead of IdentificationImpl?
-        IdentificationImpl identification = map.get(x);
+    public Optional<org.intellimate.izou.identification.Identification> getIdentificationFor(X x) {
+        Identification identification = map.get(x);
         if (identification == null || identification.equals(placeholder)) {
             return Optional.empty();
         } else {

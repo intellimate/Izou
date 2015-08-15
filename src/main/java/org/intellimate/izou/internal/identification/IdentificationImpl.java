@@ -3,7 +3,6 @@ package org.intellimate.izou.internal.identification;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.intellimate.izou.identification.Identifiable;
-import org.intellimate.izou.identification.Identification;
 
 /**
  * Used to provide identification.
@@ -11,7 +10,7 @@ import org.intellimate.izou.identification.Identification;
  * This object is Immutable.
  */
 //TODO: belongs-to method! (to check if they originate from the same Addon. (related: internal Identification Helper to obtain Addon for Identification etc?)
-public final class IdentificationImpl implements Identification {
+public final class IdentificationImpl implements org.intellimate.izou.identification.Identification {
     private final Identifiable identifiable;
     private final boolean createdFromInstance;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
@@ -21,12 +20,12 @@ public final class IdentificationImpl implements Identification {
         this.createdFromInstance = createdFromInstance;
     }
 
-    protected static Identification createIdentification (Identifiable identifiable) {
+    protected static org.intellimate.izou.identification.Identification createIdentification (Identifiable identifiable) {
         if(identifiable == null) return null;
         return new IdentificationImpl(identifiable, false);
     }
 
-    protected static Identification createIdentification (Identifiable identifiable, boolean createdFromInstance) {
+    protected static org.intellimate.izou.identification.Identification createIdentification (Identifiable identifiable, boolean createdFromInstance) {
         if(identifiable == null) return null;
         return new IdentificationImpl(identifiable, createdFromInstance);
     }
@@ -61,7 +60,7 @@ public final class IdentificationImpl implements Identification {
      * @param identification an instance of identification
      * @return true if they equal, false if not
      */
-    public boolean equals(Identification identification) {
+    public boolean equals(org.intellimate.izou.identification.Identification identification) {
         return getID().equals(identification.getID());
     }
 
@@ -72,7 +71,7 @@ public final class IdentificationImpl implements Identification {
             Identifiable that = (Identifiable) o;
             return identifiable.getID().equals(that.getID());
         } else if (o instanceof IdentificationImpl) {
-            Identification that = (Identification) o;
+            org.intellimate.izou.identification.Identification that = (org.intellimate.izou.identification.Identification) o;
             return equals(that);
         } else {
             return false;
