@@ -85,7 +85,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
                 })
                 .collect(Collectors.toList());
         try {
-            timeOut(futures, 1000);
+            timeOut(futures, 30000);
         } catch (InterruptedException e) {
             debug("interrupted while trying to time out the addOns", e);
         }
@@ -97,7 +97,8 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
      */
     private List<AddOnModel> loadAddOns() {
         debug("searching for addons in: " + getMain().getFileSystemManager().getLibLocation());
-        PluginManager pluginManager = new DefaultPluginManager(getMain().getFileSystemManager().getLibLocation(), new ArrayList<>(aspectOrAffectedSet));
+        PluginManager pluginManager = new DefaultPluginManager(getMain().getFileSystemManager().getLibLocation(),
+                new ArrayList<>(aspectOrAffectedSet));
         // load the plugins
         debug("loading plugins");
         pluginManager.loadPlugins();

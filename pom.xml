@@ -133,13 +133,13 @@
             <plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifest>
-							<mainClass>org.intellimate.izou.main.Main</mainClass>
-						</manifest>
-					</archive>
-				</configuration>
+				<!--<configuration>-->
+					<!--<archive>-->
+						<!--<manifest>-->
+							<!--<mainClass>org.intellimate.izou.main.Main</mainClass>-->
+						<!--</manifest>-->
+					<!--</archive>-->
+				<!--</configuration>-->
 			</plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>

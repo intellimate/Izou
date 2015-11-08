@@ -12,9 +12,7 @@
         <Logger name="org.intellimate.izou" level="debug">
             <!--<AppenderRef ref="fileAppender"/>-->
             <AppenderRef ref="CONSOLE"/>
-        </Logger>
-        <Root level="warn">
             <AppenderRef ref="fileAppender"/>
-        </Root>
+        </Logger>
     </Loggers>
 </Configuration>

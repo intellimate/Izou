@@ -284,7 +284,11 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
      */
     private boolean checkEventsControllers(EventModel event) {
         List<CompletableFuture<Boolean>> collect = eventsControllers.stream()
-                .map(controller -> submit(() -> controller.controlEventDispatcher(event)))
+                .map(controller -> submit(() -> controller.controlEventDispatcher(event)).thenApply(result -> {
+                    if (!result)
+                        debug("Event: " + event + " is canceled by " + controller.getID());
+                    return result;
+                }))
                 .collect(Collectors.toList());
         try {
             collect = timeOut(collect, 1000);
