@@ -174,7 +174,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
                     firePermanentEndedNotification();
                     endPermanent(permanentAddOn);
                 } catch (InterruptedException ignored) {
-                    ignored.printStackTrace();
+                    //ignored.printStackTrace();
                 }
             });
         }
