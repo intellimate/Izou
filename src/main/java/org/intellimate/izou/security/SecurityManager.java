@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.intellimate.izou.addon.AddOnManager;
 import org.intellimate.izou.addon.AddOnModel;
+import org.intellimate.izou.identification.IdentificationManager;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.exceptions.IzouPermissionException;
 import org.intellimate.izou.security.storage.SecureStorage;
@@ -87,6 +88,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
         forbiddenPackagesForAddOns.add(SecurityManager.class.getPackage().getName());
         forbiddenPackagesForAddOns.add(IzouPermissionException.class.getPackage().getName());
         forbiddenPackagesForAddOns.add(AddOnManager.class.getPackage().getName());
+        forbiddenPackagesForAddOns.add(IdentificationManager.class.getPackage().getName());
     }
 
     SecureAccess getSecureAccess() {
