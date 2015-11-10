@@ -245,15 +245,18 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
                     if (knownIdentification == null)
                         knownIdentification = source;
                     return true;
-                }
-                if (permissionWithoutUsageLimit != null && permissionWithoutUsageLimit.isBefore(LocalDateTime.now())) {
-                    endWaitingForUsage();
                 } else {
-                    return false;
+                    endPermanent(permanentAddOn);
+                    addAsPermanent(addOnModel, source, nonJava);
                 }
-                permanentAddOn = addOnModel;
             }
+        } else {
+            addAsPermanent(addOnModel, source, nonJava);
         }
+        return true;
+    }
+
+    protected void addAsPermanent(AddOnModel addOnModel, Identification source, boolean nonJava) {
         synchronized (permanentUserReadWriteLock) {
             permanentAddOn = addOnModel;
             knownIdentification = source;
@@ -288,7 +291,6 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
                 }
             }
         }
-        return true;
     }
 
     /**
