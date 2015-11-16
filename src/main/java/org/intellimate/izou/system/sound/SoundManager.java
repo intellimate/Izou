@@ -1,15 +1,16 @@
 package org.intellimate.izou.system.sound;
 
-import org.intellimate.izou.util.AddonThreadPoolUser;
-import org.intellimate.izou.util.IzouModule;
 import org.intellimate.izou.addon.AddOnModel;
+import org.intellimate.izou.events.EventListenerModel;
 import org.intellimate.izou.events.EventMinimalImpl;
 import org.intellimate.izou.events.EventModel;
-import org.intellimate.izou.events.EventsControllerModel;
 import org.intellimate.izou.identification.Identification;
 import org.intellimate.izou.identification.IdentificationManager;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.resource.ResourceMinimalImpl;
+import org.intellimate.izou.resource.ResourceModel;
+import org.intellimate.izou.util.AddonThreadPoolUser;
+import org.intellimate.izou.util.IzouModule;
 import ro.fortsoft.pf4j.AspectOrAffected;
 
 import java.lang.ref.Reference;
@@ -35,7 +36,7 @@ import java.util.stream.Collectors;
  */
 //TODO: native sound code enforcing (mute, stop(?) etc.
 //TODO: we must enforce sequential access (only one addon can defacto play sound). We can hide this using the IzouSoundLines (closing and opening the underlying lines).
-public class SoundManager extends IzouModule implements AddonThreadPoolUser, EventsControllerModel {
+public class SoundManager extends IzouModule implements AddonThreadPoolUser, EventListenerModel {
     //non-permanent and general fields
     private ConcurrentHashMap<AddOnModel, List<WeakReference<IzouSoundLineBaseClass>>> nonPermanent = new ConcurrentHashMap<>();
     //not null if this AddOn is currently muting the others Lines
@@ -57,7 +58,8 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
 
     public SoundManager(Main main) {
         super(main);
-        main.getEventDistributor().registerEventsController(this);
+        main.getEventDistributor().registerEventListener(Arrays.asList(SoundIDs.StartEvent.descriptor,
+                SoundIDs.EndedEvent.descriptor), this);
 
         URL mixerURL = this.getClass().getClassLoader().getResource("org/intellimate/izou/system/sound/replaced/MixerAspect.class");
         AspectOrAffected mixer = new AspectOrAffected(mixerURL,
@@ -233,9 +235,8 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
      * @param addOnModel the AddonModel to register
      * @param source the Source which requested the usage
      * @param nonJava true if it is not using java to play sounds
-     * @return trie if registered, false if not
      */
-    public boolean requestPermanent(AddOnModel addOnModel, Identification source, boolean nonJava) {
+    public void requestPermanent(AddOnModel addOnModel, Identification source, boolean nonJava) {
         debug("requesting permanent for addon: " + addOnModel);
         boolean notUsing = isUsing.compareAndSet(false, true);
         if (!notUsing) {
@@ -244,7 +245,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
                 if (permanentAddOn.equals(addOnModel)) {
                     if (knownIdentification == null)
                         knownIdentification = source;
-                    return true;
+                    return;
                 } else {
                     endPermanent(permanentAddOn);
                     addAsPermanent(addOnModel, source, nonJava);
@@ -253,7 +254,6 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
         } else {
             addAsPermanent(addOnModel, source, nonJava);
         }
-        return true;
     }
 
     protected void addAsPermanent(AddOnModel addOnModel, Identification source, boolean nonJava) {
@@ -389,34 +389,38 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
     }
 
     /**
-     * Controls whether the fired Event should be dispatched to all the listeners
-     * <p>
-     * This method should execute quickly.
-     * </p>
+     * Invoked when an activator-event occurs.
      *
-     * @param event the ID of the event
-     * @return true if events should be dispatched
+     * @param event an instance of Event
      */
     @Override
-    public boolean controlEventDispatcher(EventModel event) {
-        if (!event.containsDescriptor(SoundIDs.StartEvent.descriptor) &&
-                !event.containsDescriptor(SoundIDs.EndedEvent.descriptor))
-            return true;
+    public void eventFired(EventModel event) {
         if (event.containsDescriptor(SoundIDs.StartEvent.descriptor)) {
-            AddOnModel addOnModel = getMain().getInternalIdentificationManager().getAddonModel(event.getSource());
-            if (addOnModel == null) {
-                error("no AddonModel found for event: " + event);
-                return true;
+            Identification identification = event.getListResourceContainer().provideResource("izou.common.resource.selector").stream()
+                    .map(ResourceModel::getResource)
+                    .filter(resource -> resource instanceof Identification)
+                    .map(resource -> (Identification) resource)
+                    .findFirst()
+                    .orElseGet(event::getSource);
+
+            AddOnModel addonModel = getMain().getInternalIdentificationManager().getAddonModel(identification);
+
+            if (addonModel != null) {
+                requestPermanent(addonModel,
+                        event.getSource(), event.containsDescriptor(SoundIDs.StartEvent.isUsingNonJava));
             }
-            return requestPermanent(addOnModel, event.getSource(), event.containsDescriptor(SoundIDs.StartEvent.isUsingNonJava));
+
         } else {
-            AddOnModel addOnModel = getMain().getInternalIdentificationManager().getAddonModel(event.getSource());
-            if (addOnModel == null) {
-                error("no AddonModel found for event: " + event);
-                return true;
+            Identification identification = event.getListResourceContainer().provideResource("izou.common.resource.selector").stream()
+                    .map(ResourceModel::getResource)
+                    .filter(resource -> resource instanceof Identification)
+                    .map(resource -> (Identification) resource)
+                    .findFirst()
+                    .orElseGet(event::getSource);
+            AddOnModel addonModel = getMain().getInternalIdentificationManager().getAddonModel(identification);
+            if (addonModel != null) {
+                endPermanent(addonModel);
             }
-            endPermanent(addOnModel);
         }
-        return true;
     }
 }
