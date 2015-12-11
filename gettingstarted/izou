@@ -1,0 +1,18 @@
+#!/bin/bash
+# Izou
+#
+# description: Run Izou
+
+case $1 in
+    start)
+        /bin/bash /usr/local/bin/izou-start.sh
+    ;;
+    stop)
+        /bin/bash /usr/local/bin/izou-stop.sh
+    ;;
+    restart)
+        /bin/bash /usr/local/bin/izou-stop.sh
+        /bin/bash /usr/local/bin/izou-start.sh
+    ;;
+esac
+exit 0
