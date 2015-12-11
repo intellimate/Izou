@@ -1,3 +1,3 @@
 #!/bin/bash
 
-java -jar /home/izou/izou.jar -DnoSecurity=true
+java -jar -DnoSecurity=true /home/izou/izou.jar
