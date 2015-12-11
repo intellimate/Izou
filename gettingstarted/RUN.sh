@@ -6,4 +6,4 @@ mv izou-start.sh /usr/local/bin/
 mv izou-stop.sh /usr/local/bin/
 mv izou /etc/init.d
 
-update-rc.d myapp defaults
+update-rc.d izou defaults
