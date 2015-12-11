@@ -12,8 +12,10 @@
         <Logger name="org.intellimate.izou" level="debug">
             <!--<AppenderRef ref="fileAppender"/>-->
             <AppenderRef ref="CONSOLE"/>
+            <AppenderRef ref="fileAppender"/>
         </Logger>
-        <Root level="warn">
+        <Root level="error">
+            <AppenderRef ref="CONSOLE"/>
             <AppenderRef ref="fileAppender"/>
         </Root>
     </Loggers>

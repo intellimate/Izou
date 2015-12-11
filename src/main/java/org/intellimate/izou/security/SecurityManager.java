@@ -29,6 +29,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
     private final PermissionManager permissionManager;
     private final SystemMail systemMail;
     private final Main main;
+    //TODO Design: move to other class
     private final List<String> forbiddenProperties;
     private final List<String> forbiddenPackagesForAddOns;
 

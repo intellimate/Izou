@@ -168,7 +168,7 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
     }
 
     private void processOutputPlugin(EventModel event, OutputPluginModel outputPlugin) {
-        debug("processing outputPlugin: " + outputPlugin.getID() + " for event: " + event.getDescriptors().toString());
+        //debug("processing outputPlugin: " + outputPlugin.getID() + " for event: " + event.getDescriptors().toString());
         final Lock lock = new ReentrantLock();
         final Condition processing = lock.newCondition();
 
@@ -195,7 +195,7 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
             lock.unlock();
         }
         if (finished) {
-            debug("OutputPlugin: " + outputPlugin.getID() + " finished");
+            //debug("OutputPlugin: " + outputPlugin.getID() + " finished");
         } else {
             error("OutputPlugin: " + outputPlugin.getID() + " timed out");
         }
