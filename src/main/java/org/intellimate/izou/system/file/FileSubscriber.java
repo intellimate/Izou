@@ -8,5 +8,5 @@ public interface FileSubscriber {
     /**
      * Method that is called when a file pertaining to a reloadableFile is changed.
      */
-    public void update();
+    void update();
 }
