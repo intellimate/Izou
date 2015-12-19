@@ -324,7 +324,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
                     .getIdentification(this)
                     .map(id -> new EventMinimalImpl(SoundIDs.StopEvent.type, id, SoundIDs.StopEvent.descriptors))
                     .map(eventMinimal -> eventMinimal.addResource(
-                            new ResourceMinimalImpl<>(SoundIDs.StopEvent.resourceSelector, eventMinimal.getSource(), knownIdentification, null)))
+                            new ResourceMinimalImpl<>(SoundIDs.StopEvent.resourceSelector, eventMinimal.getSource(), identification, null)))
                     .ifPresent(event -> getMain().getEventDistributor().fireEventConcurrently(event));
         }
     }
