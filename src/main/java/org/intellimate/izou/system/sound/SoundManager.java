@@ -58,7 +58,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
 
     public SoundManager(Main main) {
         super(main);
-        main.getEventDistributor().registerEventListener(Arrays.asList(SoundIDs.StartEvent.descriptor,
+        main.getEventDistributor().registerEventListener(Arrays.asList(SoundIDs.StartEvent.descriptor, SoundIDs.StartRequest.descriptor,
                 SoundIDs.EndedEvent.descriptor), this);
 
         URL mixerURL = this.getClass().getClassLoader().getResource("org/intellimate/izou/system/sound/replaced/MixerAspect.class");
@@ -401,6 +401,17 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
                 .ifPresent(event -> getMain().getEventDistributor().fireEventConcurrently(event));
     }
 
+    private void checkAndUpdateIdentification(Identification identification) {
+        AddOnModel addonModel = getMain().getInternalIdentificationManager().getAddonModel(identification);
+        if (permanentAddOn.equals(addonModel)) {
+            synchronized (permanentUserReadWriteLock) {
+                if (permanentAddOn.equals(addonModel)) {
+                    knownIdentification = identification;
+                }
+            }
+        }
+    }
+
     /**
      * Invoked when an activator-event occurs.
      *
@@ -408,7 +419,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
      */
     @Override
     public void eventFired(EventModel event) {
-        if (event.containsDescriptor(SoundIDs.StartEvent.descriptor)) {
+        if (event.containsDescriptor(SoundIDs.StartRequest.descriptor)) {
             Identification identification = event.getListResourceContainer().provideResource("izou.common.resource.selector").stream()
                     .map(ResourceModel::getResource)
                     .filter(resource -> resource instanceof Identification)
@@ -423,6 +434,8 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
                         event.getSource(), event.containsDescriptor(SoundIDs.StartEvent.isUsingNonJava));
             }
 
+        } else if (event.containsDescriptor(SoundIDs.StartRequest.descriptor)) {
+            checkAndUpdateIdentification(event.getSource());
         } else {
             Identification identification = event.getListResourceContainer().provideResource("izou.common.resource.selector").stream()
                     .map(ResourceModel::getResource)
