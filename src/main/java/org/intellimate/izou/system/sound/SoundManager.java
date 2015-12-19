@@ -434,7 +434,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
                         event.getSource(), event.containsDescriptor(SoundIDs.StartEvent.isUsingNonJava));
             }
 
-        } else if (event.containsDescriptor(SoundIDs.StartRequest.descriptor)) {
+        } else if (event.containsDescriptor(SoundIDs.StartEvent.descriptor)) {
             checkAndUpdateIdentification(event.getSource());
         } else {
             Identification identification = event.getListResourceContainer().provideResource("izou.common.resource.selector").stream()
