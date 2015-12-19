@@ -242,7 +242,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
         if (!notUsing) {
             debug("already used by " + permanentAddOn);
             synchronized (permanentUserReadWriteLock) {
-                if (permanentAddOn.equals(addOnModel)) {
+                if (permanentAddOn != null && permanentAddOn.equals(addOnModel)) {
                     if (knownIdentification == null)
                         knownIdentification = source;
                     return;
