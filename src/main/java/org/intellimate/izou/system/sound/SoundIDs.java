@@ -34,4 +34,10 @@ public class SoundIDs {
         public static final List<String> descriptors = Arrays.asList("notinterrupt", "izou.sound.events.unmute");
         public static final String descriptor = "izou.sound.events.unmute";
     }
+
+    public static class StopEvent {
+        public static final String type = "response";
+        public static final List<String> descriptors = Arrays.asList("notinterrupt", "izou.sound.events.stop");
+        public static final String resourceSelector = "izou.common.resource.selector";
+    }
 }

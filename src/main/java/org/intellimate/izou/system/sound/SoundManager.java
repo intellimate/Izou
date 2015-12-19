@@ -173,7 +173,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
                     .submit((Runnable)() -> {
                 try {
                     Thread.sleep(10000);
-                    firePermanentEndedNotification();
+                    fireLineAccessEndedNotification();
                     endPermanent(permanentAddOn);
                 } catch (InterruptedException ignored) {
                     //ignored.printStackTrace();
@@ -302,7 +302,8 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
             return;
         synchronized (permanentUserReadWriteLock) {
             permanentAddOn = null;
-            knownIdentification = null;
+            Identification tempID = this.knownIdentification;
+            this.knownIdentification = null;
             if (permanentLines != null) {
                 permanentLines.forEach(weakReferenceLine -> {
                     if (weakReferenceLine.get() != null)
@@ -311,12 +312,24 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
                 nonPermanent.put(addOnModel, permanentLines);
                 permanentLines = null;
             }
+            stopAddon(tempID);
             endWaitingForUsage();
             isUsing.set(false);
         }
     }
 
-    private void firePermanentEndedNotification() {
+    private void stopAddon(Identification identification) {
+        if (identification != null) {
+            IdentificationManager.getInstance()
+                    .getIdentification(this)
+                    .map(id -> new EventMinimalImpl(SoundIDs.StopEvent.type, id, SoundIDs.StopEvent.descriptors))
+                    .map(eventMinimal -> eventMinimal.addResource(
+                            new ResourceMinimalImpl<>(SoundIDs.StopEvent.resourceSelector, eventMinimal.getSource(), knownIdentification, null)))
+                    .ifPresent(event -> getMain().getEventDistributor().fireEventConcurrently(event));
+        }
+    }
+
+    private void fireLineAccessEndedNotification() {
         if (knownIdentification != null) {
             EventModel event = new EventMinimalImpl(SoundIDs.EndedEvent.type, knownIdentification, SoundIDs.EndedEvent.descriptors);
             getMain().getEventDistributor().fireEventConcurrently(event);
