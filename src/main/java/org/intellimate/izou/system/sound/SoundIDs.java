@@ -10,6 +10,12 @@ import java.util.List;
  */
 public class SoundIDs {
 
+    public static class StartRequest {
+        public static final String descriptor = "izou.music.events.startrequest";
+        //add this descriptor to the Event if you are using non-java code to play music
+        public static final String isUsingNonJava = "izou.sound.events.start.nonjava";
+    }
+
     public static class StartEvent {
         public static final String descriptor = "izou.sound.events.start";
         //add this descriptor to the Event if you are using non-java code to play music
@@ -33,5 +39,11 @@ public class SoundIDs {
         public static final String type = "response";
         public static final List<String> descriptors = Arrays.asList("notinterrupt", "izou.sound.events.unmute");
         public static final String descriptor = "izou.sound.events.unmute";
+    }
+
+    public static class StopEvent {
+        public static final String type = "response";
+        public static final List<String> descriptors = Arrays.asList("notinterrupt", "izou.sound.events.stop");
+        public static final String resourceSelector = "izou.common.resource.selector";
     }
 }
