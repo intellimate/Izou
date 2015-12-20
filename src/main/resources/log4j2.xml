@@ -12,18 +12,13 @@
         </Console>
     </Appenders>
     <Loggers>
+        <logger name="ro.fortsoft.pf4j" level="error"/>
         <Logger name="org.intellimate.izou" level="debug">
             <AppenderRef ref="fileAppenderIzou"/>
-
-            <!--Commenting this out fixes double loggind - not sure if it is a valid soltution -->
-            <!--<AppenderRef ref="CONSOLE"/>-->
         </Logger>
         <Root level="debug">
             <AppenderRef ref="CONSOLE"/>
             <AppenderRef ref="fileAppenderGeneral"/>
-
-            <!--Commenting this out fixes double loggind - not sure if it is a valid soltution -->
-            <!--<AppenderRef ref="fileAppender"/>-->
         </Root>
     </Loggers>
 </Configuration>
