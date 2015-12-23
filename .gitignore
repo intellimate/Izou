@@ -1,16 +1,27 @@
-#Folders
+# ---------------
+# Folders
+# ---------------
+
+.idea
 build
 target
-.settings
-.project
-.classpath
-.idea
-.iml
-Izou.iml
+/system
+/resources
 lib
 apidocs
 logs
-offlineLib
 properties
-resources
-system
+
+# ---------------
+# Project Files
+# ---------------
+
+*.iml
+
+# ---------------
+# Other
+# ---------------
+
+*.settings
+*.project
+*.classpath
