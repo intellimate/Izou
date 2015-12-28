@@ -1,5 +1,6 @@
 install: |-
   sudo apt-get install -y libmagic-dev zlib1g-dev
+  sudo apt-get install software-properties-common python-software-properties
   sudo apt-add-repository ppa:brightbox/ruby-ng
   sudo apt-get update
   sudo apt-get install -y ruby2.2 ruby2.2-dev
@@ -22,7 +23,6 @@ decrypt:
   secring.gpg: "repo/secring.gpg.asc"
 docker:
   image: "teamed/docker-java-8"
-#  image: "yegor256/rultor"
 release:
   commanders:
       - LeanderK
