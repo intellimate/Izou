@@ -67,6 +67,7 @@ public interface AddonThreadPoolUser extends MainProvider {
                 throw e;
             }
         }
+
         //cancel all running tasks
         if(notFinished) {
             futures.stream()

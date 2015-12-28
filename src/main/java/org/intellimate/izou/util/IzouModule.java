@@ -86,6 +86,27 @@ public abstract class IzouModule implements MainProvider, Identifiable {
     }
 
     /**
+     * Used to log messages at fatal level
+     *
+     * @param msg the message
+     */
+    @Override
+    public void fatal(String msg) {
+        log.logIfEnabled(FQCN, Level.FATAL, null, msg, (Object) null);
+    }
+
+    /**
+     * Used to log messages at fatal level
+     *
+     * @param msg the message
+     * @param e   the Throwable
+     */
+    @Override
+    public void fatal(String msg, Throwable e) {
+        log.logIfEnabled(FQCN, Level.FATAL, null, msg, e);
+    }
+
+    /**
      * An ID must always be unique.
      * A Class like Activator or OutputPlugin can just provide their .class.getCanonicalName()
      * If you have to implement this interface multiple times, just concatenate unique Strings to

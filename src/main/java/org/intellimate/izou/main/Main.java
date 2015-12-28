@@ -112,6 +112,10 @@ public class Main {
 
         fileManager = initFileManager();
 
+        systemInitializer.registerWithPropertiesManager();
+
+        setUpJavaFX(javaFX);
+
         fileLogger.debug("Done initializing.");
         fileLogger.debug("Adding addons..");
 
@@ -258,6 +262,10 @@ public class Main {
         return fileSystemManager;
     }
 
+    public SystemInitializer getSystemInitializer() {
+        return systemInitializer;
+    }
+
     public InternalIdentificationManager getInternalIdentificationManager() {
         return internalIdentificationManager;
     }
@@ -271,7 +279,7 @@ public class Main {
             fileLogger.fatal("Failed to create the FileSystemManager", e);
         }
 
-        SystemInitializer systemInitializer = new SystemInitializer();
+        SystemInitializer systemInitializer = new SystemInitializer(this);
         systemInitializer.initSystem();
         return systemInitializer;
     }

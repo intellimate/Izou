@@ -1,9 +1,7 @@
 package org.intellimate.izou.system.file;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.intellimate.izou.util.IzouModule;
 import org.intellimate.izou.main.Main;
+import org.intellimate.izou.util.IzouModule;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,8 +15,6 @@ public class FileSystemManager extends IzouModule {
     /**
      * Path to log files
      */
-    private static final Logger logger = LogManager.getLogger(FileSystemManager.class);
-
     private final File izouParentLocation;
     private final File izouJarLocation;
     private final File libLocation;
@@ -29,7 +25,8 @@ public class FileSystemManager extends IzouModule {
     private final File systemDataLocation;
 
     /**
-     * creates a file system manager
+     * Creates a file system manager
+     *
      * @param main an instance of main
      */
     public FileSystemManager(Main main) {

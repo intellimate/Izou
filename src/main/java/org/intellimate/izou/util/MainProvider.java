@@ -40,4 +40,17 @@ public interface MainProvider {
      * @param msg the message
      */
     void error(String msg);
+
+    /**
+     * Used to log messages at fatal level
+     * @param msg the message
+     * @param e the Throwable
+     */
+    void fatal(String msg, Throwable e);
+
+    /**
+     * Used to log messages at fatal level
+     * @param msg the message
+     */
+    void fatal(String msg);
 }
