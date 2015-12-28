@@ -15,11 +15,15 @@ import java.util.Properties;
  * system properties relevant to izou etc.
  */
 public class SystemInitializer extends IzouModule implements ReloadableFile {
-    private Properties properties;
-    private File propertiesFile;
+    /**
+     * The name of the Izou properties file
+     */
+    public static final String IZOU_PROPERTIES_FILE_NAME = "izou.properties";
 
     private static final String IZOU_CONFIGURED = "izou.configured";
-    private static final String IZOU_PROPERTIES_FILE_NAME = "izou.properties";
+
+    private Properties properties;
+    private File propertiesFile;
 
     /**
      * Creates a new SystemInitializer object
