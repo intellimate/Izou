@@ -3,9 +3,6 @@ install: |-
   sudo apt-get install -y libmagic-dev
   sudo apt-get install -y bsdmainutils
   sudo gem update
-  sudo gem install est
-  sudo gem install pdd
-  sudo gem install nokogiri
 architect:
   - LeanderK
   - jundl77
@@ -21,6 +18,9 @@ release:
       - jundl77
   script: |-
     gem install --no-ri --no-rdoc pdd
+    gem install est
+    gem install pdd
+    gem install nokogiri
     mvn versions:set "-DnewVersion=${tag//\'}"
     git commit -am "${tag//\'}"
     mvn -Dmaven.test.skip=true clean deploy --settings /home/r/settings.xml
