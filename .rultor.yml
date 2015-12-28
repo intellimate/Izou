@@ -1,5 +1,9 @@
 install: |-
   sudo apt-get install ruby-dev
+  sudo apt-get install -y ruby ruby-dev
+  sudo apt-get install -y libmagic-dev
+  sudo gem update
+  sudo gem install nokogiri
   sudo apt-get install -y bsdmainutils
   sudo gem install pdd
   sudo gem install est
