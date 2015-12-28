@@ -1,13 +1,18 @@
 install: |-
-  sudo apt-get install -y ruby ruby-dev
-  sudo apt-get install -y libmagic-dev
-  sudo apt-get install -y bsdmainutils
-  sudo apt-get install build-essential patch
-  sudo gem update
-  sudo gem install --no-ri --no-rdoc pdd
-  sudo gem install est
-  sudo gem install pdd
-  sudo gem install nokogiri
+  sudo apt-get install -y libmagic-dev zlib1g-dev
+  sudo apt-add-repository ppa:brightbox/ruby-ng
+  sudo apt-get update
+  sudo apt-get install -y ruby2.2 ruby2.2-dev
+  sudo gem update && gem install nokogiri && gem install bundler
+#  sudo apt-get install -y ruby ruby-dev
+#  sudo apt-get install -y libmagic-dev
+#  sudo apt-get install -y bsdmainutils
+#  sudo apt-get install build-essential patch
+#  sudo gem update
+#  sudo gem install --no-ri --no-rdoc pdd
+#  sudo gem install est
+#  sudo gem install pdd
+#  sudo gem install nokogiri
 architect:
   - LeanderK
   - jundl77
@@ -17,7 +22,7 @@ decrypt:
   secring.gpg: "repo/secring.gpg.asc"
 docker:
   image: "teamed/docker-java-8"
-  image: "yegor256/rultor"
+#  image: "yegor256/rultor"
 release:
   commanders:
       - LeanderK
