@@ -1,11 +1,11 @@
 install: |-
   sudo apt-get install -y libmagic-dev zlib1g-dev
   sudo apt-get update
-  yes Y | sudo apt-get install -y ruby ruby-dev
+  sudo apt-get install -y ruby ruby-dev
   yes Y | sudo apt-get install -y libmagic-dev
   yes Y | sudo apt-get install -y bsdmainutils
   yes Y | sudo apt-get install build-essential patch
-  yes Y | sudo gem update && gem install nokogiri && gem install bundler
+  sudo gem update && gem install nokogiri && gem install bundler
 #  sudo gem update
 #  sudo gem install --no-ri --no-rdoc pdd
 #  sudo gem install est
