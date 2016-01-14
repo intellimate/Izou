@@ -75,19 +75,20 @@
 <span class="sourceLineNo">067</span>                throw e;<a name="line.67"></a>
 <span class="sourceLineNo">068</span>            }<a name="line.68"></a>
 <span class="sourceLineNo">069</span>        }<a name="line.69"></a>
-<span class="sourceLineNo">070</span>        //cancel all running tasks<a name="line.70"></a>
-<span class="sourceLineNo">071</span>        if(notFinished) {<a name="line.71"></a>
-<span class="sourceLineNo">072</span>            futures.stream()<a name="line.72"></a>
-<span class="sourceLineNo">073</span>                    .filter(future -&gt; !future.isDone())<a name="line.73"></a>
-<span class="sourceLineNo">074</span>                    .peek(future -&gt; error(future.toString()+ " timed out",<a name="line.74"></a>
-<span class="sourceLineNo">075</span>                            new Exception(future.toString() + " timed out")))<a name="line.75"></a>
-<span class="sourceLineNo">076</span>                    .forEach(future -&gt; future.cancel(true));<a name="line.76"></a>
-<span class="sourceLineNo">077</span>        }<a name="line.77"></a>
-<span class="sourceLineNo">078</span>        return futures.stream()<a name="line.78"></a>
-<span class="sourceLineNo">079</span>                .filter(Future::isDone)<a name="line.79"></a>
-<span class="sourceLineNo">080</span>                .collect(Collectors.&lt;V&gt;toList());<a name="line.80"></a>
-<span class="sourceLineNo">081</span>    }<a name="line.81"></a>
-<span class="sourceLineNo">082</span>}<a name="line.82"></a>
+<span class="sourceLineNo">070</span><a name="line.70"></a>
+<span class="sourceLineNo">071</span>        //cancel all running tasks<a name="line.71"></a>
+<span class="sourceLineNo">072</span>        if(notFinished) {<a name="line.72"></a>
+<span class="sourceLineNo">073</span>            futures.stream()<a name="line.73"></a>
+<span class="sourceLineNo">074</span>                    .filter(future -&gt; !future.isDone())<a name="line.74"></a>
+<span class="sourceLineNo">075</span>                    .peek(future -&gt; error(future.toString()+ " timed out",<a name="line.75"></a>
+<span class="sourceLineNo">076</span>                            new Exception(future.toString() + " timed out")))<a name="line.76"></a>
+<span class="sourceLineNo">077</span>                    .forEach(future -&gt; future.cancel(true));<a name="line.77"></a>
+<span class="sourceLineNo">078</span>        }<a name="line.78"></a>
+<span class="sourceLineNo">079</span>        return futures.stream()<a name="line.79"></a>
+<span class="sourceLineNo">080</span>                .filter(Future::isDone)<a name="line.80"></a>
+<span class="sourceLineNo">081</span>                .collect(Collectors.&lt;V&gt;toList());<a name="line.81"></a>
+<span class="sourceLineNo">082</span>    }<a name="line.82"></a>
+<span class="sourceLineNo">083</span>}<a name="line.83"></a>
 
 
 
