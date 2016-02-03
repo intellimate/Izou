@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration>
     <Appenders>
-        <File name="fileAppender" fileName="logs/org.intellimate.izou.log" append="true">
+        <File name="fileAppenderIzou" fileName="logs/org.intellimate.izou.log" append="true">
+            <PatternLayout pattern="%d %-5p [%t] %C{10} (%F:%L) - %m%n"/>
+        </File>
+            <File name="fileAppenderGeneral" fileName="logs/general.log" append="true">
             <PatternLayout pattern="%d %-5p [%t] %C{10} (%F:%L) - %m%n"/>
         </File>
         <Console name="CONSOLE" target="SYSTEM_OUT">
@@ -9,17 +12,13 @@
         </Console>
     </Appenders>
     <Loggers>
+        <logger name="ro.fortsoft.pf4j" level="error"/>
         <Logger name="org.intellimate.izou" level="debug">
-            <AppenderRef ref="fileAppender"/>
-
-            <!--Commenting this out fixes double loggind - not sure if it is a valid soltution -->
-            <!--<AppenderRef ref="CONSOLE"/>-->
+            <AppenderRef ref="fileAppenderIzou"/>
         </Logger>
-        <Root level="error">
+        <Root level="debug">
             <AppenderRef ref="CONSOLE"/>
-
-            <!--Commenting this out fixes double loggind - not sure if it is a valid soltution -->
-            <!--<AppenderRef ref="fileAppender"/>-->
+            <AppenderRef ref="fileAppenderGeneral"/>
         </Root>
     </Loggers>
 </Configuration>

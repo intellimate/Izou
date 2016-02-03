@@ -1,16 +1,15 @@
 #Izou
-A digital companion
 
-Intro goes here
+Izou is a mix between a "personal assistant" like siri that can set alarms, play music or check the latest stock prices, and a home automation system. That means it can control your TV (if you want it to), it knows when you are home etc, and eventually it will also be able to control your lights and other devices at home. 
+
+It is an addOn based software, where these addOns have an inate ability communicate with each other. That means if you developped an addOn that is a game, and lets say there is another addOn for Izou that control your lights, you can tell that lights addOn to turn the lights on and off when the user wins the game. How that exactly is done is all taken care of by Izou.
+
+Further more, it is very easy to develop your own app for Izou. Just clone the IzouAddOn repository and follow the example addOn that is given. More on this later.
 
 ###Usage
-Getting started with Izou is not that difficult, just follow the directions in the **Getting Started** section. 
 
-Izou was built to run on the Raspberry Pi and that is why we will give you everything you need to know to get Izou up and running on one. Yet as Izou is written in java, it can run on any java-enabled platform. That means we will not elaborate much on how to set up Izou on any other platform but the Raspberry Pi, but it should be pretty straight forward. The basic steps are the same. 
 
 ####Getting Started
-To get started, all you need to do is download the newest Izou release and launch the jar! We recommend that you launch the jar from within its own folder, as Izou will create its own file structure. So unless you want to trash you're desktop (or where ever your izou.jar is), listen to us. (As you always should by the way). And there you go, that's essentially it! 
 
-However in order for Izou to work properly, Izou has to be up and running almost all the time. What if you want to get the newest, most insane breaking news the moment you enter your door and Izou is not on? Nothing will happen. To avoid such tragedies, we recommend that you run Izou as a background task (Hence the Raspberry Pi as it can be on 24/7). There are various tutorials online at your disposal on how to do this. If you want to turn Izou into a linux daemon (a linux background task) to run on your Raspberry-Pi, [this](http://raspberrypi.stackexchange.com/questions/13034/executing-a-jar-file-when-raspberry-boots-up) is a great one. 
 
 

@@ -1,6 +1,7 @@
 package org.intellimate.izou.system.sound;
 
 import org.intellimate.izou.addon.AddOnModel;
+import org.intellimate.izou.events.EventLifeCycle;
 import org.intellimate.izou.events.EventListenerModel;
 import org.intellimate.izou.events.EventMinimalImpl;
 import org.intellimate.izou.events.EventModel;
@@ -23,7 +24,11 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -319,13 +324,32 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
     }
 
     private void stopAddon(Identification identification) {
+        Lock lock = new ReentrantLock();
+        Condition callback = lock.newCondition();
         if (identification != null) {
             IdentificationManager.getInstance()
                     .getIdentification(this)
-                    .map(id -> new EventMinimalImpl(SoundIDs.StopEvent.type, id, SoundIDs.StopEvent.descriptors))
+                    .map(id -> new EventMinimalImpl(SoundIDs.StopEvent.type, id, SoundIDs.StopEvent.descriptors, eventLifeCycle -> {
+                        if (eventLifeCycle.equals(EventLifeCycle.ENDED)) {
+                            lock.lock();
+                            try {
+                                callback.signal();
+                            } finally {
+                                lock.unlock();
+                            }
+                        }
+                    }))
                     .map(eventMinimal -> eventMinimal.addResource(
                             new ResourceMinimalImpl<>(SoundIDs.StopEvent.resourceSelector, eventMinimal.getSource(), identification, null)))
                     .ifPresent(event -> getMain().getEventDistributor().fireEventConcurrently(event));
+        }
+        lock.lock();
+        try {
+            callback.await(1, TimeUnit.SECONDS);
+        } catch (InterruptedException ignored) {
+
+        } finally {
+            lock.unlock();
         }
     }
 
