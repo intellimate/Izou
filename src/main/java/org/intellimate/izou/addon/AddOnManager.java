@@ -80,6 +80,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
      */
     public void registerAllAddOns(IdentifiableSet<AddOnModel> addOns) {
         initAddOns(addOns);
+        checkAddOns(addOns);
         List<CompletableFuture<Void>> futures = addOns.stream()
                 .map(addOn -> submit((Runnable) addOn::register))
                 .collect(Collectors.toList());
@@ -88,6 +89,20 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
         } catch (InterruptedException e) {
             debug("interrupted while trying to time out the addOns", e);
         }
+    }
+
+    private void checkAddOns(IdentifiableSet<AddOnModel> addOns) {
+        // checking that addOns have all required properties andcreating the addOn information list if they do
+        // (check not performed yet - waiting for xml implementation of property files until this is done)
+        addOns.stream().forEach(addOn -> {
+            Properties addOnConfigProperties = addOn.getPlugin().getPluginClassLoader().getPluginDescriptor().
+                    getAddOnProperties();
+            AddOnInformation addOnInformation = new AddOnInformation(addOnConfigProperties.getProperty("name"),
+                    addOnConfigProperties.getProperty("version"), addOnConfigProperties.getProperty("provider"),
+                    addOn.getID());
+
+            addOnInformationManager.addAddOnInformation(addOnInformation);
+        });
     }
 
     /**
@@ -210,15 +225,6 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
      * Called after the addons were initialized
      */
     private void initialized() {
-        // creating addOn information list
-        addOns.stream().forEach(addOn -> {
-            PluginDescriptor descriptor = addOn.getPlugin().getPluginClassLoader().getPluginDescriptor();
-            AddOnInformation addOnInformation = new AddOnInformation(descriptor.getPluginId(),
-                    descriptor.getVersion().getQualifier(), addOn.getID());
-
-            addOnInformationManager.addAddOnInformation(addOnInformation);
-        });
-
         initializedCallback.forEach(this::submit);
         initializedCallback = new LinkedList<>();
     }
