@@ -11,6 +11,7 @@ import org.intellimate.izou.util.IzouModule;
 import ro.fortsoft.pf4j.*;
 
 import javax.crypto.SecretKey;
+import javax.management.InstanceAlreadyExistsException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -32,13 +33,20 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
     private HashMap<AddOnModel, PluginWrapper> pluginWrappers = new HashMap<>();
     private Set<AspectOrAffected> aspectOrAffectedSet = new HashSet<>();
     private List<Runnable> initializedCallback = new ArrayList<>();
+    private AddOnInformationManager addOnInformationManager;
 
     public AddOnManager(Main main) {
         super(main);
+        try {
+            addOnInformationManager = AddOnInformationManager.createAddOnInformationManager();
+        } catch (InstanceAlreadyExistsException e) {
+            fatal("AddOnInformationManager already exists - serious error, exiting.", e);
+            System.exit(1);
+        }
     }
 
     /**
-    * retrieves and registers all AddOns.
+    * Retrieves and registers all AddOns.
     */
     public void retrieveAndRegisterAddOns() {
         addOns.addAll(loadAddOns());
@@ -55,7 +63,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
     }
 
     /**
-     * registers all AddOns.
+     * Registers all AddOns.
      *
      * @param addOns a List containing all the AddOns
      */
@@ -64,7 +72,12 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
         registerAllAddOns(this.addOns);
         initialized();
     }
-    
+
+    /**
+     * TODO: Missing doc
+     *
+     * @param addOns
+     */
     public void registerAllAddOns(IdentifiableSet<AddOnModel> addOns) {
         initAddOns(addOns);
         List<CompletableFuture<Void>> futures = addOns.stream()
@@ -77,6 +90,11 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
         }
     }
 
+    /**
+     * TODO: Missing doc
+     *
+     * @param addOns
+     */
     private void initAddOns(IdentifiableSet<AddOnModel> addOns) {
         List<CompletableFuture<Void>> futures = addOns.stream()
                 .map(addOn -> {
@@ -93,6 +111,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
 
     /**
      * This method searches all the "/lib"-directory for AddOns and adds them to the addOnList
+     *
      * @return the retrieved addOns
      */
     private List<AddOnModel> loadAddOns() {
@@ -136,7 +155,8 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
     }
 
     /**
-     * returns the addOn loaded from the ClassLoader
+     * Returns the addOn loaded from the ClassLoader
+     *
      * @param classLoader the classLoader
      * @return the (optional) AddOnModel
      */
@@ -147,8 +167,9 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
     }
 
     /**
-     * returns the (optional) PluginWrapper for the AddonModel.
+     * Returns the (optional) PluginWrapper for the AddonModel.
      * If the return is empty, it means that the AddOn was not loaded through pf4j
+     *
      * @param addOnModel the AddOnModel
      * @return the PluginWrapper if loaded through pf4j or empty if added as an argument
      */
@@ -157,7 +178,8 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
     }
 
     /**
-     * checks whether the AddOn was loaded through pf4j
+     * Checks whether the AddOn was loaded through pf4j
+     *
      * @param addOnModel the AddOnModel to check
      * @return true if loaded, false if not
      */
@@ -166,7 +188,8 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
     }
 
     /**
-     * adds an aspect-class url to the list. Must be done before loading of the addons!
+     * Adds an aspect-class url to the list. Must be done before loading of the addons!
+     *
      * @param aspectOrAffected the aspect or affected to add
      */
     public void addAspectOrAffected(AspectOrAffected aspectOrAffected) {
@@ -184,9 +207,18 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
     }
 
     /**
-     * called after the addons were initialized
+     * Called after the addons were initialized
      */
     private void initialized() {
+        // creating addOn information list
+        addOns.stream().forEach(addOn -> {
+            PluginDescriptor descriptor = addOn.getPlugin().getPluginClassLoader().getPluginDescriptor();
+            AddOnInformation addOnInformation = new AddOnInformation(descriptor.getPluginId(),
+                    descriptor.getVersion().getQualifier(), addOn.getID());
+
+            addOnInformationManager.addAddOnInformation(addOnInformation);
+        });
+
         initializedCallback.forEach(this::submit);
         initializedCallback = new LinkedList<>();
     }

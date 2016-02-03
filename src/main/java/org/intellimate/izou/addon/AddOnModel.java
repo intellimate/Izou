@@ -10,8 +10,6 @@ import ro.fortsoft.pf4j.PluginWrapper;
  *
  * It will be instantiated and its registering-methods will be called by the PluginManager.
  * This class has method for a properties-file named addOnID.properties (AddOnsID in the form: package.class)
- * @author Leander Kurscheidt
- * @version 1.0
  */
 public interface AddOnModel extends ExtensionPoint, Identifiable {
     /**
