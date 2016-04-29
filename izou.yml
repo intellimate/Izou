@@ -1,0 +1,8 @@
+#the token used to identify the izou instance, please visit the website to get the token
+token: insertHere
+
+#the installed apps. You can modify them here or through the website
+apps:
+  - name:
+    version:
+    id:
