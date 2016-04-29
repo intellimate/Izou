@@ -25,7 +25,8 @@ public interface OutputExtensionModel<X, T> extends Identifiable {
     String getPluginId();
 
     /**
-     * generates the data for the given Event
+     * Generates the data for the given Event
+     *
      * @param event the event to generate for
      * @param t the optional argument
      * @return the result
@@ -33,7 +34,8 @@ public interface OutputExtensionModel<X, T> extends Identifiable {
     X generate(EventModel event, T t);
 
     /**
-     * returns the ReturnType of the generic
+     * Returns the ReturnType of the generic
+     *
      * @return the type of the generic
      */
     //i don't think there is another way

@@ -35,13 +35,17 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
     private List<Runnable> initializedCallback = new ArrayList<>();
     private AddOnInformationManager addOnInformationManager;
 
+    /**
+     * Creates a new instance of the AddOnManager
+     *
+     * @param main The main instance
+     */
     public AddOnManager(Main main) {
         super(main);
         try {
             addOnInformationManager = AddOnInformationManager.createAddOnInformationManager();
         } catch (InstanceAlreadyExistsException e) {
-            fatal("AddOnInformationManager already exists - serious error, exiting.", e);
-            System.exit(1);
+            fatal("AddOnInformationManager already exists", e);
         }
     }
 
@@ -56,6 +60,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
 
     /**
      * Adds AddOns without registering them.
+     *
      * @param addOns a List containing all the AddOns
      */
     public void addAddOnsWithoutRegistering(List<AddOnModel> addOns) {
@@ -80,7 +85,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
      */
     public void registerAllAddOns(IdentifiableSet<AddOnModel> addOns) {
         initAddOns(addOns);
-        checkAddOns(addOns);
+        //checkAddOns(addOns);
         List<CompletableFuture<Void>> futures = addOns.stream()
                 .map(addOn -> submit((Runnable) addOn::register))
                 .collect(Collectors.toList());
@@ -92,7 +97,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
     }
 
     private void checkAddOns(IdentifiableSet<AddOnModel> addOns) {
-        // checking that addOns have all required properties andcreating the addOn information list if they do
+        // checking that addOns have all required properties and creating the addOn information list if they do
         // (check not performed yet - waiting for xml implementation of property files until this is done)
         addOns.stream().forEach(addOn -> {
             Properties addOnConfigProperties = addOn.getPlugin().getPluginClassLoader().getPluginDescriptor().

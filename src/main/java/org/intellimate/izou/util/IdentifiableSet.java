@@ -89,9 +89,10 @@ public class IdentifiableSet<X extends Identifiable> extends AbstractSet<X> impl
 
     /**
      * {@inheritDoc}
-     * <p>This implementation iterates over the collection looking for the
-     * specified element.  If it finds the element, it removes the element
-     * from the collection using the iterator's remove method.
+     *
+     * <p>
+     *     This implementation iterates over the collection looking for the specified element.  If it finds the element,
+     *     it removes the element from the collection using the iterator's remove method.
      * </p>
      *
      * @param o the object to remove

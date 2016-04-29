@@ -19,21 +19,21 @@ public interface AddOnModel extends ExtensionPoint, Identifiable {
     void initAddOn(Context context);
 
     /**
-     * use this method to register your Modules.
-     * <p>
+     * Use this method to register your Modules.
      * It will time out after 3 seconds!
-     * </p> 
      */
     void register();
 
     /**
-     * gets the associated Plugin.
+     * Gets the associated Plugin.
+     *
      * @return the Plugin.
      */
     PluginWrapper getPlugin();
 
     /**
-     * sets the Plugin IF it is not already set.
+     * Sets the Plugin IF it is not already set.
+     *
      * @param plugin the plugin
      */
     void setPlugin(PluginWrapper plugin);

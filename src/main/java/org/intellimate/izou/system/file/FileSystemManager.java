@@ -48,7 +48,7 @@ public class FileSystemManager extends IzouModule {
                     + File.separator + "data").getCanonicalFile();
         } catch (URISyntaxException | IOException e) {
             error("unable to create the Izou-file system");
-            throw new IllegalStateException("unable to create the Izou-file system");
+            throw new IllegalStateException("unable to create the Izou file system");
         }
     }
 

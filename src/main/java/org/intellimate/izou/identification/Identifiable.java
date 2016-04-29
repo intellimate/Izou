@@ -11,7 +11,7 @@ public interface Identifiable {
      * .class.getCanonicalName()
      * @return A String containing an ID
      */
-    abstract public String getID();
+    String getID();
 
     /**
      * checks whether this instance is the owner of this Identification

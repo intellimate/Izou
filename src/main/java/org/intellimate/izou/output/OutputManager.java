@@ -246,7 +246,7 @@ public class OutputManager extends IzouModule implements AddonThreadPoolUser {
     }
 
     /**
-     * starts every associated OutputExtension
+     * Starts every associated OutputExtension
      *
      * @param outputPlugin the OutputPlugin to generate the Data for
      * @param t            the argument or null
