@@ -18,6 +18,7 @@ public class FileSystemManager extends IzouModule {
     private final File izouParentLocation;
     private final File izouJarLocation;
     private final File libLocation;
+    private final File newLibLocation;
     private final File resourceLocation;
     private final File propertiesLocation;
     private final File logsLocation;
@@ -40,6 +41,7 @@ public class FileSystemManager extends IzouModule {
                 izouParentLocation = izouJarLocation.getParentFile();
             }
             libLocation = new File(izouParentLocation.toString() + File.separator + "lib").getCanonicalFile();
+            newLibLocation = new File(izouParentLocation.toString() + File.separator + "new").getCanonicalFile();
             resourceLocation = new File(izouParentLocation.toString() + File.separator + "resources").getCanonicalFile();
             propertiesLocation = new File(izouParentLocation.toString() + File.separator + "properties").getCanonicalFile();
             logsLocation = new File(izouParentLocation.toString() + File.separator + "logs").getCanonicalFile();
@@ -156,5 +158,9 @@ public class FileSystemManager extends IzouModule {
 
     public File getSystemDataLocation() {
         return systemDataLocation;
+    }
+
+    public File getNewLibLocation() {
+        return newLibLocation;
     }
 }
