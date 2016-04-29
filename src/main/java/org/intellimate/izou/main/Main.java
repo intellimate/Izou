@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.intellimate.izou.activator.ActivatorManager;
 import org.intellimate.izou.addon.AddOnManager;
 import org.intellimate.izou.addon.AddOnModel;
+import org.intellimate.izou.config.Config;
 import org.intellimate.izou.events.EventDistributor;
 import org.intellimate.izou.events.LocalEventManager;
 import org.intellimate.izou.identification.AddOnInformationManager;
@@ -12,6 +13,7 @@ import org.intellimate.izou.output.OutputControllerManager;
 import org.intellimate.izou.output.OutputManager;
 import org.intellimate.izou.resource.ResourceManager;
 import org.intellimate.izou.security.SecurityManager;
+import org.intellimate.izou.server.CommunicationManager;
 import org.intellimate.izou.support.SystemMail;
 import org.intellimate.izou.system.SystemInitializer;
 import org.intellimate.izou.system.file.FileManager;
@@ -22,8 +24,11 @@ import org.intellimate.izou.system.logger.IzouLogger;
 import org.intellimate.izou.system.sound.SoundManager;
 import org.intellimate.izou.threadpool.ThreadPoolManager;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -53,6 +58,7 @@ public class Main {
     private final SystemMail systemMail;
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
     private FileSystemManager fileSystemManager;
+    private CommunicationManager communicationManager;
 
     /**
      * Creates a new Main instance with a optionally disabled lib-folder
@@ -61,7 +67,7 @@ public class Main {
      * @param disableLibFolder  if true, izou will not load plugin from the lib-folder
      */
     private Main(boolean javaFX, boolean disableLibFolder) {
-        this(null, javaFX, disableLibFolder);
+        this(null, javaFX, disableLibFolder, null);
     }
 
     /**
@@ -70,7 +76,7 @@ public class Main {
      * @param addOns a List of AddOns to run
      */
     public Main(List<AddOnModel> addOns) {
-        this(addOns, false, false);
+        this(addOns, false, false, null);
     }
 
     /**
@@ -80,7 +86,7 @@ public class Main {
      * @param addOns a List of AddOns to run
      */
     public Main(List<AddOnModel> addOns, boolean disableLibFolder) {
-        this(addOns, false, disableLibFolder);
+        this(addOns, false, disableLibFolder, null);
     }
 
     /**
@@ -89,11 +95,12 @@ public class Main {
      * @param javaFX true if javaFX should be started, false otherwise
      * @param disableLibFolder  if true, izou will not load plugin from the lib-folder
      * @param addOns a List of AddOns to run
+     * @param config null if disabled, otherwise set pointing to the location of the izou-config
      */
-    public Main(List<AddOnModel> addOns, boolean javaFX, boolean disableLibFolder) {
+    public Main(List<AddOnModel> addOns, boolean javaFX, boolean disableLibFolder, String config) {
         fileLogger.debug("Starting Izou");
         fileLogger.debug("Initializing...");
-        systemInitializer = initSystem();
+        systemInitializer = initSystem(config);
         if (addOns != null) {
             fileLogger.debug("setting to debug");
             System.setProperty("debug", "true");
@@ -137,13 +144,20 @@ public class Main {
             fileLogger.debug("retrieving addons & registering them");
             addOnManager.retrieveAndRegisterAddOns();
         }
+
+        this.communicationManager = initCommunication(config, disableLibFolder);
     }
 
     public static void main(String[] args) {
+        File config = new File("./izou.yml");
+        if (!config.exists()) {
+            System.out.println("izou config is not existing, path: "+config.getAbsolutePath());
+            System.exit(-1);
+        }
         if (args.length > 0) {
-            @SuppressWarnings("UnusedAssignment") Main main = new Main(Boolean.getBoolean(args[0]), false);
+            @SuppressWarnings("UnusedAssignment") Main main = new Main(new ArrayList<>(), Boolean.getBoolean(args[0]), false, config.getAbsolutePath());
         } else {
-            @SuppressWarnings("UnusedAssignment") Main main = new Main(false, false);
+            @SuppressWarnings("UnusedAssignment") Main main = new Main(new ArrayList<>(), false, false, config.getAbsolutePath());
         }
     }
 
@@ -277,6 +291,15 @@ public class Main {
         return systemInitializer;
     }
 
+    public InternalIdentificationManager getInternalIdentificationManager() {
+        return internalIdentificationManager;
+    }
+
+    public Optional<CommunicationManager> getCommunicationManager() {
+        return Optional.ofNullable(communicationManager);
+    }
+
+    private SystemInitializer initSystem(String configPath) {
     private SystemInitializer initSystem() {
         // Setting up file system
         this.fileSystemManager = new FileSystemManager(this);
@@ -289,5 +312,20 @@ public class Main {
         SystemInitializer systemInitializer = new SystemInitializer(this);
         systemInitializer.initSystem();
         return systemInitializer;
+    }
+
+    private CommunicationManager initCommunication(String configPath, boolean disabledLib) {
+        if (configPath == null) {
+            return null;
+        }
+        File configFile = new File(configPath);
+        if (!configFile.exists()) {
+            fileLogger.error("unable to load izou config");
+        }
+
+        //TODO
+        Config config = null;
+
+        CommunicationManager communicationManager = new CommunicationManager(,this,config.addOns,disabledLib);
     }
 }
