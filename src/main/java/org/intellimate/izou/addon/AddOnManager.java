@@ -1,6 +1,7 @@
 package org.intellimate.izou.addon;
 
 import org.apache.logging.log4j.Level;
+import org.intellimate.izou.config.AddOn;
 import org.intellimate.izou.identification.AddOnInformationManager;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.SecurityFunctions;
@@ -17,6 +18,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -24,7 +27,11 @@ import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+import static org.aspectj.weaver.tools.cache.SimpleCacheFactory.path;
 
 /**
  * Manages all the AddOns.
@@ -118,6 +125,81 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
         } catch (InterruptedException e) {
             debug("interrupted while trying to time out the addOns", e);
         }
+    }
+
+    /**
+     * this methods replaces all the plugins in the "/lib" directory with new ones from the "/new" directory.
+     * it also deletes all the marked plugins
+     */
+    private void synchroAddons() {
+        File newLibLocation = getMain().getFileSystemManager().getNewLibLocation();
+        if (!newLibLocation.exists()) {
+            return;
+        }
+        Map<Boolean, List<Path>> toProcess;
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(newLibLocation.toPath())) {
+            toProcess = StreamSupport.stream(stream.spliterator(), false)
+                    .filter(path -> path.endsWith(".zip"))
+                    .collect(Collectors.partitioningBy(path -> path.toFile().getName().contains("delete")));
+        } catch (IOException e) {
+            fatal("unable to query newLibLocation", e);
+            throw new RuntimeException(e);
+        }
+
+        Set<String> toDelete = toProcess.get(true).stream()
+                .map(path -> new AddOn(path.toFile()))
+                .map(addOn -> addOn.name)
+                .collect(Collectors.toSet());
+
+        Map<String, AddOn> newAddons = toProcess.get(false).stream()
+                .map(path -> new AddOn(path.toFile()))
+                .collect(Collectors.toMap(addOn -> addOn.name, Function.identity()));
+
+        List<Path> deleteBeforeCopy;
+
+        File libLocation = getMain().getFileSystemManager().getLibLocation();
+        try {
+            deleteBeforeCopy = Files.walk(libLocation.toPath())
+                    .filter(path -> path.endsWith(".zip") || path.toFile().isDirectory())
+                    .filter(path -> {
+                        AddOn addOn = new AddOn(path.toFile());
+                        return toDelete.contains(addOn.name) || newAddons.containsKey(addOn.name);
+                    })
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            fatal("unable to query libLocation", e);
+            throw new RuntimeException(e);
+        }
+
+        deleteBeforeCopy.forEach(path -> {
+            if (path.toFile().isDirectory()) {
+                try {
+                    Files.walkFileTree(path, new FileVisitor<Path>() {
+                        @Override
+                        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                            return null;
+                        }
+
+                        @Override
+                        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                            return null;
+                        }
+
+                        @Override
+                        public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+                            return null;
+                        }
+
+                        @Override
+                        public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                            return null;
+                        }
+                    });
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     /**
