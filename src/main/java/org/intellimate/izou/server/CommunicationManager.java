@@ -202,9 +202,7 @@ public class CommunicationManager extends IzouModule {
             }
         });
 
-        //TODO: update config!
-
-        return true;
+        return newApps.isEmpty();
     }
 
     private boolean updateIzou() throws IOException, UnirestException {
