@@ -33,9 +33,10 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
@@ -159,7 +160,6 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        //TODO check for the Izou version & restart again!
         File config = new File("./izou.yml");
         if (!config.exists()) {
             System.out.println("izou config is not existing, path: "+config.getAbsolutePath());
@@ -384,10 +384,109 @@ public class Main {
         if (rawVersion != null) {
             version = new Version(rawVersion);
         }
-        CommunicationManager communicationManager = new CommunicationManager(version, this, addOns, disabledLib, config.token);
-        if (!disabledUpdate) {
-            communicationManager.
+        CommunicationManager communicationManager = null;
+        try {
+            CommunicationManager finalCommunManager = new CommunicationManager(version, this, addOns, disabledLib, config.token);
+            communicationManager = finalCommunManager;
+            if (!disabledUpdate) {
+                LocalDateTime firstInterval = LocalDateTime.now().withHour(2);
+                if (firstInterval.plusMinutes(10).isBefore(LocalDateTime.now())) {
+                    firstInterval = firstInterval.minusDays(1);
+                }
+                Timer timer = new Timer();
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        boolean shouldRestart = false;
+                        //TODO maybe a more sophisticated algorithm?
+                        try {
+                            shouldRestart = finalCommunManager.checkForUpdates();
+                        } catch (IOException e) {
+                            fileLogger.error("unable to search for updates", e);
+                            try {
+                                Thread.sleep(300000);
+                                shouldRestart = finalCommunManager.checkForUpdates();
+                            } catch (IOException e1) {
+                                fileLogger.error("unable to search for updates", e);
+                            } catch (InterruptedException e1) {
+                                fileLogger.error("interrupted", e);
+                            }
+                        }
+                        if (shouldRestart) {
+                            fileLogger.info("restarting to apply updates");
+                            System.exit(0);
+                        }
+                    }
+                }, Date.from(firstInterval.atZone(ZoneId.systemDefault()).toInstant()), 8640000);
+            }
+        } catch (IllegalStateException e) {
+            fileLogger.error("unable to instantiate CommunicationManager", e);
+            System.exit(-1);
         }
         return communicationManager;
+    }
+
+    public SoundManager getSoundManager() {
+        return soundManager;
+    }
+
+    public SecurityManager getSecurityManager() {
+        return securityManager;
+    }
+
+    public OutputManager getOutputManager() {
+        return outputManager;
+    }
+
+    public LocalEventManager getLocalEventManager() {
+        return localEventManager;
+    }
+
+    public ActivatorManager getActivatorManager() {
+        return activatorManager;
+    }
+
+    public AddOnManager getAddOnManager() {
+        return addOnManager;
+    }
+
+    public ResourceManager getResourceManager() {
+        return resourceManager;
+    }
+
+    public EventDistributor getEventDistributor() {
+        return eventDistributor;
+    }
+
+    public ThreadPoolManager getThreadPoolManager() {
+        return threadPoolManager;
+    }
+
+    public FileManager getFileManager() {
+        return fileManager;
+    }
+
+    public FilePublisher getFilePublisher() {
+        return filePublisher;
+    }
+
+    public IzouLogger getIzouLogger() {
+        return izouLogger;
+    }
+
+    public FileSystemManager getFileSystemManager() {
+        return fileSystemManager;
+    }
+
+    public SystemInitializer getSystemInitializer() {
+        return systemInitializer;
+    }
+
+    public InternalIdentificationManager getInternalIdentificationManager() {
+        return internalIdentificationManager;
+    }
+
+    public Optional<CommunicationManager> getCommunicationManager() {
+        return Optional.ofNullable(communicationManager);
     }
 }
