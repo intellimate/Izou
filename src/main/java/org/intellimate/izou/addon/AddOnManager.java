@@ -37,6 +37,7 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
  * Manages all the AddOns.
  */
 //TODO isolate pf4j calls & catch errors accordingly
+//TODO update method
 public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
     private IdentifiableSet<AddOnModel> addOns = new IdentifiableSet<>();
     private HashMap<AddOnModel, PluginWrapper> pluginWrappers = new HashMap<>();
