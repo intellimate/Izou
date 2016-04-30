@@ -16,6 +16,8 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -82,10 +84,10 @@ public class CommunicationManager extends IzouModule {
             throw new RuntimeException();
         }
 
-        selectedWithoutDependencies.forEach(addOn -> {
-            if (installed.containsKey(addOn.name)) {
-                AddOn installedAddon = installed.get(addOn.name);
-                installedAddon.id = addOn.id;
+        selectedWithoutDependencies.forEach(addON -> {
+            if (installed.containsKey(addON.name)) {
+                AddOn installedAddon = installed.get(addON.name);
+                installedAddon.id = addON.id;
             }
         });
 
@@ -109,30 +111,114 @@ public class CommunicationManager extends IzouModule {
     }
 
     private boolean synchronizeApps(List<AddOn> selected) {
-        selected.stream()
+        List<App> initialSelected = selected.stream()
                 .filter(app -> app.getId().isPresent())
                 .map(app -> {
                     try {
                         return serverRequests.getAddonAndDependencies(app.getId().get());
                     } catch (UnirestException e) {
                         debug("unable to connect to server", e);
-                        return new ArrayList<>();
+                        return Optional.<App>empty();
                     }
                 })
-                .
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+
+        Map<Integer, App> resolved = initialSelected.stream()
+                .collect(Collectors.toMap(App::getId, Function.identity(), (app, app2) -> app));
+
+        Map<Integer, App> toResolve = initialSelected.stream()
+                .flatMap(app -> app.getVersionsList().stream())
+                .flatMap(appVersion -> appVersion.getDependenciesList().stream())
+                .filter(app -> !resolved.containsKey(app.getId()))
+                .collect(Collectors.toMap(App::getId, Function.identity(), (app, app2) -> app));
+
+        while (!toResolve.isEmpty()) {
+            Integer next = toResolve.keySet().iterator().next();
+            App remove = toResolve.remove(next);
+            try {
+                serverRequests.getAddonAndDependencies(remove.getId())
+                        .ifPresent(app -> {
+                            resolved.put(app.getId(), app);
+                            app.getVersionsList().stream()
+                                    .flatMap(appVersion ->  appVersion.getDependenciesList().stream())
+                                    .filter(appD -> !resolved.containsKey(appD.getId()))
+                                    .forEach(appD -> toResolve.put(appD.getId(), appD));
+                        });
+            } catch (UnirestException e) {
+                debug("unable to connect to server", e);
+                e.printStackTrace();
+            }
+        }
+
+        Set<String> selectedNames = selectedWithoutDependencies.stream()
+                .map(addOn -> addOn.name)
+                .collect(Collectors.toSet());
+
+        installedWithDependencies.stream()
+                .filter(addOn -> !selectedNames.contains(addOn.name))
+                .filter(addOn -> addOn.getId()
+                        .map(id -> !resolved.containsKey(id))
+                        .orElse(true)
+                )
+                .forEach(addOn -> {
+                    File file = new File(getMain().getFileSystemManager().getNewLibLocation(), addOn.name + "-" + addOn.version + "-delete.zip");
+                    if (!file.exists()) {
+                        try {
+                            file.createNewFile();
+                        } catch (IOException e) {
+                            error("unable to create file "+file, e);
+                        }
+                    }
+                });
+
+        List<App> newApps = resolved.values().stream()
+                .filter(app -> installedWithDependencies.stream()
+                        .filter(addOn -> addOn.name.equals(app.getName()))
+                        .findAny()
+                        .filter(addOn -> addOn.getVersion().compareTo(new Version(app.getVersions(0).getVersion())) >= 0)
+                        .map(ignore -> false)
+                        .orElse(true)
+                )
+                .collect(Collectors.toList());
+
+        newApps.forEach(app -> {
+            String url = app.getVersions(0).getDownloadLink();
+            try {
+                InputStream inputStream = serverRequests.download(url);
+                File file = new File(getMain().getFileSystemManager().getNewLibLocation(), app.getName() + "-" + app.getVersions(0).getVersion() + ".zip");
+                if (!file.exists()) {
+                    file.createNewFile();
+                }
+                FileOutputStream fileOutputStream = new FileOutputStream(file);
+                ByteStreams.copy(inputStream, fileOutputStream);
+                inputStream.close();
+                fileOutputStream.close();
+            } catch (UnirestException e) {
+                error("unable to download from "+url, e);
+            } catch (IOException e) {
+                error("unable to create file ", e);
+            }
+        });
+
+        //TODO: update config!
+
         return true;
     }
 
     private boolean updateIzou() throws IOException, UnirestException {
         String currentServerVersion = serverRequests.getNewestVersion();
         if (new Version(currentServerVersion).compareTo(currentVersion) != 0) {
-            InputStream input = serverRequests.downloadIzouVersion("url");
+            InputStream input = serverRequests.download("url");
             File tempFile = new File(izouFile.getAbsolutePath() + ".new");
             if (!tempFile.exists()) {
                 tempFile.createNewFile();
             }
             FileOutputStream fileOutputStream = new FileOutputStream(tempFile);
             ByteStreams.copy(input, fileOutputStream);
+            input.close();
+            fileOutputStream.close();
             return true;
         }
         return false;
