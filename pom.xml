@@ -127,10 +127,20 @@
             <artifactId>protobuf-java-util</artifactId>
             <version>3.0.0-beta-2</version>
         </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.apache.httpcomponents</groupId>-->
+            <!--<artifactId>httpcomponents-client</artifactId>-->
+            <!--<version>4.4</version>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>org.apache.httpcomponents</groupId>-->
+            <!--<artifactId>httpcomponents-core</artifactId>-->
+            <!--<version>4.4.4</version>-->
+        <!--</dependency>-->
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcomponents-client</artifactId>
-            <version>4.5.2</version>
+            <groupId>com.esotericsoftware.yamlbeans</groupId>
+            <artifactId>yamlbeans</artifactId>
+            <version>1.09</version>
         </dependency>
     </dependencies>
 
@@ -167,6 +177,8 @@
                     <archive>
                         <manifest>
                             <mainClass>org.intellimate.izou.main.Main</mainClass>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                         </manifest>
                     </archive>
                     <descriptorRefs>
