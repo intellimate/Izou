@@ -73,23 +73,23 @@ public class ServerRequests extends IzouModule {
         return response.getBody();
     }
 
-    public List<App> getAddonAndDependencies(int id) throws UnirestException {
+    public Optional<App> getAddonAndDependencies(int id) throws UnirestException {
         HttpResponse<JsonNode> app = doGet("/apps/" + id).asJson();
         if (app.getStatus() == 404) {
             debug("unable to retrieve addon"+id);
-            return new ArrayList<>();
+            return Optional.empty();
         }
         App.Builder appBuilder = App.newBuilder();
         try {
             parser.merge(app.getBody().toString(), appBuilder);
         } catch (InvalidProtocolBufferException e) {
             debug("parse result for addon"+id);
-            return new ArrayList<>();
+            return Optional.empty();
         }
 
-        appBuilder.getVersionsList().stream()
+        return appBuilder.getVersionsList().stream()
                 .reduce((appVersion, appVersion2) -> {
-                    Version version =  new Version(appVersion.getVersion());
+                    Version version = new Version(appVersion.getVersion());
                     Version version2 = new Version(appVersion2.getVersion());
                     if (version.compareTo(version2) < 0) {
                         return appVersion2;
@@ -98,7 +98,7 @@ public class ServerRequests extends IzouModule {
                     }
                 })
                 .flatMap(version -> {
-                    Version parsed =  new Version(version.getVersion());
+                    Version parsed = new Version(version.getVersion());
                     try {
                         HttpResponse<JsonNode> response =
                                 doGet("apps/" + id + "/" + parsed.getMajor() + "/" + parsed.getMinor() + "/" + parsed.getPatch())
@@ -108,14 +108,18 @@ public class ServerRequests extends IzouModule {
                             parser.merge(response.getBody().toString(), builder);
                             return Optional.of(builder.build());
                         } catch (InvalidProtocolBufferException e) {
-                            debug("parse result for addon"+id);
+                            debug("parse result for addon" + id);
                             return Optional.empty();
                         }
                     } catch (UnirestException e) {
                         return Optional.empty();
                     }
                 })
-                .map()
+                .map(appVersion -> {
+                    appBuilder.clearVersions();
+                    appBuilder.addVersions(appVersion);
+                    return appBuilder.build();
+                });
 
     }
 
