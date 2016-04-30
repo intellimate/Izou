@@ -8,6 +8,7 @@ import org.intellimate.izou.identification.Identification;
 import org.intellimate.izou.identification.IdentificationManager;
 import org.intellimate.izou.identification.IllegalIDException;
 import org.intellimate.izou.main.Main;
+import org.intellimate.izou.output.OutputControllerModel;
 import org.intellimate.izou.output.OutputExtensionModel;
 import org.intellimate.izou.output.OutputPluginModel;
 import org.intellimate.izou.resource.ResourceModel;
@@ -745,6 +746,21 @@ public class ContextImplementation implements Context {
         @Override
         public void removeOutputPlugin(OutputPluginModel outputPlugin) {
             main.getOutputManager().removeOutputPlugin(outputPlugin);
+        }
+
+        @Override
+        public void addOutputController(OutputControllerModel outputController) {
+            main.getOutputControllerManager().addOutputController(outputController);
+        }
+
+        @Override
+        public void removeOutputController(OutputControllerModel outputController) {
+            main.getOutputControllerManager().removeOutputController(outputController);
+        }
+
+        @Override
+        public Optional<OutputControllerModel> getOutputController(Identifiable identifiable) {
+            return main.getOutputControllerManager().getOutputController(identifiable);
         }
 
         /**

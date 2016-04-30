@@ -1,5 +1,6 @@
 package org.intellimate.izou.addon;
 
+import org.apache.commons.cli.MissingArgumentException;
 import org.apache.logging.log4j.Level;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.SecurityFunctions;
@@ -11,7 +12,6 @@ import org.intellimate.izou.util.IzouModule;
 import ro.fortsoft.pf4j.*;
 
 import javax.crypto.SecretKey;
-import javax.management.InstanceAlreadyExistsException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -42,11 +42,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
      */
     public AddOnManager(Main main) {
         super(main);
-        try {
-            addOnInformationManager = AddOnInformationManager.createAddOnInformationManager();
-        } catch (InstanceAlreadyExistsException e) {
-            fatal("AddOnInformationManager already exists", e);
-        }
+        addOnInformationManager = AddOnInformationManager.getInstance();
     }
 
     /**
@@ -85,7 +81,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
      */
     public void registerAllAddOns(IdentifiableSet<AddOnModel> addOns) {
         initAddOns(addOns);
-        //checkAddOns(addOns);
+        checkAddOns(addOns);
         List<CompletableFuture<Void>> futures = addOns.stream()
                 .map(addOn -> submit((Runnable) addOn::register))
                 .collect(Collectors.toList());
@@ -96,15 +92,22 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
         }
     }
 
+    /**
+     * Checks that addOns have all required properties and creating the addOn information list if they do
+     */
     private void checkAddOns(IdentifiableSet<AddOnModel> addOns) {
-        // checking that addOns have all required properties and creating the addOn information list if they do
-        // (check not performed yet - waiting for xml implementation of property files until this is done)
         addOns.stream().forEach(addOn -> {
             Properties addOnConfigProperties = addOn.getPlugin().getPluginClassLoader().getPluginDescriptor().
                     getAddOnProperties();
-            AddOnInformation addOnInformation = new AddOnInformation(addOnConfigProperties.getProperty("name"),
-                    addOnConfigProperties.getProperty("version"), addOnConfigProperties.getProperty("provider"),
-                    addOn.getID());
+            AddOnInformation addOnInformation = null;
+            try {
+                addOnInformation = new AddOnInformation(addOnConfigProperties.getProperty("name"),
+                        addOnConfigProperties.getProperty("addOnVersion"), addOnConfigProperties.getProperty("provider"),
+                        addOn.getID());
+            } catch (MissingArgumentException e) {
+                fatal("AddOn check failed for: " + addOn.getID(), e);
+                System.exit(1);
+            }
 
             addOnInformationManager.addAddOnInformation(addOnInformation);
         });

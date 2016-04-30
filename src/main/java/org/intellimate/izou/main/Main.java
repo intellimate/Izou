@@ -8,6 +8,7 @@ import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.events.EventDistributor;
 import org.intellimate.izou.events.LocalEventManager;
 import org.intellimate.izou.identification.InternalIdentificationManager;
+import org.intellimate.izou.output.OutputControllerManager;
 import org.intellimate.izou.output.OutputManager;
 import org.intellimate.izou.resource.ResourceManager;
 import org.intellimate.izou.security.SecurityManager;
@@ -36,6 +37,7 @@ public class Main {
     private static final long INIT_TIME_LIMIT = 10000;
     private final InternalIdentificationManager internalIdentificationManager;
     private final OutputManager outputManager;
+    private final OutputControllerManager outputControllerManager;
     private final ResourceManager resourceManager;
     private final EventDistributor eventDistributor;
     private final LocalEventManager localEventManager;
@@ -102,6 +104,7 @@ public class Main {
         threadPoolManager = new ThreadPoolManager(this);
         izouLogger = new IzouLogger();
         outputManager = new OutputManager(this);
+        outputControllerManager = new OutputControllerManager();
         resourceManager = new ResourceManager(this);
         eventDistributor = new EventDistributor(this);
         localEventManager = new LocalEventManager(this);
@@ -220,6 +223,10 @@ public class Main {
 
     public OutputManager getOutputManager() {
         return outputManager;
+    }
+
+    public OutputControllerManager getOutputControllerManager() {
+        return outputControllerManager;
     }
 
     public LocalEventManager getLocalEventManager() {

@@ -1,6 +1,5 @@
 package org.intellimate.izou.addon;
 
-import javax.management.InstanceAlreadyExistsException;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -15,21 +14,15 @@ public final class AddOnInformationManager {
      * Creates a new instance of the AddOnInformationManager if none exists already, else InstanceAlreadyExistsException
      * is thrown.
      *
-     * @return a new AddOnInformationManager instance if none existed before
-     * @throws InstanceAlreadyExistsException thrown if this method is called when an instance of AddOnInformationManager
-     *          has already been created.
+     * @return A new AddOnInformationManager instance if none existed before.
      */
-    public static AddOnInformationManager createAddOnInformationManager() throws InstanceAlreadyExistsException {
+    public static AddOnInformationManager getInstance() {
         if (addOnInformationManager == null) {
             addOnInformationManager = new AddOnInformationManager();
             return addOnInformationManager;
         } else {
-            throw new InstanceAlreadyExistsException("AddOnInformationManager has already been instantiated");
+            return addOnInformationManager;
         }
-    }
-
-    public static AddOnInformationManager getInstance() {
-        return addOnInformationManager;
     }
 
     /**

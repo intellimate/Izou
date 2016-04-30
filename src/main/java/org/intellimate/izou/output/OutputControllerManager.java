@@ -3,7 +3,6 @@ package org.intellimate.izou.output;
 import org.intellimate.izou.identification.Identifiable;
 import org.intellimate.izou.util.IdentifiableSet;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -29,20 +28,20 @@ public class OutputControllerManager {
     /**
      * Adds a new {@link OutputControllerModel} to Izou.
      *
-     * @param outputControllerModels The OutputController to add to Izou.
+     * @param outputController The OutputController to add to Izou.
      */
-    public void addOutputController(List<OutputControllerModel> outputControllerModels) {
-        outputControllerModels.stream()
-                .forEach(outputControllerModel -> outputControllers.add(outputControllerModel));
+    public void addOutputController(OutputControllerModel outputController) {
+        outputControllers.add(outputController);
+
     }
 
     /**
      * Removes an existing {@link OutputControllerModel} from Izou.
      *
-     * @param outputControllerModels The OutputController to remove from to Izou.
+     * @param outputController The OutputController to remove from to Izou.
      */
-    public void removeOutputController(OutputControllerModel outputControllerModels) {
-        outputControllers.remove(outputControllerModels);
+    public void removeOutputController(OutputControllerModel outputController) {
+        outputControllers.remove(outputController);
     }
 
     /**

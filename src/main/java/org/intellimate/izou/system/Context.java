@@ -21,55 +21,63 @@ import org.intellimate.izou.system.context.System;
  */
 public interface Context {
     /**
-     * returns the API used for interaction with Events
+     * Returns the API used for interaction with Events.
+     *
      * @return Events
      */
     Events getEvents();
 
     /**
-     * returns the API used for interaction with Resource
+     * Returns the API used for interaction with Resource.
+     *
      * @return Resource
      */
     Resources getResources();
 
     /**
-     * returns the API used for interaction with Files
+     * Returns the API used for interaction with Files.
+     *
      * @return Files
      */
     Files getFiles();
 
     /**
-     * returns the API used to log
+     * Returns the API used to log.
+     *
      * @return Logger
      */
     ExtendedLogger getLogger();
 
     /**
-     * returns the API used to manage the ThreadPool
+     * Returns the API used to manage the ThreadPool.
+     *
      * @return ThreadPool
      */
     ThreadPool getThreadPool();
 
     /**
-     * returns the API to manage the Activators
+     * Returns the API to manage the Activators.
+     *
      * @return Activator
      */
     Activators getActivators();
 
     /**
-     * returns the API used to manage the OutputPlugins and OutputExtensions
+     * Returns the API used to manage the OutputPlugins, OutputExtensions and OutputControllers.
+     *
      * @return Output
      */
     Output getOutput();
 
     /**
-     * retruns the API used to interact with Izou.
+     * Retruns the API used to interact with Izou.
+     *
      * @return System.
      */
     System getSystem();
 
     /**
-     * gets addOn
+     * Gets addOn
      *
      * @return the addOn
      */
