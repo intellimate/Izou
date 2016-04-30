@@ -61,6 +61,7 @@ public class FileSystemManager extends IzouModule {
      */
     public void createIzouFileSystem() throws IOException {
         createLibFolder();
+        createNewLibFolder();
         createResourceFolder();
         createPropertiesFolder();
         createLogsFolder();
@@ -74,6 +75,16 @@ public class FileSystemManager extends IzouModule {
      * @throws IOException could throw IOException because working with files
      */
     private void createLibFolder() throws IOException {
+        if(!Files.exists(newLibLocation.toPath()))
+            Files.createDirectories(newLibLocation.toPath());
+    }
+
+    /**
+     * create lib folder
+     *
+     * @throws IOException could throw IOException because working with files
+     */
+    private void createNewLibFolder() throws IOException {
         if(!Files.exists(libLocation.toPath()))
             Files.createDirectories(libLocation.toPath());
     }
