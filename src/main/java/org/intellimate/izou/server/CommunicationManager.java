@@ -1,6 +1,7 @@
 package org.intellimate.izou.server;
 
 import com.google.common.io.ByteStreams;
+import com.mashape.unirest.http.exceptions.UnirestException;
 import org.intellimate.izou.config.AddOn;
 import org.intellimate.izou.config.Version;
 import org.intellimate.izou.main.Main;
@@ -31,9 +32,15 @@ public class CommunicationManager extends IzouModule {
     private final List<AddOn> selectedWithoutDependencies;
     private final boolean disabledLib;
 
-    public CommunicationManager(Version currentVersion, Main main, List<AddOn> selectedWithoutDependencies, boolean disabledLib, String refreshToken) {
+    public CommunicationManager(Version currentVersion, Main main, List<AddOn> selectedWithoutDependencies, boolean disabledLib, String refreshToken) throws IllegalStateException {
         super(main);
-        this.serverRequests = new ServerRequests("http://www.izou.org", refreshToken);
+        this.serverRequests = new ServerRequests("http://www.izou.org", refreshToken, main);
+        try {
+            serverRequests.init();
+        } catch (UnirestException e) {
+            error("unable to init Connection to server", e);
+            throw new IllegalStateException("not able to init server-request package");
+        }
         this.currentVersion = currentVersion;
         this.izouFile = main.getFileSystemManager().getIzouJarLocation();
         libLocation = main.getFileSystemManager().getLibLocation();
@@ -84,7 +91,12 @@ public class CommunicationManager extends IzouModule {
     }
 
     public boolean checkForUpdates() throws IOException {
-        boolean mustRestart = updateIzou();
+        boolean mustRestart = false;
+        try {
+            mustRestart = updateIzou();
+        } catch (UnirestException e) {
+            error("unable to update izou", e);
+        }
         if (mustRestart) {
             return true;
         }
@@ -98,9 +110,10 @@ public class CommunicationManager extends IzouModule {
         selected.stream()
                 .filter(app -> app.getId().isPresent())
                 .map(app -> serverRequests.)
+        return true;
     }
 
-    private boolean updateIzou() throws IOException {
+    private boolean updateIzou() throws IOException, UnirestException {
         String currentServerVersion = serverRequests.getNewestVersion();
         if (new Version(currentServerVersion).compareTo(currentVersion) != 0) {
             InputStream input = serverRequests.downloadIzouVersion("url");
@@ -112,5 +125,6 @@ public class CommunicationManager extends IzouModule {
             ByteStreams.copy(input, fileOutputStream);
             return true;
         }
+        return false;
     }
 }
