@@ -28,13 +28,10 @@ import java.security.cert.CertificateException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import static java.nio.file.StandardCopyOption.COPY_ATTRIBUTES;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static org.aspectj.weaver.tools.cache.SimpleCacheFactory.path;
 
 /**
  * Manages all the AddOns.
@@ -61,7 +58,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
     * Retrieves and registers all AddOns.
     */
     public void retrieveAndRegisterAddOns() {
-        synchroAddons();
+        synchronizeAddons();
         addOns.addAll(loadAddOns());
         registerAllAddOns(addOns);
         initialized();
@@ -135,67 +132,65 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
      * this methods replaces all the plugins in the "/lib" directory with new ones from the "/new" directory.
      * it also deletes all the marked plugins
      */
-    private void synchroAddons() {
+    private void synchronizeAddons() {
         File newLibLocation = getMain().getFileSystemManager().getNewLibLocation();
         if (!newLibLocation.exists()) {
             return;
         }
-        Map<Boolean, List<File>> toProcess = Arrays.stream(newLibLocation.listFiles())
+        Map<Boolean, List<File>> newOrReplace = Arrays.stream(newLibLocation.listFiles())
             .filter(file -> file.getName().endsWith(".zip"))
             .collect(Collectors.partitioningBy(file -> file.getName().contains("delete")));
 
-        Set<String> toDelete = toProcess.get(true).stream()
+        Set<String> toDelete = newOrReplace.get(true).stream()
                 .map(AddOn::new)
                 .map(addOn -> addOn.name)
                 .collect(Collectors.toSet());
 
-        Map<String, AddOn> newAddons = toProcess.get(false).stream()
+        Map<String, AddOn> newAddons = newOrReplace.get(false).stream()
                 .map(AddOn::new)
                 .collect(Collectors.toMap(addOn -> addOn.name, Function.identity()));
 
-        List<File> deleteBeforeCopy;
-
-        File libLocation = getMain().getFileSystemManager().getLibLocation();
-        deleteBeforeCopy = Arrays.stream(libLocation.listFiles())
+        Arrays.stream(getMain().getFileSystemManager().getLibLocation().listFiles())
             .filter(file -> file.getName().endsWith(".zip") || file.isDirectory())
             .filter(file -> {
                 AddOn addOn = new AddOn(file);
                 return toDelete.contains(addOn.name) || newAddons.containsKey(addOn.name);
             })
-            .collect(Collectors.toList());
+            .forEach(file -> {
+                if (file.isDirectory()) {
+                    try {
+                        Files.walkFileTree(file.toPath(), new SimpleFileVisitor<Path>() {
+                            @Override
+                            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                                Files.delete(file);
+                                return FileVisitResult.CONTINUE;
+                            }
 
-        deleteBeforeCopy.forEach(file -> {
-            if (file.isDirectory()) {
-                try {
-                    Files.walkFileTree(file.toPath(), new SimpleFileVisitor<Path>() {
-                        @Override
-                        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                            Files.delete(file);
-                            return FileVisitResult.CONTINUE;
-                        }
+                            @Override
+                            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                                Files.delete(dir);
+                                return FileVisitResult.CONTINUE;
+                            }
 
-                        @Override
-                        public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                            Files.delete(dir);
-                            return FileVisitResult.CONTINUE;
-                        }
-
-                    });
-                } catch (IOException e) {
-                    e.printStackTrace();
+                        });
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    file.delete();
                 }
-            } else {
-                file.delete();
-            }
-        });
+            });
 
-        toProcess.get(false).forEach(file -> {
+        newOrReplace.get(false).forEach(file -> {
             try {
                 Files.copy(file.toPath(), new File(getMain().getFileSystemManager().getLibLocation(), file.getName()).toPath(), COPY_ATTRIBUTES, REPLACE_EXISTING);
+                file.delete();
             } catch (IOException e) {
                 error("Unable to copy file "+file.toString());
             }
         });
+
+        newOrReplace.get(true).forEach(File::delete);
     }
 
     /**
