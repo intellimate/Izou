@@ -6,6 +6,7 @@ import org.intellimate.izou.config.AddOn;
 import org.intellimate.izou.config.Version;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.util.IzouModule;
+import org.intellimate.server.proto.App;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -81,9 +82,10 @@ public class CommunicationManager extends IzouModule {
             throw new RuntimeException();
         }
 
-        selectedWithoutDependencies.forEach(app -> {
-            if (installed.containsKey(app.name)) {
-                installed.put(app.name, app);
+        selectedWithoutDependencies.forEach(addOn -> {
+            if (installed.containsKey(addOn.name)) {
+                AddOn installedAddon = installed.get(addOn.name);
+                installedAddon.id = addOn.id;
             }
         });
 
@@ -109,7 +111,15 @@ public class CommunicationManager extends IzouModule {
     private boolean synchronizeApps(List<AddOn> selected) {
         selected.stream()
                 .filter(app -> app.getId().isPresent())
-                .map(app -> serverRequests.)
+                .map(app -> {
+                    try {
+                        return serverRequests.getAddonAndDependencies(app.getId().get());
+                    } catch (UnirestException e) {
+                        debug("unable to connect to server", e);
+                        return new ArrayList<>();
+                    }
+                })
+                .
         return true;
     }
 

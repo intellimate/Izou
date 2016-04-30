@@ -73,7 +73,7 @@ public class ServerRequests extends IzouModule {
         return response.getBody();
     }
 
-    public List<App> getAllAddons(int id) throws UnirestException {
+    public List<App> getAddonAndDependencies(int id) throws UnirestException {
         HttpResponse<JsonNode> app = doGet("/apps/" + id).asJson();
         if (app.getStatus() == 404) {
             debug("unable to retrieve addon"+id);
