@@ -53,6 +53,7 @@ public class ServerRequests extends IzouModule {
     }
 
     public String getNewestVersion() throws UnirestException, InvalidProtocolBufferException {
+        assureInit();
         HttpResponse<JsonNode> jsonResponse = doGet("/izou").asJson();
         if (jsonResponse.getStatus() != 200) {
             throw new IllegalStateException("server answered with " + jsonResponse.getStatus());
@@ -62,7 +63,7 @@ public class ServerRequests extends IzouModule {
         return builder.getVersion();
     }
 
-    public InputStream downloadIzouVersion(String url) throws UnirestException {
+    public InputStream download(String url) throws UnirestException {
         assureInit();
         HttpResponse<InputStream> response = Unirest.get(url)
                 .queryString("Authorization", "Bearer " + authToken)
@@ -74,6 +75,7 @@ public class ServerRequests extends IzouModule {
     }
 
     public Optional<App> getAddonAndDependencies(int id) throws UnirestException {
+        assureInit();
         HttpResponse<JsonNode> app = doGet("/apps/" + id).asJson();
         if (app.getStatus() == 404) {
             debug("unable to retrieve addon"+id);
