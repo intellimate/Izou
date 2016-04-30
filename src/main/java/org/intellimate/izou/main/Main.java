@@ -159,6 +159,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
+        //TODO check for the Izou version & restart again!
         File config = new File("./izou.yml");
         if (!config.exists()) {
             System.out.println("izou config is not existing, path: "+config.getAbsolutePath());
