@@ -12,11 +12,16 @@ import org.intellimate.izou.main.Main;
 import org.intellimate.izou.util.IzouModule;
 import org.intellimate.server.proto.App;
 import org.intellimate.server.proto.Izou;
+import org.intellimate.server.proto.SocketConnection;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 import static java.awt.SystemColor.info;
 
@@ -30,6 +35,7 @@ public class ServerRequests extends IzouModule {
     private final String refreshToken;
     private String authToken = null;
     private final JsonFormat.Parser parser = JsonFormat.parser();
+    private boolean run = true;
 
     public ServerRequests(String url, String refreshToken, Main main) {
         super(main);
@@ -49,6 +55,28 @@ public class ServerRequests extends IzouModule {
             throw new IllegalStateException("server answered with " + response.getStatus());
         } else {
             authToken = response.getBody();
+        }
+    }
+
+    public void requests(Function<org.intellimate.server.proto.HttpRequest, org.intellimate.server.proto.HttpResponse> callback) {
+        assureInit();
+        try {
+            Socket socket = new Socket(url, 40);
+            InputStream inputStream = socket.getInputStream();
+            OutputStream outputStream = socket.getOutputStream();
+            SocketConnection.newBuilder()
+                    .setToken(authToken)
+                    .build()
+                    .writeDelimitedTo(outputStream);
+            outputStream.flush();
+            while (run) {
+                org.intellimate.server.proto.HttpRequest httpRequest = org.intellimate.server.proto.HttpRequest.parseFrom(inputStream);
+                callback.apply(httpRequest)
+                        .writeDelimitedTo(outputStream);
+                outputStream.flush();
+            }
+        } catch (IOException e) {
+            error("there was a problem with the server connection", e);
         }
     }
 

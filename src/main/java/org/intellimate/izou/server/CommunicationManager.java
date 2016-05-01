@@ -34,16 +34,31 @@ public class CommunicationManager extends IzouModule {
     private final List<AddOn> installedWithDependencies;
     private final List<AddOn> selectedWithoutDependencies;
     private final boolean disabledLib;
+    private final RequestHandler requestHandler;
+    private final Thread connectionThread;
+    private boolean run = true;
 
     public CommunicationManager(Version currentVersion, Main main, List<AddOn> selectedWithoutDependencies, boolean disabledLib, String refreshToken) throws IllegalStateException {
         super(main);
         this.serverRequests = new ServerRequests("http://www.izou.org", refreshToken, main);
+        requestHandler = new RequestHandler(main, selectedWithoutDependencies);
         try {
             serverRequests.init();
         } catch (UnirestException e) {
             error("unable to init Connection to server", e);
             throw new IllegalStateException("not able to init server-request package");
         }
+        connectionThread = new Thread(() -> {
+            while (run) {
+                serverRequests.requests(requestHandler::handleRequests);
+                try {
+                    Thread.sleep(30000);
+                } catch (InterruptedException e) {
+                    debug("interrupted", e);
+                }
+            }
+        });
+        connectionThread.start();
         this.currentVersion = currentVersion;
         this.izouFile = main.getFileSystemManager().getIzouJarLocation();
         libLocation = main.getFileSystemManager().getLibLocation();
