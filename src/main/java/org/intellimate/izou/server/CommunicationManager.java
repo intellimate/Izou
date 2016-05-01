@@ -38,10 +38,10 @@ public class CommunicationManager extends IzouModule {
     private final Thread connectionThread;
     private boolean run = true;
 
-    public CommunicationManager(Version currentVersion, Main main, List<AddOn> selectedWithoutDependencies, boolean disabledLib, String refreshToken) throws IllegalStateException {
+    public CommunicationManager(Version currentVersion, Main main, List<AddOn> selectedWithoutDependencies, boolean disabledLib, String refreshToken, String addonsFile) throws IllegalStateException {
         super(main);
         this.serverRequests = new ServerRequests("http://www.izou.org", refreshToken, main);
-        requestHandler = new RequestHandler(main, selectedWithoutDependencies);
+        requestHandler = new RequestHandler(main, selectedWithoutDependencies, addonsFile);
         try {
             serverRequests.init();
         } catch (UnirestException e) {
