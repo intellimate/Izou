@@ -32,14 +32,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.URL;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 
 /**
  * Main Class.
@@ -386,7 +382,7 @@ public class Main {
         }
         CommunicationManager communicationManager = null;
         try {
-            CommunicationManager finalCommunManager = new CommunicationManager(version, this, addOns, disabledLib, config.token);
+            CommunicationManager finalCommunManager = new CommunicationManager(version, this, addOns, disabledLib, config.token, addonsFile);
             communicationManager = finalCommunManager;
             if (!disabledUpdate) {
                 LocalDateTime firstInterval = LocalDateTime.now().withHour(2);
