@@ -23,11 +23,12 @@ public final class IzouInstanceStatusOuterClass {
   static {
     java.lang.String[] descriptorData = {
       "\n*server-protobuf/izou_instance_status.p" +
-      "roto\022\013intellimate\"\201\001\n\022IzouInstanceStatus" +
+      "roto\022\013intellimate\"\217\001\n\022IzouInstanceStatus" +
       "\0226\n\006status\030\001 \001(\0162&.intellimate.IzouInsta" +
-      "nceStatus.Status\"3\n\006Status\022\013\n\007RUNNING\020\000\022" +
-      "\014\n\010DISABLED\020\001\022\016\n\nRESTARTING\020\002B \n\034org.int" +
-      "ellimate.server.protoP\001b\006proto3"
+      "nceStatus.Status\"A\n\006Status\022\013\n\007RUNNING\020\000\022" +
+      "\014\n\010DISABLED\020\001\022\016\n\nRESTARTING\020\002\022\014\n\010UPDATIN" +
+      "G\020\003B \n\034org.intellimate.server.protoP\001b\006p" +
+      "roto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {

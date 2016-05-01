@@ -89,6 +89,10 @@ public  final class IzouInstanceStatus extends
      * <code>RESTARTING = 2;</code>
      */
     RESTARTING(2, 2),
+    /**
+     * <code>UPDATING = 3;</code>
+     */
+    UPDATING(3, 3),
     UNRECOGNIZED(-1, -1),
     ;
 
@@ -104,6 +108,10 @@ public  final class IzouInstanceStatus extends
      * <code>RESTARTING = 2;</code>
      */
     public static final int RESTARTING_VALUE = 2;
+    /**
+     * <code>UPDATING = 3;</code>
+     */
+    public static final int UPDATING_VALUE = 3;
 
 
     public final int getNumber() {
@@ -119,6 +127,7 @@ public  final class IzouInstanceStatus extends
         case 0: return RUNNING;
         case 1: return DISABLED;
         case 2: return RESTARTING;
+        case 3: return UPDATING;
         default: return null;
       }
     }
