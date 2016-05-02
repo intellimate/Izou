@@ -1,9 +1,6 @@
 package org.intellimate.izou.system;
 
 import org.apache.logging.log4j.spi.ExtendedLogger;
-import org.intellimate.izou.addon.AddOnInformation;
-import org.intellimate.izou.addon.AddOnInformationManager;
-import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.security.storage.SecureStorage;
 import org.intellimate.izou.system.context.*;
 import org.intellimate.izou.system.context.System;
@@ -77,11 +74,11 @@ public interface Context {
     System getSystem();
 
     /**
-     * Gets addOn
+     * Gets the API to manage the addOns.
      *
-     * @return the addOn
+     * @return AddOns.
      */
-    AddOnModel getAddOn();
+    AddOns getAddOns();
 
     /**
      * Gets the Secure Storage object of Izou. {@link SecureStorage} allows addOns to safely store data so that other
@@ -92,15 +89,5 @@ public interface Context {
      */
     default SecureStorage getSecureStorage() {
         return SecureStorage.getInstance();
-    }
-
-    /**
-     * Gets the {@link AddOnInformation} object for a specific addOn, if it is loaded, else returns null.
-     * An AddOnInformation pretty much contains public information of an addOn, like name and version.
-     *
-     * @return the AddOnInformation for the addOn of the given ID.
-     */
-    default AddOnInformation getAddOnInformation(String id) {
-        return AddOnInformationManager.getInstance().getAddOnInformations(id);
     }
 }

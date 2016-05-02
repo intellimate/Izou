@@ -1,6 +1,5 @@
 package org.intellimate.izou.addon;
 
-import org.apache.commons.cli.MissingArgumentException;
 import org.apache.logging.log4j.Level;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.SecurityFunctions;
@@ -42,7 +41,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
      */
     public AddOnManager(Main main) {
         super(main);
-        addOnInformationManager = AddOnInformationManager.getInstance();
+        addOnInformationManager = main.getAddOnInformationManager();
     }
 
     /**
@@ -81,7 +80,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
      */
     public void registerAllAddOns(IdentifiableSet<AddOnModel> addOns) {
         initAddOns(addOns);
-        checkAddOns(addOns);
+        createAddOnInfos(addOns);
         List<CompletableFuture<Void>> futures = addOns.stream()
                 .map(addOn -> submit((Runnable) addOn::register))
                 .collect(Collectors.toList());
@@ -95,22 +94,8 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
     /**
      * Checks that addOns have all required properties and creating the addOn information list if they do
      */
-    private void checkAddOns(IdentifiableSet<AddOnModel> addOns) {
-        addOns.stream().forEach(addOn -> {
-            Properties addOnConfigProperties = addOn.getPlugin().getPluginClassLoader().getPluginDescriptor().
-                    getAddOnProperties();
-            AddOnInformation addOnInformation = null;
-            try {
-                addOnInformation = new AddOnInformation(addOnConfigProperties.getProperty("name"),
-                        addOnConfigProperties.getProperty("addOnVersion"), addOnConfigProperties.getProperty("provider"),
-                        addOn.getID());
-            } catch (MissingArgumentException e) {
-                fatal("AddOn check failed for: " + addOn.getID(), e);
-                System.exit(1);
-            }
-
-            addOnInformationManager.addAddOnInformation(addOnInformation);
-        });
+    private void createAddOnInfos(IdentifiableSet<AddOnModel> addOns) {
+        addOns.stream().forEach(addOn -> addOnInformationManager.registerAddOn(addOn));
     }
 
     /**

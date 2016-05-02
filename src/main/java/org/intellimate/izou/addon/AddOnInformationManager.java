@@ -1,62 +1,175 @@
 package org.intellimate.izou.addon;
 
-import java.util.concurrent.ConcurrentHashMap;
+import org.apache.commons.cli.MissingArgumentException;
+import org.intellimate.izou.main.Main;
+import org.intellimate.izou.util.IdentifiableSet;
+import org.intellimate.izou.util.IzouModule;
+import ro.fortsoft.pf4j.PluginDescriptor;
+
+import java.util.Optional;
 
 /**
- * This class contains a list of {@link AddOnInformation} objects. The class is thread-safe.
+ *
  */
-public final class AddOnInformationManager {
-    private static AddOnInformationManager addOnInformationManager = null;
-
-    private final ConcurrentHashMap<String, AddOnInformation> addOnInformations;
-
-    /**
-     * Creates a new instance of the AddOnInformationManager if none exists already, else InstanceAlreadyExistsException
-     * is thrown.
-     *
-     * @return A new AddOnInformationManager instance if none existed before.
-     */
-    public static AddOnInformationManager getInstance() {
-        if (addOnInformationManager == null) {
-            addOnInformationManager = new AddOnInformationManager();
-            return addOnInformationManager;
-        } else {
-            return addOnInformationManager;
-        }
-    }
+public class AddOnInformationManager extends IzouModule {
+    private final IdentifiableSet<AddOnInformation> addOnInformations;
+    private final IdentifiableSet<AddOnModel> addOns;
 
     /**
      * Creates a new instance of AddOnInformationManager.
      */
-    private AddOnInformationManager() {
-        addOnInformations = new ConcurrentHashMap<>();
+    public AddOnInformationManager(Main main) {
+        super(main);
+        addOnInformations = new IdentifiableSet<>();
+        addOns = new IdentifiableSet<>();
     }
 
     /**
-     * Adds a new addOnInformation to the map - package local so that only {@link AddOnManager} can use this method
+     * Registers an addOn with the AddOnInformationManager by extracting all relevant information from the addOn and
+     * adding it the the sets.
      *
-     * @param addOnInformation The addOnInformation to add
+     * Once an addOn is registered, its public data can be viewed by any other addOn through the context.
+     *
+     * @param addOn The addOn to register with the AddOnInformationManager.
      */
-    void addAddOnInformation(AddOnInformation addOnInformation) {
-        addOnInformations.put(addOnInformation.getID(), addOnInformation);
+    void registerAddOn(AddOnModel addOn) {
+        PluginDescriptor descriptor = addOn.getPlugin().getDescriptor();
+
+        String name = descriptor.getTitle();
+        String version = descriptor.getVersion().toString();
+        String provider = descriptor.getProvider();
+        String id = descriptor.getPluginId();
+        String sdkVersion = descriptor.getSdkVersion().toString();
+        Optional<Integer> serverIDOptional = descriptor.getServerID();
+        String artifactID = descriptor.getArtifactID();
+
+        int serverID;
+        if (serverIDOptional.isPresent()) {
+            serverID = serverIDOptional.get();
+        } else {
+            serverID = -1;
+        }
+
+        try {
+            AddOnInformation addOnInformation = new AddOnInformationImpl(name, version, provider, id, sdkVersion,
+                    serverID, artifactID);
+            addOnInformations.add(addOnInformation);
+            addOns.add(addOn);
+        } catch (MissingArgumentException e) {
+            error("Unable to register addOn: " + addOn.getID() + " with the AddOnInformationManager", e);
+        }
     }
 
     /**
-     * Removes a addOnInformation from the map - package local so that only {@link AddOnManager} can use this method
+     * Removes a addOn from the sets. The id can either be the fully classified id of an addOn, that is
+     * intellimate.izou.addOn.myaddon, or it can just be the artifact id, that is myaddon. On success, true is returned
+     * and otherwise false is returned.
      *
-     * @param id The ID of the AddOnInformation to remove
+     * @param id The ID of the addOn to remove. This can either be intellimate.izou.addOn.myaddon as an
+     *           example, or just myaddon.
+     * @return True on success, else false.
      */
-    void remove(String id) {
-        addOnInformations.remove(id);
+    @SuppressWarnings("Duplicates")
+    boolean remove(String id) {
+        boolean success1 = false;
+        Optional<AddOnModel> addOnModel = getAddOn(id);
+        if (addOnModel.isPresent()) {
+            addOns.remove(addOnModel.get());
+            success1 = true;
+        }
+
+        boolean success2 = false;
+        Optional<AddOnInformation> addOnInformation = getAddOnInformation(id);
+        if (addOnInformation.isPresent()) {
+            addOnInformations.remove(addOnInformation.get());
+            success2 = true;
+        }
+
+        return success1 && success2;
     }
 
     /**
-     * Gets the {@link AddOnInformation} mapped to the given key.
+     * Removes a addOn from the sets. The id is the serverID of an addOn. On success, true is returned
+     * and otherwise false is returned.
      *
-     * @param id The ID of the AddOnInformation to get.
-     * @return The map matched to the addOns ID.
+     * @param serverID The serverID of the addOn to remove.
+     * @return True on success, else false.
      */
-    public synchronized AddOnInformation getAddOnInformations(String id) {
-        return addOnInformations.get(id);
+    @SuppressWarnings("Duplicates")
+    boolean remove(int serverID) {
+        boolean success1 = false;
+        Optional<AddOnModel> addOnModel = getAddOn(serverID);
+        if (addOnModel.isPresent()) {
+            addOns.remove(addOnModel.get());
+            success1 = true;
+        }
+
+        boolean success2 = false;
+        Optional<AddOnInformation> addOnInformation = getAddOnInformation(serverID);
+        if (addOnInformation.isPresent()) {
+            addOnInformations.remove(addOnInformation.get());
+            success2 = true;
+        }
+
+        return success1 && success2;
+    }
+
+    /**
+     * Gets the {@link AddOnModel} that has the given id. The id can either be the fully classified id of an addOn,
+     * that is intellimate.izou.addOn.myaddon, or it can just be the artifact id, that is myaddon.
+     *
+     * @param id The id can either be the fully classified id of an addOn, that is
+     * intellimate.izou.addOn.myaddon, or it can just be the artifact id, that is myaddon.
+     * @return An optional wrapping the addOn. If the addOn was found the optional will not be empty and otherwise it
+     * will.
+     */
+    public Optional<AddOnModel> getAddOn(final String id) {
+        return addOns.stream()
+                .filter(addOn -> addOn.getID().equals(id) || addOn.getPlugin().getDescriptor().getArtifactID().equals(id))
+                .findFirst();
+    }
+
+    /**
+     * Gets the {@link AddOnModel} that has the given id. The id is the serverID of the addOn.
+     *
+     * @param serverID The id is the serverID of the addOn.
+     * @return An optional wrapping the addOn. If the addOn was found the optional will not be empty and otherwise it
+     * will.
+     */
+    public Optional<AddOnModel> getAddOn(final int serverID) {
+        return addOns.stream()
+                .filter(addOn -> {
+                    Optional<Integer> serverIDOpt = addOn.getPlugin().getDescriptor().getServerID();
+                    return serverIDOpt.isPresent() && serverIDOpt.get() == serverID;
+                })
+                .findFirst();
+    }
+
+    /**
+     * Gets the {@link AddOnInformation} that has the given id. The id can either be the fully classified id of an addOn,
+     * that is intellimate.izou.addOn.myaddon, or it can just be the artifact id, that is myaddon.
+     *
+     * @param id The id can either be the fully classified id of an addOn, that is
+     * intellimate.izou.addOn.myaddon, or it can just be the artifact id, that is myaddon.
+     * @return An optional wrapping the addOnInformation. If the addOn was found the optional will not be empty and
+     * otherwise it will.
+     */
+    public Optional<AddOnInformation> getAddOnInformation(final String id) {
+        return addOnInformations.stream()
+                .filter(addOn -> addOn.getID().equals(id) || addOn.getArtifactID().equals(id))
+                .findFirst();
+    }
+
+    /**
+     * Gets the {@link AddOnInformation} that has the given id. The id is the serverID of the addOn.
+     *
+     * @param serverID The id is the serverID of the addOn.
+     * @return An optional wrapping the addOn. If the addOn was found the optional will not be empty and otherwise it
+     * will.
+     */
+    public Optional<AddOnInformation> getAddOnInformation(final int serverID) {
+        return addOnInformations.stream()
+                .filter(addOn -> addOn.getServerID() == serverID)
+                .findFirst();
     }
 }

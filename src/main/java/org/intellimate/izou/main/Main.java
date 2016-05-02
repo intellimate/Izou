@@ -3,6 +3,7 @@ package org.intellimate.izou.main;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.intellimate.izou.activator.ActivatorManager;
+import org.intellimate.izou.addon.AddOnInformationManager;
 import org.intellimate.izou.addon.AddOnManager;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.events.EventDistributor;
@@ -43,6 +44,7 @@ public class Main {
     private final LocalEventManager localEventManager;
     private final ActivatorManager activatorManager;
     private final AddOnManager addOnManager;
+    private final AddOnInformationManager addOnInformationManager;
     private final FileManager fileManager;
     private final FilePublisher filePublisher;
     private final IzouLogger izouLogger;
@@ -101,6 +103,7 @@ public class Main {
 
         internalIdentificationManager = new InternalIdentificationManager(this);
         addOnManager = new AddOnManager(this);
+        addOnInformationManager = new AddOnInformationManager(this);
         threadPoolManager = new ThreadPoolManager(this);
         izouLogger = new IzouLogger();
         outputManager = new OutputManager(this);
@@ -239,6 +242,10 @@ public class Main {
 
     public AddOnManager getAddOnManager() {
         return addOnManager;
+    }
+
+    public AddOnInformationManager getAddOnInformationManager() {
+        return addOnInformationManager;
     }
 
     public ResourceManager getResourceManager() {
