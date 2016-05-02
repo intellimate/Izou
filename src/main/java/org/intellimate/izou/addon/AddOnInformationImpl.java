@@ -2,23 +2,25 @@ package org.intellimate.izou.addon;
 
 import org.apache.commons.cli.MissingArgumentException;
 
+import java.util.Optional;
+
 /**
  * This class holds all public information of an addOn. That means all information that other addOns are allowed to know
  * about a given addOn is contained in here. Each addOn has its own instance of AddOnInformation which are stored in
  * {@link AddOnInformationManager}.
  */
-public final class AddOnInformationImpl implements AddOnInformation {
+class AddOnInformationImpl implements AddOnInformation {
     private final String name;
     private final String version;
     private final String sdkVersion;
     private final String provider;
     private final String id;
-    private final int serverID;
+    private final Optional<Integer> serverID;
     private final String artifactID;
 
     /**
      * Creates a new instance of AddOnInformation, which holds all the public information of an addOn and is registered
-     * in the {@link AddOnInformationManager}
+     * in the {@link AddOnInformationManager} with the serverID.
      *
      * @param name The name of the AddOn.
      * @param version The version of the AddOn.
@@ -32,10 +34,10 @@ public final class AddOnInformationImpl implements AddOnInformation {
      * an argument is missing in the file
      */
     public AddOnInformationImpl(String name, String provider, String version, String id, String sdkVersion,
-                                int serverID, String artifactID) throws MissingArgumentException {
+                                Optional<Integer> serverID, String artifactID) throws MissingArgumentException {
 
-        if (!checkField(name) || !checkField(provider) || !checkField(version) || !checkField(id) || !checkField(sdkVersion)
-                || !checkField(artifactID)) {
+        if (!checkField(name) || !checkField(provider) || !checkField(version) || !checkField(id)
+                || !checkField(sdkVersion) || !checkField(artifactID)) {
             throw new MissingArgumentException("AddOnInformation is not complete - an argument is missing");
         }
 
@@ -104,7 +106,7 @@ public final class AddOnInformationImpl implements AddOnInformation {
      * @return The serverID of the addOn, if it has one (used to match the addOn with the server).
      */
     @Override
-    public int getServerID() {
+    public Optional<Integer> getServerID() {
         return serverID;
     }
 

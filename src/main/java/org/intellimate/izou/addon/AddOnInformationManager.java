@@ -40,15 +40,8 @@ public class AddOnInformationManager extends IzouModule {
         String provider = descriptor.getProvider();
         String id = descriptor.getPluginId();
         String sdkVersion = descriptor.getSdkVersion().toString();
-        Optional<Integer> serverIDOptional = descriptor.getServerID();
         String artifactID = descriptor.getArtifactID();
-
-        int serverID;
-        if (serverIDOptional.isPresent()) {
-            serverID = serverIDOptional.get();
-        } else {
-            serverID = -1;
-        }
+        Optional<Integer> serverID = descriptor.getServerID();
 
         try {
             AddOnInformation addOnInformation = new AddOnInformationImpl(name, version, provider, id, sdkVersion,
@@ -70,7 +63,7 @@ public class AddOnInformationManager extends IzouModule {
      * @return True on success, else false.
      */
     @SuppressWarnings("Duplicates")
-    boolean remove(String id) {
+    boolean unregisterAddOn(String id) {
         boolean success1 = false;
         Optional<AddOnModel> addOnModel = getAddOn(id);
         if (addOnModel.isPresent()) {
@@ -96,7 +89,7 @@ public class AddOnInformationManager extends IzouModule {
      * @return True on success, else false.
      */
     @SuppressWarnings("Duplicates")
-    boolean remove(int serverID) {
+    boolean unregisterAddOn(int serverID) {
         boolean success1 = false;
         Optional<AddOnModel> addOnModel = getAddOn(serverID);
         if (addOnModel.isPresent()) {
@@ -168,8 +161,12 @@ public class AddOnInformationManager extends IzouModule {
      * will.
      */
     public Optional<AddOnInformation> getAddOnInformation(final int serverID) {
+        if (serverID == -1) {
+            return Optional.empty();
+        }
+
         return addOnInformations.stream()
-                .filter(addOn -> addOn.getServerID() == serverID)
+                .filter(addOn -> addOn.getServerID().orElse(-1) == serverID)
                 .findFirst();
     }
 }

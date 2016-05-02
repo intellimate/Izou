@@ -2,6 +2,8 @@ package org.intellimate.izou.addon;
 
 import org.intellimate.izou.identification.Identifiable;
 
+import java.util.Optional;
+
 /**
  * <p>
  * </p>
@@ -43,7 +45,7 @@ public interface AddOnInformation extends Identifiable {
      *
      * @return The serverID of the addOn, if it has one (used to match the addOn with the server).
      */
-    int getServerID();
+    Optional<Integer> getServerID();
 
     /**
      * Gets the artifactID of the addOn. This is the maven artifactID.
