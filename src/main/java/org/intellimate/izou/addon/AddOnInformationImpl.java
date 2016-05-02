@@ -1,6 +1,7 @@
 package org.intellimate.izou.addon;
 
 import org.apache.commons.cli.MissingArgumentException;
+import org.intellimate.izou.config.Version;
 
 import java.util.Optional;
 
@@ -11,8 +12,8 @@ import java.util.Optional;
  */
 class AddOnInformationImpl implements AddOnInformation {
     private final String name;
-    private final String version;
-    private final String sdkVersion;
+    private final Version version;
+    private final Version sdkVersion;
     private final String provider;
     private final String id;
     private final Optional<Integer> serverID;
@@ -42,10 +43,10 @@ class AddOnInformationImpl implements AddOnInformation {
         }
 
         this.name = name;
-        this.version = version;
+        this.version = new Version(version);
         this.provider = provider;
         this.id = id;
-        this.sdkVersion = sdkVersion;
+        this.sdkVersion = new Version(sdkVersion);
         this.serverID = serverID;
         this.artifactID = artifactID;
     }
@@ -66,7 +67,7 @@ class AddOnInformationImpl implements AddOnInformation {
      * @return The version of the addOn.
      */
     @Override
-    public String getVersion() {
+    public Version getVersion() {
         return version;
     }
 
@@ -96,7 +97,7 @@ class AddOnInformationImpl implements AddOnInformation {
      * @return The SDK version that this addOn uses.
      */
     @Override
-    public String getSdkVersion() {
+    public Version getSdkVersion() {
         return sdkVersion;
     }
 

@@ -1,5 +1,6 @@
 package org.intellimate.izou.addon;
 
+import org.intellimate.izou.config.Version;
 import org.intellimate.izou.identification.Identifiable;
 
 import java.util.Optional;
@@ -24,7 +25,7 @@ public interface AddOnInformation extends Identifiable {
      *
      * @return The version of the addOn.
      */
-    String getVersion();
+    Version getVersion();
 
     /**
      * Gets the provider, or the author, of the addOn.
@@ -38,7 +39,7 @@ public interface AddOnInformation extends Identifiable {
      *
      * @return The SDK version that this addOn uses.
      */
-    String getSdkVersion();
+    Version getSdkVersion();
 
     /**
      * Gets the serverID of the addOn, if it has one (used to match the addOn with the server).
