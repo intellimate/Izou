@@ -7,9 +7,11 @@ import org.intellimate.izou.util.IzouModule;
 import ro.fortsoft.pf4j.PluginDescriptor;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
- *
+ * The AddOnInformationManager is a class that gives access to all kinds of information about registered addOns in Izou.
+ * For example, any addOn can find out the names of all other registered addOns through this class.
  */
 public class AddOnInformationManager extends IzouModule {
     private final IdentifiableSet<AddOnInformation> addOnInformations;
@@ -62,23 +64,8 @@ public class AddOnInformationManager extends IzouModule {
      *           example, or just myaddon.
      * @return True on success, else false.
      */
-    @SuppressWarnings("Duplicates")
     boolean unregisterAddOn(String id) {
-        boolean success1 = false;
-        Optional<AddOnModel> addOnModel = getAddOn(id);
-        if (addOnModel.isPresent()) {
-            addOns.remove(addOnModel.get());
-            success1 = true;
-        }
-
-        boolean success2 = false;
-        Optional<AddOnInformation> addOnInformation = getAddOnInformation(id);
-        if (addOnInformation.isPresent()) {
-            addOnInformations.remove(addOnInformation.get());
-            success2 = true;
-        }
-
-        return success1 && success2;
+        return unregisterHelper(() -> getAddOn(id), () -> getAddOnInformation(id));
     }
 
     /**
@@ -88,20 +75,28 @@ public class AddOnInformationManager extends IzouModule {
      * @param serverID The serverID of the addOn to remove.
      * @return True on success, else false.
      */
-    @SuppressWarnings("Duplicates")
     boolean unregisterAddOn(int serverID) {
+        return unregisterHelper(() -> getAddOn(serverID), () -> getAddOnInformation(serverID));
+    }
+
+    /**
+     * Helper to unregister an addOn.
+     *
+     * @param suppAdd The first get function to find the right addon.
+     * @param suppAddInf The second get function to find the right addonInformation.
+     * @return True if the operation was successful, otherwise false.
+     */
+    private boolean unregisterHelper(Supplier<Optional<AddOnModel>> suppAdd, Supplier<Optional<AddOnInformation>> suppAddInf) {
         boolean success1 = false;
-        Optional<AddOnModel> addOnModel = getAddOn(serverID);
+        Optional<AddOnModel> addOnModel = suppAdd.get();
         if (addOnModel.isPresent()) {
-            addOns.remove(addOnModel.get());
-            success1 = true;
+            success1 = addOns.remove(addOnModel.get());
         }
 
         boolean success2 = false;
-        Optional<AddOnInformation> addOnInformation = getAddOnInformation(serverID);
+        Optional<AddOnInformation> addOnInformation = suppAddInf.get();
         if (addOnInformation.isPresent()) {
-            addOnInformations.remove(addOnInformation.get());
-            success2 = true;
+            success2 = addOnInformations.remove(addOnInformation.get());
         }
 
         return success1 && success2;
@@ -167,6 +162,36 @@ public class AddOnInformationManager extends IzouModule {
 
         return addOnInformations.stream()
                 .filter(addOn -> addOn.getServerID().orElse(-1) == serverID)
+                .findFirst();
+    }
+
+    /**
+     * Gets all registered addOnInformations.
+     *
+     * @return All registered addOnInformations.
+     */
+    public IdentifiableSet<AddOnInformation> getAllAddOnInformations() {
+       return addOnInformations;
+    }
+
+    /**
+     * Gets all registered addOns.
+     *
+     * @return All registered addOns.
+     */
+    public IdentifiableSet<AddOnModel> getAllAddOns() {
+        return addOns;
+    }
+
+    /**
+     * Returns the addOn loaded from the given classLoader.
+     *
+     * @param classLoader The classLoader.
+     * @return The (optional) AddOnModel.
+     */
+    public Optional<AddOnModel> getAddOnForClassLoader(ClassLoader classLoader) {
+        return addOns.stream()
+                .filter(addOnModel -> addOnModel.getClass().getClassLoader().equals(classLoader))
                 .findFirst();
     }
 }

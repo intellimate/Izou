@@ -21,6 +21,7 @@ import org.intellimate.izou.system.logger.IzouLogger;
 import org.intellimate.izou.threadpool.TrackingExecutorService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.spi.ExtendedLogger;
+import org.intellimate.izou.util.IdentifiableSet;
 
 import java.io.File;
 import java.io.IOException;
@@ -720,6 +721,11 @@ public class ContextImplementation implements Context {
         @Override
         public Optional<AddOnInformation> getAddOnInformation(int serverID) {
             return main.getAddOnInformationManager().getAddOnInformation(serverID);
+        }
+
+        @Override
+        public IdentifiableSet<AddOnInformation> getAllAddOnInformations() {
+            return main.getAddOnInformationManager().getAllAddOnInformations();
         }
     }
 

@@ -2,6 +2,7 @@ package org.intellimate.izou.system.context;
 
 import org.intellimate.izou.addon.AddOnInformation;
 import org.intellimate.izou.addon.AddOnModel;
+import org.intellimate.izou.util.IdentifiableSet;
 
 import java.util.Optional;
 
@@ -39,4 +40,11 @@ public interface AddOns {
      * will.
      */
     Optional<AddOnInformation> getAddOnInformation(final int serverID);
+
+    /**
+     * Gets all registered addOnInformations.
+     *
+     * @return All registered addOnInformations.
+     */
+    IdentifiableSet<AddOnInformation> getAllAddOnInformations();
 }

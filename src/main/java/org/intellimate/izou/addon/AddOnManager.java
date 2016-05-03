@@ -163,18 +163,6 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
     }
 
     /**
-     * Returns the addOn loaded from the ClassLoader
-     *
-     * @param classLoader the classLoader
-     * @return the (optional) AddOnModel
-     */
-    public Optional<AddOnModel> getAddOnForClassLoader(ClassLoader classLoader) {
-        return addOns.stream()
-                .filter(addOnModel -> addOnModel.getClass().getClassLoader().equals(classLoader))
-                .findFirst();
-    }
-
-    /**
      * Returns the (optional) PluginWrapper for the AddonModel.
      * If the return is empty, it means that the AddOn was not loaded through pf4j
      *
