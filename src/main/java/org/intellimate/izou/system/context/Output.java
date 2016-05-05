@@ -94,7 +94,7 @@ public interface Output {
 
     /**
      * returns the ID of the Manager
-     * @return an instance of Identification
+     * @return an instance of Idedntification
      */
     Identification getManagerIdentification();
 }
