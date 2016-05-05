@@ -111,7 +111,7 @@ public final class SecurityManager extends java.lang.SecurityManager {
             if (classes[i].getClassLoader() instanceof IzouPluginClassLoader && !classes[i].getName().toLowerCase()
                     .contains(IzouPluginClassLoader.PLUGIN_PACKAGE_PREFIX_IZOU_SDK)) {
                 ClassLoader classLoader = classes[i].getClassLoader();
-                return main.getAddOnManager().getAddOnForClassLoader(classLoader);
+                return main.getAddOnInformationManager().getAddOnForClassLoader(classLoader);
             }
         }
         return Optional.empty();

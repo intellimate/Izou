@@ -1,9 +1,6 @@
 package org.intellimate.izou.system;
 
 import org.apache.logging.log4j.spi.ExtendedLogger;
-import org.intellimate.izou.addon.AddOnInformation;
-import org.intellimate.izou.addon.AddOnInformationManager;
-import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.security.storage.SecureStorage;
 import org.intellimate.izou.system.context.*;
 import org.intellimate.izou.system.context.System;
@@ -21,59 +18,67 @@ import org.intellimate.izou.system.context.System;
  */
 public interface Context {
     /**
-     * returns the API used for interaction with Events
+     * Returns the API used for interaction with Events.
+     *
      * @return Events
      */
     Events getEvents();
 
     /**
-     * returns the API used for interaction with Resource
+     * Returns the API used for interaction with Resource.
+     *
      * @return Resource
      */
     Resources getResources();
 
     /**
-     * returns the API used for interaction with Files
+     * Returns the API used for interaction with Files.
+     *
      * @return Files
      */
     Files getFiles();
 
     /**
-     * returns the API used to log
+     * Returns the API used to log.
+     *
      * @return Logger
      */
     ExtendedLogger getLogger();
 
     /**
-     * returns the API used to manage the ThreadPool
+     * Returns the API used to manage the ThreadPool.
+     *
      * @return ThreadPool
      */
     ThreadPool getThreadPool();
 
     /**
-     * returns the API to manage the Activators
+     * Returns the API to manage the Activators.
+     *
      * @return Activator
      */
     Activators getActivators();
 
     /**
-     * returns the API used to manage the OutputPlugins and OutputExtensions
+     * Returns the API used to manage the OutputPlugins, OutputExtensions and OutputControllers.
+     *
      * @return Output
      */
     Output getOutput();
 
     /**
-     * retruns the API used to interact with Izou.
+     * Retruns the API used to interact with Izou.
+     *
      * @return System.
      */
     System getSystem();
 
     /**
-     * gets addOn
+     * Gets the API to manage the addOns.
      *
-     * @return the addOn
+     * @return AddOns.
      */
-    AddOnModel getAddOn();
+    AddOns getAddOns();
 
     /**
      * Gets the Secure Storage object of Izou. {@link SecureStorage} allows addOns to safely store data so that other
@@ -84,15 +89,5 @@ public interface Context {
      */
     default SecureStorage getSecureStorage() {
         return SecureStorage.getInstance();
-    }
-
-    /**
-     * Gets the {@link AddOnInformation} object for a specific addOn, if it is loaded, else returns null.
-     * An AddOnInformation pretty much contains public information of an addOn, like name and version.
-     *
-     * @return the AddOnInformation for the addOn of the given ID.
-     */
-    default AddOnInformation getAddOnInformation(String id) {
-        return AddOnInformationManager.getInstance().getAddOnInformations(id);
     }
 }

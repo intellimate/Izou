@@ -1,6 +1,7 @@
 package org.intellimate.izou.system.context;
 
 import org.intellimate.izou.activator.ActivatorModel;
+import org.intellimate.izou.addon.AddOnInformation;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.events.*;
 import org.intellimate.izou.identification.Identifiable;
@@ -8,6 +9,7 @@ import org.intellimate.izou.identification.Identification;
 import org.intellimate.izou.identification.IdentificationManager;
 import org.intellimate.izou.identification.IllegalIDException;
 import org.intellimate.izou.main.Main;
+import org.intellimate.izou.output.OutputControllerModel;
 import org.intellimate.izou.output.OutputExtensionModel;
 import org.intellimate.izou.output.OutputPluginModel;
 import org.intellimate.izou.resource.ResourceModel;
@@ -19,6 +21,7 @@ import org.intellimate.izou.system.logger.IzouLogger;
 import org.intellimate.izou.threadpool.TrackingExecutorService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.spi.ExtendedLogger;
+import org.intellimate.izou.util.IdentifiableSet;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,6 +46,7 @@ public class ContextImplementation implements Context {
     private final Activators activators = new ActivatorsImpl();
     private final Output output = new OutputImpl();
     private final System system = new SystemImpl();
+    private final AddOns addOns = new AddOnsImpl();
 
     /**
      * creates a new context for the addOn
@@ -61,7 +65,6 @@ public class ContextImplementation implements Context {
         this.threadPool = new ThreadPoolImpl();
 
         IzouLogger izouLogger = main.getIzouLogger();
-        ExtendedLogger logger = null;
         if (izouLogger != null)
             this.logger = izouLogger.createFileLogger(addOn.getID(), logLevel);
         else {
@@ -128,7 +131,8 @@ public class ContextImplementation implements Context {
     }
 
     /**
-     * returns the API used to manage the OutputPlugins and OutputExtensions
+     * Returns the API used to manage the OutputPlugins and OutputExtensions.
+     *
      * @return Output
      */
     @Override
@@ -137,7 +141,7 @@ public class ContextImplementation implements Context {
     }
 
     /**
-     * retruns the API used to interact with Izou.
+     * Returns the API used to interact with Izou.
      *
      * @return System.
      */
@@ -147,13 +151,13 @@ public class ContextImplementation implements Context {
     }
 
     /**
-     * gets addOn
+     * Gets the API to manage the addOns.
      *
-     * @return the addOn
+     * @return AddOns.
      */
     @Override
-    public AddOnModel getAddOn() {
-        return addOn;
+    public AddOns getAddOns() {
+        return addOns;
     }
 
     private class FilesImpl implements Files {
@@ -703,7 +707,29 @@ public class ContextImplementation implements Context {
         }
     }
 
-    public class OutputImpl implements Output {
+    private class AddOnsImpl implements AddOns {
+        @Override
+        public AddOnModel getAddOn() {
+            return addOn;
+        }
+
+        @Override
+        public Optional<AddOnInformation> getAddOnInformation(String id) {
+            return main.getAddOnInformationManager().getAddOnInformation(id);
+        }
+
+        @Override
+        public Optional<AddOnInformation> getAddOnInformation(int serverID) {
+            return main.getAddOnInformationManager().getAddOnInformation(serverID);
+        }
+
+        @Override
+        public IdentifiableSet<AddOnInformation> getAllAddOnInformations() {
+            return main.getAddOnInformationManager().getAllAddOnInformations();
+        }
+    }
+
+    private class OutputImpl implements Output {
         /**
          * adds output extension to desired outputPlugin
          *
@@ -745,6 +771,21 @@ public class ContextImplementation implements Context {
         @Override
         public void removeOutputPlugin(OutputPluginModel outputPlugin) {
             main.getOutputManager().removeOutputPlugin(outputPlugin);
+        }
+
+        @Override
+        public void addOutputController(OutputControllerModel outputController) {
+            main.getOutputControllerManager().addOutputController(outputController);
+        }
+
+        @Override
+        public void removeOutputController(OutputControllerModel outputController) {
+            main.getOutputControllerManager().removeOutputController(outputController);
+        }
+
+        @Override
+        public Optional<OutputControllerModel> getOutputController(Identifiable identifiable) {
+            return main.getOutputControllerManager().getOutputController(identifiable);
         }
 
         /**

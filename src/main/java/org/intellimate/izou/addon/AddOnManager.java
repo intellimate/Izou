@@ -11,7 +11,6 @@ import org.intellimate.izou.util.IzouModule;
 import ro.fortsoft.pf4j.*;
 
 import javax.crypto.SecretKey;
-import javax.management.InstanceAlreadyExistsException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -42,11 +41,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
      */
     public AddOnManager(Main main) {
         super(main);
-        try {
-            addOnInformationManager = AddOnInformationManager.createAddOnInformationManager();
-        } catch (InstanceAlreadyExistsException e) {
-            fatal("AddOnInformationManager already exists", e);
-        }
+        addOnInformationManager = main.getAddOnInformationManager();
     }
 
     /**
@@ -85,7 +80,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
      */
     public void registerAllAddOns(IdentifiableSet<AddOnModel> addOns) {
         initAddOns(addOns);
-        //checkAddOns(addOns);
+        createAddOnInfos(addOns);
         List<CompletableFuture<Void>> futures = addOns.stream()
                 .map(addOn -> submit((Runnable) addOn::register))
                 .collect(Collectors.toList());
@@ -96,18 +91,11 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
         }
     }
 
-    private void checkAddOns(IdentifiableSet<AddOnModel> addOns) {
-        // checking that addOns have all required properties and creating the addOn information list if they do
-        // (check not performed yet - waiting for xml implementation of property files until this is done)
-        addOns.stream().forEach(addOn -> {
-            Properties addOnConfigProperties = addOn.getPlugin().getPluginClassLoader().getPluginDescriptor().
-                    getAddOnProperties();
-            AddOnInformation addOnInformation = new AddOnInformation(addOnConfigProperties.getProperty("name"),
-                    addOnConfigProperties.getProperty("version"), addOnConfigProperties.getProperty("provider"),
-                    addOn.getID());
-
-            addOnInformationManager.addAddOnInformation(addOnInformation);
-        });
+    /**
+     * Checks that addOns have all required properties and creating the addOn information list if they do
+     */
+    private void createAddOnInfos(IdentifiableSet<AddOnModel> addOns) {
+        addOns.stream().forEach(addOn -> addOnInformationManager.registerAddOn(addOn));
     }
 
     /**
@@ -172,18 +160,6 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
             log.fatal("Error while trying to start the AddOns", e);
             return new ArrayList<>();
         }
-    }
-
-    /**
-     * Returns the addOn loaded from the ClassLoader
-     *
-     * @param classLoader the classLoader
-     * @return the (optional) AddOnModel
-     */
-    public Optional<AddOnModel> getAddOnForClassLoader(ClassLoader classLoader) {
-        return addOns.stream()
-                .filter(addOnModel -> addOnModel.getClass().getClassLoader().equals(classLoader))
-                .findFirst();
     }
 
     /**

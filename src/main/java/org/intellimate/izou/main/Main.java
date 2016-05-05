@@ -3,11 +3,13 @@ package org.intellimate.izou.main;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.intellimate.izou.activator.ActivatorManager;
+import org.intellimate.izou.addon.AddOnInformationManager;
 import org.intellimate.izou.addon.AddOnManager;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.events.EventDistributor;
 import org.intellimate.izou.events.LocalEventManager;
 import org.intellimate.izou.identification.InternalIdentificationManager;
+import org.intellimate.izou.output.OutputControllerManager;
 import org.intellimate.izou.output.OutputManager;
 import org.intellimate.izou.resource.ResourceManager;
 import org.intellimate.izou.security.SecurityManager;
@@ -36,11 +38,13 @@ public class Main {
     private static final long INIT_TIME_LIMIT = 10000;
     private final InternalIdentificationManager internalIdentificationManager;
     private final OutputManager outputManager;
+    private final OutputControllerManager outputControllerManager;
     private final ResourceManager resourceManager;
     private final EventDistributor eventDistributor;
     private final LocalEventManager localEventManager;
     private final ActivatorManager activatorManager;
     private final AddOnManager addOnManager;
+    private final AddOnInformationManager addOnInformationManager;
     private final FileManager fileManager;
     private final FilePublisher filePublisher;
     private final IzouLogger izouLogger;
@@ -99,9 +103,11 @@ public class Main {
 
         internalIdentificationManager = new InternalIdentificationManager(this);
         addOnManager = new AddOnManager(this);
+        addOnInformationManager = new AddOnInformationManager(this);
         threadPoolManager = new ThreadPoolManager(this);
         izouLogger = new IzouLogger();
         outputManager = new OutputManager(this);
+        outputControllerManager = new OutputControllerManager();
         resourceManager = new ResourceManager(this);
         eventDistributor = new EventDistributor(this);
         localEventManager = new LocalEventManager(this);
@@ -222,6 +228,10 @@ public class Main {
         return outputManager;
     }
 
+    public OutputControllerManager getOutputControllerManager() {
+        return outputControllerManager;
+    }
+
     public LocalEventManager getLocalEventManager() {
         return localEventManager;
     }
@@ -232,6 +242,10 @@ public class Main {
 
     public AddOnManager getAddOnManager() {
         return addOnManager;
+    }
+
+    public AddOnInformationManager getAddOnInformationManager() {
+        return addOnInformationManager;
     }
 
     public ResourceManager getResourceManager() {

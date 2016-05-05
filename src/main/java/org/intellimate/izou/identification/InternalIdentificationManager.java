@@ -25,7 +25,7 @@ public class InternalIdentificationManager extends IzouModule {
         Identifiable identifiable = identification.getIdentifiable();
         if (identifiable.getClass().getClassLoader() instanceof IzouPluginClassLoader && !identifiable.getClass().getName().toLowerCase()
                 .contains(IzouPluginClassLoader.PLUGIN_PACKAGE_PREFIX_IZOU_SDK)) {
-            return getMain().getAddOnManager().getAddOnForClassLoader(identifiable.getClass().getClassLoader())
+            return getMain().getAddOnInformationManager().getAddOnForClassLoader(identifiable.getClass().getClassLoader())
                     .orElse(null);
         }
         return null;

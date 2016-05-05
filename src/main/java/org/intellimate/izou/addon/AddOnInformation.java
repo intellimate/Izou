@@ -1,63 +1,65 @@
 package org.intellimate.izou.addon;
 
+import org.intellimate.izou.config.Version;
 import org.intellimate.izou.identification.Identifiable;
 
+import java.util.Optional;
+
 /**
- * This class holds all public information of an addOn. That means all information that other addOns are allowed to know
- * about a given addOn is contained in here. Each addOn has its own instance of AddOnInformation which are stored in
- * {@link AddOnInformationManager}.
+ * <p>
+ * </p>
+ *
+ * @author Julian Brendl
+ * @version 1.0
  */
-public final class AddOnInformation implements Identifiable {
-    private final String name;
-    private final String version;
-    private final String provider;
-    private final String id;
-
-    /**
-     * Creates a new instance of AddOnInformation, which holds all the public information of an addOn and is registered
-     * in the {@link AddOnInformationManager}
-     *
-     * @param name The name of the AddOn.
-     * @param version The version of the AddOn.
-     * @param provider The author of the AddOn.
-     * @param id The unique ID of the AddOn.
-     */
-    public AddOnInformation(String name, String provider, String version, String id) {
-        this.name = name;
-        this.version = version;
-        this.provider = provider;
-        this.id = id;
-    }
-
+public interface AddOnInformation extends Identifiable {
     /**
      * Gets the name of the addOn.
      *
      * @return The name of the addOn.
      */
-    public String getName() {
-        return name;
-    }
+    String getName();
 
     /**
      * Gets the version of the addOn.
      *
      * @return The version of the addOn.
      */
-    public String getVersion() {
-        return version;
-    }
+    Version getVersion();
 
     /**
      * Gets the provider, or the author, of the addOn.
      *
      * @return the author of the addOn.
      */
-    public String getProvider() {
-        return provider;
-    }
+    String getProvider();
 
+    /**
+     * Gets the SDK version that this addOn uses.
+     *
+     * @return The SDK version that this addOn uses.
+     */
+    Version getSdkVersion();
+
+    /**
+     * Gets the serverID of the addOn, if it has one (used to match the addOn with the server).
+     *
+     * @return The serverID of the addOn, if it has one (used to match the addOn with the server).
+     */
+    Optional<Integer> getServerID();
+
+    /**
+     * Gets the artifactID of the addOn. This is the maven artifactID.
+     *
+     * @return The artifactID of the addOn. This is the maven artifactID.
+     */
+    String getArtifactID();
+
+    /**
+     * Gets the fully classified ID. An example would be intellimate.izou.addon.myaddon.
+     *
+     * @return The fully classified ID. An example would be intellimate.izou.addon.myaddon.
+     */
     @Override
-    public String getID() {
-        return id;
-    }
+    String getID();
 }

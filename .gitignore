@@ -8,6 +8,7 @@ target
 /system
 /resources
 lib
+oldLib
 apidocs
 logs
 properties
