@@ -7,6 +7,9 @@ import java.util.Optional;
 
 /**
  * <p>
+ *     An AddOnInformation holds all public information of an addOn. That means all information that other addOns are
+ *     allowed to see about a given addOn is in here. Each addOn has its own instance of AddOnInformation which is
+ *     stored in the {@link AddOnInformationManager}.
  * </p>
  *
  * @author Julian Brendl
