@@ -75,23 +75,15 @@ public class SystemInitializer extends IzouModule implements ReloadableFile {
                 + IZOU_PROPERTIES_FILE_NAME;
 
         propertiesFile = new File(propertiesPath);
-        if (!propertiesFile.exists()) try {
+        if (!propertiesFile.exists()) try (PrintWriter writer = new PrintWriter(propertiesFile.getAbsolutePath(), "UTF-8")) {
             propertiesFile.createNewFile();
 
-            PrintWriter writer = new PrintWriter(propertiesFile.getAbsolutePath(), "UTF-8");
             writer.println("# --------------------");
             writer.println("# Izou Properties File");
             writer.println("# --------------------");
             writer.println("#");
             writer.println("# This file has some general configuration options that have to be configured before");
-            writer.println("# Izou can run successfully. For example, you should give the device Izou is running on");
-            writer.println("# a static IP and enter it here.");
-            writer.println("#");
-            writer.println("#");
-            writer.println("# Enter the IP address of the device Izou is running on below, and make sure it is static");
-            writer.println("# (does not change).");
-            writer.println("ip-address = ");
-            writer.close();
+            writer.println("# Izou can run successfully.");
         } catch (IOException e) {
             error("Error while trying to create the new Properties file", e);
         }
@@ -155,7 +147,7 @@ public class SystemInitializer extends IzouModule implements ReloadableFile {
         reloadProperties();
         propertyNames = properties.propertyNames();
 
-        boolean configured = false;
+        boolean configured = true;
 
         while (propertyNames.hasMoreElements()) {
             String key = (String) propertyNames.nextElement();
@@ -165,8 +157,8 @@ public class SystemInitializer extends IzouModule implements ReloadableFile {
                 continue;
             }
 
-            if (!value.equals("")) {
-                configured = true;
+            if (value.equals("")) {
+                configured = false;
             }
 
             System.setProperty(key, value);

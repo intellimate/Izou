@@ -46,7 +46,7 @@ public class AddOnInformationManager extends IzouModule {
         Optional<Integer> serverID = descriptor.getServerID();
 
         try {
-            AddOnInformation addOnInformation = new AddOnInformationImpl(name, version, provider, id, sdkVersion,
+            AddOnInformation addOnInformation = new AddOnInformationImpl(name, provider, version, id, sdkVersion,
                     serverID, artifactID);
             addOnInformations.add(addOnInformation);
             addOns.add(addOn);

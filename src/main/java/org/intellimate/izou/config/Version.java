@@ -10,7 +10,7 @@ public class Version implements Comparable<Version> {
     private final int patch;
 
     public Version(String version) throws IllegalArgumentException {
-        String[] split = version.split(".");
+        String[] split = version.split("\\.");
         if (split.length > 3) {
             throw new IllegalArgumentException("illegal version: "+version);
         }

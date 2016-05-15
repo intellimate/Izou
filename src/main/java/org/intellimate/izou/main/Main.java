@@ -102,8 +102,8 @@ public class Main {
         }
 
         internalIdentificationManager = new InternalIdentificationManager(this);
+        addOnInformationManager = new AddOnInformationManager(this); // Put this before the addOnManager, it needs it
         addOnManager = new AddOnManager(this);
-        addOnInformationManager = new AddOnInformationManager(this);
         threadPoolManager = new ThreadPoolManager(this);
         izouLogger = new IzouLogger();
         outputManager = new OutputManager(this);

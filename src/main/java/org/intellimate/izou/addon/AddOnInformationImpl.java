@@ -6,9 +6,12 @@ import org.intellimate.izou.config.Version;
 import java.util.Optional;
 
 /**
- * This class holds all public information of an addOn. That means all information that other addOns are allowed to know
- * about a given addOn is contained in here. Each addOn has its own instance of AddOnInformation which are stored in
- * {@link AddOnInformationManager}.
+ * <p>
+ *     The implementation of an {@link AddOnInformation}.
+ * </p>
+ *
+ * @author Julian Brendl
+ * @version 1.0
  */
 class AddOnInformationImpl implements AddOnInformation {
     private final String name;
