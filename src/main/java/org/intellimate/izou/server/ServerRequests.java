@@ -61,7 +61,7 @@ public class ServerRequests extends IzouModule {
     public void requests(Function<org.intellimate.server.proto.HttpRequest, org.intellimate.server.proto.HttpResponse> callback) {
         assureInit();
         try {
-            Socket socket = new Socket(url, 40);
+            Socket socket = new Socket(url, 4000);
             InputStream inputStream = socket.getInputStream();
             OutputStream outputStream = socket.getOutputStream();
             SocketConnection.newBuilder()

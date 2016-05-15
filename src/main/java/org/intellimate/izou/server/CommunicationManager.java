@@ -40,7 +40,7 @@ public class CommunicationManager extends IzouModule {
 
     public CommunicationManager(Version currentVersion, Main main, List<AddOn> selectedWithoutDependencies, boolean disabledLib, String refreshToken, String addonsFile) throws IllegalStateException {
         super(main);
-        this.serverRequests = new ServerRequests("http://www.izou.org", refreshToken, main);
+        this.serverRequests = new ServerRequests("http://www.izou.info", refreshToken, main);
         requestHandler = new RequestHandler(main, selectedWithoutDependencies, addonsFile);
         try {
             serverRequests.init();
