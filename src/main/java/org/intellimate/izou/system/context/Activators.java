@@ -3,11 +3,13 @@ package org.intellimate.izou.system.context;
 import org.intellimate.izou.activator.ActivatorModel;
 import org.intellimate.izou.identification.Identification;
 import org.intellimate.izou.identification.IllegalIDException;
+import ro.fortsoft.pf4j.AddonAccessible;
 
 /**
  * @author Leander Kurscheidt
  * @version 1.0
  */
+@AddonAccessible
 public interface Activators {
     /**
      * adds an activator and automatically submits it to the Thread-Pool

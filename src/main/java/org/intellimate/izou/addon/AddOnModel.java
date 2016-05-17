@@ -2,6 +2,7 @@ package org.intellimate.izou.addon;
 
 import org.intellimate.izou.identification.Identifiable;
 import org.intellimate.izou.system.Context;
+import ro.fortsoft.pf4j.AddonAccessible;
 import ro.fortsoft.pf4j.ExtensionPoint;
 import ro.fortsoft.pf4j.PluginWrapper;
 
@@ -11,6 +12,7 @@ import ro.fortsoft.pf4j.PluginWrapper;
  * It will be instantiated and its registering-methods will be called by the PluginManager.
  * This class has method for a properties-file named addOnID.properties (AddOnsID in the form: package.class)
  */
+@AddonAccessible
 public interface AddOnModel extends ExtensionPoint, Identifiable {
     /**
      * Internal initiation of addOn - fake constructor, comes before prepare

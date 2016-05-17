@@ -7,6 +7,7 @@ import org.intellimate.izou.identification.IllegalIDException;
 import org.intellimate.izou.output.OutputControllerModel;
 import org.intellimate.izou.output.OutputExtensionModel;
 import org.intellimate.izou.output.OutputPluginModel;
+import ro.fortsoft.pf4j.AddonAccessible;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +17,7 @@ import java.util.concurrent.CompletableFuture;
  * @author Leander Kurscheidt
  * @version 1.0
  */
+@AddonAccessible
 public interface Output {
     /**
      * adds output extension to desired outputPlugin

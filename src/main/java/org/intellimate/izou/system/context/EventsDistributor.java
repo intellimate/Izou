@@ -5,6 +5,7 @@ import org.intellimate.izou.events.EventModel;
 import org.intellimate.izou.events.EventsControllerModel;
 import org.intellimate.izou.identification.Identification;
 import org.intellimate.izou.identification.IllegalIDException;
+import ro.fortsoft.pf4j.AddonAccessible;
 
 import java.util.Optional;
 
@@ -12,6 +13,7 @@ import java.util.Optional;
  * @author Leander Kurscheidt
  * @version 1.0
  */
+@AddonAccessible
 public interface EventsDistributor {
     /**
      * with this method you can register EventPublisher add a Source of Events to the System.

@@ -1,11 +1,14 @@
 package org.intellimate.izou.events;
 
+import ro.fortsoft.pf4j.AddonAccessible;
+
 /**
  * Interface for listening to events.
  *
  * To receive events a class must implements this interface and register with the registerEventListener-method.
  * When the activator event occurs, that object's eventFired method is invoked.
  */
+@AddonAccessible
 public interface EventListenerModel {
 
     /**
@@ -13,5 +16,5 @@ public interface EventListenerModel {
      *
      * @param event an instance of Event
      */
-    public void eventFired(EventModel event);
+    void eventFired(EventModel event);
 }

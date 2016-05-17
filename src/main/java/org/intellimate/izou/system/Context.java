@@ -4,6 +4,7 @@ import org.apache.logging.log4j.spi.ExtendedLogger;
 import org.intellimate.izou.security.storage.SecureStorage;
 import org.intellimate.izou.system.context.*;
 import org.intellimate.izou.system.context.System;
+import ro.fortsoft.pf4j.AddonAccessible;
 
 /**
  * The Izou context is a means for all addOns to get general information they might need. Every addOn its own context
@@ -16,6 +17,7 @@ import org.intellimate.izou.system.context.System;
  * So in short, the context exists to give addOns access to higher Izou components while still denying access to other
  * components.
  */
+@AddonAccessible
 public interface Context {
     /**
      * Returns the API used for interaction with Events.

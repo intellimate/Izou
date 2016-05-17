@@ -2,11 +2,13 @@ package org.intellimate.izou.resource;
 
 import org.intellimate.izou.identification.Identifiable;
 import org.intellimate.izou.identification.Identification;
+import ro.fortsoft.pf4j.AddonAccessible;
 
 /**
  * @author Leander Kurscheidt
  * @version 1.0
  */
+@AddonAccessible
 public interface ResourceModel<T> extends Identifiable {
     /**
      * returns the associated Resource data if set.

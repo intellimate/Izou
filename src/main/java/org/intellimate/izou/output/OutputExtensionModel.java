@@ -3,11 +3,13 @@ package org.intellimate.izou.output;
 import com.google.common.reflect.TypeToken;
 import org.intellimate.izou.events.EventModel;
 import org.intellimate.izou.identification.Identifiable;
+import ro.fortsoft.pf4j.AddonAccessible;
 
 /**
  * OutputExtension's purpose is to take resourceData and convert it into another data format so that it can be rendered correctly
  * by the output-plugin. These objects are represented in the form of future objects that are stored in tDoneList
  */
+@AddonAccessible
 public interface OutputExtensionModel<X, T> extends Identifiable {
     /**
      * Checks if the outputExtension can execute with the current event

@@ -2,6 +2,7 @@ package org.intellimate.izou.resource;
 
 import org.intellimate.izou.events.EventModel;
 import org.intellimate.izou.identification.Identifiable;
+import ro.fortsoft.pf4j.AddonAccessible;
 
 import java.util.List;
 import java.util.Optional;
@@ -9,6 +10,7 @@ import java.util.Optional;
 /**
  * This interface is used to provide resources to other parts of the application.
  */
+@AddonAccessible
 @SuppressWarnings("UnusedDeclaration")
 public interface ResourceBuilderModel extends Identifiable {
     /**
@@ -17,7 +19,7 @@ public interface ResourceBuilderModel extends Identifiable {
      *
      * @return a List containing the resources the object provides
      */
-    abstract List<? extends ResourceModel> announceResources();
+    List<? extends ResourceModel> announceResources();
     /**
      * this method is called to register for what Events it wants to provide Resources.
      * <p>
@@ -26,7 +28,7 @@ public interface ResourceBuilderModel extends Identifiable {
      * </p> 
      * @return a List containing ID's for the Events
      */
-    abstract List<? extends EventModel<?>> announceEvents();
+    List<? extends EventModel<?>> announceEvents();
     /**
      * This method is called when an object wants to get a Resource.
      *
@@ -38,5 +40,5 @@ public interface ResourceBuilderModel extends Identifiable {
      * @param event if an event caused the action, it gets passed. It can also be null.
      * @return a list of resources with data
      */
-    abstract List<ResourceModel> provideResource(List<? extends ResourceModel> resources, Optional<EventModel> event);
+    List<ResourceModel> provideResource(List<? extends ResourceModel> resources, Optional<EventModel> event);
 }

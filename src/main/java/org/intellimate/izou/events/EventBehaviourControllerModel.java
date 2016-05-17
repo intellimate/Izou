@@ -1,6 +1,7 @@
 package org.intellimate.izou.events;
 
 import org.intellimate.izou.identification.Identification;
+import ro.fortsoft.pf4j.AddonAccessible;
 
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.List;
  * @author Leander Kurscheidt
  * @version 1.0
  */
+@AddonAccessible
 public interface EventBehaviourControllerModel {
     /**
      * generates the data to control the Event

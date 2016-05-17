@@ -4,6 +4,7 @@ import org.intellimate.izou.identification.Identification;
 import org.intellimate.izou.identification.IllegalIDException;
 import org.intellimate.izou.system.file.FileSubscriber;
 import org.intellimate.izou.system.file.ReloadableFile;
+import ro.fortsoft.pf4j.AddonAccessible;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +14,7 @@ import java.nio.file.Path;
  * @author Leander Kurscheidt
  * @version 1.0
  */
+@AddonAccessible
 public interface Files {
     /**
      * Use this method to register a file with the watcherService

@@ -1,6 +1,7 @@
 package org.intellimate.izou.util;
 
 import org.intellimate.izou.main.Main;
+import ro.fortsoft.pf4j.AddonAccessible;
 
 /**
  * This interface provides an instance of main
@@ -8,6 +9,7 @@ import org.intellimate.izou.main.Main;
  * @author Leander Kurscheidt
  * @version 1.0
  */
+@AddonAccessible
 public interface MainProvider {
     /**
      * returns the instance of Main
