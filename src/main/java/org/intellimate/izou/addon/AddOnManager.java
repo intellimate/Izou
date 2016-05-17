@@ -1,6 +1,7 @@
 package org.intellimate.izou.addon;
 
 import org.apache.logging.log4j.Level;
+import org.intellimate.izou.identification.AddOnInformationManager;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.SecurityFunctions;
 import org.intellimate.izou.system.Context;
