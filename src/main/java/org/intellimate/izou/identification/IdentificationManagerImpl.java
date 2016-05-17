@@ -7,8 +7,6 @@ import org.intellimate.izou.addon.AddOnModel;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.sun.tools.doclint.Entity.nu;
-
 /**
  * You can register an Object with the IdentificationManager and receive an Identification Objects.
  */
