@@ -426,7 +426,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
     }
 
     private void checkAndUpdateIdentification(Identification identification) {
-        AddOnModel addonModel = getMain().getInternalIdentificationManager().getAddonModel(identification);
+        AddOnModel addonModel = getMain().getAddOnInformationManager().getAddonModel(identification);
         if (permanentAddOn.equals(addonModel)) {
             synchronized (permanentUserReadWriteLock) {
                 if (permanentAddOn.equals(addonModel)) {
@@ -451,7 +451,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
                     .findFirst()
                     .orElseGet(event::getSource);
 
-            AddOnModel addonModel = getMain().getInternalIdentificationManager().getAddonModel(identification);
+            AddOnModel addonModel = getMain().getAddOnInformationManager().getAddonModel(identification);
 
             if (addonModel != null) {
                 requestPermanent(addonModel,
@@ -467,7 +467,7 @@ public class SoundManager extends IzouModule implements AddonThreadPoolUser, Eve
                     .map(resource -> (Identification) resource)
                     .findFirst()
                     .orElseGet(event::getSource);
-            AddOnModel addonModel = getMain().getInternalIdentificationManager().getAddonModel(identification);
+            AddOnModel addonModel = getMain().getAddOnInformationManager().getAddonModel(identification);
             if (addonModel != null) {
                 endPermanent(addonModel);
             }

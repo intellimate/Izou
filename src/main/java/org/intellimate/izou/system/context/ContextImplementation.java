@@ -1,7 +1,7 @@
 package org.intellimate.izou.system.context;
 
 import org.intellimate.izou.activator.ActivatorModel;
-import org.intellimate.izou.addon.AddOnInformation;
+import org.intellimate.izou.identification.AddOnInformation;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.events.*;
 import org.intellimate.izou.identification.Identifiable;

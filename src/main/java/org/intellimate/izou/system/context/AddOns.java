@@ -1,6 +1,6 @@
 package org.intellimate.izou.system.context;
 
-import org.intellimate.izou.addon.AddOnInformation;
+import org.intellimate.izou.identification.AddOnInformation;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.util.IdentifiableSet;
 import ro.fortsoft.pf4j.AddonAccessible;
