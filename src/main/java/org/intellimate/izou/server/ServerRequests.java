@@ -13,7 +13,10 @@ import org.intellimate.izou.util.IzouModule;
 import org.intellimate.server.proto.App;
 import org.intellimate.server.proto.Izou;
 import org.intellimate.server.proto.SocketConnection;
+import sun.security.ssl.SSLSocketImpl;
 
+import javax.net.SocketFactory;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -61,7 +64,8 @@ public class ServerRequests extends IzouModule {
     public void requests(Function<org.intellimate.server.proto.HttpRequest, org.intellimate.server.proto.HttpResponse> callback) {
         assureInit();
         try {
-            Socket socket = new Socket(url, 4000);
+            SocketFactory socketFactory = SSLSocketFactory.getDefault();
+            Socket socket = socketFactory.createSocket(url, 4000);
             InputStream inputStream = socket.getInputStream();
             OutputStream outputStream = socket.getOutputStream();
             SocketConnection.newBuilder()
