@@ -1,4 +1,4 @@
-package org.intellimate.izou.addon;
+package org.intellimate.izou.identification;
 
 import org.apache.commons.cli.MissingArgumentException;
 import org.intellimate.izou.config.Version;

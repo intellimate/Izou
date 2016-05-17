@@ -1,7 +1,6 @@
-package org.intellimate.izou.addon;
+package org.intellimate.izou.identification;
 
 import org.intellimate.izou.config.Version;
-import org.intellimate.izou.identification.Identifiable;
 import ro.fortsoft.pf4j.AddonAccessible;
 
 import java.util.Optional;

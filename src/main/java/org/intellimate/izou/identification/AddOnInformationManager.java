@@ -1,9 +1,11 @@
-package org.intellimate.izou.addon;
+package org.intellimate.izou.identification;
 
 import org.apache.commons.cli.MissingArgumentException;
+import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.util.IdentifiableSet;
 import org.intellimate.izou.util.IzouModule;
+import ro.fortsoft.pf4j.IzouPluginClassLoader;
 import ro.fortsoft.pf4j.PluginDescriptor;
 
 import java.util.Optional;
@@ -24,6 +26,8 @@ public class AddOnInformationManager extends IzouModule {
         super(main);
         addOnInformations = new IdentifiableSet<>();
         addOns = new IdentifiableSet<>();
+        IdentificationManagerImpl identificationManager = (IdentificationManagerImpl) IdentificationManagerM.getInstance();
+        identificationManager.setAddOnInformationManager(this);
     }
 
     /**
@@ -34,7 +38,7 @@ public class AddOnInformationManager extends IzouModule {
      *
      * @param addOn The addOn to register with the AddOnInformationManager.
      */
-    void registerAddOn(AddOnModel addOn) {
+    public void registerAddOn(AddOnModel addOn) {
         PluginDescriptor descriptor = addOn.getPlugin().getDescriptor();
 
         String name = descriptor.getTitle();
@@ -131,6 +135,29 @@ public class AddOnInformationManager extends IzouModule {
                     return serverIDOpt.isPresent() && serverIDOpt.get() == serverID;
                 })
                 .findFirst();
+    }
+
+    /**
+     * gets the AddonModel for the Identification, or null if none found
+     * @param identification the Identification
+     * @return an AddonModel or null
+     */
+    public AddOnModel getAddonModel(Identification identification) {
+        return getAddonModel(identification.getIdentifiable());
+    }
+
+    /**
+     * gets the AddonModel for the Identifiable, or null if none found
+     * @param identifiable the Identifiable
+     * @return an AddonModel or null
+     */
+    public AddOnModel getAddonModel(Identifiable identifiable) {
+        if (identifiable.getClass().getClassLoader() instanceof IzouPluginClassLoader && !identifiable.getClass().getName().toLowerCase()
+                .contains(IzouPluginClassLoader.PLUGIN_PACKAGE_PREFIX_IZOU_SDK)) {
+            return getMain().getAddOnInformationManager().getAddOnForClassLoader(identifiable.getClass().getClassLoader())
+                    .orElse(null);
+        }
+        return null;
     }
 
     /**
