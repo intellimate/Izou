@@ -2,6 +2,8 @@ package org.intellimate.izou.addon;
 
 import org.intellimate.izou.identification.Identifiable;
 import org.intellimate.izou.system.Context;
+import org.intellimate.server.proto.HttpRequest;
+import org.intellimate.server.proto.HttpResponse;
 import ro.fortsoft.pf4j.AddonAccessible;
 import ro.fortsoft.pf4j.ExtensionPoint;
 import ro.fortsoft.pf4j.PluginWrapper;
@@ -39,4 +41,11 @@ public interface AddOnModel extends ExtensionPoint, Identifiable {
      * @param plugin the plugin
      */
     void setPlugin(PluginWrapper plugin);
+
+    /**
+     * this method handles the HTTP-Requests
+     * @param request the request to process
+     * @return the response
+     */
+    HttpResponse handleRequest(HttpRequest request);
 }
