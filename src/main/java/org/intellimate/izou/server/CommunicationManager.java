@@ -27,6 +27,7 @@ import java.util.stream.StreamSupport;
  * @author LeanderK
  * @version 1.0
  */
+//TODO update to AddonInformationManager
 public class CommunicationManager extends IzouModule {
     private final ServerRequests serverRequests;
     private final Version currentVersion;
@@ -38,7 +39,7 @@ public class CommunicationManager extends IzouModule {
     private boolean run = true;
     private final AddOnInformationManager infoManager = getMain().getAddOnInformationManager();
 
-    public CommunicationManager(Version currentVersion, Main main, boolean disabledLib, String refreshToken, String addonsFile) throws IllegalStateException {
+    public CommunicationManager(Version currentVersion, Main main, boolean disabledLib, String refreshToken, List<AddOn> selected) throws IllegalStateException {
         super(main);
         this.serverRequests = new ServerRequests("http://www.izou.info", refreshToken, main);
         requestHandler = new RequestHandler(main);
@@ -63,12 +64,24 @@ public class CommunicationManager extends IzouModule {
         this.izouFile = main.getFileSystemManager().getIzouJarLocation();
         libLocation = main.getFileSystemManager().getLibLocation();
         this.disabledLib = disabledLib;
-        //TODO init AddonInformationManager
+        List<AddOn> allInstalled;
         if (disabledLib) {
-            installedWithDependencies = new ArrayList<>();
+            allInstalled = new ArrayList<>();
         } else {
-            installedWithDependencies = loadInstalledApps();
+            allInstalled = loadInstalledApps(selected);
         }
+        Set<String> installedNames = allInstalled.stream().map(addOn -> addOn.name).collect(Collectors.toSet());
+        List<AddOn> installed = new ArrayList<>();
+        List<AddOn> toInstall = new ArrayList<>();
+        List<AddOn> toDelete = new ArrayList<>();
+        for (AddOn addOn : selected) {
+            if (installedNames.contains(addOn.name)) {
+                installed.add(addOn);
+            } else {
+                toInstall.add(addOn);
+            }
+        }
+        infoManager.initAddOns(installed, allInstalled, toInstall, toDelete);
     }
 
     private List<AddOn> loadInstalledApps(List<AddOn> selected) {
