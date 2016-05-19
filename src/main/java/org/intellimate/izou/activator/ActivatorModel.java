@@ -1,6 +1,7 @@
 package org.intellimate.izou.activator;
 
 import org.intellimate.izou.identification.Identifiable;
+import ro.fortsoft.pf4j.AddonAccessible;
 
 import java.util.concurrent.Callable;
 
@@ -10,6 +11,7 @@ import java.util.concurrent.Callable;
  * The Activator always runs in the Background, just overwrite activatorStarts(). To use Activator simply extend from it
  * and hand an instance over to the ActivatorManager.
  */
+@AddonAccessible
 public interface ActivatorModel extends Identifiable, Callable<Boolean> {
 
     /**

@@ -4,6 +4,7 @@ import org.intellimate.izou.identification.Identification;
 import org.intellimate.izou.identification.IllegalIDException;
 import org.intellimate.izou.resource.ResourceModel;
 import org.intellimate.izou.resource.ResourceBuilderModel;
+import ro.fortsoft.pf4j.AddonAccessible;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,6 +15,7 @@ import java.util.function.Consumer;
  * @author Leander Kurscheidt
  * @version 1.0
  */
+@AddonAccessible
 public interface Resources {
     /**
      * registers a ResourceBuilder.

@@ -3,6 +3,7 @@ package org.intellimate.izou.system.context;
 import org.intellimate.izou.identification.Identifiable;
 import org.intellimate.izou.identification.Identification;
 import org.intellimate.izou.identification.IllegalIDException;
+import ro.fortsoft.pf4j.AddonAccessible;
 
 import java.util.concurrent.ExecutorService;
 
@@ -10,6 +11,7 @@ import java.util.concurrent.ExecutorService;
  * @author Leander Kurscheidt
  * @version 1.0
  */
+@AddonAccessible
 public interface ThreadPool {
     /**
      * returns an ThreadPool where all the IzouPlugins are running

@@ -1,8 +1,11 @@
 package org.intellimate.izou.identification;
 
+import ro.fortsoft.pf4j.AddonAccessible;
+
 /**
  * Makes a class identifiable by forcing implementations to set an ID.
  */
+@AddonAccessible
 public interface Identifiable {
     /**
      * An ID must always be unique.

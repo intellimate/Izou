@@ -3,12 +3,11 @@ package org.intellimate.izou.main;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.intellimate.izou.activator.ActivatorManager;
-import org.intellimate.izou.addon.AddOnInformationManager;
 import org.intellimate.izou.addon.AddOnManager;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.events.EventDistributor;
 import org.intellimate.izou.events.LocalEventManager;
-import org.intellimate.izou.identification.InternalIdentificationManager;
+import org.intellimate.izou.identification.AddOnInformationManager;
 import org.intellimate.izou.output.OutputControllerManager;
 import org.intellimate.izou.output.OutputManager;
 import org.intellimate.izou.resource.ResourceManager;
@@ -36,7 +35,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class Main {
     public static AtomicBoolean jfxToolKitInit;
     private static final long INIT_TIME_LIMIT = 10000;
-    private final InternalIdentificationManager internalIdentificationManager;
     private final OutputManager outputManager;
     private final OutputControllerManager outputControllerManager;
     private final ResourceManager resourceManager;
@@ -101,7 +99,6 @@ public class Main {
             System.setProperty("debug", "true");
         }
 
-        internalIdentificationManager = new InternalIdentificationManager(this);
         addOnInformationManager = new AddOnInformationManager(this); // Put this before the addOnManager, it needs it
         addOnManager = new AddOnManager(this);
         threadPoolManager = new ThreadPoolManager(this);
@@ -278,10 +275,6 @@ public class Main {
 
     public SystemInitializer getSystemInitializer() {
         return systemInitializer;
-    }
-
-    public InternalIdentificationManager getInternalIdentificationManager() {
-        return internalIdentificationManager;
     }
 
     private SystemInitializer initSystem() {

@@ -1,6 +1,7 @@
 package org.intellimate.izou.output;
 
 import org.intellimate.izou.identification.Identifiable;
+import ro.fortsoft.pf4j.AddonAccessible;
 
 /**
  * <p>
@@ -21,6 +22,7 @@ import org.intellimate.izou.identification.Identifiable;
  * @author Julian Brendl
  * @version 1.0
  */
+@AddonAccessible
 public interface OutputControllerModel extends Identifiable {
     /**
      * Turns the external output device that this OutputControllerModel controls on.

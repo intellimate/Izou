@@ -1,10 +1,13 @@
 package org.intellimate.izou.resource;
 
+import ro.fortsoft.pf4j.AddonAccessible;
+
 import java.util.List;
 
 /**
  * This interface is used to provide resources
  */
+@AddonAccessible
 public interface ResourceProvider {
 
     /**
@@ -13,7 +16,7 @@ public interface ResourceProvider {
      * @param resource the resource to provide
      * @return true if the container can provide the resource
      */
-    abstract boolean providesResource(ResourceModel resource);
+    boolean providesResource(ResourceModel resource);
 
     /**
      * checks whether there are any resources registered from the source
@@ -21,7 +24,7 @@ public interface ResourceProvider {
      * @param sourceID the ID of the source
      * @return true if the container has resources from the source
      */
-    abstract boolean containsResourcesFromSource(String sourceID);
+    boolean containsResourcesFromSource(String sourceID);
 
     /**
      * checks whether the ResourceContainer can provide at least ONE resource
@@ -29,7 +32,7 @@ public interface ResourceProvider {
      * @param resourcesID a list containing sources
      * @return true if the ResourceContainer can provide at least one resource
      */
-    abstract boolean providesResource(List<String> resourcesID);
+    boolean providesResource(List<String> resourcesID);
 
     /**
      * returns all EXISTING resources for the ID.
@@ -38,7 +41,7 @@ public interface ResourceProvider {
      * @param resourceIDs an Array containing the resources
      * @return a list of resources found
      */
-    abstract List<ResourceModel> provideResource(String[] resourceIDs);
+    List<ResourceModel> provideResource(String[] resourceIDs);
 
     /**
      * returns the resource (if existing)
@@ -46,7 +49,7 @@ public interface ResourceProvider {
      * @param resourceID the ID of the resource
      * @return a list of resources found
      */
-    abstract List<ResourceModel> provideResource(String resourceID);
+    List<ResourceModel> provideResource(String resourceID);
 
     /**
      * returns the resource (if existing) from the source
@@ -54,5 +57,5 @@ public interface ResourceProvider {
      * @param sourceID the ID of the source
      * @return a list containing all the found resources
      */
-    public List<ResourceModel> provideResourceFromSource(String sourceID);
+    List<ResourceModel> provideResourceFromSource(String sourceID);
 }

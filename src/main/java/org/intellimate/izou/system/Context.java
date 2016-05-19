@@ -2,8 +2,10 @@ package org.intellimate.izou.system;
 
 import org.apache.logging.log4j.spi.ExtendedLogger;
 import org.intellimate.izou.security.storage.SecureStorage;
+import org.intellimate.izou.security.storage.SecureStorageImpl;
 import org.intellimate.izou.system.context.*;
 import org.intellimate.izou.system.context.System;
+import ro.fortsoft.pf4j.AddonAccessible;
 
 /**
  * The Izou context is a means for all addOns to get general information they might need. Every addOn its own context
@@ -16,6 +18,7 @@ import org.intellimate.izou.system.context.System;
  * So in short, the context exists to give addOns access to higher Izou components while still denying access to other
  * components.
  */
+@AddonAccessible
 public interface Context {
     /**
      * Returns the API used for interaction with Events.
@@ -81,13 +84,13 @@ public interface Context {
     AddOns getAddOns();
 
     /**
-     * Gets the Secure Storage object of Izou. {@link SecureStorage} allows addOns to safely store data so that other
+     * Gets the Secure Storage object of Izou. {@link SecureStorageImpl} allows addOns to safely store data so that other
      * addOns cannot access it. However while the data is encrypted, there is no guarantee that the end user cannot
      * decrypt the data and access it. So be careful to not store any sensitive information here
      *
      * @return the Secure Storage object of Izou
      */
-    default SecureStorage getSecureStorage() {
-        return SecureStorage.getInstance();
+    static SecureStorage getSecureStorage() {
+        return SecureStorageImpl.getInstance();
     }
 }

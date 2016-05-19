@@ -1,8 +1,9 @@
 package org.intellimate.izou.system.context;
 
-import org.intellimate.izou.addon.AddOnInformation;
+import org.intellimate.izou.identification.AddOnInformation;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.util.IdentifiableSet;
+import ro.fortsoft.pf4j.AddonAccessible;
 
 import java.util.Optional;
 
@@ -13,6 +14,7 @@ import java.util.Optional;
  * @author Julian Brendl
  * @version 1.0
  */
+@AddonAccessible
 public interface AddOns {
     /**
      * Gets addOn

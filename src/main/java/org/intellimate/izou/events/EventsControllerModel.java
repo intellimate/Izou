@@ -1,11 +1,13 @@
 package org.intellimate.izou.events;
 
 import org.intellimate.izou.identification.Identifiable;
+import ro.fortsoft.pf4j.AddonAccessible;
 
 /**
  * This class can control the whether Events-Dispatcher  get Fired or not.
  * It is expected, that the method-implementation gets executed quickly.
  */
+@AddonAccessible
 public interface EventsControllerModel extends Identifiable {
 
     /**
@@ -16,5 +18,5 @@ public interface EventsControllerModel extends Identifiable {
      * @param event the ID of the event
      * @return true if events should be dispatched
      */
-    public boolean controlEventDispatcher(EventModel event);
+    boolean controlEventDispatcher(EventModel event);
 }

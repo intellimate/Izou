@@ -4,6 +4,7 @@ import org.intellimate.izou.identification.Identifiable;
 import org.intellimate.izou.identification.Identification;
 import org.intellimate.izou.resource.ListResourceProvider;
 import org.intellimate.izou.resource.ResourceModel;
+import ro.fortsoft.pf4j.AddonAccessible;
 
 import java.util.List;
 
@@ -12,6 +13,7 @@ import java.util.List;
  * @author Leander Kurscheidt
  * @version 1.0
  */
+@AddonAccessible
 public interface EventModel<X extends EventModel> extends Identifiable {
     /**
      * The type of the Event.

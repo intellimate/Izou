@@ -2,6 +2,7 @@ package org.intellimate.izou.system.sound;
 
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.identification.Identification;
+import ro.fortsoft.pf4j.AddonAccessible;
 
 /**
  * use this interface to communicate with Izou. Every Instance of Line you obtain via Mixer.getLine() implements this
@@ -9,6 +10,7 @@ import org.intellimate.izou.identification.Identification;
  * @author LeanderK
  * @version 1.0
  */
+@AddonAccessible
 //TODO: TargetDataLine is not implemented yet
 public interface IzouSoundLine {
     /**

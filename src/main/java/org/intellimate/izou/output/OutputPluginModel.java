@@ -4,11 +4,13 @@ import com.google.common.reflect.TypeToken;
 import org.intellimate.izou.events.EventModel;
 import org.intellimate.izou.identification.Identifiable;
 import org.intellimate.izou.identification.Identification;
+import ro.fortsoft.pf4j.AddonAccessible;
 
 /**
  * The OutputPlugin class gets Event and then starts threads filled with output-extension tasks to create the final
  * output and then render it on its own medium
  */
+@AddonAccessible
 public interface OutputPluginModel<X, T> extends Runnable, Identifiable {
     /**
      * Adds an event to blockingQueue

@@ -1,12 +1,24 @@
 package org.intellimate.izou.identification;
 
+import ro.fortsoft.pf4j.AddonAccessible;
+
 import java.util.Optional;
 
 /**
  * @author Leander Kurscheidt
  * @version 1.0
  */
+@AddonAccessible
 public interface IdentificationManagerM {
+
+    /**
+     * Returns the IdentificationManager instance
+     * @return the instance
+     */
+    static IdentificationManagerM getInstance() {
+        return IdentificationManagerImpl.singletonInstance;
+    }
+
     /**
      * If you have registered with an Identifiable interface, you can receive Identification Instances with this method.
      * @param identifiable the registered Identifiable

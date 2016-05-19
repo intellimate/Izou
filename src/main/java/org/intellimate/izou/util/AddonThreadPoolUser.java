@@ -1,5 +1,7 @@
 package org.intellimate.izou.util;
 
+import ro.fortsoft.pf4j.AddonAccessible;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -12,6 +14,7 @@ import java.util.stream.Collectors;
  * @author Leander Kurscheidt
  * @version 1.0
  */
+@AddonAccessible
 public interface AddonThreadPoolUser extends MainProvider {
 
     /**

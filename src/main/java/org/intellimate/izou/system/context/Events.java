@@ -6,6 +6,7 @@ import org.intellimate.izou.events.EventListenerModel;
 import org.intellimate.izou.events.MultipleEventsException;
 import org.intellimate.izou.identification.Identification;
 import org.intellimate.izou.identification.IllegalIDException;
+import ro.fortsoft.pf4j.AddonAccessible;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,6 +15,7 @@ import java.util.Optional;
  * @author Leander Kurscheidt
  * @version 1.0
  */
+@AddonAccessible
 public interface Events {
     /**
      * Adds an listener for events that gets called before the generation of the resources and the outputPlugins..

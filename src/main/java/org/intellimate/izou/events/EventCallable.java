@@ -1,10 +1,13 @@
 package org.intellimate.izou.events;
 
+import ro.fortsoft.pf4j.AddonAccessible;
+
 /**
  * Interface to fire events
  * @author LeanderK
  * @version 1.0
  */
+@AddonAccessible
 public interface EventCallable {
     /**
      * This method is used to fire the event.
