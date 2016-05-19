@@ -2,6 +2,7 @@ package org.intellimate.izou.system;
 
 import org.apache.logging.log4j.spi.ExtendedLogger;
 import org.intellimate.izou.security.storage.SecureStorage;
+import org.intellimate.izou.security.storage.SecureStorageImpl;
 import org.intellimate.izou.system.context.*;
 import org.intellimate.izou.system.context.System;
 import ro.fortsoft.pf4j.AddonAccessible;
@@ -83,13 +84,13 @@ public interface Context {
     AddOns getAddOns();
 
     /**
-     * Gets the Secure Storage object of Izou. {@link SecureStorage} allows addOns to safely store data so that other
+     * Gets the Secure Storage object of Izou. {@link SecureStorageImpl} allows addOns to safely store data so that other
      * addOns cannot access it. However while the data is encrypted, there is no guarantee that the end user cannot
      * decrypt the data and access it. So be careful to not store any sensitive information here
      *
      * @return the Secure Storage object of Izou
      */
-    default SecureStorage getSecureStorage() {
-        return SecureStorage.getInstance();
+    static SecureStorage getSecureStorage() {
+        return SecureStorageImpl.getInstance();
     }
 }

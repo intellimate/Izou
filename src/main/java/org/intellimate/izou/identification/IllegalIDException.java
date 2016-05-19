@@ -1,11 +1,14 @@
 package org.intellimate.izou.identification;
 
+import ro.fortsoft.pf4j.AddonAccessible;
+
 /**
  * This Exception gets fired when an Identification or Identifiable doesn't fulfil certain requirements
  * (e.g. used twice)
  * @author Leander Kurscheidt
  * @version 1.0
  */
+@AddonAccessible
 //This Exception is more of a placeholder, but in future version we will certainly check if an ID is valid
 public class IllegalIDException extends RuntimeException {
     /**

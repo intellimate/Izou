@@ -143,7 +143,8 @@ public class AddOnInformationManager extends IzouModule {
      * @return an AddonModel or null
      */
     public AddOnModel getAddonModel(Identification identification) {
-        return getAddonModel(identification.getIdentifiable());
+        IdentificationImpl impl = (IdentificationImpl) identification;
+        return getAddonModel(impl.getIdentifiable());
     }
 
     /**

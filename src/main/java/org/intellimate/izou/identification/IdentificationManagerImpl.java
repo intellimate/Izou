@@ -14,19 +14,21 @@ import java.util.concurrent.ConcurrentHashMap;
 final class IdentificationManagerImpl implements IdentificationManagerM, IdentificationManager {
     private Map<String, Identifiable> registered = new ConcurrentHashMap<>();
     private AddOnInformationManager addOnInformationManager = null;
-    static IdentificationManagerImpl ourInstance = new IdentificationManagerImpl();
+    static IdentificationManagerImpl singletonInstance = new IdentificationManagerImpl();
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
 
     private IdentificationManagerImpl() {
 
     }
 
+
+
     /**
      * sets the AddOnInformationManager if not initialized
      * @param addOnInformationManager the addOnInformationManager
      */
     public void setAddOnInformationManager(AddOnInformationManager addOnInformationManager) {
-        if (this.addOnInformationManager != null) {
+        if (this.addOnInformationManager == null) {
             this.addOnInformationManager = addOnInformationManager;
         }
     }
@@ -46,7 +48,7 @@ final class IdentificationManagerImpl implements IdentificationManagerM, Identif
         if (!(registered == requested)) {
             return Optional.empty();
         }
-        return Optional.of(Identification.createIdentification(identifiable, true));
+        return Optional.of(IdentificationImpl.createIdentification(identifiable, true));
     }
 
     /**
@@ -58,7 +60,7 @@ final class IdentificationManagerImpl implements IdentificationManagerM, Identif
     @Override
     public Optional<Identification> getIdentification(String id) {
         return Optional.ofNullable(registered.get(id))
-                .map(Identification::createIdentification);
+                .map(IdentificationImpl::createIdentification);
     }
 
     /**

@@ -16,7 +16,7 @@ public interface IdentificationManagerM {
      * @return the instance
      */
     static IdentificationManagerM getInstance() {
-        return IdentificationManagerM.getInstance();
+        return IdentificationManagerImpl.singletonInstance;
     }
 
     /**

@@ -16,6 +16,6 @@ public interface IdentificationManager extends IdentificationManagerM {
      */
     @Deprecated
     static IdentificationManagerM getInstance() {
-        return IdentificationManagerImpl.ourInstance;
+        return IdentificationManagerImpl.singletonInstance;
     }
 }
