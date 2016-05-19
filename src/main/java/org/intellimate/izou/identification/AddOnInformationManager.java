@@ -1,15 +1,22 @@
 package org.intellimate.izou.identification;
 
+import com.esotericsoftware.yamlbeans.YamlWriter;
 import org.apache.commons.cli.MissingArgumentException;
 import org.intellimate.izou.addon.AddOnModel;
+import org.intellimate.izou.config.AddOn;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.util.IdentifiableSet;
 import org.intellimate.izou.util.IzouModule;
 import ro.fortsoft.pf4j.IzouPluginClassLoader;
 import ro.fortsoft.pf4j.PluginDescriptor;
 
-import java.util.Optional;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.*;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * The AddOnInformationManager is a class that gives access to all kinds of information about registered addOns in Izou.
@@ -18,12 +25,20 @@ import java.util.function.Supplier;
 public class AddOnInformationManager extends IzouModule {
     private final IdentifiableSet<AddOnInformation> addOnInformations;
     private final IdentifiableSet<AddOnModel> addOns;
+    private List<AddOn> installedAddOns = new ArrayList<>();
+    private List<AddOn> installedWithDependencies = new ArrayList<>();
+    private List<AddOn> addOnsToInstall = Collections.synchronizedList(new ArrayList<>());
+    private List<AddOn> addOnsToDelete = Collections.synchronizedList(new ArrayList<>());
+    private final String addonConfigFile;
 
     /**
      * Creates a new instance of AddOnInformationManager.
+     * @param main an instance of main
+     * @param addonConfigFile the config file for the addons
      */
-    public AddOnInformationManager(Main main) {
+    public AddOnInformationManager(Main main, String addonConfigFile) {
         super(main);
+        this.addonConfigFile = addonConfigFile;
         addOnInformations = new IdentifiableSet<>();
         addOns = new IdentifiableSet<>();
         IdentificationManagerImpl identificationManager = (IdentificationManagerImpl) IdentificationManagerM.getInstance();
@@ -200,6 +215,113 @@ public class AddOnInformationManager extends IzouModule {
      */
     public IdentifiableSet<AddOnInformation> getAllAddOnInformations() {
        return addOnInformations;
+    }
+
+    /**
+     * returns the configuration for all the installed AddOns.
+     * <p>
+     * these are not the actual AddOnModels, but the content of the addons-file for the installed AddOns.
+     * @return a list of AddOns
+     */
+    public List<AddOn> getInstalledAddOns() {
+        return installedAddOns;
+    }
+
+    /**
+     * returns the description for all the AddOns not yet downloaded
+     * @return the Addons
+     */
+    public List<AddOn> getAddOnsToInstall() {
+        return addOnsToInstall;
+    }
+
+    /**
+     * returns the description for all the AddOns not yet downloaded
+     * @return the Addons
+     */
+    public List<AddOn> getAddOnsToDelete() {
+        return addOnsToDelete;
+    }
+
+    /**
+     * returns all the Addons with their dependencies
+     * @return the Addons
+     */
+    public List<AddOn> getInstalledWithDependencies() {
+        return installedWithDependencies;
+    }
+
+    /**
+     * sets the installed/installedWithDependencies/toInstall/toDelete lists
+     */
+    public void initAddOns(List<AddOn> installed, List<AddOn> installedWithDependencies, List<AddOn> toInstall, List<AddOn> toDelete) {
+        this.installedAddOns = installed;
+        this.installedWithDependencies = installedWithDependencies;
+        this.addOnsToInstall = toInstall;
+        this.addOnsToDelete = toDelete;
+    }
+
+    /**
+     * adds the addon to the InstalledList
+     * @param addOn the AddOn to add
+     * @throws IOException
+     */
+    public synchronized void addAddonToInstalledList(AddOn addOn) throws IOException {
+        ArrayList<AddOn> installed = new ArrayList<>(installedAddOns);
+        installed.add(addOn);
+        synchro(new ArrayList<>(addOnsToDelete), installed, new ArrayList<>(addOnsToInstall));
+        installedAddOns = Collections.synchronizedList(installed);
+        installedWithDependencies.add(addOn);
+    }
+
+    /**
+     * sets the addons to install in the next synchronization
+     * @param addOns the addons to install
+     * @throws IOException when unable to write to the config-File (no change applied)
+     */
+    public synchronized void setAddOnsToInstall(List<AddOn> addOns) throws IOException {
+        synchro(new ArrayList<>(addOnsToDelete), new ArrayList<>(installedAddOns), addOns);
+        addOnsToInstall = Collections.synchronizedList(addOns);
+    }
+
+    /**
+     * sets the addons to delete by restart
+     * @param toDelete the addOns to delete
+     * @throws IOException when unable to write to the config-File (no change applied)
+     */
+    public synchronized void setAddonsToDelete(List<AddOn> toDelete) throws IOException {
+        synchro(toDelete, new ArrayList<>(installedAddOns), new ArrayList<>(addOnsToInstall));
+        addOnsToDelete = Collections.synchronizedList(toDelete);
+    }
+
+    private void synchro(List<AddOn> toDelete, List<AddOn> installed, List<AddOn> toInstall) throws IOException {
+        Set<String> toDeleteNames = toDelete.stream().map(addOn -> addOn.name).collect(Collectors.toSet());
+        Set<Integer> toDeleteIds = toDelete.stream()
+                .map(AddOn::getId)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toSet());
+        Predicate<AddOn> matchPredicate = addOn ->
+                !toDeleteNames.contains(addOn.name)
+                        || addOn.getId().map(id -> !toDeleteIds.contains(id)).orElse(true);
+        List<AddOn> addOns = installed.stream()
+                .filter(matchPredicate)
+                .collect(Collectors.toList());
+        addOns.addAll(toInstall);
+        //needed because only arrayList ist guaranteed to no print
+        ArrayList<AddOn> finalAddons = new ArrayList<>(addOns);
+        writeToFile(finalAddons);
+    }
+
+    private void writeToFile(ArrayList<AddOn> addOns) throws IOException {
+        File configFile = new File(addonConfigFile);
+        if (!configFile.exists()) {
+            configFile.createNewFile();
+        }
+        try (FileWriter writer = new FileWriter(addonConfigFile)) {
+            YamlWriter yamlWriter = new YamlWriter(writer);
+            yamlWriter.write(addOns);
+        }
     }
 
     /**
