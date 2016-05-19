@@ -113,7 +113,7 @@ public class Main {
             System.setProperty("debug", "true");
         }
 
-        addOnInformationManager = new AddOnInformationManager(this); // Put this before the addOnManager, it needs it
+        addOnInformationManager = new AddOnInformationManager(this, installedAddOns, installedWithDependencies, addonConfigFile); // Put this before the addOnManager, it needs it
         addOnManager = new AddOnManager(this);
         threadPoolManager = new ThreadPoolManager(this);
         izouLogger = new IzouLogger();
@@ -303,10 +303,6 @@ public class Main {
         return systemInitializer;
     }
 
-    public InternalIdentificationManager getInternalIdentificationManager() {
-        return internalIdentificationManager;
-    }
-
     public Optional<CommunicationManager> getCommunicationManager() {
         return Optional.ofNullable(communicationManager);
     }
@@ -420,69 +416,5 @@ public class Main {
             System.exit(-1);
         }
         return communicationManager;
-    }
-
-    public SoundManager getSoundManager() {
-        return soundManager;
-    }
-
-    public SecurityManager getSecurityManager() {
-        return securityManager;
-    }
-
-    public OutputManager getOutputManager() {
-        return outputManager;
-    }
-
-    public LocalEventManager getLocalEventManager() {
-        return localEventManager;
-    }
-
-    public ActivatorManager getActivatorManager() {
-        return activatorManager;
-    }
-
-    public AddOnManager getAddOnManager() {
-        return addOnManager;
-    }
-
-    public ResourceManager getResourceManager() {
-        return resourceManager;
-    }
-
-    public EventDistributor getEventDistributor() {
-        return eventDistributor;
-    }
-
-    public ThreadPoolManager getThreadPoolManager() {
-        return threadPoolManager;
-    }
-
-    public FileManager getFileManager() {
-        return fileManager;
-    }
-
-    public FilePublisher getFilePublisher() {
-        return filePublisher;
-    }
-
-    public IzouLogger getIzouLogger() {
-        return izouLogger;
-    }
-
-    public FileSystemManager getFileSystemManager() {
-        return fileSystemManager;
-    }
-
-    public SystemInitializer getSystemInitializer() {
-        return systemInitializer;
-    }
-
-    public InternalIdentificationManager getInternalIdentificationManager() {
-        return internalIdentificationManager;
-    }
-
-    public Optional<CommunicationManager> getCommunicationManager() {
-        return Optional.ofNullable(communicationManager);
     }
 }
