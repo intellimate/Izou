@@ -4,6 +4,7 @@ import com.google.common.io.ByteStreams;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import org.intellimate.izou.config.AddOn;
 import org.intellimate.izou.config.Version;
+import org.intellimate.izou.identification.AddOnInformationManager;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.util.IzouModule;
 import org.intellimate.server.proto.App;
@@ -31,17 +32,16 @@ public class CommunicationManager extends IzouModule {
     private final Version currentVersion;
     private final File izouFile;
     private final File libLocation;
-    private final List<AddOn> installedWithDependencies;
-    private final List<AddOn> selectedWithoutDependencies;
     private final boolean disabledLib;
     private final RequestHandler requestHandler;
     private final Thread connectionThread;
     private boolean run = true;
+    private final AddOnInformationManager infoManager = getMain().getAddOnInformationManager();
 
-    public CommunicationManager(Version currentVersion, Main main, List<AddOn> selectedWithoutDependencies, boolean disabledLib, String refreshToken, String addonsFile) throws IllegalStateException {
+    public CommunicationManager(Version currentVersion, Main main, boolean disabledLib, String refreshToken, String addonsFile) throws IllegalStateException {
         super(main);
         this.serverRequests = new ServerRequests("http://www.izou.info", refreshToken, main);
-        requestHandler = new RequestHandler(main, selectedWithoutDependencies, addonsFile);
+        requestHandler = new RequestHandler(main);
         try {
             serverRequests.init();
         } catch (UnirestException e) {
@@ -62,8 +62,8 @@ public class CommunicationManager extends IzouModule {
         this.currentVersion = currentVersion;
         this.izouFile = main.getFileSystemManager().getIzouJarLocation();
         libLocation = main.getFileSystemManager().getLibLocation();
-        this.selectedWithoutDependencies = selectedWithoutDependencies;
         this.disabledLib = disabledLib;
+        //TODO init AddonInformationManager
         if (disabledLib) {
             installedWithDependencies = new ArrayList<>();
         } else {
@@ -71,7 +71,7 @@ public class CommunicationManager extends IzouModule {
         }
     }
 
-    private List<AddOn> loadInstalledApps() {
+    private List<AddOn> loadInstalledApps(List<AddOn> selected) {
         Function<Path, AddOn> pathToApp = path -> {
             String fileName = path.toFile().getName();
             String[] split = fileName.split("-");
@@ -99,7 +99,7 @@ public class CommunicationManager extends IzouModule {
             throw new RuntimeException();
         }
 
-        selectedWithoutDependencies.forEach(addON -> {
+        selected.forEach(addON -> {
             if (installed.containsKey(addON.name)) {
                 AddOn installedAddon = installed.get(addON.name);
                 installedAddon.id = addON.id;
@@ -120,7 +120,7 @@ public class CommunicationManager extends IzouModule {
             return true;
         }
         if (!disabledLib) {
-            return synchronizeApps(this.selectedWithoutDependencies);
+            return synchronizeApps(infoManager.getInstalledAddOns());
         }
         return false;
     }
@@ -167,11 +167,11 @@ public class CommunicationManager extends IzouModule {
             }
         }
 
-        Set<String> selectedNames = selectedWithoutDependencies.stream()
+        Set<String> selectedNames = infoManager.getInstalledWithDependencies().stream()
                 .map(addOn -> addOn.name)
                 .collect(Collectors.toSet());
 
-        installedWithDependencies.stream()
+        infoManager.getInstalledWithDependencies().stream()
                 .filter(addOn -> !selectedNames.contains(addOn.name))
                 .filter(addOn -> addOn.getId()
                         .map(id -> !resolved.containsKey(id))
@@ -189,7 +189,7 @@ public class CommunicationManager extends IzouModule {
                 });
 
         List<App> newApps = resolved.values().stream()
-                .filter(app -> installedWithDependencies.stream()
+                .filter(app -> infoManager.getInstalledWithDependencies().stream()
                         .filter(addOn -> addOn.name.equals(app.getName()))
                         .findAny()
                         .filter(addOn -> addOn.getVersion().compareTo(new Version(app.getVersions(0).getVersion())) >= 0)
