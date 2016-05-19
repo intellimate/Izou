@@ -113,7 +113,7 @@ public class Main {
             System.setProperty("debug", "true");
         }
 
-        addOnInformationManager = new AddOnInformationManager(this, installedAddOns, installedWithDependencies, addonConfigFile); // Put this before the addOnManager, it needs it
+        addOnInformationManager = new AddOnInformationManager(this, addonsConfig); // Put this before the addOnManager, it needs it
         addOnManager = new AddOnManager(this);
         threadPoolManager = new ThreadPoolManager(this);
         izouLogger = new IzouLogger();
@@ -363,7 +363,7 @@ public class Main {
 
         List<AddOn> addOns;
         try {
-            addOns = reader.read(List.class,AddOn.class);
+            addOns = reader.read(ArrayList.class,AddOn.class);
         } catch (YamlException e) {
             fileLogger.error("unable to load addons config", e);
             System.out.println(-1);
@@ -378,7 +378,7 @@ public class Main {
         }
         CommunicationManager communicationManager = null;
         try {
-            CommunicationManager finalCommunManager = new CommunicationManager(version, this, addOns, disabledLib, config.token, addonsFile);
+            CommunicationManager finalCommunManager = new CommunicationManager(version, this, disabledLib, config.token, addOns);
             communicationManager = finalCommunManager;
             if (!disabledUpdate) {
                 LocalDateTime firstInterval = LocalDateTime.now().withHour(2);
