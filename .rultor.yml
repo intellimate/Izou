@@ -19,6 +19,6 @@ release:
       - LeanderK
       - jundl77
   script: |-
-    mvn versions:set "-DnewVersion=${tag//\'}"
-    git commit -am "${tag//\'}"
+    mvn versions:set "-DnewVersion=${tag}"
+    git commit -am "${tag}"
     mvn -Dmaven.test.skip=true clean deploy --settings /home/r/settings.xml
