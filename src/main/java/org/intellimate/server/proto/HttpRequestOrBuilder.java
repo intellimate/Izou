@@ -62,7 +62,7 @@ public interface HttpRequestOrBuilder extends
       getContentTypeBytes();
 
   /**
-   * <code>optional bytes body = 5;</code>
+   * <code>optional sint64 body_size = 5;</code>
    */
-  com.google.protobuf.ByteString getBody();
+  long getBodySize();
 }

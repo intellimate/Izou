@@ -28,12 +28,12 @@ public final class HttpResponseOuterClass {
   static {
     java.lang.String[] descriptorData = {
       "\n#server-protobuf/http_response.proto\022\013i" +
-      "ntellimate\"\232\001\n\014HttpResponse\022\016\n\006status\030\001 " +
+      "ntellimate\"\237\001\n\014HttpResponse\022\016\n\006status\030\001 " +
       "\001(\005\0221\n\007headers\030\002 \003(\0132 .intellimate.HttpR" +
-      "esponse.Header\022\023\n\013contentType\030\003 \001(\t\022\014\n\004b" +
-      "ody\030\004 \001(\014\032$\n\006Header\022\013\n\003key\030\001 \001(\t\022\r\n\005valu" +
-      "e\030\002 \003(\tB \n\034org.intellimate.server.protoP" +
-      "\001b\006proto3"
+      "esponse.Header\022\023\n\013contentType\030\003 \001(\t\022\021\n\tb" +
+      "ody_size\030\004 \001(\022\032$\n\006Header\022\013\n\003key\030\001 \001(\t\022\r\n" +
+      "\005value\030\002 \003(\tB \n\034org.intellimate.server.p" +
+      "rotoP\001b\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -52,7 +52,7 @@ public final class HttpResponseOuterClass {
     internal_static_intellimate_HttpResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_intellimate_HttpResponse_descriptor,
-        new java.lang.String[] { "Status", "Headers", "ContentType", "Body", });
+        new java.lang.String[] { "Status", "Headers", "ContentType", "BodySize", });
     internal_static_intellimate_HttpResponse_Header_descriptor =
       internal_static_intellimate_HttpResponse_descriptor.getNestedTypes().get(0);
     internal_static_intellimate_HttpResponse_Header_fieldAccessorTable = new

@@ -47,7 +47,7 @@ public interface HttpResponseOrBuilder extends
       getContentTypeBytes();
 
   /**
-   * <code>optional bytes body = 4;</code>
+   * <code>optional sint64 body_size = 4;</code>
    */
-  com.google.protobuf.ByteString getBody();
+  long getBodySize();
 }

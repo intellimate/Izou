@@ -18,7 +18,7 @@ public  final class HttpResponse extends
     status_ = 0;
     headers_ = java.util.Collections.emptyList();
     contentType_ = "";
-    body_ = com.google.protobuf.ByteString.EMPTY;
+    bodySize_ = 0L;
   }
 
   @java.lang.Override
@@ -64,9 +64,9 @@ public  final class HttpResponse extends
             contentType_ = s;
             break;
           }
-          case 34: {
+          case 32: {
 
-            body_ = input.readBytes();
+            bodySize_ = input.readSInt64();
             break;
           }
         }
@@ -812,13 +812,13 @@ public  final class HttpResponse extends
     }
   }
 
-  public static final int BODY_FIELD_NUMBER = 4;
-  private com.google.protobuf.ByteString body_;
+  public static final int BODY_SIZE_FIELD_NUMBER = 4;
+  private long bodySize_;
   /**
-   * <code>optional bytes body = 4;</code>
+   * <code>optional sint64 body_size = 4;</code>
    */
-  public com.google.protobuf.ByteString getBody() {
-    return body_;
+  public long getBodySize() {
+    return bodySize_;
   }
 
   private byte memoizedIsInitialized = -1;
@@ -842,8 +842,8 @@ public  final class HttpResponse extends
     if (!getContentTypeBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessage.writeString(output, 3, contentType_);
     }
-    if (!body_.isEmpty()) {
-      output.writeBytes(4, body_);
+    if (bodySize_ != 0L) {
+      output.writeSInt64(4, bodySize_);
     }
   }
 
@@ -863,9 +863,9 @@ public  final class HttpResponse extends
     if (!getContentTypeBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessage.computeStringSize(3, contentType_);
     }
-    if (!body_.isEmpty()) {
+    if (bodySize_ != 0L) {
       size += com.google.protobuf.CodedOutputStream
-        .computeBytesSize(4, body_);
+        .computeSInt64Size(4, bodySize_);
     }
     memoizedSize = size;
     return size;
@@ -989,7 +989,7 @@ public  final class HttpResponse extends
       }
       contentType_ = "";
 
-      body_ = com.google.protobuf.ByteString.EMPTY;
+      bodySize_ = 0L;
 
       return this;
     }
@@ -1026,7 +1026,7 @@ public  final class HttpResponse extends
         result.headers_ = headersBuilder_.build();
       }
       result.contentType_ = contentType_;
-      result.body_ = body_;
+      result.bodySize_ = bodySize_;
       result.bitField0_ = to_bitField0_;
       onBuilt();
       return result;
@@ -1076,8 +1076,8 @@ public  final class HttpResponse extends
         contentType_ = other.contentType_;
         onChanged();
       }
-      if (other.getBody() != com.google.protobuf.ByteString.EMPTY) {
-        setBody(other.getBody());
+      if (other.getBodySize() != 0L) {
+        setBodySize(other.getBodySize());
       }
       onChanged();
       return this;
@@ -1441,31 +1441,28 @@ public  final class HttpResponse extends
       return this;
     }
 
-    private com.google.protobuf.ByteString body_ = com.google.protobuf.ByteString.EMPTY;
+    private long bodySize_ ;
     /**
-     * <code>optional bytes body = 4;</code>
+     * <code>optional sint64 body_size = 4;</code>
      */
-    public com.google.protobuf.ByteString getBody() {
-      return body_;
+    public long getBodySize() {
+      return bodySize_;
     }
     /**
-     * <code>optional bytes body = 4;</code>
+     * <code>optional sint64 body_size = 4;</code>
      */
-    public Builder setBody(com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
-      body_ = value;
+    public Builder setBodySize(long value) {
+      
+      bodySize_ = value;
       onChanged();
       return this;
     }
     /**
-     * <code>optional bytes body = 4;</code>
+     * <code>optional sint64 body_size = 4;</code>
      */
-    public Builder clearBody() {
+    public Builder clearBodySize() {
       
-      body_ = getDefaultInstance().getBody();
+      bodySize_ = 0L;
       onChanged();
       return this;
     }
