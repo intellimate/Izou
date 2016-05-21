@@ -29,8 +29,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static java.awt.SystemColor.info;
-
 /**
  * used for all the qhttp-requests to the server
  * @author LeanderK

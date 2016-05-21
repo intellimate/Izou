@@ -19,8 +19,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static com.sun.tools.doclint.Entity.ge;
-
 /**
  * @author LeanderK
  * @version 1.0
