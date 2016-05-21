@@ -51,11 +51,15 @@ public class CommunicationManager extends IzouModule {
         }
         connectionThread = new Thread(() -> {
             while (run) {
-                serverRequests.requests(requestHandler::handleRequests);
                 try {
-                    Thread.sleep(30000);
-                } catch (InterruptedException e) {
-                    debug("interrupted", e);
+                    serverRequests.requests(requestHandler::handleRequests);
+                    try {
+                        Thread.sleep(30000);
+                    } catch (InterruptedException e) {
+                        debug("interrupted", e);
+                    }
+                } catch (Exception e) {
+                    error("an uncatched Exception occurred", e);
                 }
             }
         });

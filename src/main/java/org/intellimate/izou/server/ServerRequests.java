@@ -1,5 +1,6 @@
 package org.intellimate.izou.server;
 
+import com.google.common.io.ByteStreams;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import com.mashape.unirest.http.HttpResponse;
@@ -17,6 +18,7 @@ import sun.security.ssl.SSLSocketImpl;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -25,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static java.awt.SystemColor.info;
 
@@ -61,11 +64,12 @@ public class ServerRequests extends IzouModule {
         }
     }
 
-    public void requests(Function<org.intellimate.server.proto.HttpRequest, org.intellimate.server.proto.HttpResponse> callback) {
+    public void requests(Function<Request, Response> callback) {
         assureInit();
+        SocketFactory socketFactory = SSLSocketFactory.getDefault();
+        Socket socket = null;
         try {
-            SocketFactory socketFactory = SSLSocketFactory.getDefault();
-            Socket socket = socketFactory.createSocket(url, 4000);
+            socket = socketFactory.createSocket(url, 4000);
             InputStream inputStream = socket.getInputStream();
             OutputStream outputStream = socket.getOutputStream();
             SocketConnection.newBuilder()
@@ -74,13 +78,48 @@ public class ServerRequests extends IzouModule {
                     .writeDelimitedTo(outputStream);
             outputStream.flush();
             while (run) {
-                org.intellimate.server.proto.HttpRequest httpRequest = org.intellimate.server.proto.HttpRequest.parseFrom(inputStream);
-                callback.apply(httpRequest)
+                org.intellimate.server.proto.HttpRequest httpRequest = org.intellimate.server.proto.HttpRequest.parseDelimitedFrom(inputStream);
+                int bodySize = (int) httpRequest.getBodySize();
+                if (bodySize < httpRequest.getBodySize()) {
+                    throw new IllegalStateException("Body to large, requested body: "+httpRequest.getBodySize());
+                }
+                byte[] bytes = new byte[bodySize];
+                ByteStreams.readFully(inputStream, bytes);
+                RequestImpl request = new RequestImpl(httpRequest, bytes);
+                Response response = callback.apply(request);
+                org.intellimate.server.proto.HttpResponse.newBuilder()
+                        .setContentType(response.getContentType())
+                        .setStatus(response.getStatus())
+                        .setBodySize(response.getData().length)
+                        .addAllHeaders(
+                                response.getHeaders().entrySet().stream()
+                                        .map(entry ->
+                                                org.intellimate.server.proto.HttpResponse.Header.newBuilder()
+                                                        .setKey(entry.getKey())
+                                                        .addAllValue(entry.getValue())
+                                                        .build()
+                                        )
+                                        .collect(Collectors.toList())
+                        )
+                        .build()
                         .writeDelimitedTo(outputStream);
+                outputStream.write(response.getData());
                 outputStream.flush();
             }
+        } catch (EOFException e) {
+            error("body size did not match advertised size", e);
         } catch (IOException e) {
             error("there was a problem with the server connection", e);
+        } catch (IllegalStateException e) {
+            error(e.getMessage(), e);
+        } finally {
+            if (socket != null) {
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    error("unable to close the socket", e);
+                }
+            }
         }
     }
 
