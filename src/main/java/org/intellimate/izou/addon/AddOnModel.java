@@ -1,6 +1,8 @@
 package org.intellimate.izou.addon;
 
 import org.intellimate.izou.identification.Identifiable;
+import org.intellimate.izou.server.Request;
+import org.intellimate.izou.server.Response;
 import org.intellimate.izou.system.Context;
 import org.intellimate.server.proto.HttpRequest;
 import org.intellimate.server.proto.HttpResponse;
@@ -47,5 +49,5 @@ public interface AddOnModel extends ExtensionPoint, Identifiable {
      * @param request the request to process
      * @return the response
      */
-    HttpResponse handleRequest(HttpRequest request);
+    Response handleRequest(Request request);
 }

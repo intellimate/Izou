@@ -1,7 +1,5 @@
 package org.intellimate.izou.server;
 
-import com.esotericsoftware.yamlbeans.YamlWriter;
-import com.google.common.io.ByteStreams;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
@@ -14,11 +12,14 @@ import org.intellimate.izou.util.IzouModule;
 import org.intellimate.server.proto.*;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static com.sun.tools.doclint.Entity.ge;
 
 /**
  * @author LeanderK
@@ -33,34 +34,34 @@ public class RequestHandler extends IzouModule {
         super(main);
     }
 
-    HttpResponse handleRequests(HttpRequest httpRequest) {
-        if (httpRequest.getUrl().startsWith("/apps")) {
-            return handleApps(httpRequest);
-        } else if (httpRequest.getUrl().equals("/stats")) {
-            return handleStatus(httpRequest);
+    Response handleRequests(Request request) {
+        if (request.getUrl().startsWith("/apps")) {
+            return handleApps(request);
+        } else if (request.getUrl().equals("/stats")) {
+            return handleStatus(request);
         }
-        return HttpResponse.newBuilder().setStatus(404).build();
+        return sendStringMessage("illegal request, no suitable route found", 404);
     }
 
-    private HttpResponse handleApps(HttpRequest httpRequest) {
-        String url = httpRequest.getUrl();
+    private Response handleApps(Request request) {
+        String url = request.getUrl();
         if (url.equals("/apps")) {
-            return handleListApps(httpRequest);
+            return handleListApps(request);
         } else if (url.matches("/apps/\\d+(/.*)?")) {
             Pattern pattern = Pattern.compile("/apps/(?<id>\\d+)(/.*)?");
-            return handleAddonHTTPRequest(httpRequest, url, pattern, id -> getMain().getAddOnInformationManager().getAddOn(Integer.parseInt(id)));
+            return handleAddonHTTPRequest(request, url, pattern, id -> getMain().getAddOnInformationManager().getAddOn(Integer.parseInt(id)));
         } else if (url.matches("/apps/dev/\\w+(/.*)?")) {
-            if (httpRequest.getMethod().equals("POST") && url.matches("/apps/dev/\\w+/\\d+/\\d+/\\d+")) {
-                return saveLocalApp(httpRequest, url);
-            } else if (httpRequest.getMethod().equals("GET")) {
+            if (request.getMethod().equals("POST") && url.matches("/apps/dev/\\w+/\\d+/\\d+/\\d+")) {
+                return saveLocalApp(request, url);
+            } else if (request.getMethod().equals("GET")) {
                 Pattern pattern = Pattern.compile("/apps/dev/(?<id>\\w+)(/.*)?");
-                return handleAddonHTTPRequest(httpRequest, url, pattern, id -> getMain().getAddOnInformationManager().getAddOn(Integer.parseInt(id)));
+                return handleAddonHTTPRequest(request, url, pattern, id -> getMain().getAddOnInformationManager().getAddOn(Integer.parseInt(id)));
             }
         }
         return sendStringMessage("illegal request, no suitable route found", 404);
     }
 
-    private HttpResponse saveLocalApp(HttpRequest httpRequest, String url) {
+    private Response saveLocalApp(Request request, String url) {
         Pattern pattern = Pattern.compile("/apps/dev/(?<id>\\w+)/(?<major>\\d+)/(?<minor>\\d+)/(?<patch>\\d+)");
         Matcher matcher = pattern.matcher(url);
         String id = matcher.group("id");
@@ -81,7 +82,7 @@ public class RequestHandler extends IzouModule {
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(file);
-            fos.write(httpRequest.getBody().toByteArray());
+            fos.write(request.getData());
         } catch (IOException e) {
             error("unable to write to file", e);
             return sendStringMessage("an internal error occured", 500);
@@ -102,8 +103,8 @@ public class RequestHandler extends IzouModule {
         return sendStringMessage("OK", 201);
     }
 
-    private HttpResponse handleListApps(HttpRequest httpRequest) {
-        if (httpRequest.getMethod().equals("GET")) {
+    private Response handleListApps(Request request) {
+        if (request.getMethod().equals("GET")) {
             IzouAppList appList = IzouAppList.newBuilder()
                     .addAllSelected(
                             getMain().getAddOnInformationManager().getInstalledAddOns().stream()
@@ -127,8 +128,8 @@ public class RequestHandler extends IzouModule {
                     )
                     .build();
             return messageHelper(appList, 200);
-        } else if (httpRequest.getMethod().equals("PATCH")) {
-            String json = httpRequest.getBody().toStringUtf8();
+        } else if (request.getMethod().equals("PATCH")) {
+            String json = request.getDataAsUTF8();
             IzouAppList.Builder builder = IzouAppList.newBuilder();
             try {
                 PARSER.merge(json, builder);
@@ -207,12 +208,12 @@ public class RequestHandler extends IzouModule {
         return new AddOn(app.getName(), null, id);
     }
 
-    private HttpResponse handleAddonHTTPRequest(HttpRequest httpRequest, String url, Pattern pattern, Function<String, Optional<AddOnModel>> getAddon) {
+    private Response handleAddonHTTPRequest(Request httpRequest, String url, Pattern pattern, Function<String, Optional<AddOnModel>> getAddon) {
         Matcher matcher = pattern.matcher(url);
         String id = matcher.group("id");
-        Boolean authorized = httpRequest.getParamsList().stream()
+        Boolean authorized = httpRequest.getParams().entrySet().stream()
                 .filter(param -> param.getKey().equals("app"))
-                .map(HttpRequest.Param::getValueList)
+                .map(Map.Entry::getValue)
                 .findAny()
                 .map(list -> list.stream().filter(authorizedApp -> authorizedApp.equals(id)).findAny().isPresent())
                 .orElse(true);
@@ -226,15 +227,15 @@ public class RequestHandler extends IzouModule {
         }
         //TODO wrap in completableFuture to isolate
         return addOnModel.flatMap(addOnModelInstance -> Optional.ofNullable(addOnModelInstance.handleRequest(httpRequest)))
-                .orElseGet(() -> HttpResponse.newBuilder().setStatus(404).build());
+                .orElseGet(() -> sendStringMessage("illegal request, no suitable route found", 404));
     }
 
-    private HttpResponse handleStatus(HttpRequest httpRequest) {
-        if (httpRequest.getMethod().equals("GET")) {
+    private Response handleStatus(Request request) {
+        if (request.getMethod().equals("GET")) {
             IzouInstanceStatus status = IzouInstanceStatus.newBuilder().setStatus(IzouInstanceStatus.Status.RUNNING).build();
             return messageHelper(status, 200);
-        } else if (httpRequest.getMethod().equals("PATCH")) {
-            String json = httpRequest.getBody().toStringUtf8();
+        } else if (request.getMethod().equals("PATCH")) {
+            String json = request.getDataAsUTF8();
             IzouInstanceStatus.Builder builder = IzouInstanceStatus.newBuilder();
             try {
                 PARSER.merge(json, builder);
@@ -255,24 +256,16 @@ public class RequestHandler extends IzouModule {
         return sendStringMessage("illegal request, no suitable route found", 404);
     }
 
-    private HttpResponse messageHelper(Message message, int status) {
+    private Response messageHelper(Message message, int status) {
         try {
-            return HttpResponse.newBuilder()
-                    .setContentType("application/json")
-                    .setBody(ByteString.copyFromUtf8(PRINTER.print(message)))
-                    .setStatus(status)
-                    .build();
+            return new ResponseImpl(status, new HashMap<>(), "application/json", PRINTER.print(message).getBytes(Charset.forName("UTF-8")));
         } catch (InvalidProtocolBufferException e) {
             error("unable to print message", e);
-            return HttpResponse.newBuilder().setStatus(500).build();
+            return sendStringMessage("Izou: unable to print message in messageHelper", 500);
         }
     }
 
-    private HttpResponse sendStringMessage(String message, int status) {
-        return HttpResponse.newBuilder()
-                .setStatus(status)
-                .setContentType("text")
-                .setBody(ByteString.copyFromUtf8(message))
-                .build();
+    private Response sendStringMessage(String message, int status) {
+        return new ResponseImpl(status, new HashMap<>(), "text", message.getBytes(Charset.forName("UTF-8")));
     }
 }
