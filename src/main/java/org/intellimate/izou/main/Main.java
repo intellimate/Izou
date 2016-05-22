@@ -18,6 +18,7 @@ import org.intellimate.izou.output.OutputManager;
 import org.intellimate.izou.resource.ResourceManager;
 import org.intellimate.izou.security.SecurityManager;
 import org.intellimate.izou.server.CommunicationManager;
+import org.intellimate.izou.server.SSLCertificateHelper;
 import org.intellimate.izou.support.SystemMail;
 import org.intellimate.izou.system.SystemInitializer;
 import org.intellimate.izou.system.file.FileManager;
@@ -36,6 +37,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static javafx.scene.input.KeyCode.M;
 
 /**
  * Main Class.
@@ -65,6 +68,10 @@ public class Main {
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
     private FileSystemManager fileSystemManager;
     private CommunicationManager communicationManager;
+
+    static {
+        SSLCertificateHelper.init();
+    }
 
     /**
      * Creates a new Main instance with a optionally disabled lib-folder.
@@ -325,6 +332,7 @@ public class Main {
         if (configPath == null || addonsConfigPath == null) {
             return null;
         }
+
         File configFile = new File(configPath);
         if (!configFile.exists()) {
             fileLogger.error("unable to load izou config");
@@ -376,9 +384,11 @@ public class Main {
         if (rawVersion != null) {
             version = new Version(rawVersion);
         }
+
+        boolean sslEnabled = "true".equals(config.ssl);
         CommunicationManager communicationManager = null;
         try {
-            CommunicationManager finalCommunManager = new CommunicationManager(version, this, disabledLib, config.token, addOns);
+            CommunicationManager finalCommunManager = new CommunicationManager(version, this, config.url, config.urlSocket, sslEnabled, disabledLib, config.token, addOns);
             communicationManager = finalCommunManager;
             if (!disabledUpdate) {
                 LocalDateTime firstInterval = LocalDateTime.now().withHour(2);
