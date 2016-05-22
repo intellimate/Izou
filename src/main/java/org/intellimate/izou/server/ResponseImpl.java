@@ -1,5 +1,7 @@
 package org.intellimate.izou.server;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -11,13 +13,23 @@ public class ResponseImpl implements Response {
     private final int status;
     private final Map<String, List<String>> headers;
     private final String contentType;
-    private final byte[] data;
+    private final int dataSize;
+    private final InputStream stream;
 
     public ResponseImpl(int status, Map<String, List<String>> headers, String contentType, byte[] data) {
         this.status = status;
         this.headers = headers;
         this.contentType = contentType;
-        this.data = data;
+        this.dataSize = data.length;
+        this.stream = new ByteArrayInputStream(data);
+    }
+
+    public ResponseImpl(int status, Map<String, List<String>> headers, String contentType, int dataSize, InputStream stream) {
+        this.status = status;
+        this.headers = headers;
+        this.contentType = contentType;
+        this.dataSize = dataSize;
+        this.stream = stream;
     }
 
     @Override
@@ -36,7 +48,12 @@ public class ResponseImpl implements Response {
     }
 
     @Override
-    public byte[] getData() {
-        return data;
+    public int getDataSize() {
+        return dataSize;
+    }
+
+    @Override
+    public InputStream getData() {
+        return stream;
     }
 }

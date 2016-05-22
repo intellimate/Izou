@@ -1,7 +1,7 @@
 package org.intellimate.izou.server;
 
 import com.google.common.io.ByteStreams;
-import com.mashape.unirest.http.exceptions.UnirestException;
+import com.sun.jersey.api.client.ClientHandlerException;
 import org.intellimate.izou.config.AddOn;
 import org.intellimate.izou.config.Version;
 import org.intellimate.izou.identification.AddOnInformationManager;
@@ -28,6 +28,7 @@ import java.util.stream.StreamSupport;
  * @version 1.0
  */
 //TODO update to AddonInformationManager
+//TODO set URL dynamically via config
 public class CommunicationManager extends IzouModule {
     private final ServerRequests serverRequests;
     private final Version currentVersion;
@@ -38,14 +39,21 @@ public class CommunicationManager extends IzouModule {
     private final Thread connectionThread;
     private boolean run = true;
     private final AddOnInformationManager infoManager = getMain().getAddOnInformationManager();
+    private final String izouServerURL;
 
-    public CommunicationManager(Version currentVersion, Main main, boolean disabledLib, String refreshToken, List<AddOn> selected) throws IllegalStateException {
+    public CommunicationManager(Version currentVersion, Main main, String izouServerURL, String izouSocketUrl, boolean ssl, boolean disabledLib, String refreshToken, List<AddOn> selected) throws IllegalStateException {
         super(main);
-        this.serverRequests = new ServerRequests("http://www.izou.info", refreshToken, main);
+        if (ssl) {
+            this.izouServerURL = "https://"+izouServerURL;
+        } else {
+            this.izouServerURL = "http://"+izouServerURL;
+        }
+
+        this.serverRequests = new ServerRequests(izouServerURL, izouSocketUrl, ssl, refreshToken, main);
         requestHandler = new RequestHandler(main);
         try {
             serverRequests.init();
-        } catch (UnirestException e) {
+        } catch (ClientHandlerException e) {
             error("unable to init Connection to server", e);
             throw new IllegalStateException("not able to init server-request package");
         }
@@ -130,7 +138,7 @@ public class CommunicationManager extends IzouModule {
         boolean mustRestart = false;
         try {
             mustRestart = updateIzou();
-        } catch (UnirestException e) {
+        } catch (ClientHandlerException e) {
             error("unable to update izou", e);
         }
         if (mustRestart) {
@@ -148,7 +156,7 @@ public class CommunicationManager extends IzouModule {
                 .map(app -> {
                     try {
                         return serverRequests.getAddonAndDependencies(app.getId().get());
-                    } catch (UnirestException e) {
+                    } catch (ClientHandlerException e) {
                         debug("unable to connect to server", e);
                         return Optional.<App>empty();
                     }
@@ -178,7 +186,7 @@ public class CommunicationManager extends IzouModule {
                                     .filter(appD -> !resolved.containsKey(appD.getId()))
                                     .forEach(appD -> toResolve.put(appD.getId(), appD));
                         });
-            } catch (UnirestException e) {
+            } catch (ClientHandlerException e) {
                 debug("unable to connect to server", e);
                 e.printStackTrace();
             }
@@ -227,7 +235,7 @@ public class CommunicationManager extends IzouModule {
                 ByteStreams.copy(inputStream, fileOutputStream);
                 inputStream.close();
                 fileOutputStream.close();
-            } catch (UnirestException e) {
+            } catch (ClientHandlerException e) {
                 error("unable to download from "+url, e);
             } catch (IOException e) {
                 error("unable to create file ", e);
@@ -237,7 +245,7 @@ public class CommunicationManager extends IzouModule {
         return newApps.isEmpty();
     }
 
-    private boolean updateIzou() throws IOException, UnirestException {
+    private boolean updateIzou() throws IOException, ClientHandlerException {
         String currentServerVersion = serverRequests.getNewestVersion();
         if (new Version(currentServerVersion).compareTo(currentVersion) != 0) {
             InputStream input = serverRequests.download("url");
@@ -252,5 +260,13 @@ public class CommunicationManager extends IzouModule {
             return true;
         }
         return false;
+    }
+
+    /**
+     * the active IzouServerURL
+     * @return the URL
+     */
+    public String getIzouServerURL() {
+        return izouServerURL;
     }
 }
