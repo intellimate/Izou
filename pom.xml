@@ -6,7 +6,7 @@
 
     <groupId>org.intellimate.izou</groupId>
     <artifactId>izou</artifactId>
-    <version>1.15.1</version>
+    <version>1.16.1</version>
     <packaging>jar</packaging>
     <name>Izou</name>
     <description>Izou is a framework used for an addon-based personal assistant</description>
@@ -113,9 +113,9 @@
             <version>1.5.4</version>
         </dependency>
         <dependency>
-            <groupId>com.mashape.unirest</groupId>
-            <artifactId>unirest-java</artifactId>
-            <version>1.4.9</version>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-client</artifactId>
+            <version>1.19.1</version>
         </dependency>
         <dependency>
             <groupId>com.google.protobuf</groupId>
