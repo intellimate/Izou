@@ -7,6 +7,8 @@ import org.intellimate.izou.system.context.*;
 import org.intellimate.izou.system.context.System;
 import ro.fortsoft.pf4j.AddonAccessible;
 
+import java.util.Optional;
+
 /**
  * The Izou context is a means for all addOns to get general information they might need. Every addOn its own context
  * and can use it to reach certain Izou components. It controls what an addOn has access to and what it does not have
@@ -82,6 +84,12 @@ public interface Context {
      * @return AddOns.
      */
     AddOns getAddOns();
+
+    /**
+     * returns the URL of the server this is instance is communicating with
+     * @return the
+     */
+    Optional<String> getIzouServerURL();
 
     /**
      * Gets the Secure Storage object of Izou. {@link SecureStorageImpl} allows addOns to safely store data so that other

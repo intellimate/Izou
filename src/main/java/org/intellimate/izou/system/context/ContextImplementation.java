@@ -43,6 +43,7 @@ public class ContextImplementation implements Context {
     private final Files files;
     private final ExtendedLogger logger;
     private final ThreadPool threadPool;
+    private final String izouServerURL;
     private final Activators activators = new ActivatorsImpl();
     private final Output output = new OutputImpl();
     private final System system = new SystemImpl();
@@ -53,14 +54,15 @@ public class ContextImplementation implements Context {
      *
      * A context contains all the "global" or generally necessary information an addOn might need that it otherwise does
      * not have access too
-     *
-     * @param addOn the addOn for which to create a new context
+     *  @param addOn the addOn for which to create a new context
      * @param main instance of main
      * @param logLevel the logLevel to initialize the IzouLogger with
+     * @param izouServerURL the server-url or null
      */
-    public ContextImplementation(AddOnModel addOn, Main main, String logLevel) {
+    public ContextImplementation(AddOnModel addOn, Main main, String logLevel, String izouServerURL) {
         this.addOn = addOn;
         this.main = main;
+        this.izouServerURL = izouServerURL;
         this.files = new FilesImpl();
         this.threadPool = new ThreadPoolImpl();
 
@@ -158,6 +160,16 @@ public class ContextImplementation implements Context {
     @Override
     public AddOns getAddOns() {
         return addOns;
+    }
+
+    /**
+     * returns the URL of the server this is instance is communicating with
+     *
+     * @return the
+     */
+    @Override
+    public Optional<String> getIzouServerURL() {
+        return Optional.ofNullable(izouServerURL);
     }
 
     private class FilesImpl implements Files {
