@@ -6,6 +6,7 @@ import org.intellimate.izou.identification.AddOnInformationManager;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.SecurityFunctions;
 import org.intellimate.izou.security.storage.SecureStorageImpl;
+import org.intellimate.izou.server.CommunicationManager;
 import org.intellimate.izou.system.Context;
 import org.intellimate.izou.system.context.ContextImplementation;
 import org.intellimate.izou.util.AddonThreadPoolUser;
@@ -118,7 +119,8 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
     private void initAddOns(IdentifiableSet<AddOnModel> addOns) {
         List<CompletableFuture<Void>> futures = addOns.stream()
                 .map(addOn -> {
-                    Context context = new ContextImplementation(addOn, main, Level.DEBUG.name());
+                    String izouServerURL = getMain().getCommunicationManager().map(CommunicationManager::getIzouServerURL).orElse(null);
+                    Context context = new ContextImplementation(addOn, main, Level.DEBUG.name(), izouServerURL);
                     return submit(() -> addOn.initAddOn(context));
                 })
                 .collect(Collectors.toList());
