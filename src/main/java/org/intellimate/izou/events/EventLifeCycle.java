@@ -1,10 +1,13 @@
 package org.intellimate.izou.events;
 
+import ro.fortsoft.pf4j.AddonAccessible;
+
 /**
  * This enum contains the different stages in the lifecycle of the Event.
  * @author LeanderK
  * @version 1.0
  */
+@AddonAccessible
 public enum EventLifeCycle {
     /**
      * gets called while the EventDistributor started the processing.
