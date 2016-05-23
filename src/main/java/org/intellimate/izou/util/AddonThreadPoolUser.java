@@ -2,6 +2,7 @@ package org.intellimate.izou.util;
 
 import ro.fortsoft.pf4j.AddonAccessible;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -57,13 +58,14 @@ public interface AddonThreadPoolUser extends MainProvider {
      */
     default <U, V extends Future<U>> List<V> timeOut(Collection<? extends V> futures,
                                                    int milliseconds) throws InterruptedException {
-        //Timeout
-        int start = 0;
+        // Track timeout
+        Instant start = Instant.now();
+        long duration = 0;
         boolean notFinished = true;
-        while ( (start < milliseconds) && notFinished) {
+        while ( (duration < milliseconds) && notFinished) {
             notFinished = futures.stream()
                     .anyMatch(future -> !future.isDone());
-            start = start + 10;
+            duration = Instant.now().toEpochMilli() - start.toEpochMilli();
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {

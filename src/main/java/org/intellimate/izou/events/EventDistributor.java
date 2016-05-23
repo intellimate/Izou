@@ -345,6 +345,7 @@ public class EventDistributor extends IzouModule implements Runnable, AddonThrea
         }
         debug("EventFired: " + event.toString() + " from " + event.getSource().getID());
         submit(() -> event.lifecycleCallback(EventLifeCycle.START));
+
         if (checkEventsControllers(event)) {
             submit(() -> event.lifecycleCallback(EventLifeCycle.APPROVED));
             submit(() -> event.lifecycleCallback(EventLifeCycle.RESOURCE));
