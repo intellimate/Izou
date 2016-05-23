@@ -95,6 +95,7 @@ public class ServerRequests extends IzouModule {
                 org.intellimate.server.proto.HttpRequest httpRequest = org.intellimate.server.proto.HttpRequest.parseDelimitedFrom(inputStream);
                 if (httpRequest == null) {
                     loop = false;
+                    continue;
                 }
                 int bodySize = (int) httpRequest.getBodySize();
                 if (bodySize < httpRequest.getBodySize()) {

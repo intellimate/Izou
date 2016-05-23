@@ -35,7 +35,7 @@ public class RequestHandler extends IzouModule {
     Response handleRequests(Request request) {
         if (request.getUrl().startsWith("/apps")) {
             return handleApps(request);
-        } else if (request.getUrl().equals("/stats")) {
+        } else if (request.getUrl().equals("/status")) {
             return handleStatus(request);
         }
         return sendStringMessage("illegal request, no suitable route found", 404);

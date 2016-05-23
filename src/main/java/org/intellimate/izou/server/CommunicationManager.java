@@ -87,6 +87,9 @@ public class CommunicationManager extends IzouModule {
         List<AddOn> toInstall = new ArrayList<>();
         List<AddOn> toDelete = new ArrayList<>();
         for (AddOn addOn : selected) {
+            if (addOn.name.isEmpty()) {
+                continue;
+            }
             if (installedNames.contains(addOn.name)) {
                 installed.add(addOn);
             } else {
