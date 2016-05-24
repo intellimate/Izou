@@ -14,6 +14,7 @@ import org.intellimate.server.proto.*;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,9 +24,11 @@ import java.util.stream.Collectors;
  * @author LeanderK
  * @version 1.0
  */
-public class RequestHandler extends IzouModule {
+//TODO status add update errored?
+class RequestHandler extends IzouModule {
     private static JsonFormat.Printer PRINTER = JsonFormat.printer().includingDefaultValueFields();
     private static JsonFormat.Parser PARSER = JsonFormat.parser();
+    private CompletableFuture<Void> updateFuture;
 
 
     public RequestHandler(Main main) {
@@ -67,7 +70,12 @@ public class RequestHandler extends IzouModule {
         int minor = Integer.parseInt(matcher.group("minor"));
         int patch = Integer.parseInt(matcher.group("patch"));
         AddOn addOn = new AddOn(id, major+"."+minor+"."+patch, -1);
-        getMain().getAddOnInformationManager().getInstalledAddOns().add(addOn);
+        try {
+            getMain().getAddOnInformationManager().addAddonToInstalledList(addOn);
+        } catch (IOException e) {
+            error("unable to write to config file", e);
+            return sendStringMessage("izou was unable to update the config file", 404);
+        }
         File file = new File(getMain().getFileSystemManager().getNewLibLocation(), id+"-"+major+"."+minor+"."+patch+".zip");
         if (!file.exists()) {
             try {
@@ -91,12 +99,6 @@ public class RequestHandler extends IzouModule {
             } catch (IOException e) {
                 error("unable to cloe FileOutput", e);
             }
-        }
-        try {
-            getMain().getAddOnInformationManager().addAddonToInstalledList(addOn);
-        } catch (IOException e) {
-            error("unable to write to config file", e);
-            return sendStringMessage("the file was added but izou was unable to update the config file", 404);
         }
         return sendStringMessage("OK", 201);
     }
@@ -127,6 +129,8 @@ public class RequestHandler extends IzouModule {
                     .build();
             return messageHelper(appList, 200);
         } else if (request.getMethod().equals("PATCH")) {
+            return sendStringMessage("not implemented yet", 404);
+            /*
             String json = request.getDataAsUTF8();
             IzouAppList.Builder builder = IzouAppList.newBuilder();
             try {
@@ -185,7 +189,7 @@ public class RequestHandler extends IzouModule {
             } catch (IOException e) {
                 error("unable to write to config file", e);
                 return sendStringMessage("unable to write to config file", 404);
-            }
+            }*/
         }
         return sendStringMessage("illegal request, no suitable route found", 404);
     }
@@ -230,8 +234,12 @@ public class RequestHandler extends IzouModule {
 
     private Response handleStatus(Request request) {
         if (request.getMethod().equals("GET")) {
-            IzouInstanceStatus status = IzouInstanceStatus.newBuilder().setStatus(IzouInstanceStatus.Status.RUNNING).build();
-            return messageHelper(status, 200);
+            IzouInstanceStatus.Status status = IzouInstanceStatus.Status.RUNNING;
+            if (getMain().getCommunicationManager().isPresent() && getMain().getCommunicationManager().get().isSynchronizing()) {
+                status = IzouInstanceStatus.Status.UPDATING;
+            }
+            IzouInstanceStatus statusMessage = IzouInstanceStatus.newBuilder().setStatus(status).build();
+            return messageHelper(statusMessage, 200);
         } else if (request.getMethod().equals("PATCH")) {
             String json = request.getDataAsUTF8();
             IzouInstanceStatus.Builder builder = IzouInstanceStatus.newBuilder();
@@ -243,15 +251,34 @@ public class RequestHandler extends IzouModule {
             }
             //TODO implement (beware of concurrency!)
             switch (builder.getStatus()) {
-                case UNRECOGNIZED: return sendStringMessage("unable to parse message", 400);
-                case UPDATING: return sendStringMessage("not implemented yet", 500);
-                case RESTARTING: return sendStringMessage("not implemented yet", 500);
+                case UNRECOGNIZED: return sendStringMessage("unable to parse message", 404);
+                case UPDATING: return handleUpdateRequest();
+                case RESTARTING: return sendStringMessage("not implemented yet", 404);
                 case RUNNING: IzouInstanceStatus status = IzouInstanceStatus.newBuilder().setStatus(IzouInstanceStatus.Status.RUNNING).build();
                     return messageHelper(status, 200);
-                case DISABLED: return sendStringMessage("not implemented yet", 500);
+                case DISABLED: return sendStringMessage("not implemented yet", 404);
             }
         }
         return sendStringMessage("illegal request, no suitable route found", 404);
+    }
+
+    private Response handleUpdateRequest() {
+        Optional<CommunicationManager> communicationManager = getMain().getCommunicationManager();
+        if (communicationManager.isPresent()) {
+            IzouInstanceStatus statusMessage = IzouInstanceStatus.newBuilder().setStatus(IzouInstanceStatus.Status.UPDATING).build();
+            if (!communicationManager.get().isSynchronizing()) {
+                updateFuture = CompletableFuture.runAsync(() -> {
+                    try {
+                        communicationManager.get().checkForUpdates();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            }
+            return messageHelper(statusMessage, 200);
+        } else {
+            return sendStringMessage("communication to server is not active", 404);
+        }
     }
 
     private Response messageHelper(Message message, int status) {

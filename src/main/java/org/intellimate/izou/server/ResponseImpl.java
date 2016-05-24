@@ -9,7 +9,7 @@ import java.util.Map;
  * @author LeanderK
  * @version 1.0
  */
-public class ResponseImpl implements Response {
+class ResponseImpl implements Response {
     private final int status;
     private final Map<String, List<String>> headers;
     private final String contentType;

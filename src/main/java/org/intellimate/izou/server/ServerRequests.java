@@ -22,6 +22,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.nio.charset.Charset;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -32,6 +35,7 @@ import java.util.stream.Collectors;
  * @version 1.0
  */
 //TODO update the update method (respect toInstall/toDelete etc)
+//TODO: os via System.getProperty("os.arch") (arm on arm)
 public class ServerRequests extends IzouModule {
     private final String izouServerURL;
     private final String izouSocketUrl;
@@ -39,6 +43,7 @@ public class ServerRequests extends IzouModule {
     private final Client client;
     private final boolean ssl;
     private String authToken = null;
+    private LocalDateTime authTokenCreation = null;
     private final JsonFormat.Parser parser = JsonFormat.parser();
     private boolean run = true;
 
@@ -55,10 +60,7 @@ public class ServerRequests extends IzouModule {
         this.client = Client.create();
     }
 
-    public void init() throws ClientHandlerException {
-        if (authToken != null) {
-            return;
-        }
+    void refreshToken() throws ClientHandlerException {
         WebResource.Builder builder = client.resource(izouServerURL + "/authentication/refreshIzou/izou")
                 .header("Authorization", "Bearer " + refreshToken)
                 .accept("application/json");
@@ -70,6 +72,7 @@ public class ServerRequests extends IzouModule {
         } else {
             authToken = post.getEntity(String.class);
         }
+        authTokenCreation = LocalDateTime.now();
     }
 
     public void requests(Function<Request, Response> callback) {
@@ -86,7 +89,7 @@ public class ServerRequests extends IzouModule {
             InputStream inputStream = socket.getInputStream();
             OutputStream outputStream = socket.getOutputStream();
             SocketConnection.newBuilder()
-                    .setToken(authToken)
+                    .setToken(getAuthToken())
                     .build()
                     .writeDelimitedTo(outputStream);
             outputStream.flush();
@@ -107,7 +110,14 @@ public class ServerRequests extends IzouModule {
                     ByteStreams.readFully(inputStream, bytes);
                 }
                 RequestImpl request = new RequestImpl(httpRequest, bytes);
-                Response response = callback.apply(request);
+                Response response;
+                try {
+                    response = callback.apply(request);
+                } catch (Exception e) {
+                    error("unable to apply callback", e);
+                    String returnText = "an internal error occured: " + e.getMessage();
+                    response = new ResponseImpl(500, new HashMap<>(), "text", returnText.getBytes(Charset.forName("UTF-8")));
+                }
                 org.intellimate.server.proto.HttpResponse.newBuilder()
                         .setContentType(response.getContentType())
                         .setStatus(response.getStatus())
@@ -162,7 +172,7 @@ public class ServerRequests extends IzouModule {
         assureInit();
 
         WebResource.Builder builder = client.resource(url)
-                .header("Authorization", "Bearer " + authToken);
+                .header("Authorization", "Bearer " + getAuthToken());
 
         ClientResponse response = builder.get(ClientResponse.class);
 
@@ -226,7 +236,7 @@ public class ServerRequests extends IzouModule {
         assureInit();
 
         WebResource.Builder builder = client.resource(izouServerURL + "/authentication/refreshIzou/izou")
-                .header("Authorization", "Bearer " + authToken)
+                .header("Authorization", "Bearer " + getAuthToken())
                 .accept("application/json");
 
         return builder.get(ClientResponse.class);
@@ -236,5 +246,15 @@ public class ServerRequests extends IzouModule {
         if (authToken == null) {
             throw new IllegalStateException("not initialized");
         }
+    }
+
+    private String getAuthToken() {
+        if (authToken == null) {
+            refreshToken();
+        }
+        if (LocalDateTime.now().plusDays(1).isAfter(authTokenCreation)) {
+            refreshToken();
+        }
+        return authToken;
     }
 }

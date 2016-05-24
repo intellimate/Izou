@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
  * @version 1.0
  */
 @AddonAccessible
-public class RequestImpl implements Request {
+class RequestImpl implements Request {
     private final HttpRequest request;
     private final Map<String, List<String>> params;
     private final byte[] data;
