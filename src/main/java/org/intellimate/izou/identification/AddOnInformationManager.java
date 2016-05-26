@@ -302,6 +302,17 @@ public class AddOnInformationManager extends IzouModule {
     }
 
     /**
+     * adds an addon to selected List
+     * @param addOn the addon to Add
+     */
+    public void addAddonToSelectedList(AddOn addOn) throws IOException {
+        ArrayList<AddOn> addOns = new ArrayList<>(selectedAddOns);
+        addOns.add(addOn);
+        synchro(addOns);
+        this.selectedAddOns = addOns;
+    }
+
+    /**
      * returns all the AddOns that are downloaded but not yet active
      * @return a list of Addons
      */
