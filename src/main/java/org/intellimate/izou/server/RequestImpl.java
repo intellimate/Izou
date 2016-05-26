@@ -3,6 +3,7 @@ package org.intellimate.izou.server;
 import org.intellimate.server.proto.HttpRequest;
 import ro.fortsoft.pf4j.AddonAccessible;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -15,16 +16,18 @@ import java.util.stream.Collectors;
 class RequestImpl implements Request {
     private final HttpRequest request;
     private final Map<String, List<String>> params;
-    private final byte[] data;
+    private final InputStream in;
+    private final int contentLenght;
 
-    public RequestImpl(HttpRequest request, byte[] data) {
+    public RequestImpl(HttpRequest request, InputStream in, int contentLenght) {
         this.request = request;
         params = request.getParamsList().stream()
                 .collect(Collectors.toMap(HttpRequest.Param::getKey, param -> (List<String>) param.getValueList(), (l1, l2) -> {
                     l1.addAll(l2);
                     return l1;
                 }));
-        this.data = data;
+        this.in = in;
+        this.contentLenght = contentLenght;
     }
 
     public HttpRequest getRequest() {
@@ -52,7 +55,12 @@ class RequestImpl implements Request {
     }
 
     @Override
-    public byte[] getData() {
-        return data;
+    public int getContentLength() {
+        return contentLenght;
+    }
+
+    @Override
+    public InputStream getData() {
+        return in;
     }
 }

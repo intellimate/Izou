@@ -1,8 +1,13 @@
 package org.intellimate.izou.server;
 
+import com.google.common.io.ByteStreams;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author LeanderK
@@ -13,8 +18,14 @@ public interface Request {
     Map<String, List<String>> getParams();
     String getMethod();
     String getContentType();
-    byte[] getData();
-    default String getDataAsUTF8() {
-        return new String(getData(), Charset.forName("UTF-8"));
+    int getContentLength();
+    InputStream getData();
+    default Optional<String> getDataAsUTF8String() throws IOException {
+        byte[] bytes = ByteStreams.toByteArray(getData());
+        if (bytes.length != getContentLength()) {
+            return Optional.empty();
+        } else {
+            return Optional.of(new String(bytes, Charset.forName("UTF-8")));
+        }
     }
 }

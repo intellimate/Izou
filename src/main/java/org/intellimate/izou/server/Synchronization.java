@@ -31,6 +31,7 @@ import java.util.stream.StreamSupport;
  * @version 1.0
  */
 //TODO what about entries where there is no id given and that are not installed?
+//TODO handle mutiple addons with different id's
 @SuppressWarnings("Duplicates")
 class Synchronization extends IzouModule {
     private final AddOnInformationManager infoManager;
@@ -69,6 +70,9 @@ class Synchronization extends IzouModule {
             }
         }
         List<AddOn> toInstallScheduled = loadScheduledApps(selected).get(false);
+        if (toInstallScheduled == null) {
+            toInstallScheduled = new ArrayList<>();
+        }
         Set<String> scheduled = toInstallScheduled.stream()
                 .map(addOn -> addOn.name)
                 .collect(Collectors.toSet());

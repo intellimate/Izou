@@ -101,15 +101,8 @@ public class ServerRequests extends IzouModule {
                     continue;
                 }
                 int bodySize = (int) httpRequest.getBodySize();
-                if (bodySize < httpRequest.getBodySize()) {
-                    throw new IllegalStateException("Body to large, requested body: "+httpRequest.getBodySize());
-                }
-                byte[] bytes = new byte[0];
-                if (bodySize > 0) {
-                    bytes = new byte[bodySize];
-                    ByteStreams.readFully(inputStream, bytes);
-                }
-                RequestImpl request = new RequestImpl(httpRequest, bytes);
+                InputStream stream = ByteStreams.limit(socket.getInputStream(), bodySize);
+                RequestImpl request = new RequestImpl(httpRequest, stream, bodySize);
                 Response response;
                 try {
                     response = callback.apply(request);
@@ -117,6 +110,10 @@ public class ServerRequests extends IzouModule {
                     error("unable to apply callback", e);
                     String returnText = "an internal error occured: " + e.getMessage();
                     response = new ResponseImpl(500, new HashMap<>(), "text", returnText.getBytes(Charset.forName("UTF-8")));
+                }
+                int result = stream.read();
+                while (result != -1) {
+                    result = stream.read();
                 }
                 org.intellimate.server.proto.HttpResponse.newBuilder()
                         .setContentType(response.getContentType())

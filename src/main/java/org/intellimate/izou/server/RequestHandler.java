@@ -1,18 +1,19 @@
 package org.intellimate.izou.server;
 
-import com.google.protobuf.ByteString;
+import com.google.common.io.ByteStreams;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.config.AddOn;
-import org.intellimate.izou.identification.AddOnInformationManager;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.util.IzouModule;
 import org.intellimate.server.proto.*;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
@@ -46,17 +47,19 @@ class RequestHandler extends IzouModule {
 
     private Response handleApps(Request request) {
         String url = request.getUrl();
+        Pattern serverIDPattern = Pattern.compile("/apps/(?<id>\\d+)(/.*)?");
+        Matcher serverIDMatcher = serverIDPattern.matcher(url);
         if (url.equals("/apps")) {
             return handleListApps(request);
-        } else if (url.matches("/apps/\\d+(/.*)?")) {
-            Pattern pattern = Pattern.compile("/apps/(?<id>\\d+)(/.*)?");
-            return handleAddonHTTPRequest(request, url, pattern, id -> getMain().getAddOnInformationManager().getAddOn(Integer.parseInt(id)));
+        } else if (serverIDMatcher.matches()) {
+            return handleAddonHTTPRequest(request, serverIDMatcher, id -> getMain().getAddOnInformationManager().getAddOn(Integer.parseInt(id)));
         } else if (url.matches("/apps/dev/\\w+(/.*)?")) {
+            Pattern pattern = Pattern.compile("/apps/dev/(?<id>\\w+)(/.*)?");
+            Matcher devIDMatcher = pattern.matcher(url);
             if (request.getMethod().equals("POST") && url.matches("/apps/dev/\\w+/\\d+/\\d+/\\d+")) {
                 return saveLocalApp(request, url);
-            } else if (request.getMethod().equals("GET")) {
-                Pattern pattern = Pattern.compile("/apps/dev/(?<id>\\w+)(/.*)?");
-                return handleAddonHTTPRequest(request, url, pattern, id -> getMain().getAddOnInformationManager().getAddOn(Integer.parseInt(id)));
+            } else if (request.getMethod().equals("GET") && devIDMatcher.matches()) {
+                return handleAddonHTTPRequest(request, devIDMatcher, id -> getMain().getAddOnInformationManager().getAddOn(id));
             }
         }
         return sendStringMessage("illegal request, no suitable route found", 404);
@@ -70,12 +73,33 @@ class RequestHandler extends IzouModule {
         int minor = Integer.parseInt(matcher.group("minor"));
         int patch = Integer.parseInt(matcher.group("patch"));
         AddOn addOn = new AddOn(id, major+"."+minor+"."+patch, -1);
-        try {
-            getMain().getAddOnInformationManager().addAddonToInstalledList(addOn);
-        } catch (IOException e) {
-            error("unable to write to config file", e);
-            return sendStringMessage("izou was unable to update the config file", 404);
+        if (getMain().getAddOnInformationManager().getSelectedAddOns().stream()
+                .noneMatch(selected -> selected.equalsIgnoringVersion(addOn))) {
+            try {
+                getMain().getAddOnInformationManager().addAddonToSelectedList(addOn);
+            } catch (IOException e) {
+                error("unable to write to config file", e);
+                return sendStringMessage("izou was unable to update the config file", 404);
+            }
         }
+        getMain().getAddOnInformationManager().addToDownloaded(addOn);
+
+        try {
+            Files.list(getMain().getFileSystemManager().getNewLibLocation().toPath())
+                    .map(Path::toFile)
+                    .filter(file -> file.getName().matches("\\w+-[\\.\\d]+\\.zip"))
+                    .filter(file -> file.getName().startsWith(addOn.name))
+                    .forEach(file -> {
+                        boolean deleted = file.delete();
+                        if (!deleted) {
+                            error("unable to delete downloaded version: " + file.toString());
+                        }
+                    });
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         File file = new File(getMain().getFileSystemManager().getNewLibLocation(), id+"-"+major+"."+minor+"."+patch+".zip");
         if (!file.exists()) {
             try {
@@ -88,7 +112,13 @@ class RequestHandler extends IzouModule {
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(file);
-            fos.write(request.getData());
+            long copied = ByteStreams.copy(request.getData(), fos);
+            if (copied != request.getContentLength()) {
+                file.delete();
+                getMain().getAddOnInformationManager().getAddOnsToInstallDownloaded()
+                        .removeIf(downloaded -> downloaded.name.equals(addOn.name) && downloaded.getVersion().equals(addOn.getVersion()));
+                return sendStringMessage("Body size does not equal advertised size", 400);
+            }
         } catch (IOException e) {
             error("unable to write to file", e);
             return sendStringMessage("an internal error occured", 500);
@@ -210,8 +240,7 @@ class RequestHandler extends IzouModule {
         return new AddOn(app.getName(), null, id);
     }
 
-    private Response handleAddonHTTPRequest(Request httpRequest, String url, Pattern pattern, Function<String, Optional<AddOnModel>> getAddon) {
-        Matcher matcher = pattern.matcher(url);
+    private Response handleAddonHTTPRequest(Request httpRequest, Matcher matcher, Function<String, Optional<AddOnModel>> getAddon) {
         String id = matcher.group("id");
         Boolean authorized = httpRequest.getParams().entrySet().stream()
                 .filter(param -> param.getKey().equals("app"))
@@ -241,7 +270,17 @@ class RequestHandler extends IzouModule {
             IzouInstanceStatus statusMessage = IzouInstanceStatus.newBuilder().setStatus(status).build();
             return messageHelper(statusMessage, 200);
         } else if (request.getMethod().equals("PATCH")) {
-            String json = request.getDataAsUTF8();
+            String json = null;
+            try {
+                Optional<String> stringOpt = request.getDataAsUTF8String();
+                if (stringOpt.isPresent()) {
+                    json = stringOpt.get();
+                } else {
+                   return sendStringMessage("body-size does not match advertised size", 400);
+                }
+            } catch (IOException e) {
+                return sendStringMessage("unable to read body", 500);
+            }
             IzouInstanceStatus.Builder builder = IzouInstanceStatus.newBuilder();
             try {
                 PARSER.merge(json, builder);
@@ -291,6 +330,6 @@ class RequestHandler extends IzouModule {
     }
 
     private Response sendStringMessage(String message, int status) {
-        return new ResponseImpl(status, new HashMap<>(), "text", message.getBytes(Charset.forName("UTF-8")));
+        return new ResponseImpl(status, new HashMap<>(), "text/plain", message.getBytes(Charset.forName("UTF-8")));
     }
 }
