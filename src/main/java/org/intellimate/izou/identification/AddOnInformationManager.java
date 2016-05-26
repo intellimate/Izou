@@ -24,6 +24,7 @@ import static org.bouncycastle.asn1.x500.style.RFC4519Style.l;
  * The AddOnInformationManager is a class that gives access to all kinds of information about registered addOns in Izou.
  * For example, any addOn can find out the names of all other registered addOns through this class.
  */
+//TODO just selected AND move other list to a file-manager that is based on the content of the directories (ignore caching for now)
 public class AddOnInformationManager extends IzouModule {
     private final IdentifiableSet<AddOnInformation> addOnInformations;
     private final IdentifiableSet<AddOnModel> addOns;
