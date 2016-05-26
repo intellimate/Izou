@@ -8,7 +8,17 @@ public interface SocketConnectionResponseOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>optional int32 id = 1;</code>
+   * <code>optional string route = 1;</code>
+   */
+  java.lang.String getRoute();
+  /**
+   * <code>optional string route = 1;</code>
+   */
+  com.google.protobuf.ByteString
+      getRouteBytes();
+
+  /**
+   * <code>optional int32 id = 2;</code>
    */
   int getId();
 }

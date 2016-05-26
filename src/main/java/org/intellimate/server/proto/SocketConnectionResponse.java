@@ -15,6 +15,7 @@ public  final class SocketConnectionResponse extends
     super(builder);
   }
   private SocketConnectionResponse() {
+    route_ = "";
     id_ = 0;
   }
 
@@ -43,7 +44,13 @@ public  final class SocketConnectionResponse extends
             }
             break;
           }
-          case 8: {
+          case 10: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            route_ = s;
+            break;
+          }
+          case 16: {
 
             id_ = input.readInt32();
             break;
@@ -71,10 +78,44 @@ public  final class SocketConnectionResponse extends
             org.intellimate.server.proto.SocketConnectionResponse.class, org.intellimate.server.proto.SocketConnectionResponse.Builder.class);
   }
 
-  public static final int ID_FIELD_NUMBER = 1;
+  public static final int ROUTE_FIELD_NUMBER = 1;
+  private volatile java.lang.Object route_;
+  /**
+   * <code>optional string route = 1;</code>
+   */
+  public java.lang.String getRoute() {
+    java.lang.Object ref = route_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      route_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>optional string route = 1;</code>
+   */
+  public com.google.protobuf.ByteString
+      getRouteBytes() {
+    java.lang.Object ref = route_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      route_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int ID_FIELD_NUMBER = 2;
   private int id_;
   /**
-   * <code>optional int32 id = 1;</code>
+   * <code>optional int32 id = 2;</code>
    */
   public int getId() {
     return id_;
@@ -92,8 +133,11 @@ public  final class SocketConnectionResponse extends
 
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
+    if (!getRouteBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessage.writeString(output, 1, route_);
+    }
     if (id_ != 0) {
-      output.writeInt32(1, id_);
+      output.writeInt32(2, id_);
     }
   }
 
@@ -102,9 +146,12 @@ public  final class SocketConnectionResponse extends
     if (size != -1) return size;
 
     size = 0;
+    if (!getRouteBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessage.computeStringSize(1, route_);
+    }
     if (id_ != 0) {
       size += com.google.protobuf.CodedOutputStream
-        .computeInt32Size(1, id_);
+        .computeInt32Size(2, id_);
     }
     memoizedSize = size;
     return size;
@@ -223,6 +270,8 @@ public  final class SocketConnectionResponse extends
     }
     public Builder clear() {
       super.clear();
+      route_ = "";
+
       id_ = 0;
 
       return this;
@@ -247,6 +296,7 @@ public  final class SocketConnectionResponse extends
 
     public org.intellimate.server.proto.SocketConnectionResponse buildPartial() {
       org.intellimate.server.proto.SocketConnectionResponse result = new org.intellimate.server.proto.SocketConnectionResponse(this);
+      result.route_ = route_;
       result.id_ = id_;
       onBuilt();
       return result;
@@ -263,6 +313,10 @@ public  final class SocketConnectionResponse extends
 
     public Builder mergeFrom(org.intellimate.server.proto.SocketConnectionResponse other) {
       if (other == org.intellimate.server.proto.SocketConnectionResponse.getDefaultInstance()) return this;
+      if (!other.getRoute().isEmpty()) {
+        route_ = other.route_;
+        onChanged();
+      }
       if (other.getId() != 0) {
         setId(other.getId());
       }
@@ -292,15 +346,84 @@ public  final class SocketConnectionResponse extends
       return this;
     }
 
+    private java.lang.Object route_ = "";
+    /**
+     * <code>optional string route = 1;</code>
+     */
+    public java.lang.String getRoute() {
+      java.lang.Object ref = route_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        route_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>optional string route = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getRouteBytes() {
+      java.lang.Object ref = route_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        route_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>optional string route = 1;</code>
+     */
+    public Builder setRoute(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      route_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>optional string route = 1;</code>
+     */
+    public Builder clearRoute() {
+      
+      route_ = getDefaultInstance().getRoute();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>optional string route = 1;</code>
+     */
+    public Builder setRouteBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      route_ = value;
+      onChanged();
+      return this;
+    }
+
     private int id_ ;
     /**
-     * <code>optional int32 id = 1;</code>
+     * <code>optional int32 id = 2;</code>
      */
     public int getId() {
       return id_;
     }
     /**
-     * <code>optional int32 id = 1;</code>
+     * <code>optional int32 id = 2;</code>
      */
     public Builder setId(int value) {
       
@@ -309,7 +432,7 @@ public  final class SocketConnectionResponse extends
       return this;
     }
     /**
-     * <code>optional int32 id = 1;</code>
+     * <code>optional int32 id = 2;</code>
      */
     public Builder clearId() {
       

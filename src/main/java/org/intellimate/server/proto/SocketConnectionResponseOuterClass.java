@@ -23,9 +23,9 @@ public final class SocketConnectionResponseOuterClass {
   static {
     java.lang.String[] descriptorData = {
       "\n0server-protobuf/socket_connection_resp" +
-      "onse.proto\022\013intellimate\"&\n\030SocketConnect" +
-      "ionResponse\022\n\n\002id\030\001 \001(\005B \n\034org.intellima" +
-      "te.server.protoP\001b\006proto3"
+      "onse.proto\022\013intellimate\"5\n\030SocketConnect" +
+      "ionResponse\022\r\n\005route\030\001 \001(\t\022\n\n\002id\030\002 \001(\005B " +
+      "\n\034org.intellimate.server.protoP\001b\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -44,7 +44,7 @@ public final class SocketConnectionResponseOuterClass {
     internal_static_intellimate_SocketConnectionResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_intellimate_SocketConnectionResponse_descriptor,
-        new java.lang.String[] { "Id", });
+        new java.lang.String[] { "Route", "Id", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)
