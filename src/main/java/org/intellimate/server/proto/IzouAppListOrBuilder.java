@@ -102,4 +102,28 @@ public interface IzouAppListOrBuilder extends
    */
   org.intellimate.server.proto.AppOrBuilder getToInstallOrBuilder(
       int index);
+
+  /**
+   * <code>repeated .intellimate.App to_install_downloaded = 5;</code>
+   */
+  java.util.List<org.intellimate.server.proto.App> 
+      getToInstallDownloadedList();
+  /**
+   * <code>repeated .intellimate.App to_install_downloaded = 5;</code>
+   */
+  org.intellimate.server.proto.App getToInstallDownloaded(int index);
+  /**
+   * <code>repeated .intellimate.App to_install_downloaded = 5;</code>
+   */
+  int getToInstallDownloadedCount();
+  /**
+   * <code>repeated .intellimate.App to_install_downloaded = 5;</code>
+   */
+  java.util.List<? extends org.intellimate.server.proto.AppOrBuilder> 
+      getToInstallDownloadedOrBuilderList();
+  /**
+   * <code>repeated .intellimate.App to_install_downloaded = 5;</code>
+   */
+  org.intellimate.server.proto.AppOrBuilder getToInstallDownloadedOrBuilder(
+      int index);
 }

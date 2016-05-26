@@ -19,6 +19,7 @@ public  final class IzouAppList extends
     installed_ = java.util.Collections.emptyList();
     toDelete_ = java.util.Collections.emptyList();
     toInstall_ = java.util.Collections.emptyList();
+    toInstallDownloaded_ = java.util.Collections.emptyList();
   }
 
   @java.lang.Override
@@ -28,7 +29,8 @@ public  final class IzouAppList extends
   }
   private IzouAppList(
       com.google.protobuf.CodedInputStream input,
-      com.google.protobuf.ExtensionRegistryLite extensionRegistry) {
+      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+      throws com.google.protobuf.InvalidProtocolBufferException {
     this();
     int mutable_bitField0_ = 0;
     try {
@@ -77,14 +79,21 @@ public  final class IzouAppList extends
             toInstall_.add(input.readMessage(org.intellimate.server.proto.App.parser(), extensionRegistry));
             break;
           }
+          case 42: {
+            if (!((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+              toInstallDownloaded_ = new java.util.ArrayList<org.intellimate.server.proto.App>();
+              mutable_bitField0_ |= 0x00000010;
+            }
+            toInstallDownloaded_.add(input.readMessage(org.intellimate.server.proto.App.parser(), extensionRegistry));
+            break;
+          }
         }
       }
     } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-      throw new RuntimeException(e.setUnfinishedMessage(this));
+      throw e.setUnfinishedMessage(this);
     } catch (java.io.IOException e) {
-      throw new RuntimeException(
-          new com.google.protobuf.InvalidProtocolBufferException(
-              e.getMessage()).setUnfinishedMessage(this));
+      throw new com.google.protobuf.InvalidProtocolBufferException(
+          e).setUnfinishedMessage(this);
     } finally {
       if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
         selected_ = java.util.Collections.unmodifiableList(selected_);
@@ -97,6 +106,9 @@ public  final class IzouAppList extends
       }
       if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
         toInstall_ = java.util.Collections.unmodifiableList(toInstall_);
+      }
+      if (((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+        toInstallDownloaded_ = java.util.Collections.unmodifiableList(toInstallDownloaded_);
       }
       makeExtensionsImmutable();
     }
@@ -253,6 +265,41 @@ public  final class IzouAppList extends
     return toInstall_.get(index);
   }
 
+  public static final int TO_INSTALL_DOWNLOADED_FIELD_NUMBER = 5;
+  private java.util.List<org.intellimate.server.proto.App> toInstallDownloaded_;
+  /**
+   * <code>repeated .intellimate.App to_install_downloaded = 5;</code>
+   */
+  public java.util.List<org.intellimate.server.proto.App> getToInstallDownloadedList() {
+    return toInstallDownloaded_;
+  }
+  /**
+   * <code>repeated .intellimate.App to_install_downloaded = 5;</code>
+   */
+  public java.util.List<? extends org.intellimate.server.proto.AppOrBuilder> 
+      getToInstallDownloadedOrBuilderList() {
+    return toInstallDownloaded_;
+  }
+  /**
+   * <code>repeated .intellimate.App to_install_downloaded = 5;</code>
+   */
+  public int getToInstallDownloadedCount() {
+    return toInstallDownloaded_.size();
+  }
+  /**
+   * <code>repeated .intellimate.App to_install_downloaded = 5;</code>
+   */
+  public org.intellimate.server.proto.App getToInstallDownloaded(int index) {
+    return toInstallDownloaded_.get(index);
+  }
+  /**
+   * <code>repeated .intellimate.App to_install_downloaded = 5;</code>
+   */
+  public org.intellimate.server.proto.AppOrBuilder getToInstallDownloadedOrBuilder(
+      int index) {
+    return toInstallDownloaded_.get(index);
+  }
+
   private byte memoizedIsInitialized = -1;
   public final boolean isInitialized() {
     byte isInitialized = memoizedIsInitialized;
@@ -277,6 +324,9 @@ public  final class IzouAppList extends
     for (int i = 0; i < toInstall_.size(); i++) {
       output.writeMessage(4, toInstall_.get(i));
     }
+    for (int i = 0; i < toInstallDownloaded_.size(); i++) {
+      output.writeMessage(5, toInstallDownloaded_.get(i));
+    }
   }
 
   public int getSerializedSize() {
@@ -299,6 +349,10 @@ public  final class IzouAppList extends
     for (int i = 0; i < toInstall_.size(); i++) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(4, toInstall_.get(i));
+    }
+    for (int i = 0; i < toInstallDownloaded_.size(); i++) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(5, toInstallDownloaded_.get(i));
     }
     memoizedSize = size;
     return size;
@@ -328,34 +382,40 @@ public  final class IzouAppList extends
   }
   public static org.intellimate.server.proto.IzouAppList parseFrom(java.io.InputStream input)
       throws java.io.IOException {
-    return PARSER.parseFrom(input);
+    return com.google.protobuf.GeneratedMessage
+        .parseWithIOException(PARSER, input);
   }
   public static org.intellimate.server.proto.IzouAppList parseFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
-    return PARSER.parseFrom(input, extensionRegistry);
+    return com.google.protobuf.GeneratedMessage
+        .parseWithIOException(PARSER, input, extensionRegistry);
   }
   public static org.intellimate.server.proto.IzouAppList parseDelimitedFrom(java.io.InputStream input)
       throws java.io.IOException {
-    return PARSER.parseDelimitedFrom(input);
+    return com.google.protobuf.GeneratedMessage
+        .parseDelimitedWithIOException(PARSER, input);
   }
   public static org.intellimate.server.proto.IzouAppList parseDelimitedFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
-    return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    return com.google.protobuf.GeneratedMessage
+        .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
   }
   public static org.intellimate.server.proto.IzouAppList parseFrom(
       com.google.protobuf.CodedInputStream input)
       throws java.io.IOException {
-    return PARSER.parseFrom(input);
+    return com.google.protobuf.GeneratedMessage
+        .parseWithIOException(PARSER, input);
   }
   public static org.intellimate.server.proto.IzouAppList parseFrom(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
-    return PARSER.parseFrom(input, extensionRegistry);
+    return com.google.protobuf.GeneratedMessage
+        .parseWithIOException(PARSER, input, extensionRegistry);
   }
 
   public Builder newBuilderForType() { return newBuilder(); }
@@ -411,6 +471,7 @@ public  final class IzouAppList extends
         getInstalledFieldBuilder();
         getToDeleteFieldBuilder();
         getToInstallFieldBuilder();
+        getToInstallDownloadedFieldBuilder();
       }
     }
     public Builder clear() {
@@ -438,6 +499,12 @@ public  final class IzouAppList extends
         bitField0_ = (bitField0_ & ~0x00000008);
       } else {
         toInstallBuilder_.clear();
+      }
+      if (toInstallDownloadedBuilder_ == null) {
+        toInstallDownloaded_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000010);
+      } else {
+        toInstallDownloadedBuilder_.clear();
       }
       return this;
     }
@@ -497,6 +564,15 @@ public  final class IzouAppList extends
         result.toInstall_ = toInstall_;
       } else {
         result.toInstall_ = toInstallBuilder_.build();
+      }
+      if (toInstallDownloadedBuilder_ == null) {
+        if (((bitField0_ & 0x00000010) == 0x00000010)) {
+          toInstallDownloaded_ = java.util.Collections.unmodifiableList(toInstallDownloaded_);
+          bitField0_ = (bitField0_ & ~0x00000010);
+        }
+        result.toInstallDownloaded_ = toInstallDownloaded_;
+      } else {
+        result.toInstallDownloaded_ = toInstallDownloadedBuilder_.build();
       }
       onBuilt();
       return result;
@@ -617,6 +693,32 @@ public  final class IzouAppList extends
           }
         }
       }
+      if (toInstallDownloadedBuilder_ == null) {
+        if (!other.toInstallDownloaded_.isEmpty()) {
+          if (toInstallDownloaded_.isEmpty()) {
+            toInstallDownloaded_ = other.toInstallDownloaded_;
+            bitField0_ = (bitField0_ & ~0x00000010);
+          } else {
+            ensureToInstallDownloadedIsMutable();
+            toInstallDownloaded_.addAll(other.toInstallDownloaded_);
+          }
+          onChanged();
+        }
+      } else {
+        if (!other.toInstallDownloaded_.isEmpty()) {
+          if (toInstallDownloadedBuilder_.isEmpty()) {
+            toInstallDownloadedBuilder_.dispose();
+            toInstallDownloadedBuilder_ = null;
+            toInstallDownloaded_ = other.toInstallDownloaded_;
+            bitField0_ = (bitField0_ & ~0x00000010);
+            toInstallDownloadedBuilder_ = 
+              com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                 getToInstallDownloadedFieldBuilder() : null;
+          } else {
+            toInstallDownloadedBuilder_.addAllMessages(other.toInstallDownloaded_);
+          }
+        }
+      }
       onChanged();
       return this;
     }
@@ -634,7 +736,7 @@ public  final class IzouAppList extends
         parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         parsedMessage = (org.intellimate.server.proto.IzouAppList) e.getUnfinishedMessage();
-        throw e;
+        throw e.unwrapIOException();
       } finally {
         if (parsedMessage != null) {
           mergeFrom(parsedMessage);
@@ -1603,6 +1705,246 @@ public  final class IzouAppList extends
       }
       return toInstallBuilder_;
     }
+
+    private java.util.List<org.intellimate.server.proto.App> toInstallDownloaded_ =
+      java.util.Collections.emptyList();
+    private void ensureToInstallDownloadedIsMutable() {
+      if (!((bitField0_ & 0x00000010) == 0x00000010)) {
+        toInstallDownloaded_ = new java.util.ArrayList<org.intellimate.server.proto.App>(toInstallDownloaded_);
+        bitField0_ |= 0x00000010;
+       }
+    }
+
+    private com.google.protobuf.RepeatedFieldBuilder<
+        org.intellimate.server.proto.App, org.intellimate.server.proto.App.Builder, org.intellimate.server.proto.AppOrBuilder> toInstallDownloadedBuilder_;
+
+    /**
+     * <code>repeated .intellimate.App to_install_downloaded = 5;</code>
+     */
+    public java.util.List<org.intellimate.server.proto.App> getToInstallDownloadedList() {
+      if (toInstallDownloadedBuilder_ == null) {
+        return java.util.Collections.unmodifiableList(toInstallDownloaded_);
+      } else {
+        return toInstallDownloadedBuilder_.getMessageList();
+      }
+    }
+    /**
+     * <code>repeated .intellimate.App to_install_downloaded = 5;</code>
+     */
+    public int getToInstallDownloadedCount() {
+      if (toInstallDownloadedBuilder_ == null) {
+        return toInstallDownloaded_.size();
+      } else {
+        return toInstallDownloadedBuilder_.getCount();
+      }
+    }
+    /**
+     * <code>repeated .intellimate.App to_install_downloaded = 5;</code>
+     */
+    public org.intellimate.server.proto.App getToInstallDownloaded(int index) {
+      if (toInstallDownloadedBuilder_ == null) {
+        return toInstallDownloaded_.get(index);
+      } else {
+        return toInstallDownloadedBuilder_.getMessage(index);
+      }
+    }
+    /**
+     * <code>repeated .intellimate.App to_install_downloaded = 5;</code>
+     */
+    public Builder setToInstallDownloaded(
+        int index, org.intellimate.server.proto.App value) {
+      if (toInstallDownloadedBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureToInstallDownloadedIsMutable();
+        toInstallDownloaded_.set(index, value);
+        onChanged();
+      } else {
+        toInstallDownloadedBuilder_.setMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .intellimate.App to_install_downloaded = 5;</code>
+     */
+    public Builder setToInstallDownloaded(
+        int index, org.intellimate.server.proto.App.Builder builderForValue) {
+      if (toInstallDownloadedBuilder_ == null) {
+        ensureToInstallDownloadedIsMutable();
+        toInstallDownloaded_.set(index, builderForValue.build());
+        onChanged();
+      } else {
+        toInstallDownloadedBuilder_.setMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .intellimate.App to_install_downloaded = 5;</code>
+     */
+    public Builder addToInstallDownloaded(org.intellimate.server.proto.App value) {
+      if (toInstallDownloadedBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureToInstallDownloadedIsMutable();
+        toInstallDownloaded_.add(value);
+        onChanged();
+      } else {
+        toInstallDownloadedBuilder_.addMessage(value);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .intellimate.App to_install_downloaded = 5;</code>
+     */
+    public Builder addToInstallDownloaded(
+        int index, org.intellimate.server.proto.App value) {
+      if (toInstallDownloadedBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureToInstallDownloadedIsMutable();
+        toInstallDownloaded_.add(index, value);
+        onChanged();
+      } else {
+        toInstallDownloadedBuilder_.addMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .intellimate.App to_install_downloaded = 5;</code>
+     */
+    public Builder addToInstallDownloaded(
+        org.intellimate.server.proto.App.Builder builderForValue) {
+      if (toInstallDownloadedBuilder_ == null) {
+        ensureToInstallDownloadedIsMutable();
+        toInstallDownloaded_.add(builderForValue.build());
+        onChanged();
+      } else {
+        toInstallDownloadedBuilder_.addMessage(builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .intellimate.App to_install_downloaded = 5;</code>
+     */
+    public Builder addToInstallDownloaded(
+        int index, org.intellimate.server.proto.App.Builder builderForValue) {
+      if (toInstallDownloadedBuilder_ == null) {
+        ensureToInstallDownloadedIsMutable();
+        toInstallDownloaded_.add(index, builderForValue.build());
+        onChanged();
+      } else {
+        toInstallDownloadedBuilder_.addMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .intellimate.App to_install_downloaded = 5;</code>
+     */
+    public Builder addAllToInstallDownloaded(
+        java.lang.Iterable<? extends org.intellimate.server.proto.App> values) {
+      if (toInstallDownloadedBuilder_ == null) {
+        ensureToInstallDownloadedIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, toInstallDownloaded_);
+        onChanged();
+      } else {
+        toInstallDownloadedBuilder_.addAllMessages(values);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .intellimate.App to_install_downloaded = 5;</code>
+     */
+    public Builder clearToInstallDownloaded() {
+      if (toInstallDownloadedBuilder_ == null) {
+        toInstallDownloaded_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000010);
+        onChanged();
+      } else {
+        toInstallDownloadedBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .intellimate.App to_install_downloaded = 5;</code>
+     */
+    public Builder removeToInstallDownloaded(int index) {
+      if (toInstallDownloadedBuilder_ == null) {
+        ensureToInstallDownloadedIsMutable();
+        toInstallDownloaded_.remove(index);
+        onChanged();
+      } else {
+        toInstallDownloadedBuilder_.remove(index);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .intellimate.App to_install_downloaded = 5;</code>
+     */
+    public org.intellimate.server.proto.App.Builder getToInstallDownloadedBuilder(
+        int index) {
+      return getToInstallDownloadedFieldBuilder().getBuilder(index);
+    }
+    /**
+     * <code>repeated .intellimate.App to_install_downloaded = 5;</code>
+     */
+    public org.intellimate.server.proto.AppOrBuilder getToInstallDownloadedOrBuilder(
+        int index) {
+      if (toInstallDownloadedBuilder_ == null) {
+        return toInstallDownloaded_.get(index);  } else {
+        return toInstallDownloadedBuilder_.getMessageOrBuilder(index);
+      }
+    }
+    /**
+     * <code>repeated .intellimate.App to_install_downloaded = 5;</code>
+     */
+    public java.util.List<? extends org.intellimate.server.proto.AppOrBuilder> 
+         getToInstallDownloadedOrBuilderList() {
+      if (toInstallDownloadedBuilder_ != null) {
+        return toInstallDownloadedBuilder_.getMessageOrBuilderList();
+      } else {
+        return java.util.Collections.unmodifiableList(toInstallDownloaded_);
+      }
+    }
+    /**
+     * <code>repeated .intellimate.App to_install_downloaded = 5;</code>
+     */
+    public org.intellimate.server.proto.App.Builder addToInstallDownloadedBuilder() {
+      return getToInstallDownloadedFieldBuilder().addBuilder(
+          org.intellimate.server.proto.App.getDefaultInstance());
+    }
+    /**
+     * <code>repeated .intellimate.App to_install_downloaded = 5;</code>
+     */
+    public org.intellimate.server.proto.App.Builder addToInstallDownloadedBuilder(
+        int index) {
+      return getToInstallDownloadedFieldBuilder().addBuilder(
+          index, org.intellimate.server.proto.App.getDefaultInstance());
+    }
+    /**
+     * <code>repeated .intellimate.App to_install_downloaded = 5;</code>
+     */
+    public java.util.List<org.intellimate.server.proto.App.Builder> 
+         getToInstallDownloadedBuilderList() {
+      return getToInstallDownloadedFieldBuilder().getBuilderList();
+    }
+    private com.google.protobuf.RepeatedFieldBuilder<
+        org.intellimate.server.proto.App, org.intellimate.server.proto.App.Builder, org.intellimate.server.proto.AppOrBuilder> 
+        getToInstallDownloadedFieldBuilder() {
+      if (toInstallDownloadedBuilder_ == null) {
+        toInstallDownloadedBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+            org.intellimate.server.proto.App, org.intellimate.server.proto.App.Builder, org.intellimate.server.proto.AppOrBuilder>(
+                toInstallDownloaded_,
+                ((bitField0_ & 0x00000010) == 0x00000010),
+                getParentForChildren(),
+                isClean());
+        toInstallDownloaded_ = null;
+      }
+      return toInstallDownloadedBuilder_;
+    }
     public final Builder setUnknownFields(
         final com.google.protobuf.UnknownFieldSet unknownFields) {
       return this;
@@ -1633,16 +1975,7 @@ public  final class IzouAppList extends
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      try {
         return new IzouAppList(input, extensionRegistry);
-      } catch (RuntimeException e) {
-        if (e.getCause() instanceof
-            com.google.protobuf.InvalidProtocolBufferException) {
-          throw (com.google.protobuf.InvalidProtocolBufferException)
-              e.getCause();
-        }
-        throw e;
-      }
     }
   };
 

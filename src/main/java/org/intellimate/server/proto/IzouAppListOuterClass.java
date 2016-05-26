@@ -8,9 +8,9 @@ public final class IzouAppListOuterClass {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
-  static com.google.protobuf.Descriptors.Descriptor
+  static final com.google.protobuf.Descriptors.Descriptor
     internal_static_intellimate_IzouAppList_descriptor;
-  static
+  static final 
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_intellimate_IzouAppList_fieldAccessorTable;
 
@@ -18,18 +18,19 @@ public final class IzouAppListOuterClass {
       getDescriptor() {
     return descriptor;
   }
-  private static com.google.protobuf.Descriptors.FileDescriptor
+  private static  com.google.protobuf.Descriptors.FileDescriptor
       descriptor;
   static {
     java.lang.String[] descriptorData = {
       "\n#server-protobuf/izou_app_list.proto\022\013i" +
-      "ntellimate\032\031server-protobuf/app.proto\"\241\001" +
+      "ntellimate\032\031server-protobuf/app.proto\"\322\001" +
       "\n\013IzouAppList\022\"\n\010selected\030\001 \003(\0132\020.intell" +
       "imate.App\022#\n\tinstalled\030\002 \003(\0132\020.intellima" +
       "te.App\022#\n\tto_delete\030\003 \003(\0132\020.intellimate." +
       "App\022$\n\nto_install\030\004 \003(\0132\020.intellimate.Ap" +
-      "pB \n\034org.intellimate.server.protoP\001b\006pro" +
-      "to3"
+      "p\022/\n\025to_install_downloaded\030\005 \003(\0132\020.intel" +
+      "limate.AppB \n\034org.intellimate.server.pro" +
+      "toP\001b\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -49,7 +50,7 @@ public final class IzouAppListOuterClass {
     internal_static_intellimate_IzouAppList_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_intellimate_IzouAppList_descriptor,
-        new java.lang.String[] { "Selected", "Installed", "ToDelete", "ToInstall", });
+        new java.lang.String[] { "Selected", "Installed", "ToDelete", "ToInstall", "ToInstallDownloaded", });
     org.intellimate.server.proto.AppOuterClass.getDescriptor();
   }
 

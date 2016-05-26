@@ -31,7 +31,8 @@ public  final class App extends
   }
   private App(
       com.google.protobuf.CodedInputStream input,
-      com.google.protobuf.ExtensionRegistryLite extensionRegistry) {
+      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+      throws com.google.protobuf.InvalidProtocolBufferException {
     this();
     int mutable_bitField0_ = 0;
     try {
@@ -96,11 +97,10 @@ public  final class App extends
         }
       }
     } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-      throw new RuntimeException(e.setUnfinishedMessage(this));
+      throw e.setUnfinishedMessage(this);
     } catch (java.io.IOException e) {
-      throw new RuntimeException(
-          new com.google.protobuf.InvalidProtocolBufferException(
-              e.getMessage()).setUnfinishedMessage(this));
+      throw new com.google.protobuf.InvalidProtocolBufferException(
+          e).setUnfinishedMessage(this);
     } finally {
       if (((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
         tags_ = tags_.getUnmodifiableView();
@@ -148,35 +148,40 @@ public  final class App extends
         getPlatformBytes();
 
     /**
-     * <code>optional string download_link = 3;</code>
+     * <code>optional bool active = 4;</code>
+     */
+    boolean getActive();
+
+    /**
+     * <code>optional string download_link = 5;</code>
      */
     java.lang.String getDownloadLink();
     /**
-     * <code>optional string download_link = 3;</code>
+     * <code>optional string download_link = 5;</code>
      */
     com.google.protobuf.ByteString
         getDownloadLinkBytes();
 
     /**
-     * <code>repeated .intellimate.App dependencies = 4;</code>
+     * <code>repeated .intellimate.App dependencies = 6;</code>
      */
     java.util.List<org.intellimate.server.proto.App> 
         getDependenciesList();
     /**
-     * <code>repeated .intellimate.App dependencies = 4;</code>
+     * <code>repeated .intellimate.App dependencies = 6;</code>
      */
     org.intellimate.server.proto.App getDependencies(int index);
     /**
-     * <code>repeated .intellimate.App dependencies = 4;</code>
+     * <code>repeated .intellimate.App dependencies = 6;</code>
      */
     int getDependenciesCount();
     /**
-     * <code>repeated .intellimate.App dependencies = 4;</code>
+     * <code>repeated .intellimate.App dependencies = 6;</code>
      */
     java.util.List<? extends org.intellimate.server.proto.AppOrBuilder> 
         getDependenciesOrBuilderList();
     /**
-     * <code>repeated .intellimate.App dependencies = 4;</code>
+     * <code>repeated .intellimate.App dependencies = 6;</code>
      */
     org.intellimate.server.proto.AppOrBuilder getDependenciesOrBuilder(
         int index);
@@ -195,6 +200,7 @@ public  final class App extends
     private AppVersion() {
       version_ = "";
       platform_ = "";
+      active_ = false;
       downloadLink_ = "";
       dependencies_ = java.util.Collections.emptyList();
     }
@@ -206,7 +212,8 @@ public  final class App extends
     }
     private AppVersion(
         com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry) {
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
       this();
       int mutable_bitField0_ = 0;
       try {
@@ -235,16 +242,21 @@ public  final class App extends
               platform_ = s;
               break;
             }
-            case 26: {
+            case 32: {
+
+              active_ = input.readBool();
+              break;
+            }
+            case 42: {
               java.lang.String s = input.readStringRequireUtf8();
 
               downloadLink_ = s;
               break;
             }
-            case 34: {
-              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+            case 50: {
+              if (!((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
                 dependencies_ = new java.util.ArrayList<org.intellimate.server.proto.App>();
-                mutable_bitField0_ |= 0x00000008;
+                mutable_bitField0_ |= 0x00000010;
               }
               dependencies_.add(input.readMessage(org.intellimate.server.proto.App.parser(), extensionRegistry));
               break;
@@ -252,13 +264,12 @@ public  final class App extends
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw new RuntimeException(e.setUnfinishedMessage(this));
+        throw e.setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
-        throw new RuntimeException(
-            new com.google.protobuf.InvalidProtocolBufferException(
-                e.getMessage()).setUnfinishedMessage(this));
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+        if (((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
           dependencies_ = java.util.Collections.unmodifiableList(dependencies_);
         }
         makeExtensionsImmutable();
@@ -345,10 +356,19 @@ public  final class App extends
       }
     }
 
-    public static final int DOWNLOAD_LINK_FIELD_NUMBER = 3;
+    public static final int ACTIVE_FIELD_NUMBER = 4;
+    private boolean active_;
+    /**
+     * <code>optional bool active = 4;</code>
+     */
+    public boolean getActive() {
+      return active_;
+    }
+
+    public static final int DOWNLOAD_LINK_FIELD_NUMBER = 5;
     private volatile java.lang.Object downloadLink_;
     /**
-     * <code>optional string download_link = 3;</code>
+     * <code>optional string download_link = 5;</code>
      */
     public java.lang.String getDownloadLink() {
       java.lang.Object ref = downloadLink_;
@@ -363,7 +383,7 @@ public  final class App extends
       }
     }
     /**
-     * <code>optional string download_link = 3;</code>
+     * <code>optional string download_link = 5;</code>
      */
     public com.google.protobuf.ByteString
         getDownloadLinkBytes() {
@@ -379,35 +399,35 @@ public  final class App extends
       }
     }
 
-    public static final int DEPENDENCIES_FIELD_NUMBER = 4;
+    public static final int DEPENDENCIES_FIELD_NUMBER = 6;
     private java.util.List<org.intellimate.server.proto.App> dependencies_;
     /**
-     * <code>repeated .intellimate.App dependencies = 4;</code>
+     * <code>repeated .intellimate.App dependencies = 6;</code>
      */
     public java.util.List<org.intellimate.server.proto.App> getDependenciesList() {
       return dependencies_;
     }
     /**
-     * <code>repeated .intellimate.App dependencies = 4;</code>
+     * <code>repeated .intellimate.App dependencies = 6;</code>
      */
     public java.util.List<? extends org.intellimate.server.proto.AppOrBuilder> 
         getDependenciesOrBuilderList() {
       return dependencies_;
     }
     /**
-     * <code>repeated .intellimate.App dependencies = 4;</code>
+     * <code>repeated .intellimate.App dependencies = 6;</code>
      */
     public int getDependenciesCount() {
       return dependencies_.size();
     }
     /**
-     * <code>repeated .intellimate.App dependencies = 4;</code>
+     * <code>repeated .intellimate.App dependencies = 6;</code>
      */
     public org.intellimate.server.proto.App getDependencies(int index) {
       return dependencies_.get(index);
     }
     /**
-     * <code>repeated .intellimate.App dependencies = 4;</code>
+     * <code>repeated .intellimate.App dependencies = 6;</code>
      */
     public org.intellimate.server.proto.AppOrBuilder getDependenciesOrBuilder(
         int index) {
@@ -432,11 +452,14 @@ public  final class App extends
       if (!getPlatformBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessage.writeString(output, 2, platform_);
       }
+      if (active_ != false) {
+        output.writeBool(4, active_);
+      }
       if (!getDownloadLinkBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessage.writeString(output, 3, downloadLink_);
+        com.google.protobuf.GeneratedMessage.writeString(output, 5, downloadLink_);
       }
       for (int i = 0; i < dependencies_.size(); i++) {
-        output.writeMessage(4, dependencies_.get(i));
+        output.writeMessage(6, dependencies_.get(i));
       }
     }
 
@@ -451,12 +474,16 @@ public  final class App extends
       if (!getPlatformBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessage.computeStringSize(2, platform_);
       }
+      if (active_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(4, active_);
+      }
       if (!getDownloadLinkBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessage.computeStringSize(3, downloadLink_);
+        size += com.google.protobuf.GeneratedMessage.computeStringSize(5, downloadLink_);
       }
       for (int i = 0; i < dependencies_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(4, dependencies_.get(i));
+          .computeMessageSize(6, dependencies_.get(i));
       }
       memoizedSize = size;
       return size;
@@ -486,34 +513,40 @@ public  final class App extends
     }
     public static org.intellimate.server.proto.App.AppVersion parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
     }
     public static org.intellimate.server.proto.App.AppVersion parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
     }
     public static org.intellimate.server.proto.App.AppVersion parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input);
     }
     public static org.intellimate.server.proto.App.AppVersion parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
     public static org.intellimate.server.proto.App.AppVersion parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
     }
     public static org.intellimate.server.proto.App.AppVersion parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
     public Builder newBuilderForType() { return newBuilder(); }
@@ -574,11 +607,13 @@ public  final class App extends
 
         platform_ = "";
 
+        active_ = false;
+
         downloadLink_ = "";
 
         if (dependenciesBuilder_ == null) {
           dependencies_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000008);
+          bitField0_ = (bitField0_ & ~0x00000010);
         } else {
           dependenciesBuilder_.clear();
         }
@@ -608,11 +643,12 @@ public  final class App extends
         int to_bitField0_ = 0;
         result.version_ = version_;
         result.platform_ = platform_;
+        result.active_ = active_;
         result.downloadLink_ = downloadLink_;
         if (dependenciesBuilder_ == null) {
-          if (((bitField0_ & 0x00000008) == 0x00000008)) {
+          if (((bitField0_ & 0x00000010) == 0x00000010)) {
             dependencies_ = java.util.Collections.unmodifiableList(dependencies_);
-            bitField0_ = (bitField0_ & ~0x00000008);
+            bitField0_ = (bitField0_ & ~0x00000010);
           }
           result.dependencies_ = dependencies_;
         } else {
@@ -642,6 +678,9 @@ public  final class App extends
           platform_ = other.platform_;
           onChanged();
         }
+        if (other.getActive() != false) {
+          setActive(other.getActive());
+        }
         if (!other.getDownloadLink().isEmpty()) {
           downloadLink_ = other.downloadLink_;
           onChanged();
@@ -650,7 +689,7 @@ public  final class App extends
           if (!other.dependencies_.isEmpty()) {
             if (dependencies_.isEmpty()) {
               dependencies_ = other.dependencies_;
-              bitField0_ = (bitField0_ & ~0x00000008);
+              bitField0_ = (bitField0_ & ~0x00000010);
             } else {
               ensureDependenciesIsMutable();
               dependencies_.addAll(other.dependencies_);
@@ -663,7 +702,7 @@ public  final class App extends
               dependenciesBuilder_.dispose();
               dependenciesBuilder_ = null;
               dependencies_ = other.dependencies_;
-              bitField0_ = (bitField0_ & ~0x00000008);
+              bitField0_ = (bitField0_ & ~0x00000010);
               dependenciesBuilder_ = 
                 com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
                    getDependenciesFieldBuilder() : null;
@@ -689,7 +728,7 @@ public  final class App extends
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (org.intellimate.server.proto.App.AppVersion) e.getUnfinishedMessage();
-          throw e;
+          throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
             mergeFrom(parsedMessage);
@@ -837,9 +876,35 @@ public  final class App extends
         return this;
       }
 
+      private boolean active_ ;
+      /**
+       * <code>optional bool active = 4;</code>
+       */
+      public boolean getActive() {
+        return active_;
+      }
+      /**
+       * <code>optional bool active = 4;</code>
+       */
+      public Builder setActive(boolean value) {
+        
+        active_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bool active = 4;</code>
+       */
+      public Builder clearActive() {
+        
+        active_ = false;
+        onChanged();
+        return this;
+      }
+
       private java.lang.Object downloadLink_ = "";
       /**
-       * <code>optional string download_link = 3;</code>
+       * <code>optional string download_link = 5;</code>
        */
       public java.lang.String getDownloadLink() {
         java.lang.Object ref = downloadLink_;
@@ -854,7 +919,7 @@ public  final class App extends
         }
       }
       /**
-       * <code>optional string download_link = 3;</code>
+       * <code>optional string download_link = 5;</code>
        */
       public com.google.protobuf.ByteString
           getDownloadLinkBytes() {
@@ -870,7 +935,7 @@ public  final class App extends
         }
       }
       /**
-       * <code>optional string download_link = 3;</code>
+       * <code>optional string download_link = 5;</code>
        */
       public Builder setDownloadLink(
           java.lang.String value) {
@@ -883,7 +948,7 @@ public  final class App extends
         return this;
       }
       /**
-       * <code>optional string download_link = 3;</code>
+       * <code>optional string download_link = 5;</code>
        */
       public Builder clearDownloadLink() {
         
@@ -892,7 +957,7 @@ public  final class App extends
         return this;
       }
       /**
-       * <code>optional string download_link = 3;</code>
+       * <code>optional string download_link = 5;</code>
        */
       public Builder setDownloadLinkBytes(
           com.google.protobuf.ByteString value) {
@@ -909,9 +974,9 @@ public  final class App extends
       private java.util.List<org.intellimate.server.proto.App> dependencies_ =
         java.util.Collections.emptyList();
       private void ensureDependenciesIsMutable() {
-        if (!((bitField0_ & 0x00000008) == 0x00000008)) {
+        if (!((bitField0_ & 0x00000010) == 0x00000010)) {
           dependencies_ = new java.util.ArrayList<org.intellimate.server.proto.App>(dependencies_);
-          bitField0_ |= 0x00000008;
+          bitField0_ |= 0x00000010;
          }
       }
 
@@ -919,7 +984,7 @@ public  final class App extends
           org.intellimate.server.proto.App, org.intellimate.server.proto.App.Builder, org.intellimate.server.proto.AppOrBuilder> dependenciesBuilder_;
 
       /**
-       * <code>repeated .intellimate.App dependencies = 4;</code>
+       * <code>repeated .intellimate.App dependencies = 6;</code>
        */
       public java.util.List<org.intellimate.server.proto.App> getDependenciesList() {
         if (dependenciesBuilder_ == null) {
@@ -929,7 +994,7 @@ public  final class App extends
         }
       }
       /**
-       * <code>repeated .intellimate.App dependencies = 4;</code>
+       * <code>repeated .intellimate.App dependencies = 6;</code>
        */
       public int getDependenciesCount() {
         if (dependenciesBuilder_ == null) {
@@ -939,7 +1004,7 @@ public  final class App extends
         }
       }
       /**
-       * <code>repeated .intellimate.App dependencies = 4;</code>
+       * <code>repeated .intellimate.App dependencies = 6;</code>
        */
       public org.intellimate.server.proto.App getDependencies(int index) {
         if (dependenciesBuilder_ == null) {
@@ -949,7 +1014,7 @@ public  final class App extends
         }
       }
       /**
-       * <code>repeated .intellimate.App dependencies = 4;</code>
+       * <code>repeated .intellimate.App dependencies = 6;</code>
        */
       public Builder setDependencies(
           int index, org.intellimate.server.proto.App value) {
@@ -966,7 +1031,7 @@ public  final class App extends
         return this;
       }
       /**
-       * <code>repeated .intellimate.App dependencies = 4;</code>
+       * <code>repeated .intellimate.App dependencies = 6;</code>
        */
       public Builder setDependencies(
           int index, org.intellimate.server.proto.App.Builder builderForValue) {
@@ -980,7 +1045,7 @@ public  final class App extends
         return this;
       }
       /**
-       * <code>repeated .intellimate.App dependencies = 4;</code>
+       * <code>repeated .intellimate.App dependencies = 6;</code>
        */
       public Builder addDependencies(org.intellimate.server.proto.App value) {
         if (dependenciesBuilder_ == null) {
@@ -996,7 +1061,7 @@ public  final class App extends
         return this;
       }
       /**
-       * <code>repeated .intellimate.App dependencies = 4;</code>
+       * <code>repeated .intellimate.App dependencies = 6;</code>
        */
       public Builder addDependencies(
           int index, org.intellimate.server.proto.App value) {
@@ -1013,7 +1078,7 @@ public  final class App extends
         return this;
       }
       /**
-       * <code>repeated .intellimate.App dependencies = 4;</code>
+       * <code>repeated .intellimate.App dependencies = 6;</code>
        */
       public Builder addDependencies(
           org.intellimate.server.proto.App.Builder builderForValue) {
@@ -1027,7 +1092,7 @@ public  final class App extends
         return this;
       }
       /**
-       * <code>repeated .intellimate.App dependencies = 4;</code>
+       * <code>repeated .intellimate.App dependencies = 6;</code>
        */
       public Builder addDependencies(
           int index, org.intellimate.server.proto.App.Builder builderForValue) {
@@ -1041,7 +1106,7 @@ public  final class App extends
         return this;
       }
       /**
-       * <code>repeated .intellimate.App dependencies = 4;</code>
+       * <code>repeated .intellimate.App dependencies = 6;</code>
        */
       public Builder addAllDependencies(
           java.lang.Iterable<? extends org.intellimate.server.proto.App> values) {
@@ -1056,12 +1121,12 @@ public  final class App extends
         return this;
       }
       /**
-       * <code>repeated .intellimate.App dependencies = 4;</code>
+       * <code>repeated .intellimate.App dependencies = 6;</code>
        */
       public Builder clearDependencies() {
         if (dependenciesBuilder_ == null) {
           dependencies_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000008);
+          bitField0_ = (bitField0_ & ~0x00000010);
           onChanged();
         } else {
           dependenciesBuilder_.clear();
@@ -1069,7 +1134,7 @@ public  final class App extends
         return this;
       }
       /**
-       * <code>repeated .intellimate.App dependencies = 4;</code>
+       * <code>repeated .intellimate.App dependencies = 6;</code>
        */
       public Builder removeDependencies(int index) {
         if (dependenciesBuilder_ == null) {
@@ -1082,14 +1147,14 @@ public  final class App extends
         return this;
       }
       /**
-       * <code>repeated .intellimate.App dependencies = 4;</code>
+       * <code>repeated .intellimate.App dependencies = 6;</code>
        */
       public org.intellimate.server.proto.App.Builder getDependenciesBuilder(
           int index) {
         return getDependenciesFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .intellimate.App dependencies = 4;</code>
+       * <code>repeated .intellimate.App dependencies = 6;</code>
        */
       public org.intellimate.server.proto.AppOrBuilder getDependenciesOrBuilder(
           int index) {
@@ -1099,7 +1164,7 @@ public  final class App extends
         }
       }
       /**
-       * <code>repeated .intellimate.App dependencies = 4;</code>
+       * <code>repeated .intellimate.App dependencies = 6;</code>
        */
       public java.util.List<? extends org.intellimate.server.proto.AppOrBuilder> 
            getDependenciesOrBuilderList() {
@@ -1110,14 +1175,14 @@ public  final class App extends
         }
       }
       /**
-       * <code>repeated .intellimate.App dependencies = 4;</code>
+       * <code>repeated .intellimate.App dependencies = 6;</code>
        */
       public org.intellimate.server.proto.App.Builder addDependenciesBuilder() {
         return getDependenciesFieldBuilder().addBuilder(
             org.intellimate.server.proto.App.getDefaultInstance());
       }
       /**
-       * <code>repeated .intellimate.App dependencies = 4;</code>
+       * <code>repeated .intellimate.App dependencies = 6;</code>
        */
       public org.intellimate.server.proto.App.Builder addDependenciesBuilder(
           int index) {
@@ -1125,7 +1190,7 @@ public  final class App extends
             index, org.intellimate.server.proto.App.getDefaultInstance());
       }
       /**
-       * <code>repeated .intellimate.App dependencies = 4;</code>
+       * <code>repeated .intellimate.App dependencies = 6;</code>
        */
       public java.util.List<org.intellimate.server.proto.App.Builder> 
            getDependenciesBuilderList() {
@@ -1138,7 +1203,7 @@ public  final class App extends
           dependenciesBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
               org.intellimate.server.proto.App, org.intellimate.server.proto.App.Builder, org.intellimate.server.proto.AppOrBuilder>(
                   dependencies_,
-                  ((bitField0_ & 0x00000008) == 0x00000008),
+                  ((bitField0_ & 0x00000010) == 0x00000010),
                   getParentForChildren(),
                   isClean());
           dependencies_ = null;
@@ -1175,16 +1240,7 @@ public  final class App extends
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        try {
           return new AppVersion(input, extensionRegistry);
-        } catch (RuntimeException e) {
-          if (e.getCause() instanceof
-              com.google.protobuf.InvalidProtocolBufferException) {
-            throw (com.google.protobuf.InvalidProtocolBufferException)
-                e.getCause();
-          }
-          throw e;
-        }
       }
     };
 
@@ -1485,34 +1541,40 @@ public  final class App extends
   }
   public static org.intellimate.server.proto.App parseFrom(java.io.InputStream input)
       throws java.io.IOException {
-    return PARSER.parseFrom(input);
+    return com.google.protobuf.GeneratedMessage
+        .parseWithIOException(PARSER, input);
   }
   public static org.intellimate.server.proto.App parseFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
-    return PARSER.parseFrom(input, extensionRegistry);
+    return com.google.protobuf.GeneratedMessage
+        .parseWithIOException(PARSER, input, extensionRegistry);
   }
   public static org.intellimate.server.proto.App parseDelimitedFrom(java.io.InputStream input)
       throws java.io.IOException {
-    return PARSER.parseDelimitedFrom(input);
+    return com.google.protobuf.GeneratedMessage
+        .parseDelimitedWithIOException(PARSER, input);
   }
   public static org.intellimate.server.proto.App parseDelimitedFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
-    return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    return com.google.protobuf.GeneratedMessage
+        .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
   }
   public static org.intellimate.server.proto.App parseFrom(
       com.google.protobuf.CodedInputStream input)
       throws java.io.IOException {
-    return PARSER.parseFrom(input);
+    return com.google.protobuf.GeneratedMessage
+        .parseWithIOException(PARSER, input);
   }
   public static org.intellimate.server.proto.App parseFrom(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
-    return PARSER.parseFrom(input, extensionRegistry);
+    return com.google.protobuf.GeneratedMessage
+        .parseWithIOException(PARSER, input, extensionRegistry);
   }
 
   public Builder newBuilderForType() { return newBuilder(); }
@@ -1717,7 +1779,7 @@ public  final class App extends
         parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         parsedMessage = (org.intellimate.server.proto.App) e.getUnfinishedMessage();
-        throw e;
+        throw e.unwrapIOException();
       } finally {
         if (parsedMessage != null) {
           mergeFrom(parsedMessage);
@@ -2349,16 +2411,7 @@ public  final class App extends
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      try {
         return new App(input, extensionRegistry);
-      } catch (RuntimeException e) {
-        if (e.getCause() instanceof
-            com.google.protobuf.InvalidProtocolBufferException) {
-          throw (com.google.protobuf.InvalidProtocolBufferException)
-              e.getCause();
-        }
-        throw e;
-      }
     }
   };
 

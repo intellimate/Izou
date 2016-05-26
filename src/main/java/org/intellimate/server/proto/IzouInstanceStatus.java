@@ -25,7 +25,8 @@ public  final class IzouInstanceStatus extends
   }
   private IzouInstanceStatus(
       com.google.protobuf.CodedInputStream input,
-      com.google.protobuf.ExtensionRegistryLite extensionRegistry) {
+      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+      throws com.google.protobuf.InvalidProtocolBufferException {
     this();
     int mutable_bitField0_ = 0;
     try {
@@ -51,11 +52,10 @@ public  final class IzouInstanceStatus extends
         }
       }
     } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-      throw new RuntimeException(e.setUnfinishedMessage(this));
+      throw e.setUnfinishedMessage(this);
     } catch (java.io.IOException e) {
-      throw new RuntimeException(
-          new com.google.protobuf.InvalidProtocolBufferException(
-              e.getMessage()).setUnfinishedMessage(this));
+      throw new com.google.protobuf.InvalidProtocolBufferException(
+          e).setUnfinishedMessage(this);
     } finally {
       makeExtensionsImmutable();
     }
@@ -80,20 +80,20 @@ public  final class IzouInstanceStatus extends
     /**
      * <code>RUNNING = 0;</code>
      */
-    RUNNING(0, 0),
+    RUNNING(0),
     /**
      * <code>DISABLED = 1;</code>
      */
-    DISABLED(1, 1),
+    DISABLED(1),
     /**
      * <code>RESTARTING = 2;</code>
      */
-    RESTARTING(2, 2),
+    RESTARTING(2),
     /**
      * <code>UPDATING = 3;</code>
      */
-    UPDATING(3, 3),
-    UNRECOGNIZED(-1, -1),
+    UPDATING(3),
+    UNRECOGNIZED(-1),
     ;
 
     /**
@@ -115,14 +115,22 @@ public  final class IzouInstanceStatus extends
 
 
     public final int getNumber() {
-      if (index == -1) {
+      if (this == UNRECOGNIZED) {
         throw new java.lang.IllegalArgumentException(
             "Can't get the number of an unknown enum value.");
       }
       return value;
     }
 
+    /**
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
     public static Status valueOf(int value) {
+      return forNumber(value);
+    }
+
+    public static Status forNumber(int value) {
       switch (value) {
         case 0: return RUNNING;
         case 1: return DISABLED;
@@ -140,13 +148,13 @@ public  final class IzouInstanceStatus extends
         Status> internalValueMap =
           new com.google.protobuf.Internal.EnumLiteMap<Status>() {
             public Status findValueByNumber(int number) {
-              return Status.valueOf(number);
+              return Status.forNumber(number);
             }
           };
 
     public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
-      return getDescriptor().getValues().get(index);
+      return getDescriptor().getValues().get(ordinal());
     }
     public final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptorForType() {
@@ -171,11 +179,9 @@ public  final class IzouInstanceStatus extends
       return VALUES[desc.getIndex()];
     }
 
-    private final int index;
     private final int value;
 
-    private Status(int index, int value) {
-      this.index = index;
+    private Status(int value) {
       this.value = value;
     }
 
@@ -194,7 +200,7 @@ public  final class IzouInstanceStatus extends
    * <code>optional .intellimate.IzouInstanceStatus.Status status = 1;</code>
    */
   public org.intellimate.server.proto.IzouInstanceStatus.Status getStatus() {
-    org.intellimate.server.proto.IzouInstanceStatus.Status result = org.intellimate.server.proto.IzouInstanceStatus.Status.valueOf(status_);
+    org.intellimate.server.proto.IzouInstanceStatus.Status result = org.intellimate.server.proto.IzouInstanceStatus.Status.forNumber(status_);
     return result == null ? org.intellimate.server.proto.IzouInstanceStatus.Status.UNRECOGNIZED : result;
   }
 
@@ -252,34 +258,40 @@ public  final class IzouInstanceStatus extends
   }
   public static org.intellimate.server.proto.IzouInstanceStatus parseFrom(java.io.InputStream input)
       throws java.io.IOException {
-    return PARSER.parseFrom(input);
+    return com.google.protobuf.GeneratedMessage
+        .parseWithIOException(PARSER, input);
   }
   public static org.intellimate.server.proto.IzouInstanceStatus parseFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
-    return PARSER.parseFrom(input, extensionRegistry);
+    return com.google.protobuf.GeneratedMessage
+        .parseWithIOException(PARSER, input, extensionRegistry);
   }
   public static org.intellimate.server.proto.IzouInstanceStatus parseDelimitedFrom(java.io.InputStream input)
       throws java.io.IOException {
-    return PARSER.parseDelimitedFrom(input);
+    return com.google.protobuf.GeneratedMessage
+        .parseDelimitedWithIOException(PARSER, input);
   }
   public static org.intellimate.server.proto.IzouInstanceStatus parseDelimitedFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
-    return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    return com.google.protobuf.GeneratedMessage
+        .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
   }
   public static org.intellimate.server.proto.IzouInstanceStatus parseFrom(
       com.google.protobuf.CodedInputStream input)
       throws java.io.IOException {
-    return PARSER.parseFrom(input);
+    return com.google.protobuf.GeneratedMessage
+        .parseWithIOException(PARSER, input);
   }
   public static org.intellimate.server.proto.IzouInstanceStatus parseFrom(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
-    return PARSER.parseFrom(input, extensionRegistry);
+    return com.google.protobuf.GeneratedMessage
+        .parseWithIOException(PARSER, input, extensionRegistry);
   }
 
   public Builder newBuilderForType() { return newBuilder(); }
@@ -395,7 +407,7 @@ public  final class IzouInstanceStatus extends
         parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         parsedMessage = (org.intellimate.server.proto.IzouInstanceStatus) e.getUnfinishedMessage();
-        throw e;
+        throw e.unwrapIOException();
       } finally {
         if (parsedMessage != null) {
           mergeFrom(parsedMessage);
@@ -423,7 +435,7 @@ public  final class IzouInstanceStatus extends
      * <code>optional .intellimate.IzouInstanceStatus.Status status = 1;</code>
      */
     public org.intellimate.server.proto.IzouInstanceStatus.Status getStatus() {
-      org.intellimate.server.proto.IzouInstanceStatus.Status result = org.intellimate.server.proto.IzouInstanceStatus.Status.valueOf(status_);
+      org.intellimate.server.proto.IzouInstanceStatus.Status result = org.intellimate.server.proto.IzouInstanceStatus.Status.forNumber(status_);
       return result == null ? org.intellimate.server.proto.IzouInstanceStatus.Status.UNRECOGNIZED : result;
     }
     /**
@@ -477,16 +489,7 @@ public  final class IzouInstanceStatus extends
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      try {
         return new IzouInstanceStatus(input, extensionRegistry);
-      } catch (RuntimeException e) {
-        if (e.getCause() instanceof
-            com.google.protobuf.InvalidProtocolBufferException) {
-          throw (com.google.protobuf.InvalidProtocolBufferException)
-              e.getCause();
-        }
-        throw e;
-      }
     }
   };
 
