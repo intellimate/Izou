@@ -1,3 +1,6 @@
 #the token used to identify the izou instance, please visit the website to get the token
-token: insertHere
+token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJJWk9VIiwic2lkIjoiMSIsInJlZnJlc2hJem91Ijp0cnVlfQ.0K2RDPucqoihA0_jY41m4VbfKPHWFH-nFfvEXwklQ2A
 #TODO platform (also connect to apps query)
+url: localhost:4567
+urlSocket: localhost
+ssl: false
