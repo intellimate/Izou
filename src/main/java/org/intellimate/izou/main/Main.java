@@ -9,6 +9,7 @@ import org.intellimate.izou.addon.AddOnManager;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.config.AddOn;
 import org.intellimate.izou.config.Config;
+import org.intellimate.izou.config.InternalConfig;
 import org.intellimate.izou.config.Version;
 import org.intellimate.izou.events.EventDistributor;
 import org.intellimate.izou.events.LocalEventManager;
@@ -28,6 +29,7 @@ import org.intellimate.izou.system.javafx.JavaFXInitializer;
 import org.intellimate.izou.system.logger.IzouLogger;
 import org.intellimate.izou.system.sound.SoundManager;
 import org.intellimate.izou.threadpool.ThreadPoolManager;
+import org.intellimate.server.proto.IzouInstanceStatus;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -68,6 +70,7 @@ public class Main {
     private final Logger fileLogger = LogManager.getLogger(this.getClass());
     private FileSystemManager fileSystemManager;
     private CommunicationManager communicationManager;
+    private IzouInstanceStatus.Status state = IzouInstanceStatus.Status.RUNNING;
 
     static {
         SSLCertificateHelper.init();
@@ -140,12 +143,20 @@ public class Main {
 
         setUpJavaFX(javaFX);
 
-        fileLogger.debug("Done initializing.");
-        fileLogger.debug("Adding addons..");
-
         // Starting security manager
         systemMail = initMail();
         securityManager = startSecurity(systemMail);
+
+        this.communicationManager = initCommunication(config, addonsConfig, disableLibFolder, disabledUpdate);
+
+        if (!state.equals(IzouInstanceStatus.Status.DISABLED)) {
+            startAddOns(addOns, disableLibFolder);
+        }
+    }
+
+    public void startAddOns(List<AddOnModel> addOns, boolean disableLibFolder) {
+        fileLogger.debug("Done initializing.");
+        fileLogger.debug("Adding addons..");
 
         if (addOns != null && !disableLibFolder) {
             fileLogger.debug("adding addons from the parameter without registering");
@@ -158,8 +169,6 @@ public class Main {
             fileLogger.debug("retrieving addons & registering them");
             addOnManager.retrieveAndRegisterAddOns();
         }
-
-        this.communicationManager = initCommunication(config, addonsConfig, disableLibFolder, disabledUpdate);
     }
 
     public static void main(String[] args) {
@@ -168,10 +177,14 @@ public class Main {
             System.out.println("izou config is not existing, path: "+config.getAbsolutePath());
             System.exit(-1);
         }
-        File addonsConfig = new File("./addons.yml");
+        File addonsConfig = new File("./internal.yml");
         if (!config.exists()) {
-            System.out.println("addons config is not existing, path: "+config.getAbsolutePath());
-            System.exit(-1);
+            try {
+                addonsConfig.createNewFile();
+            } catch (IOException e) {
+                System.out.println("unable to create internal-config file");
+                System.exit(-1);
+            }
         }
         if (args.length > 0) {
             @SuppressWarnings("UnusedAssignment") Main main = new Main(new ArrayList<>(), Boolean.getBoolean(args[0]), false, false, config.getAbsolutePath(), addonsConfig.getAbsolutePath());
@@ -314,6 +327,10 @@ public class Main {
         return Optional.ofNullable(communicationManager);
     }
 
+    public IzouInstanceStatus.Status getState() {
+        return state;
+    }
+
     private SystemInitializer initSystem() {
         // Setting up file system
         this.fileSystemManager = new FileSystemManager(this);
@@ -369,14 +386,22 @@ public class Main {
             return null;
         }
 
-        List<AddOn> addOns;
+        InternalConfig internalConfig;
         try {
-            addOns = reader.read(ArrayList.class,AddOn.class);
+            internalConfig = reader.read(InternalConfig.class);
         } catch (YamlException e) {
             fileLogger.error("unable to load addons config", e);
             System.out.println(-1);
             return null;
         }
+        addOnInformationManager.initInternalConfigFile(internalConfig);
+        try {
+            state = IzouInstanceStatus.Status.valueOf(internalConfig.state);
+        } catch (IllegalArgumentException e) {
+            fileLogger.error("unable to read state", e);
+            state = IzouInstanceStatus.Status.RUNNING;
+        }
+
 
         AddOn addOn =  new AddOn();
         String rawVersion = addOn.getClass().getPackage().getImplementationVersion();
@@ -388,7 +413,7 @@ public class Main {
         boolean sslEnabled = "true".equals(config.ssl);
         CommunicationManager communicationManager = null;
         try {
-            CommunicationManager finalCommunManager = new CommunicationManager(version, this, config.url, config.urlSocket, sslEnabled, disabledLib, config.token, addOns);
+            CommunicationManager finalCommunManager = new CommunicationManager(version, this, config.url, config.urlSocket, sslEnabled, disabledLib, config.token, internalConfig.addOns);
             communicationManager = finalCommunManager;
             if (!disabledUpdate) {
                 LocalDateTime firstInterval = LocalDateTime.now().withHour(2);
