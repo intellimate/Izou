@@ -7,6 +7,7 @@ import com.google.protobuf.util.JsonFormat;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.config.AddOn;
 import org.intellimate.izou.main.Main;
+import org.intellimate.izou.util.AddonThreadPoolUser;
 import org.intellimate.izou.util.IzouModule;
 import org.intellimate.server.proto.*;
 
@@ -25,8 +26,9 @@ import java.util.stream.Collectors;
  * @author LeanderK
  * @version 1.0
  */
-//TODO status add update errored?
-class RequestHandler extends IzouModule {
+//TODO new status for update errored?
+//TODO: update the update method (respect toInstall/toDelete etc)
+class RequestHandler extends IzouModule implements AddonThreadPoolUser {
     private static JsonFormat.Printer PRINTER = JsonFormat.printer().includingDefaultValueFields();
     private static JsonFormat.Parser PARSER = JsonFormat.parser();
     private CompletableFuture<Void> updateFuture;
@@ -68,13 +70,13 @@ class RequestHandler extends IzouModule {
     private Response saveLocalApp(Request request, String url) {
         Pattern pattern = Pattern.compile("/apps/dev/(?<id>\\w+)/(?<major>\\d+)/(?<minor>\\d+)/(?<patch>\\d+)");
         Matcher matcher = pattern.matcher(url);
-        String id = matcher.group("id");
+        String name = matcher.group("id");
         int major = Integer.parseInt(matcher.group("major"));
         int minor = Integer.parseInt(matcher.group("minor"));
         int patch = Integer.parseInt(matcher.group("patch"));
-        AddOn addOn = new AddOn(id, major+"."+minor+"."+patch, -1);
+        AddOn addOn = new AddOn(name, major+"."+minor+"."+patch, -1);
         if (getMain().getAddOnInformationManager().getSelectedAddOns().stream()
-                .noneMatch(selected -> selected.equalsIgnoringVersion(addOn))) {
+                .noneMatch(selected -> selected.name.equals(addOn.name))) {
             try {
                 getMain().getAddOnInformationManager().addAddonToSelectedList(addOn);
             } catch (IOException e) {
@@ -100,7 +102,7 @@ class RequestHandler extends IzouModule {
             e.printStackTrace();
         }
 
-        File file = new File(getMain().getFileSystemManager().getNewLibLocation(), id+"-"+major+"."+minor+"."+patch+".zip");
+        File file = new File(getMain().getFileSystemManager().getNewLibLocation(), name+"-"+major+"."+minor+"."+patch+".zip");
         if (!file.exists()) {
             try {
                 file.createNewFile();
@@ -241,6 +243,9 @@ class RequestHandler extends IzouModule {
     }
 
     private Response handleAddonHTTPRequest(Request httpRequest, Matcher matcher, Function<String, Optional<AddOnModel>> getAddon) {
+        if (getMain().getState().equals(IzouInstanceStatus.Status.DISABLED)) {
+            //TODO: further coding? or another place?
+        }
         String id = matcher.group("id");
         Boolean authorized = httpRequest.getParams().entrySet().stream()
                 .filter(param -> param.getKey().equals("app"))
@@ -256,8 +261,15 @@ class RequestHandler extends IzouModule {
         if (!addOnModel.isPresent()) {
             return sendStringMessage("no local app found with id: "+id, 404);
         }
-        //TODO wrap in completableFuture to isolate
-        return addOnModel.flatMap(addOnModelInstance -> Optional.ofNullable(addOnModelInstance.handleRequest(httpRequest)))
+
+        return addOnModel.map(addOnModelInstance -> submit(() -> Optional.ofNullable(addOnModelInstance.handleRequest(httpRequest))))
+                .flatMap(future -> {
+                    try {
+                        return future.join();
+                    } catch (Exception e) {
+                        return Optional.of(handleException(e, "an internal server error occured", 500));
+                    }
+                })
                 .orElseGet(() -> sendStringMessage("illegal request, no suitable route found", 404));
     }
 
@@ -318,6 +330,15 @@ class RequestHandler extends IzouModule {
         } else {
             return sendStringMessage("communication to server is not active", 404);
         }
+    }
+
+    private Response handleException(Throwable throwable, String message, int status) {
+        ErrorResponse build = ErrorResponse.newBuilder()
+                .setCode(message)
+                .setDetail(throwable.getMessage())
+                .build();
+        debug(message, throwable);
+        return messageHelper(build, status);
     }
 
     private Response messageHelper(Message message, int status) {

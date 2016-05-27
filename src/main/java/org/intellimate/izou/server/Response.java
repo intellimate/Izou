@@ -15,6 +15,6 @@ public interface Response {
     int getStatus();
     Map<String, List<String>> getHeaders();
     String getContentType();
-    int getDataSize();
+    long getDataSize();
     InputStream getData();
 }

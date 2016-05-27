@@ -13,6 +13,7 @@ import org.intellimate.izou.util.IzouModule;
 import org.intellimate.server.proto.App;
 import org.intellimate.server.proto.Izou;
 import org.intellimate.server.proto.SocketConnection;
+import org.intellimate.server.proto.SocketConnectionResponse;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
@@ -34,8 +35,12 @@ import java.util.stream.Collectors;
  * @author LeanderK
  * @version 1.0
  */
-//TODO update the update method (respect toInstall/toDelete etc)
+
 //TODO: os via System.getProperty("os.arch") (arm on arm)
+//TODO: get server id on response connection
+//TODO: drain on exception?
+//TODO: close Inputstream from response?
+//TODO: make disable close method in limitedInputStream
 public class ServerRequests extends IzouModule {
     private final String izouServerURL;
     private final String izouSocketUrl;
@@ -46,6 +51,8 @@ public class ServerRequests extends IzouModule {
     private LocalDateTime authTokenCreation = null;
     private final JsonFormat.Parser parser = JsonFormat.parser();
     private boolean run = true;
+    private int izouId = -1;
+    private String izouRoute = null;
 
     public ServerRequests(String izouServerURL, String izouSocketUrl, boolean ssl, String refreshToken, Main main) {
         super(main);
@@ -93,6 +100,9 @@ public class ServerRequests extends IzouModule {
                     .build()
                     .writeDelimitedTo(outputStream);
             outputStream.flush();
+            SocketConnectionResponse connectionResponse = SocketConnectionResponse.parseDelimitedFrom(socket.getInputStream());
+            this.izouId = connectionResponse.getId();
+            this.izouRoute = connectionResponse.getRoute();
             boolean loop = true;
             while (run && loop) {
                 org.intellimate.server.proto.HttpRequest httpRequest = org.intellimate.server.proto.HttpRequest.parseDelimitedFrom(inputStream);
@@ -253,5 +263,25 @@ public class ServerRequests extends IzouModule {
             refreshToken();
         }
         return authToken;
+    }
+
+    /**
+     * returns the IzouId on the Server, if fetched
+     * @return the id or empty
+     */
+    public Optional<Integer> getIzouId() {
+        if (izouId == -1) {
+            return Optional.empty();
+        } else {
+            return Optional.of(izouId);
+        }
+    }
+
+    /**
+     * returns the route Izou is reachable at, if fetched
+     * @return the route or empty if not fetched
+     */
+    public Optional<String> getIzouRoute() {
+        return Optional.ofNullable(izouRoute);
     }
 }

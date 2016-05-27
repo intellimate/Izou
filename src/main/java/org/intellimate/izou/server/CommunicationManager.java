@@ -8,6 +8,7 @@ import org.intellimate.izou.util.IzouModule;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author LeanderK
@@ -93,5 +94,21 @@ public class CommunicationManager extends IzouModule {
      */
     public String getIzouServerURL() {
         return izouServerURL;
+    }
+
+    /**
+     * returns the id of izou, or empty if not yet fetched
+     * @return the id or empty
+     */
+    public Optional<Integer> getIzouId() {
+        return serverRequests.getIzouId();
+    }
+
+    /**
+     * returns the route izou is reachable at, concatenated with the server-url it constructs the whole url
+     * @return the route or empty
+     */
+    public Optional<String> getIzouRoute() {
+        return serverRequests.getIzouRoute();
     }
 }

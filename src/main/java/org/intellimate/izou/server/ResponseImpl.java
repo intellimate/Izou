@@ -13,7 +13,7 @@ class ResponseImpl implements Response {
     private final int status;
     private final Map<String, List<String>> headers;
     private final String contentType;
-    private final int dataSize;
+    private final long dataSize;
     private final InputStream stream;
 
     public ResponseImpl(int status, Map<String, List<String>> headers, String contentType, byte[] data) {
@@ -24,7 +24,7 @@ class ResponseImpl implements Response {
         this.stream = new ByteArrayInputStream(data);
     }
 
-    public ResponseImpl(int status, Map<String, List<String>> headers, String contentType, int dataSize, InputStream stream) {
+    public ResponseImpl(int status, Map<String, List<String>> headers, String contentType, long dataSize, InputStream stream) {
         this.status = status;
         this.headers = headers;
         this.contentType = contentType;
@@ -48,7 +48,7 @@ class ResponseImpl implements Response {
     }
 
     @Override
-    public int getDataSize() {
+    public long getDataSize() {
         return dataSize;
     }
 
