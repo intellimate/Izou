@@ -4,9 +4,11 @@ import com.esotericsoftware.yamlbeans.YamlWriter;
 import org.apache.commons.cli.MissingArgumentException;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.config.AddOn;
+import org.intellimate.izou.config.InternalConfig;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.util.IdentifiableSet;
 import org.intellimate.izou.util.IzouModule;
+import org.intellimate.server.proto.IzouInstanceStatus;
 import ro.fortsoft.pf4j.IzouPluginClassLoader;
 import ro.fortsoft.pf4j.PluginDescriptor;
 
@@ -18,6 +20,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static javafx.scene.input.KeyCode.M;
 import static org.bouncycastle.asn1.x500.style.RFC4519Style.l;
 
 /**
@@ -28,6 +31,7 @@ import static org.bouncycastle.asn1.x500.style.RFC4519Style.l;
 public class AddOnInformationManager extends IzouModule {
     private final IdentifiableSet<AddOnInformation> addOnInformations;
     private final IdentifiableSet<AddOnModel> addOns;
+    private InternalConfig internalConfig;
     private List<AddOn> selectedAddOns = new ArrayList<>();
     private List<AddOn> installedAddOns = new ArrayList<>();
     private List<AddOn> installedWithDependencies = new ArrayList<>();
@@ -375,6 +379,22 @@ public class AddOnInformationManager extends IzouModule {
         this.selectedAddOns = selected;
     }
 
+    /**
+     * sets a new state to the config-file
+     * @param status the state to set the file to
+     * @throws IOException if an exception occurred while writing to the file
+     */
+    public void setNewStateToConfig(IzouInstanceStatus.Status status) throws IOException {
+        this.internalConfig = internalConfig.createNew(status);
+        //needed because only arrayList ist guaranteed to no print
+        ArrayList<AddOn> finalAddons = new ArrayList<>(selectedAddOns);
+        writeToFile(finalAddons);
+    }
+
+    public void initInternalConfigFile(InternalConfig internalConfig) {
+        this.internalConfig = internalConfig;
+    }
+
     private void synchro(List<AddOn> selectedAddOns) throws IOException {
         //needed because only arrayList ist guaranteed to no print
         ArrayList<AddOn> finalAddons = new ArrayList<>(selectedAddOns);
@@ -386,9 +406,10 @@ public class AddOnInformationManager extends IzouModule {
         if (!configFile.exists()) {
             configFile.createNewFile();
         }
+        this.internalConfig = internalConfig.createNew(addOns);
         try (FileWriter writer = new FileWriter(addonConfigFile)) {
             YamlWriter yamlWriter = new YamlWriter(writer);
-            yamlWriter.write(addOns);
+            yamlWriter.write(internalConfig);
         }
     }
 
