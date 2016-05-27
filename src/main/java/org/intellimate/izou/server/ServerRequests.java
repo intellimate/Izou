@@ -9,6 +9,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import org.intellimate.izou.config.Version;
 import org.intellimate.izou.main.Main;
+import org.intellimate.izou.util.AddonThreadPoolUser;
 import org.intellimate.izou.util.IzouModule;
 import org.intellimate.server.proto.App;
 import org.intellimate.server.proto.Izou;
@@ -27,6 +28,8 @@ import java.nio.charset.Charset;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -37,11 +40,7 @@ import java.util.stream.Collectors;
  */
 
 //TODO: os via System.getProperty("os.arch") (arm on arm)
-//TODO: get server id on response connection
-//TODO: drain on exception?
-//TODO: close Inputstream from response?
-//TODO: make disable close method in limitedInputStream
-public class ServerRequests extends IzouModule {
+public class ServerRequests extends IzouModule implements AddonThreadPoolUser {
     private final String izouServerURL;
     private final String izouSocketUrl;
     private final String refreshToken;
@@ -112,7 +111,8 @@ public class ServerRequests extends IzouModule {
                 }
                 int bodySize = (int) httpRequest.getBodySize();
                 InputStream stream = ByteStreams.limit(socket.getInputStream(), bodySize);
-                RequestImpl request = new RequestImpl(httpRequest, stream, bodySize);
+                InputStream streamWithoutClose = new DelegatingInputstream(stream);
+                RequestImpl request = new RequestImpl(httpRequest, streamWithoutClose, bodySize);
                 Response response;
                 try {
                     response = callback.apply(request);
@@ -121,9 +121,9 @@ public class ServerRequests extends IzouModule {
                     String returnText = "an internal error occured: " + e.getMessage();
                     response = new ResponseImpl(500, new HashMap<>(), "text", returnText.getBytes(Charset.forName("UTF-8")));
                 }
-                int result = stream.read();
+                int result = streamWithoutClose.read();
                 while (result != -1) {
-                    result = stream.read();
+                    result = streamWithoutClose.read();
                 }
                 org.intellimate.server.proto.HttpResponse.newBuilder()
                         .setContentType(response.getContentType())
@@ -141,10 +141,30 @@ public class ServerRequests extends IzouModule {
                         )
                         .build()
                         .writeDelimitedTo(outputStream);
-                long dataWritten = ByteStreams.copy(response.getData(), outputStream);
-                if (dataWritten != response.getDataSize()) {
-                    throw new IllegalStateException("response body is larger than advertised");
-                }
+                Response finalResponse = response;
+                submit(() -> {
+                    try {
+                        if (finalResponse.getData() != null) {
+                            long dataWritten = 0;
+                            try {
+                                dataWritten = ByteStreams.copy(finalResponse.getData(), outputStream);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                            if (dataWritten != finalResponse.getDataSize()) {
+                                throw new IllegalStateException("response body is larger than advertised");
+                            }
+                        }
+                    } finally {
+                        if (finalResponse.getData() != null) {
+                            try {
+                                finalResponse.getData().close();
+                            } catch (IOException e) {
+                                debug("unable to close inputStream from app", e);
+                            }
+                        }
+                    }
+                }).join();
                 outputStream.flush();
             }
         } catch (EOFException e) {
@@ -153,6 +173,8 @@ public class ServerRequests extends IzouModule {
             error("there was a problem with the server connection", e);
         } catch (IllegalStateException e) {
             error(e.getMessage(), e);
+        } catch (CompletionException e) {
+            debug("there was a problem copying the response into the body", e);
         } finally {
             if (socket != null) {
                 try {
