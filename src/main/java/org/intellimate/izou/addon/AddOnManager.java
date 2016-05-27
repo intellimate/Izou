@@ -92,8 +92,8 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
      * @param addOns
      */
     public void registerAllAddOns(IdentifiableSet<AddOnModel> addOns) {
-        initAddOns(addOns);
         createAddOnInfos(addOns);
+        initAddOns(addOns);
         List<CompletableFuture<Void>> futures = addOns.stream()
                 .map(addOn -> submit((Runnable) addOn::register))
                 .collect(Collectors.toList());
@@ -119,8 +119,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
     private void initAddOns(IdentifiableSet<AddOnModel> addOns) {
         List<CompletableFuture<Void>> futures = addOns.stream()
                 .map(addOn -> {
-                    String izouServerURL = getMain().getCommunicationManager().map(CommunicationManager::getIzouServerURL).orElse(null);
-                    Context context = new ContextImplementation(addOn, main, Level.DEBUG.name(), izouServerURL);
+                    Context context = new ContextImplementation(addOn, main, Level.DEBUG.name());
                     return submit(() -> addOn.initAddOn(context));
                 })
                 .collect(Collectors.toList());
@@ -151,7 +150,13 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
 
         Map<String, AddOn> newAddons = newOrReplace.get(false).stream()
                 .map(AddOn::new)
-                .collect(Collectors.toMap(addOn -> addOn.name, Function.identity()));
+                .collect(Collectors.toMap(addOn -> addOn.name, Function.identity(), (addOn, addOn2) -> {
+                    if (addOn.getVersion().compareTo(addOn2.getVersion()) >= 0) {
+                        return addOn;
+                    } else {
+                        return addOn2;
+                    }
+                }));
 
         Arrays.stream(getMain().getFileSystemManager().getLibLocation().listFiles())
             .filter(file -> file.getName().endsWith(".zip") || file.isDirectory())
