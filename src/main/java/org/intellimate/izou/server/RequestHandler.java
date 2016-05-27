@@ -22,6 +22,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static org.bouncycastle.asn1.ua.DSTU4145NamedCurves.params;
+
 /**
  * @author LeanderK
  * @version 1.0
@@ -247,22 +249,27 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
             //TODO: further coding? or another place?
         }
         String id = matcher.group("id");
-        Boolean authorized = httpRequest.getParams().entrySet().stream()
+        Boolean sameApp = httpRequest.getParams().entrySet().stream()
                 .filter(param -> param.getKey().equals("app"))
                 .map(Map.Entry::getValue)
                 .findAny()
                 .map(list -> list.stream().filter(authorizedApp -> authorizedApp.equals(id)).findAny().isPresent())
                 .orElse(true);
 
-        if (!authorized) {
-            return sendStringMessage("App is not authorized to request pages from other apps", 401);
+        Request request = httpRequest;
+        if (!sameApp) {
+            HashMap<String, List<String>> httpParams = new HashMap<>(httpRequest.getParams());
+            httpParams.remove("token");
+            request = ((RequestImpl) httpRequest).changeParams(httpParams);
         }
+        Request finalRequest = request;
+
         Optional<AddOnModel> addOnModel = getAddon.apply(id);
         if (!addOnModel.isPresent()) {
             return sendStringMessage("no local app found with id: "+id, 404);
         }
 
-        return addOnModel.map(addOnModelInstance -> submit(() -> Optional.ofNullable(addOnModelInstance.handleRequest(httpRequest))))
+        return addOnModel.map(addOnModelInstance -> submit(() -> Optional.ofNullable(addOnModelInstance.handleRequest(finalRequest))))
                 .flatMap(future -> {
                     try {
                         return future.join();

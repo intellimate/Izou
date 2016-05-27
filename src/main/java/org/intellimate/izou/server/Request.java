@@ -1,6 +1,7 @@
 package org.intellimate.izou.server;
 
 import com.google.common.io.ByteStreams;
+import ro.fortsoft.pf4j.AddonAccessible;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,10 +14,12 @@ import java.util.Optional;
  * @author LeanderK
  * @version 1.0
  */
+@AddonAccessible
 public interface Request {
     String getUrl();
     Map<String, List<String>> getParams();
     String getMethod();
+    @SuppressWarnings("unused")
     String getContentType();
     int getContentLength();
     InputStream getData();
