@@ -71,6 +71,7 @@ public class Main {
     private FileSystemManager fileSystemManager;
     private CommunicationManager communicationManager;
     private IzouInstanceStatus.Status state = IzouInstanceStatus.Status.RUNNING;
+    private UpdatesManager updatesManager;
 
     static {
         SSLCertificateHelper.init();
@@ -147,7 +148,18 @@ public class Main {
         systemMail = initMail();
         securityManager = startSecurity(systemMail);
 
-        this.communicationManager = initCommunication(config, addonsConfig, disableLibFolder, disabledUpdate);
+        this.communicationManager = initCommunication(config, addonsConfig, disableLibFolder);
+
+        if (communicationManager != null) {
+            String rawVersion = this.getClass().getPackage().getImplementationVersion();
+            Version version = null;
+            if (rawVersion != null) {
+                version = new Version(rawVersion);
+            }
+            this.updatesManager = new UpdatesManager(this, disabledUpdate, version, communicationManager, disableLibFolder);
+        } else {
+            this.updatesManager = null;
+        }
 
         if (!state.equals(IzouInstanceStatus.Status.DISABLED)) {
             startAddOns(addOns, disableLibFolder);
@@ -167,7 +179,12 @@ public class Main {
         }
         if (!disableLibFolder) {
             fileLogger.debug("retrieving addons & registering them");
-            addOnManager.retrieveAndRegisterAddOns();
+            try {
+                addOnManager.retrieveAndRegisterAddOns();
+            } catch (IOException e) {
+                fileLogger.error("unable to copy/delete the addons from the newLib folder");
+                System.exit(-1);
+            }
         }
     }
 
@@ -327,6 +344,10 @@ public class Main {
         return Optional.ofNullable(communicationManager);
     }
 
+    public Optional<UpdatesManager> getUpdatesManager() {
+        return Optional.ofNullable(updatesManager);
+    }
+
     public IzouInstanceStatus.Status getState() {
         return state;
     }
@@ -345,7 +366,7 @@ public class Main {
         return systemInitializer;
     }
 
-    private CommunicationManager initCommunication(String configPath, String addonsConfigPath, boolean disabledLib, boolean disabledUpdate) {
+    private CommunicationManager initCommunication(String configPath, String addonsConfigPath, boolean disabledLib) {
         if (configPath == null || addonsConfigPath == null) {
             return null;
         }
@@ -402,50 +423,10 @@ public class Main {
             state = IzouInstanceStatus.Status.RUNNING;
         }
 
-
-        AddOn addOn =  new AddOn();
-        String rawVersion = addOn.getClass().getPackage().getImplementationVersion();
-        Version version = null;
-        if (rawVersion != null) {
-            version = new Version(rawVersion);
-        }
-
         boolean sslEnabled = "true".equals(config.ssl);
         CommunicationManager communicationManager = null;
         try {
-            CommunicationManager finalCommunManager = new CommunicationManager(version, this, config.url, config.urlSocket, sslEnabled, disabledLib, config.token, internalConfig.addOns);
-            communicationManager = finalCommunManager;
-            if (!disabledUpdate) {
-                LocalDateTime firstInterval = LocalDateTime.now().withHour(2);
-                if (firstInterval.plusMinutes(10).isBefore(LocalDateTime.now())) {
-                    firstInterval = firstInterval.minusDays(1);
-                }
-                Timer timer = new Timer();
-                timer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        boolean shouldRestart = false;
-                        //TODO maybe a more sophisticated algorithm?
-                        try {
-                            shouldRestart = finalCommunManager.checkForUpdates();
-                        } catch (IOException e) {
-                            fileLogger.error("unable to search for updates", e);
-                            try {
-                                Thread.sleep(300000);
-                                shouldRestart = finalCommunManager.checkForUpdates();
-                            } catch (IOException e1) {
-                                fileLogger.error("unable to search for updates", e);
-                            } catch (InterruptedException e1) {
-                                fileLogger.error("interrupted", e);
-                            }
-                        }
-                        if (shouldRestart) {
-                            fileLogger.info("restarting to apply updates");
-                            System.exit(0);
-                        }
-                    }
-                }, Date.from(firstInterval.atZone(ZoneId.systemDefault()).toInstant()), 8640000);
-            }
+            communicationManager = new CommunicationManager(this, config.url, config.urlSocket, sslEnabled, disabledLib, config.token);
         } catch (IllegalStateException e) {
             fileLogger.error("unable to instantiate CommunicationManager", e);
             System.exit(-1);
