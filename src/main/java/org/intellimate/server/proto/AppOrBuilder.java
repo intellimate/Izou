@@ -43,49 +43,59 @@ public interface AppOrBuilder extends
       getDescriptionBytes();
 
   /**
-   * <code>optional bool active = 5;</code>
+   * <code>optional string package = 5;</code>
+   */
+  java.lang.String getPackage();
+  /**
+   * <code>optional string package = 5;</code>
+   */
+  com.google.protobuf.ByteString
+      getPackageBytes();
+
+  /**
+   * <code>optional bool active = 6;</code>
    */
   boolean getActive();
 
   /**
-   * <code>repeated string tags = 6;</code>
+   * <code>repeated string tags = 7;</code>
    */
   com.google.protobuf.ProtocolStringList
       getTagsList();
   /**
-   * <code>repeated string tags = 6;</code>
+   * <code>repeated string tags = 7;</code>
    */
   int getTagsCount();
   /**
-   * <code>repeated string tags = 6;</code>
+   * <code>repeated string tags = 7;</code>
    */
   java.lang.String getTags(int index);
   /**
-   * <code>repeated string tags = 6;</code>
+   * <code>repeated string tags = 7;</code>
    */
   com.google.protobuf.ByteString
       getTagsBytes(int index);
 
   /**
-   * <code>repeated .intellimate.App.AppVersion versions = 7;</code>
+   * <code>repeated .intellimate.App.AppVersion versions = 8;</code>
    */
   java.util.List<org.intellimate.server.proto.App.AppVersion> 
       getVersionsList();
   /**
-   * <code>repeated .intellimate.App.AppVersion versions = 7;</code>
+   * <code>repeated .intellimate.App.AppVersion versions = 8;</code>
    */
   org.intellimate.server.proto.App.AppVersion getVersions(int index);
   /**
-   * <code>repeated .intellimate.App.AppVersion versions = 7;</code>
+   * <code>repeated .intellimate.App.AppVersion versions = 8;</code>
    */
   int getVersionsCount();
   /**
-   * <code>repeated .intellimate.App.AppVersion versions = 7;</code>
+   * <code>repeated .intellimate.App.AppVersion versions = 8;</code>
    */
   java.util.List<? extends org.intellimate.server.proto.App.AppVersionOrBuilder> 
       getVersionsOrBuilderList();
   /**
-   * <code>repeated .intellimate.App.AppVersion versions = 7;</code>
+   * <code>repeated .intellimate.App.AppVersion versions = 8;</code>
    */
   org.intellimate.server.proto.App.AppVersionOrBuilder getVersionsOrBuilder(
       int index);

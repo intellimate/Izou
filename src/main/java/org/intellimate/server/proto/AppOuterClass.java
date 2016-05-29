@@ -28,15 +28,16 @@ public final class AppOuterClass {
   static {
     java.lang.String[] descriptorData = {
       "\n\031server-protobuf/app.proto\022\013intellimate" +
-      "\"\224\002\n\003App\022\n\n\002id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\021\n\tde" +
-      "veloper\030\003 \001(\t\022\023\n\013description\030\004 \001(\t\022\016\n\006ac" +
-      "tive\030\005 \001(\010\022\014\n\004tags\030\006 \003(\t\022-\n\010versions\030\007 \003" +
-      "(\0132\033.intellimate.App.AppVersion\032~\n\nAppVe" +
-      "rsion\022\017\n\007version\030\001 \001(\t\022\020\n\010platform\030\002 \001(\t" +
-      "\022\016\n\006active\030\004 \001(\010\022\025\n\rdownload_link\030\005 \001(\t\022" +
-      "&\n\014dependencies\030\006 \003(\0132\020.intellimate.AppB" +
-      " \n\034org.intellimate.server.protoP\001b\006proto" +
-      "3"
+      "\"\307\002\n\003App\022\n\n\002id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\021\n\tde" +
+      "veloper\030\003 \001(\t\022\023\n\013description\030\004 \001(\t\022\017\n\007pa" +
+      "ckage\030\005 \001(\t\022\016\n\006active\030\006 \001(\010\022\014\n\004tags\030\007 \003(" +
+      "\t\022-\n\010versions\030\010 \003(\0132\033.intellimate.App.Ap" +
+      "pVersion\032\237\001\n\nAppVersion\022\017\n\007version\030\001 \001(\t" +
+      "\022\020\n\010platform\030\002 \001(\t\022\r\n\005error\030\003 \001(\t\022\020\n\010war" +
+      "nings\030\005 \003(\t\022\016\n\006active\030\006 \001(\010\022\025\n\rdownload_" +
+      "link\030\007 \001(\t\022&\n\014dependencies\030\010 \003(\0132\020.intel" +
+      "limate.AppB \n\034org.intellimate.server.pro",
+      "toP\001b\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -55,13 +56,13 @@ public final class AppOuterClass {
     internal_static_intellimate_App_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_intellimate_App_descriptor,
-        new java.lang.String[] { "Id", "Name", "Developer", "Description", "Active", "Tags", "Versions", });
+        new java.lang.String[] { "Id", "Name", "Developer", "Description", "Package", "Active", "Tags", "Versions", });
     internal_static_intellimate_App_AppVersion_descriptor =
       internal_static_intellimate_App_descriptor.getNestedTypes().get(0);
     internal_static_intellimate_App_AppVersion_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_intellimate_App_AppVersion_descriptor,
-        new java.lang.String[] { "Version", "Platform", "Active", "DownloadLink", "Dependencies", });
+        new java.lang.String[] { "Version", "Platform", "Error", "Warnings", "Active", "DownloadLink", "Dependencies", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)
