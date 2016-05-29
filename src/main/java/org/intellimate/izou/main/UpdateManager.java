@@ -19,7 +19,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author LeanderK
  * @version 1.0
  */
-public class UpdatesManager extends IzouModule {
+public class UpdateManager extends IzouModule {
     private final boolean disabledUpdate;
     private final IzouSynchronization izouSynchronization;
     @SuppressWarnings({"FieldCanBeLocal", "unused"})
@@ -28,7 +28,7 @@ public class UpdatesManager extends IzouModule {
     private final Lock lock = new ReentrantLock();
     private boolean isLocked = false;
 
-    public UpdatesManager(Main main, boolean disabledUpdate, Version currentIzouVersion, CommunicationManager communicationManager, boolean disabledLib) {
+    public UpdateManager(Main main, boolean disabledUpdate, Version currentIzouVersion, CommunicationManager communicationManager, boolean disabledLib) {
         super(main);
         this.disabledUpdate = disabledUpdate;
         this.disabledLib = disabledLib;

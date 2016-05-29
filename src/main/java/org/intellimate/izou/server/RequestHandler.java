@@ -8,7 +8,7 @@ import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.config.AddOn;
 import org.intellimate.izou.identification.AddOnInformation;
 import org.intellimate.izou.main.Main;
-import org.intellimate.izou.main.UpdatesManager;
+import org.intellimate.izou.main.UpdateManager;
 import org.intellimate.izou.util.AddonThreadPoolUser;
 import org.intellimate.izou.util.IzouModule;
 import org.intellimate.server.proto.*;
@@ -23,8 +23,6 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import static org.bouncycastle.asn1.ua.DSTU4145NamedCurves.params;
 
 /**
  * @author LeanderK
@@ -300,7 +298,7 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
     private Response handleStatus(Request request) {
         if (request.getMethod().equals("GET")) {
             IzouInstanceStatus.Status status = IzouInstanceStatus.Status.RUNNING;
-            if (getMain().getUpdatesManager().isPresent() && getMain().getUpdatesManager().get().isUpdating()) {
+            if (getMain().getUpdateManager().isPresent() && getMain().getUpdateManager().get().isUpdating()) {
                 status = IzouInstanceStatus.Status.UPDATING;
             }
             IzouInstanceStatus statusMessage = IzouInstanceStatus.newBuilder().setStatus(status).build();
@@ -338,7 +336,7 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
     }
 
     private Response handleUpdateRequest() {
-        Optional<UpdatesManager> updatesManager = getMain().getUpdatesManager();
+        Optional<UpdateManager> updatesManager = getMain().getUpdateManager();
         if (updatesManager.isPresent()) {
             IzouInstanceStatus statusMessage = IzouInstanceStatus.newBuilder().setStatus(IzouInstanceStatus.Status.UPDATING).build();
             if (!updatesManager.get().isUpdating()) {

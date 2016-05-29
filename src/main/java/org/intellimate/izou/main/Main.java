@@ -7,7 +7,6 @@ import org.apache.logging.log4j.Logger;
 import org.intellimate.izou.activator.ActivatorManager;
 import org.intellimate.izou.addon.AddOnManager;
 import org.intellimate.izou.addon.AddOnModel;
-import org.intellimate.izou.config.AddOn;
 import org.intellimate.izou.config.Config;
 import org.intellimate.izou.config.InternalConfig;
 import org.intellimate.izou.config.Version;
@@ -35,12 +34,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static javafx.scene.input.KeyCode.M;
 
 /**
  * Main Class.
@@ -71,7 +66,7 @@ public class Main {
     private FileSystemManager fileSystemManager;
     private CommunicationManager communicationManager;
     private IzouInstanceStatus.Status state = IzouInstanceStatus.Status.RUNNING;
-    private UpdatesManager updatesManager;
+    private UpdateManager updateManager;
 
     static {
         SSLCertificateHelper.init();
@@ -156,9 +151,9 @@ public class Main {
             if (rawVersion != null) {
                 version = new Version(rawVersion);
             }
-            this.updatesManager = new UpdatesManager(this, disabledUpdate, version, communicationManager, disableLibFolder);
+            this.updateManager = new UpdateManager(this, disabledUpdate, version, communicationManager, disableLibFolder);
         } else {
-            this.updatesManager = null;
+            this.updateManager = null;
         }
 
         if (!state.equals(IzouInstanceStatus.Status.DISABLED)) {
@@ -344,8 +339,8 @@ public class Main {
         return Optional.ofNullable(communicationManager);
     }
 
-    public Optional<UpdatesManager> getUpdatesManager() {
-        return Optional.ofNullable(updatesManager);
+    public Optional<UpdateManager> getUpdateManager() {
+        return Optional.ofNullable(updateManager);
     }
 
     public IzouInstanceStatus.Status getState() {
