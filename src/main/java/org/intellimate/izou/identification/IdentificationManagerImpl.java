@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * You can register an Object with the IdentificationManager and receive an Identification Objects.
  */
-//FIXME: ConcurrentModification Exception with streams
+//FIXME: ConcurrentModification Exception with streams, should not happen anymore (may forgot to delete the TODO)
 final class IdentificationManagerImpl implements IdentificationManagerM, IdentificationManager {
     private Map<String, Identifiable> registered = new ConcurrentHashMap<>();
     private AddOnInformationManager addOnInformationManager = null;
@@ -20,8 +20,6 @@ final class IdentificationManagerImpl implements IdentificationManagerM, Identif
     private IdentificationManagerImpl() {
 
     }
-
-
 
     /**
      * sets the AddOnInformationManager if not initialized
@@ -36,7 +34,7 @@ final class IdentificationManagerImpl implements IdentificationManagerM, Identif
     /**
      * If you have registered with an Identifiable interface, you can receive Identification Instances with this method.
      * @param identifiable the registered Identifiable
-     * @return an Identification Instance or null if not registered
+     * @return an Identification Instance or empty if not registered
      */
     @Override
     public Optional<Identification> getIdentification(Identifiable identifiable) {
@@ -74,7 +72,7 @@ final class IdentificationManagerImpl implements IdentificationManagerM, Identif
         if (registered.containsValue(identifiable) || registered.containsKey(identifiable.getID())) {
             return false;
         }
-        registered.put(identifiable.getID(), identifiable);
-        return true;
+        Identifiable old = registered.putIfAbsent(identifiable.getID(), identifiable);
+        return old == null;
     }
 }

@@ -27,17 +27,11 @@ import static org.bouncycastle.asn1.x500.style.RFC4519Style.l;
  * The AddOnInformationManager is a class that gives access to all kinds of information about registered addOns in Izou.
  * For example, any addOn can find out the names of all other registered addOns through this class.
  */
-//TODO just selected AND move other list to a file-manager that is based on the content of the directories (ignore caching for now)
 public class AddOnInformationManager extends IzouModule {
     private final IdentifiableSet<AddOnInformation> addOnInformations;
     private final IdentifiableSet<AddOnModel> addOns;
     private InternalConfig internalConfig;
     private List<AddOn> selectedAddOns = new ArrayList<>();
-    private List<AddOn> installedAddOns = new ArrayList<>();
-    private List<AddOn> installedWithDependencies = new ArrayList<>();
-    private List<AddOn> addOnsToInstall = new ArrayList<>();
-    private List<AddOn> addOnsToInstallDownloaded = new ArrayList<>();
-    private List<AddOn> addOnsToDelete = new ArrayList<>();
     private final String addonConfigFile;
 
     /**
@@ -227,86 +221,6 @@ public class AddOnInformationManager extends IzouModule {
     }
 
     /**
-     * returns the configuration for all the installed AddOns.
-     * <p>
-     * these are not the actual AddOnModels, but the content of the addons-file for the installed AddOns.
-     * @return a list of AddOns
-     */
-    public List<AddOn> getInstalledAddOns() {
-        return installedAddOns;
-    }
-
-    /**
-     * returns the description for all the AddOns not yet downloaded
-     * @return the Addons
-     */
-    public List<AddOn> getAddOnsToInstall() {
-        return addOnsToInstall;
-    }
-
-    /**
-     * returns the description for all the AddOns not yet downloaded
-     * @return the Addons
-     */
-    public List<AddOn> getAddOnsToDelete() {
-        return addOnsToDelete;
-    }
-
-    /**
-     * returns all the Addons with their dependencies
-     * @return the Addons
-     */
-    public List<AddOn> getInstalledWithDependencies() {
-        return installedWithDependencies;
-    }
-
-    /**
-     * sets the installed/installedWithDependencies/toInstall/toDelete lists
-     */
-    public void initAddOns(List<AddOn> installed, List<AddOn> installedWithDependencies, List<AddOn> toInstall,
-                           List<AddOn> toInstallDownloaded, List<AddOn> toDelete, List<AddOn> selected) {
-        this.installedAddOns = installed;
-        this.installedWithDependencies = installedWithDependencies;
-        this.addOnsToInstall = toInstall;
-        this.addOnsToInstallDownloaded = toInstallDownloaded;
-        this.addOnsToDelete = toDelete;
-    }
-
-    /**
-     * adds the addon to the InstalledList
-     * @param addOn the AddOn to add
-     * @throws IOException
-     */
-    public void addAddonToInstalledList(AddOn addOn) throws IOException {
-        ArrayList<AddOn> selected = new ArrayList<>(selectedAddOns);
-        selected.add(addOn);
-        synchro(selected);
-        installedAddOns.add(addOn);
-        this.selectedAddOns = selected;
-    }
-
-    /**
-     * adds an AddOn to the Downloaded list, removing it from the toInstall list
-     * @param addOn the addon to add to the list
-     */
-    public void addToDownloaded(AddOn addOn) {
-        boolean present = addOnsToInstall.stream()
-                .filter(toInstall -> {
-                    return toInstall.name.equals(addOn.name) ||
-                            addOn.getId().flatMap(id -> toInstall.getId().map(id::equals)).orElse(false);
-                })
-                .findAny()
-                .isPresent();
-        if (present) {
-           if (!addOnsToInstallDownloaded.stream()
-                   .anyMatch(downloaded -> downloaded.name.equals(addOn.name)
-                           || (addOn.id != -1 && addOn.id == downloaded.id)))  {
-                addOnsToInstallDownloaded.add(addOn);
-            }
-        }
-    }
-
-    /**
      * adds an addon to selected List
      * @param addOn the addon to Add
      */
@@ -318,65 +232,11 @@ public class AddOnInformationManager extends IzouModule {
     }
 
     /**
-     * returns all the AddOns that are downloaded but not yet active
-     * @return a list of Addons
-     */
-    public List<AddOn> getAddOnsToInstallDownloaded() {
-        return addOnsToInstallDownloaded;
-    }
-
-    /**
-     * sets the list of addons downloaded but not yet active
-     * @param addOns a list of addons
-     */
-    public void setAddOsToInstallDownloaded(List<AddOn> addOns) {
-        this.addOnsToInstallDownloaded = addOns;
-    }
-
-    /**
-     * gets the selected Addons
-     * @return the selected Addons
+     * returns the selected Addons
+     * @return the selected
      */
     public List<AddOn> getSelectedAddOns() {
         return selectedAddOns;
-    }
-
-    /**
-     * gets the selected Addons
-     * @return the selected Addons
-     */
-    public void setSelectedAddOns(List<AddOn> selectedAddOns) {
-        this.selectedAddOns = selectedAddOns;
-    }
-
-    /**
-     * sets teh Addons to delete
-     * @param addonsToDelete the addons to Delete
-     */
-    public void setAddonsToDelete(List<AddOn> addonsToDelete) {
-        this.addOnsToDelete = addonsToDelete;
-    }
-
-    /**
-     * sets the addons to delete by restart
-     * @param toDelete the addOns to delete
-     * @throws IOException when unable to write to the config-File (no change applied)
-     */
-    public void addAddonsToDelete(List<AddOn> toDelete) throws IllegalArgumentException, IOException {
-        Set<String> toDeleteNames = toDelete.stream()
-                .map(addOn -> addOn.name)
-                .collect(Collectors.toSet());
-        Set<String> installed = installedAddOns.stream()
-                .map(addOn -> addOn.name)
-                .collect(Collectors.toSet());
-        if (toDelete.stream().anyMatch(addOn -> !installed.contains(addOn.name))) {
-            throw new IllegalArgumentException("unable to delete addons that are not selected & installed");
-        }
-        ArrayList<AddOn> selected = new ArrayList<>(selectedAddOns);
-        selected.removeIf(addOn -> toDeleteNames.contains(addOn.name));
-        synchro(selected);
-        addOnsToDelete = toDelete;
-        this.selectedAddOns = selected;
     }
 
     /**
@@ -393,6 +253,7 @@ public class AddOnInformationManager extends IzouModule {
 
     public void initInternalConfigFile(InternalConfig internalConfig) {
         this.internalConfig = internalConfig;
+        this.selectedAddOns = internalConfig.addOns;
     }
 
     private void synchro(List<AddOn> selectedAddOns) throws IOException {

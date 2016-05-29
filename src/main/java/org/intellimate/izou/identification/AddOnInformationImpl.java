@@ -19,7 +19,7 @@ class AddOnInformationImpl implements AddOnInformation {
     private final Version sdkVersion;
     private final String provider;
     private final String id;
-    private final Optional<Integer> serverID;
+    private final int serverID;
     private final String artifactID;
 
     /**
@@ -50,7 +50,7 @@ class AddOnInformationImpl implements AddOnInformation {
         this.provider = provider;
         this.id = id;
         this.sdkVersion = new Version(sdkVersion);
-        this.serverID = serverID;
+        this.serverID = serverID.orElse(-1);
         this.artifactID = artifactID;
     }
 
@@ -111,7 +111,11 @@ class AddOnInformationImpl implements AddOnInformation {
      */
     @Override
     public Optional<Integer> getServerID() {
-        return serverID;
+        if (serverID == -1) {
+            return Optional.empty();
+        } else {
+            return Optional.of(serverID);
+        }
     }
 
     /**
