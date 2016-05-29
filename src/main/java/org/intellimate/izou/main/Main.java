@@ -143,7 +143,7 @@ public class Main {
         systemMail = initMail();
         securityManager = startSecurity(systemMail);
 
-        this.communicationManager = initCommunication(config, addonsConfig, disableLibFolder);
+        this.communicationManager = initCommunication(config, addonsConfig);
 
         if (communicationManager != null) {
             String rawVersion = this.getClass().getPackage().getImplementationVersion();
@@ -361,7 +361,7 @@ public class Main {
         return systemInitializer;
     }
 
-    private CommunicationManager initCommunication(String configPath, String addonsConfigPath, boolean disabledLib) {
+    private CommunicationManager initCommunication(String configPath, String addonsConfigPath) {
         if (configPath == null || addonsConfigPath == null) {
             return null;
         }
@@ -421,7 +421,7 @@ public class Main {
         boolean sslEnabled = "true".equals(config.ssl);
         CommunicationManager communicationManager = null;
         try {
-            communicationManager = new CommunicationManager(this, config.url, config.urlSocket, sslEnabled, disabledLib, config.token);
+            communicationManager = new CommunicationManager(this, config.url, config.urlSocket, sslEnabled, config.token);
         } catch (IllegalStateException e) {
             fileLogger.error("unable to instantiate CommunicationManager", e);
             System.exit(-1);

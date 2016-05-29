@@ -12,13 +12,12 @@ import java.util.Optional;
  */
 public class CommunicationManager extends IzouModule {
     private final ServerRequests serverRequests;
-    private final boolean disabledLib;
     private final RequestHandler requestHandler;
     private final Thread connectionThread;
     private boolean run = true;
     private final String izouServerURL;
 
-    public CommunicationManager(Main main, String izouServerURL, String izouSocketUrl, boolean ssl, boolean disabledLib, String refreshToken) throws IllegalStateException {
+    public CommunicationManager(Main main, String izouServerURL, String izouSocketUrl, boolean ssl, String refreshToken) throws IllegalStateException {
         super(main);
         if (ssl) {
             this.izouServerURL = "https://"+izouServerURL;
@@ -49,7 +48,6 @@ public class CommunicationManager extends IzouModule {
             }
         });
         connectionThread.start();
-        this.disabledLib = disabledLib;
     }
 
     /**
