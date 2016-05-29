@@ -81,7 +81,11 @@ public class ServerRequests extends IzouModule implements AddonThreadPoolUser {
         authTokenCreation = LocalDateTime.now();
     }
 
-    public void requests(Function<Request, Response> callback) {
+    /**
+     * processes the requests from the
+     * @param callback
+     */
+    void requests(Function<Request, Response> callback) {
         assureInit();
         SocketFactory socketFactory;
         if (ssl) {
@@ -186,7 +190,7 @@ public class ServerRequests extends IzouModule implements AddonThreadPoolUser {
         }
     }
 
-    public String getNewestVersion() throws ClientHandlerException, InvalidProtocolBufferException {
+    public Izou getNewestVersion() throws ClientHandlerException, InvalidProtocolBufferException {
         assureInit();
         ClientResponse jsonResponse = doGet("/izou");
         if (jsonResponse.getStatus() != 200) {
@@ -194,7 +198,7 @@ public class ServerRequests extends IzouModule implements AddonThreadPoolUser {
         }
         Izou.Builder builder = Izou.newBuilder();
         parser.merge(jsonResponse.getEntity(String.class), builder);
-        return builder.getVersion();
+        return builder.build();
     }
 
     public InputStream download(String url) throws ClientHandlerException {

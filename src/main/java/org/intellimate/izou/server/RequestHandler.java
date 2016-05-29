@@ -6,7 +6,9 @@ import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.config.AddOn;
+import org.intellimate.izou.identification.AddOnInformation;
 import org.intellimate.izou.main.Main;
+import org.intellimate.izou.main.UpdatesManager;
 import org.intellimate.izou.util.AddonThreadPoolUser;
 import org.intellimate.izou.util.IzouModule;
 import org.intellimate.server.proto.*;
@@ -29,7 +31,6 @@ import static org.bouncycastle.asn1.ua.DSTU4145NamedCurves.params;
  * @version 1.0
  */
 //TODO new status for update errored?
-//TODO: update the update method (respect toInstall/toDelete etc)
 class RequestHandler extends IzouModule implements AddonThreadPoolUser {
     private static JsonFormat.Printer PRINTER = JsonFormat.printer().includingDefaultValueFields();
     private static JsonFormat.Parser PARSER = JsonFormat.parser();
@@ -86,7 +87,6 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
                 return sendStringMessage("izou was unable to update the config file", 404);
             }
         }
-        getMain().getAddOnInformationManager().addToDownloaded(addOn);
 
         try {
             Files.list(getMain().getFileSystemManager().getNewLibLocation().toPath())
@@ -119,8 +119,6 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
             long copied = ByteStreams.copy(request.getData(), fos);
             if (copied != request.getContentLength()) {
                 file.delete();
-                getMain().getAddOnInformationManager().getAddOnsToInstallDownloaded()
-                        .removeIf(downloaded -> downloaded.name.equals(addOn.name) && downloaded.getVersion().equals(addOn.getVersion()));
                 return sendStringMessage("Body size does not equal advertised size", 400);
             }
         } catch (IOException e) {
@@ -139,24 +137,35 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
 
     private Response handleListApps(Request request) {
         if (request.getMethod().equals("GET")) {
+            List<AddOnInformation> installed = null;
+            List<AddOn> scheduledToDelete = null;
+            List<AddOn> scheduledToInstall = null;
+            try {
+                installed = getMain().getAddOnManager().getInstalledWithDependencies();
+                scheduledToDelete = getMain().getAddOnManager().getScheduledToDelete();
+                scheduledToInstall = getMain().getAddOnManager().getScheduledToInstall();
+            } catch (IOException e) {
+                debug("unable to access App File-Directories", e);
+                return sendStringMessage("unable to access App File-Directories", 500);
+            }
             IzouAppList appList = IzouAppList.newBuilder()
                     .addAllSelected(
-                            getMain().getAddOnInformationManager().getInstalledAddOns().stream()
+                            getMain().getAddOnInformationManager().getSelectedAddOns().stream()
                                     .map(this::toApp)
                                     .collect(Collectors.toList())
                     )
-                    .addAllToInstall(
-                            getMain().getAddOnInformationManager().getInstalledWithDependencies().stream()
+                    .addAllInstalled(
+                            installed.stream()
                                     .map(this::toApp)
                                     .collect(Collectors.toList())
                     )
                     .addAllToDelete(
-                            getMain().getAddOnInformationManager().getAddOnsToDelete().stream()
+                            scheduledToDelete.stream()
                                     .map(this::toApp)
                                     .collect(Collectors.toList())
                     )
                     .addAllToInstall(
-                            getMain().getAddOnInformationManager().getAddOnsToInstall().stream()
+                            scheduledToInstall.stream()
                                     .map(this::toApp)
                                     .collect(Collectors.toList())
                     )
@@ -236,6 +245,14 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
         return builder.build();
     }
 
+    private App toApp(AddOnInformation addOn) {
+        App.Builder builder = App.newBuilder()
+                .setName(addOn.getName())
+                .addVersions(App.AppVersion.newBuilder().setVersion(addOn.getVersion().toString()));
+        addOn.getServerID().ifPresent(builder::setId);
+        return builder.build();
+    }
+
     private AddOn toAddon(App app) {
         int id = -1;
         if (app.hasField(app.getDescriptorForType().findFieldByNumber(App.ID_FIELD_NUMBER))) {
@@ -283,7 +300,7 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
     private Response handleStatus(Request request) {
         if (request.getMethod().equals("GET")) {
             IzouInstanceStatus.Status status = IzouInstanceStatus.Status.RUNNING;
-            if (getMain().getCommunicationManager().isPresent() && getMain().getCommunicationManager().get().isSynchronizing()) {
+            if (getMain().getUpdatesManager().isPresent() && getMain().getUpdatesManager().get().isUpdating()) {
                 status = IzouInstanceStatus.Status.UPDATING;
             }
             IzouInstanceStatus statusMessage = IzouInstanceStatus.newBuilder().setStatus(status).build();
@@ -321,13 +338,13 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
     }
 
     private Response handleUpdateRequest() {
-        Optional<CommunicationManager> communicationManager = getMain().getCommunicationManager();
-        if (communicationManager.isPresent()) {
+        Optional<UpdatesManager> updatesManager = getMain().getUpdatesManager();
+        if (updatesManager.isPresent()) {
             IzouInstanceStatus statusMessage = IzouInstanceStatus.newBuilder().setStatus(IzouInstanceStatus.Status.UPDATING).build();
-            if (!communicationManager.get().isSynchronizing()) {
+            if (!updatesManager.get().isUpdating()) {
                 updateFuture = CompletableFuture.runAsync(() -> {
                     try {
-                        communicationManager.get().checkForUpdates();
+                        updatesManager.get().checkForUpdates();
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
