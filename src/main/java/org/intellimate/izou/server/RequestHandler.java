@@ -45,7 +45,7 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
         } else if (request.getUrl().equals("/status")) {
             return handleStatus(request);
         }
-        return sendStringMessage("illegal request, no suitable route found", 404);
+        return sendNotFound("illegal request, no suitable route found");
     }
 
     private Response handleApps(Request request) {
@@ -65,7 +65,7 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
                 return handleAddonHTTPRequest(request, devIDMatcher, id -> getMain().getAddOnInformationManager().getAddOn(id));
             }
         }
-        return sendStringMessage("illegal request, no suitable route found", 404);
+        return sendNotFound("no suitable route found");
     }
 
     private Response saveLocalApp(Request request, String url) {
@@ -82,7 +82,7 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
                 getMain().getAddOnInformationManager().addAddonToSelectedList(addOn);
             } catch (IOException e) {
                 error("unable to write to config file", e);
-                return sendStringMessage("izou was unable to update the config file", 404);
+                return sendStringMessage("izou was unable to update the config file", 500);
             }
         }
 
@@ -170,7 +170,7 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
                     .build();
             return messageHelper(appList, 200);
         } else if (request.getMethod().equals("PATCH")) {
-            return sendStringMessage("not implemented yet", 404);
+            return sendNotFound("not implemented yet");
             /*
             String json = request.getDataAsUTF8();
             IzouAppList.Builder builder = IzouAppList.newBuilder();
@@ -232,7 +232,7 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
                 return sendStringMessage("unable to write to config file", 404);
             }*/
         }
-        return sendStringMessage("illegal request, no suitable route found", 404);
+        return sendNotFound("illegal request, no suitable route found");
     }
 
     private App toApp(AddOn addOn) {
@@ -281,7 +281,7 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
 
         Optional<AddOnModel> addOnModel = getAddon.apply(id);
         if (!addOnModel.isPresent()) {
-            return sendStringMessage("no local app found with id: "+id, 404);
+            return sendNotFound("no local app found with id: "+id);
         }
 
         return addOnModel.map(addOnModelInstance -> submit(() -> Optional.ofNullable(addOnModelInstance.handleRequest(finalRequest))))
@@ -292,7 +292,7 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
                         return Optional.of(handleException(e, "an internal server error occured", 500));
                     }
                 })
-                .orElseGet(() -> sendStringMessage("illegal request, no suitable route found", 404));
+                .orElseGet(() -> sendNotFound("Addon does not server route: "+finalRequest.getUrl()));
     }
 
     private Response handleStatus(Request request) {
@@ -324,15 +324,15 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
             }
             //TODO implement (beware of concurrency!)
             switch (builder.getStatus()) {
-                case UNRECOGNIZED: return sendStringMessage("unable to parse message", 404);
+                case UNRECOGNIZED: return sendStringMessage("unable to parse message", 400);
                 case UPDATING: return handleUpdateRequest();
-                case RESTARTING: return sendStringMessage("not implemented yet", 404);
+                case RESTARTING: return sendStringMessage("not implemented yet", 501);
                 case RUNNING: IzouInstanceStatus status = IzouInstanceStatus.newBuilder().setStatus(IzouInstanceStatus.Status.RUNNING).build();
                     return messageHelper(status, 200);
-                case DISABLED: return sendStringMessage("not implemented yet", 404);
+                case DISABLED: return sendStringMessage("not implemented yet", 501);
             }
         }
-        return sendStringMessage("illegal request, no suitable route found", 404);
+        return sendNotFound("illegal request, no suitable route found");
     }
 
     private Response handleUpdateRequest() {
@@ -350,7 +350,7 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
             }
             return messageHelper(statusMessage, 200);
         } else {
-            return sendStringMessage("communication to server is not active", 404);
+            return sendNotFound("communication to server is not active");
         }
     }
 
@@ -361,6 +361,14 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
                 .build();
         debug(message, throwable);
         return messageHelper(build, status);
+    }
+
+    private Response sendNotFound(String detail) {
+        ErrorResponse errorResponse = ErrorResponse.newBuilder()
+                .setCode("not found")
+                .setDetail(detail)
+                .build();
+        return messageHelper(errorResponse, 404);
     }
 
     private Response messageHelper(Message message, int status) {

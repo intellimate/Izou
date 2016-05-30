@@ -1,7 +1,7 @@
 #the installed apps. You can modify them here or through the website
-addons:
+addOns:
 - name:
   version:
   id:
 
-state: "running"
+state: "RUNNING"

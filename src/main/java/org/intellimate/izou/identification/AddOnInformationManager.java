@@ -270,6 +270,7 @@ public class AddOnInformationManager extends IzouModule {
         this.internalConfig = internalConfig.createNew(addOns);
         try (FileWriter writer = new FileWriter(addonConfigFile)) {
             YamlWriter yamlWriter = new YamlWriter(writer);
+            yamlWriter.getConfig().setPropertyElementType(InternalConfig.class, "addOns", AddOn.class);
             yamlWriter.write(internalConfig);
         }
     }

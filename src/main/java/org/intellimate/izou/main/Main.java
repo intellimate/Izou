@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 import org.intellimate.izou.activator.ActivatorManager;
 import org.intellimate.izou.addon.AddOnManager;
 import org.intellimate.izou.addon.AddOnModel;
+import org.intellimate.izou.config.AddOn;
 import org.intellimate.izou.config.Config;
 import org.intellimate.izou.config.InternalConfig;
 import org.intellimate.izou.config.Version;
@@ -396,6 +397,7 @@ public class Main {
 
         try {
             reader = new YamlReader(new FileReader(addonsConfigFile));
+            reader.getConfig().setPropertyElementType(InternalConfig.class, "addOns", AddOn.class);
         } catch (FileNotFoundException e) {
             fileLogger.error("unable to load addons config", e);
             System.out.println(-1);
@@ -410,6 +412,7 @@ public class Main {
             System.out.println(-1);
             return null;
         }
+        internalConfig.addOns.removeIf(addOn -> addOn.name.isEmpty());
         addOnInformationManager.initInternalConfigFile(internalConfig);
         try {
             state = IzouInstanceStatus.Status.valueOf(internalConfig.state);

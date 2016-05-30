@@ -147,7 +147,7 @@ class SynchronizationManager extends IzouModule {
                         .map(Optional::get)
                         .collect(Collectors.toList());
 
-                return downloadedApps.isEmpty();
+                return !downloadedApps.isEmpty();
             } else {
                 return false;
             }

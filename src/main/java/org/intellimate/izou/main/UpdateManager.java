@@ -32,12 +32,12 @@ public class UpdateManager extends IzouModule {
         super(main);
         this.disabledUpdate = disabledUpdate;
         this.disabledLib = disabledLib;
+        izouSynchronization = new IzouSynchronization(main, currentIzouVersion, communicationManager.getServerRequests());
         if (!disabledUpdate) {
             timer = init();
         } else {
             timer = null;
         }
-        izouSynchronization = new IzouSynchronization(main, currentIzouVersion, communicationManager.getServerRequests());
     }
 
     private Timer init() {
@@ -89,7 +89,7 @@ public class UpdateManager extends IzouModule {
             boolean mustRestart = false;
             try {
                 mustRestart = izouSynchronization.updateIzou();
-            } catch (ClientHandlerException e) {
+            } catch (ClientHandlerException | IllegalStateException e) {
                 error("unable to update izou", e);
             }
             if (mustRestart) {

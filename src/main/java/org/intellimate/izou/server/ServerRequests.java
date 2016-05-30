@@ -114,6 +114,9 @@ public class ServerRequests extends IzouModule implements AddonThreadPoolUser {
                     continue;
                 }
                 int bodySize = (int) httpRequest.getBodySize();
+                if (bodySize == -1) {
+                    bodySize = 0;
+                }
                 InputStream stream = ByteStreams.limit(socket.getInputStream(), bodySize);
                 InputStream streamWithoutClose = new DelegatingInputstream(stream);
                 RequestImpl request = new RequestImpl(httpRequest, streamWithoutClose, bodySize);

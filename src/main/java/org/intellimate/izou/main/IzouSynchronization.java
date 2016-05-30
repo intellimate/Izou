@@ -27,7 +27,7 @@ class IzouSynchronization extends IzouModule {
         this.serverRequests = serverRequests;
     }
 
-    boolean updateIzou() throws IOException, ClientHandlerException {
+    boolean updateIzou() throws IOException, ClientHandlerException, IllegalStateException {
         Izou currentIzou = serverRequests.getNewestVersion();
         File izouFile = main.getFileSystemManager().getIzouJarLocation();
         if (new Version(currentIzou.getVersion()).compareTo(currentVersion) != 0) {
