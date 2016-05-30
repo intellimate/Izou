@@ -204,23 +204,33 @@ class SynchronizationManager extends IzouModule {
                     }
                 });
 
-        newApps.forEach(app -> {
-            String url = app.getVersions(0).getDownloadLink();
-            try {
-                InputStream inputStream = serverRequests.download(url);
-                File file = new File(getMain().getFileSystemManager().getNewLibLocation(), app.getName() + "-" + app.getVersions(0).getVersion() + ".zip");
-                if (!file.exists()) {
-                    file.createNewFile();
-                }
-                FileOutputStream fileOutputStream = new FileOutputStream(file);
-                ByteStreams.copy(inputStream, fileOutputStream);
-                inputStream.close();
-                fileOutputStream.close();
-            } catch (ClientHandlerException e) {
-                error("unable to download from "+url, e);
-            } catch (IOException e) {
-                error("unable to create file ", e);
-            }
+        newApps.stream()
+                .filter(app -> !app.getVersionsList().isEmpty())
+                .forEach(app -> {
+                    App.AppVersion newestVersion = app.getVersionsList().stream()
+                            .reduce((appVersion, appVersion2) -> {
+                                if (new Version(appVersion.getVersion()).compareTo(new Version(appVersion2.getVersion())) > 0) {
+                                    return appVersion;
+                                } else {
+                                    return appVersion2;
+                                }
+                            }).get();
+                    String url = newestVersion.getDownloadLink();
+                    try {
+                        InputStream inputStream = serverRequests.download(url);
+                        File file = new File(getMain().getFileSystemManager().getNewLibLocation(), app.getName() + "-" + newestVersion.getVersion() + ".zip");
+                        if (!file.exists()) {
+                            file.createNewFile();
+                        }
+                        FileOutputStream fileOutputStream = new FileOutputStream(file);
+                        ByteStreams.copy(inputStream, fileOutputStream);
+                        inputStream.close();
+                        fileOutputStream.close();
+                    } catch (ClientHandlerException e) {
+                        error("unable to download from "+url, e);
+                    } catch (IOException e) {
+                        error("unable to create file ", e);
+                    }
         });
 
         return newApps;
