@@ -59,7 +59,6 @@ public class AddOnInformationManager extends IzouModule {
     public void registerAddOn(AddOnModel addOn) {
         PluginDescriptor descriptor = addOn.getPlugin().getDescriptor();
 
-        String name = descriptor.getTitle();
         String version = descriptor.getVersion().toString();
         String provider = descriptor.getProvider();
         String id = descriptor.getPluginId();
@@ -68,7 +67,7 @@ public class AddOnInformationManager extends IzouModule {
         Optional<Integer> serverID = descriptor.getServerID();
 
         try {
-            AddOnInformation addOnInformation = new AddOnInformationImpl(name, provider, version, id, sdkVersion,
+            AddOnInformation addOnInformation = new AddOnInformationImpl(provider, version, id, sdkVersion,
                     serverID, artifactID);
             addOnInformations.add(addOnInformation);
             addOns.add(addOn);

@@ -22,7 +22,7 @@ public class AddOn {
     }
 
     public AddOn(File file) {
-        Pattern pattern = Pattern.compile("(?<name>\\w+)-(?<version>[\\.\\d]+)-.+");
+        Pattern pattern = Pattern.compile("(?<name>\\w+)-(?<version>[\\.\\d]+)(-delete)?(\\.zip)?");
         Matcher matcher = pattern.matcher(file.getName());
         if (!matcher.matches()) {
             throw new IllegalArgumentException("name does not match regex: " + file.getName());

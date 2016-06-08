@@ -37,6 +37,7 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
  */
 //TODO what about entries where there is no id given and that are not installed?
 //TODO handle mutiple addons with different id's
+//TODO does it delete folders when synchronizing?
 @SuppressWarnings("Duplicates")
 class SynchronizationManager extends IzouModule {
     private final Lock lock = new ReentrantLock();
@@ -161,7 +162,7 @@ class SynchronizationManager extends IzouModule {
         List<AddOnInformation> allInstalled = getMain().getAddOnManager().getInstalledWithDependencies();
         List<App> newApps = newestAddOnAndDependency.values().stream()
                 .filter(app -> allInstalled.stream()
-                        .filter(addOn -> addOn.getName().equals(app.getName()))
+                        .filter(addOn -> addOn.getArtifactID().equals(app.getName()))
                         .findAny()
                         .filter(addOn -> {
                             return getNewestVersion(app)
@@ -261,18 +262,18 @@ class SynchronizationManager extends IzouModule {
     private List<AddOnInformation> createDeleteFiles(Map<Integer, App> newestAddOnAndDependency) throws IOException {
         List<AddOnInformation> allInstalled = getMain().getAddOnManager().getInstalledWithDependencies();
         Set<String> selectedNames = allInstalled.stream()
-                .map(AddOnInformation::getName)
+                .map(AddOnInformation::getArtifactID)
                 .collect(Collectors.toSet());
 
         List<AddOnInformation> finalToDeleteList = allInstalled.stream()
-                .filter(addOn -> !selectedNames.contains(addOn.getName()))
+                .filter(addOn -> !selectedNames.contains(addOn.getArtifactID()))
                 .filter(addOn -> addOn.getServerID()
                         .map(id -> !newestAddOnAndDependency.containsKey(id))
                         .orElse(true)
                 ).collect(Collectors.toList());
 
         finalToDeleteList.forEach(addOn -> {
-                    File file = new File(getMain().getFileSystemManager().getNewLibLocation(), addOn.getName() + "-" + addOn.getVersion() + "-delete.zip");
+                    File file = new File(getMain().getFileSystemManager().getNewLibLocation(), addOn.getArtifactID() + "-" + addOn.getVersion() + "-delete.zip");
                     if (!file.exists()) {
                         try {
                             file.createNewFile();

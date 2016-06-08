@@ -245,7 +245,7 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
 
     private App toApp(AddOnInformation addOn) {
         App.Builder builder = App.newBuilder()
-                .setName(addOn.getName())
+                .setName(addOn.getArtifactID())
                 .addVersions(App.AppVersion.newBuilder().setVersion(addOn.getVersion().toString()));
         addOn.getServerID().ifPresent(builder::setId);
         return builder.build();
