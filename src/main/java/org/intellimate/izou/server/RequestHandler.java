@@ -7,6 +7,7 @@ import com.google.protobuf.util.JsonFormat;
 import org.intellimate.izou.addon.AddOnModel;
 import org.intellimate.izou.config.AddOn;
 import org.intellimate.izou.identification.AddOnInformation;
+import org.intellimate.izou.identification.AddOnInformationManager;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.main.UpdateManager;
 import org.intellimate.izou.util.AddonThreadPoolUser;
@@ -138,104 +139,76 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
 
     private Response handleListApps(Request request) {
         if (request.getMethod().equals("GET")) {
-            List<AddOnInformation> installed = null;
-            List<AddOn> scheduledToDelete = null;
-            List<AddOn> scheduledToInstall = null;
-            try {
-                installed = getMain().getAddOnManager().getInstalledWithDependencies();
-                scheduledToDelete = getMain().getAddOnManager().getScheduledToDelete();
-                scheduledToInstall = getMain().getAddOnManager().getScheduledToInstall();
-            } catch (IOException e) {
-                debug("unable to access App File-Directories", e);
-                return sendStringMessage("unable to access App File-Directories", 500);
-            }
-            IzouAppList appList = IzouAppList.newBuilder()
-                    .addAllSelected(
-                            getMain().getAddOnInformationManager().getSelectedAddOns().stream()
-                                    .map(this::toApp)
-                                    .collect(Collectors.toList())
-                    )
-                    .addAllInstalled(
-                            installed.stream()
-                                    .map(this::toApp)
-                                    .collect(Collectors.toList())
-                    )
-                    .addAllToDelete(
-                            scheduledToDelete.stream()
-                                    .map(this::toApp)
-                                    .collect(Collectors.toList())
-                    )
-                    .addAllToInstall(
-                            scheduledToInstall.stream()
-                                    .map(this::toApp)
-                                    .collect(Collectors.toList())
-                    )
-                    .build();
-            return sendMessage(appList, 200);
+            return returnAddonsList();
         } else if (request.getMethod().equals("PATCH")) {
-            return sendNotFound("not implemented yet");
-            /*
-            String json = request.getDataAsUTF8();
-            IzouAppList.Builder builder = IzouAppList.newBuilder();
+            Optional<String> json = null;
             try {
-                PARSER.merge(json, builder);
-            } catch (InvalidProtocolBufferException e) {
-                error("unable to parse message", e);
-                return sendStringMessage("unable to parse message", 400);
-            }
-            IzouAppList list = builder.build();
-            AddOnInformationManager informationManager = getMain().getAddOnInformationManager();
-
-            if (list.getInstalledList().size() != informationManager.getInstalledAddOns().size()) {
-                return sendStringMessage("patched installed list is not the same size as the local one", 400);
-            }
-
-            Set<Integer> installedIds = informationManager.getInstalledAddOns().stream()
-                    .map(AddOn::getId)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .collect(Collectors.toSet());
-
-            Set<String> installedNames = informationManager.getInstalledAddOns().stream()
-                    .map(addOn -> addOn.name)
-                    .collect(Collectors.toSet());
-
-            List<AddOn> newToInstall = list.getToInstallList().stream()
-                    .map(this::toAddon)
-                    .collect(Collectors.toList());
-
-            List<AddOn> newToDelete = list.getToDeleteList().stream()
-                    .map(this::toAddon)
-                    .collect(Collectors.toList());
-
-            boolean deleteWithoutInstalled = newToDelete.stream()
-                    .filter(addOn -> addOn.getId().map(id -> !installedIds.contains(id)).orElse(false) || !installedNames.contains(addOn.name))
-                    .findAny().isPresent();
-
-            if (deleteWithoutInstalled) {
-                return sendStringMessage("delete app list contains apps that are not installed", 400);
-            }
-
-            boolean alreadyInstalled = newToInstall.stream()
-                    .anyMatch(addOn -> addOn.getId().map(installedIds::contains).orElse(false) || installedNames.contains(addOn.name));
-
-            if (alreadyInstalled) {
-                return sendStringMessage("toInstall app list contains installed apps", 400);
-            }
-
-            if (newToInstall.stream().anyMatch(addon -> !addon.getId().isPresent())) {
-                return sendStringMessage("toInstall app list contains apps without ids", 400);
-            }
-
-            try {
-                informationManager.setAddonsToDelete(newToDelete);
-                informationManager.setAddOnsToInstall(newToInstall);
+                json = request.getDataAsUTF8String();
             } catch (IOException e) {
-                error("unable to write to config file", e);
-                return sendStringMessage("unable to write to config file", 404);
-            }*/
+                return sendBadRequest("unable to read request body");
+            }
+            if (json.isPresent()) {
+                IzouAppList.Builder builder = IzouAppList.newBuilder();
+                try {
+                    PARSER.merge(json.get(), builder);
+                } catch (InvalidProtocolBufferException e) {
+                    error("unable to parse message", e);
+                    return sendInternalServerError(e);
+                }
+                IzouAppList list = builder.build();
+                List<AddOn> selected = list.getSelectedList().stream()
+                        .map(this::toAddon)
+                        .collect(Collectors.toList());
+                try {
+                    getMain().getAddOnInformationManager()
+                            .setSelectedList(selected);
+                } catch (IOException e) {
+                    error("unable to to save config", e);
+                    return sendInternalServerError(e);
+                }
+                return returnAddonsList();
+            } else {
+                return sendBadRequest("unable to read request body");
+            }
         }
         return sendNotFound("illegal request, no suitable route found");
+    }
+
+    private Response returnAddonsList() {
+        List<AddOnInformation> installed = null;
+        List<AddOn> scheduledToDelete = null;
+        List<AddOn> scheduledToInstall = null;
+        try {
+            installed = getMain().getAddOnManager().getInstalledWithDependencies();
+            scheduledToDelete = getMain().getAddOnManager().getScheduledToDelete();
+            scheduledToInstall = getMain().getAddOnManager().getScheduledToInstall();
+        } catch (IOException e) {
+            debug("unable to access App File-Directories", e);
+            return sendStringMessage("unable to access App File-Directories", 500);
+        }
+        IzouAppList appList = IzouAppList.newBuilder()
+                .addAllSelected(
+                        getMain().getAddOnInformationManager().getSelectedAddOns().stream()
+                                .map(this::toApp)
+                                .collect(Collectors.toList())
+                )
+                .addAllInstalled(
+                        installed.stream()
+                                .map(this::toApp)
+                                .collect(Collectors.toList())
+                )
+                .addAllToDelete(
+                        scheduledToDelete.stream()
+                                .map(this::toApp)
+                                .collect(Collectors.toList())
+                )
+                .addAllToInstall(
+                        scheduledToInstall.stream()
+                                .map(this::toApp)
+                                .collect(Collectors.toList())
+                )
+                .build();
+        return sendMessage(appList, 200);
     }
 
     private App toApp(AddOn addOn) {
@@ -407,11 +380,7 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
     }
 
     private Response sendErrorDisabled() {
-        ErrorResponse errorResponse = ErrorResponse.newBuilder()
-                .setCode("bad request")
-                .setDetail("not allowed during disabled-state")
-                .build();
-        return sendMessage(errorResponse, 400);
+        return sendBadRequest("not allowed during disabled-state");
     }
 
     private Response sendNotFound(String detail) {
@@ -428,6 +397,14 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
                 .setDetail(cause.getMessage())
                 .build();
         return sendMessage(errorResponse, 500);
+    }
+
+    private Response sendBadRequest(String detail) {
+        ErrorResponse errorResponse = ErrorResponse.newBuilder()
+                .setCode("bad request")
+                .setDetail(detail)
+                .build();
+        return sendMessage(errorResponse, 400);
     }
 
     private Response sendMessage(Message message, int status) {

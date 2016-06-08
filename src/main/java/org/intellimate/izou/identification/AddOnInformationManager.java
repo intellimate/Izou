@@ -231,6 +231,15 @@ public class AddOnInformationManager extends IzouModule {
     }
 
     /**
+     * sets the selected list
+     * @param addOns the addons to set
+     */
+    public void setSelectedList(List<AddOn> addOns) throws IOException {
+        synchro(addOns);
+        this.selectedAddOns = addOns;
+    }
+
+    /**
      * returns the selected Addons
      * @return the selected
      */
