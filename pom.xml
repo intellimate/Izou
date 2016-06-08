@@ -6,7 +6,7 @@
 
     <groupId>org.intellimate.izou</groupId>
     <artifactId>izou</artifactId>
-    <version>1.16.4</version>
+    <version>1.16.5</version>
     <packaging>jar</packaging>
     <name>Izou</name>
     <description>Izou is a framework used for an addon-based personal assistant</description>
@@ -79,7 +79,7 @@
         <dependency>
             <groupId>org.intellimate.izou</groupId>
             <artifactId>pf4j</artifactId>
-            <version>1.18.4</version>
+            <version>1.18.6</version>
             <!-- we are releasing a jar with dependencies, version changes require a new Izou Version -->
         </dependency>
         <dependency>

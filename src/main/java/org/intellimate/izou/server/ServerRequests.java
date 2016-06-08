@@ -38,8 +38,6 @@ import java.util.stream.Collectors;
  * @author LeanderK
  * @version 1.0
  */
-
-//TODO: os via System.getProperty("os.arch") (arm on arm)
 public class ServerRequests extends IzouModule implements AddonThreadPoolUser {
     private final String izouServerURL;
     private final String izouSocketUrl;
@@ -220,7 +218,16 @@ public class ServerRequests extends IzouModule implements AddonThreadPoolUser {
 
     public Optional<App> getAddonAndDependencies(int id) throws ClientHandlerException {
         assureInit();
-        ClientResponse app = doGet("/apps/" + id);
+        Function<String, ClientResponse> doGetWithPlatform = route -> {
+            WebResource.Builder builder = client.resource(izouServerURL + route)
+                    .queryParam("platform", System.getProperty("os.arch"))
+                    .header("Authorization", "Bearer " + getAuthToken())
+                    .accept("application/json");
+
+            return builder.get(ClientResponse.class);
+        };
+
+        ClientResponse app = doGetWithPlatform.apply("/apps/" + id);
         if (app.getStatus() == 404) {
             debug("unable to retrieve addon"+id);
             return Optional.empty();
@@ -247,7 +254,7 @@ public class ServerRequests extends IzouModule implements AddonThreadPoolUser {
                     Version parsed = new Version(version.getVersion());
                     try {
                         ClientResponse response =
-                                doGet("apps/" + id + "/" + parsed.getMajor() + "/" + parsed.getMinor() + "/" + parsed.getPatch());
+                                doGetWithPlatform.apply("apps/" + id + "/" + parsed.getMajor() + "/" + parsed.getMinor() + "/" + parsed.getPatch());
                         App.AppVersion.Builder builder = App.AppVersion.newBuilder();
                         try {
                             parser.merge(response.getEntity(String.class), builder);
@@ -271,7 +278,7 @@ public class ServerRequests extends IzouModule implements AddonThreadPoolUser {
     private ClientResponse doGet(String route) throws ClientHandlerException {
         assureInit();
 
-        WebResource.Builder builder = client.resource(izouServerURL + "/authentication/refreshIzou/izou")
+        WebResource.Builder builder = client.resource(izouServerURL + route)
                 .header("Authorization", "Bearer " + getAuthToken())
                 .accept("application/json");
 

@@ -41,6 +41,9 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
 
     Response handleRequests(Request request) {
         if (request.getUrl().startsWith("/apps")) {
+            if (getMain().getState().equals(IzouInstanceStatus.Status.DISABLED)) {
+                return sendErrorDisabled();
+            }
             return handleApps(request);
         } else if (request.getUrl().equals("/status")) {
             return handleStatus(request);
@@ -168,7 +171,7 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
                                     .collect(Collectors.toList())
                     )
                     .build();
-            return messageHelper(appList, 200);
+            return sendMessage(appList, 200);
         } else if (request.getMethod().equals("PATCH")) {
             return sendNotFound("not implemented yet");
             /*
@@ -260,9 +263,6 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
     }
 
     private Response handleAddonHTTPRequest(Request httpRequest, Matcher matcher, Function<String, Optional<AddOnModel>> getAddon) {
-        if (getMain().getState().equals(IzouInstanceStatus.Status.DISABLED)) {
-            //TODO: further coding? or another place?
-        }
         String id = matcher.group("id");
         Boolean sameApp = httpRequest.getParams().entrySet().stream()
                 .filter(param -> param.getKey().equals("app"))
@@ -301,8 +301,11 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
             if (getMain().getUpdateManager().isPresent() && getMain().getUpdateManager().get().isUpdating()) {
                 status = IzouInstanceStatus.Status.UPDATING;
             }
+            if (getMain().getState().equals(IzouInstanceStatus.Status.DISABLED)) {
+                status = IzouInstanceStatus.Status.DISABLED;
+            }
             IzouInstanceStatus statusMessage = IzouInstanceStatus.newBuilder().setStatus(status).build();
-            return messageHelper(statusMessage, 200);
+            return sendMessage(statusMessage, 200);
         } else if (request.getMethod().equals("PATCH")) {
             String json = null;
             try {
@@ -322,17 +325,57 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
                 error("unable to parse message", e);
                 return sendStringMessage("unable to parse message", 400);
             }
+            if (getMain().getState().equals(IzouInstanceStatus.Status.DISABLED)) {
+                if (builder.getStatus() == IzouInstanceStatus.Status.DISABLED) {
+                    return sendMessage(builder.build(), 200);
+                }
+            }
             //TODO implement (beware of concurrency!)
             switch (builder.getStatus()) {
                 case UNRECOGNIZED: return sendStringMessage("unable to parse message", 400);
                 case UPDATING: return handleUpdateRequest();
                 case RESTARTING: return sendStringMessage("not implemented yet", 501);
-                case RUNNING: IzouInstanceStatus status = IzouInstanceStatus.newBuilder().setStatus(IzouInstanceStatus.Status.RUNNING).build();
-                    return messageHelper(status, 200);
-                case DISABLED: return sendStringMessage("not implemented yet", 501);
+                case RUNNING: return handleRunningRequests();
+                case DISABLED: return handleDisabledRequests();
             }
         }
         return sendNotFound("illegal request, no suitable route found");
+    }
+
+    private Response handleDisabledRequests() {
+        if (!getMain().getState().equals(IzouInstanceStatus.Status.DISABLED)) {
+            try {
+                getMain().getAddOnInformationManager().setNewStateToConfig(IzouInstanceStatus.Status.DISABLED);
+            } catch (IOException e) {
+                error("unable to update config-file", e);
+                return sendInternalServerError(e);
+            }
+            //TODO: more beautiful! but this is hard
+            System.exit(0);
+            IzouInstanceStatus status = IzouInstanceStatus.newBuilder().setStatus(IzouInstanceStatus.Status.DISABLED).build();
+            return sendMessage(status, 200);
+        } else {
+            IzouInstanceStatus status = IzouInstanceStatus.newBuilder().setStatus(IzouInstanceStatus.Status.DISABLED).build();
+            return sendMessage(status, 200);
+        }
+    }
+
+    private Response handleRunningRequests() {
+        if (getMain().getState().equals(IzouInstanceStatus.Status.DISABLED)) {
+            try {
+                getMain().getAddOnInformationManager().setNewStateToConfig(IzouInstanceStatus.Status.RUNNING);
+            } catch (IOException e) {
+                error("unable to update config-file", e);
+                return sendInternalServerError(e);
+            }
+            //TODO: more beautiful! but this is hard
+            System.exit(0);
+            IzouInstanceStatus status = IzouInstanceStatus.newBuilder().setStatus(IzouInstanceStatus.Status.RUNNING).build();
+            return sendMessage(status, 200);
+        } else {
+            IzouInstanceStatus status = IzouInstanceStatus.newBuilder().setStatus(IzouInstanceStatus.Status.RUNNING).build();
+            return sendMessage(status, 200);
+        }
     }
 
     private Response handleUpdateRequest() {
@@ -348,7 +391,7 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
                     }
                 });
             }
-            return messageHelper(statusMessage, 200);
+            return sendMessage(statusMessage, 200);
         } else {
             return sendNotFound("communication to server is not active");
         }
@@ -360,7 +403,15 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
                 .setDetail(throwable.getMessage())
                 .build();
         debug(message, throwable);
-        return messageHelper(build, status);
+        return sendMessage(build, status);
+    }
+
+    private Response sendErrorDisabled() {
+        ErrorResponse errorResponse = ErrorResponse.newBuilder()
+                .setCode("bad request")
+                .setDetail("not allowed during disabled-state")
+                .build();
+        return sendMessage(errorResponse, 400);
     }
 
     private Response sendNotFound(String detail) {
@@ -368,15 +419,23 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
                 .setCode("not found")
                 .setDetail(detail)
                 .build();
-        return messageHelper(errorResponse, 404);
+        return sendMessage(errorResponse, 404);
     }
 
-    private Response messageHelper(Message message, int status) {
+    private Response sendInternalServerError(Throwable cause) {
+        ErrorResponse errorResponse = ErrorResponse.newBuilder()
+                .setCode("internal Server Error")
+                .setDetail(cause.getMessage())
+                .build();
+        return sendMessage(errorResponse, 500);
+    }
+
+    private Response sendMessage(Message message, int status) {
         try {
             return new ResponseImpl(status, new HashMap<>(), "application/json", PRINTER.print(message).getBytes(Charset.forName("UTF-8")));
         } catch (InvalidProtocolBufferException e) {
             error("unable to print message", e);
-            return sendStringMessage("Izou: unable to print message in messageHelper", 500);
+            return sendStringMessage("Izou: unable to print message in sendMessage", 500);
         }
     }
 
