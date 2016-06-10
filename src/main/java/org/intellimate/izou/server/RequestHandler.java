@@ -10,6 +10,7 @@ import org.intellimate.izou.identification.AddOnInformation;
 import org.intellimate.izou.identification.AddOnInformationManager;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.main.UpdateManager;
+import org.intellimate.izou.sdk.server.NotFoundException;
 import org.intellimate.izou.util.AddonThreadPoolUser;
 import org.intellimate.izou.util.IzouModule;
 import org.intellimate.server.proto.*;
@@ -24,6 +25,8 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static javafx.scene.input.KeyCode.M;
 
 /**
  * this class takes all the request from the server to Izou and handles them where possible or delegates to an addon
@@ -57,6 +60,11 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
             return handleApps(request);
         } else if (request.getUrl().equals("/status")) {
             return handleStatus(request);
+        } else if (request.getUrl().equals("/log")) {
+            if (getMain().getState().equals(IzouInstanceStatus.Status.DISABLED)) {
+                return sendErrorDisabled();
+            }
+            return handleLog(request);
         }
         return sendNotFound("illegal request, no suitable route found");
     }
@@ -424,6 +432,32 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
         }
     }
 
+    /**
+     * handles the request to {@code /log}.
+     * @param request the request
+     * @return the reponse
+     */
+    private Response handleLog(Request request) {
+        File file = new File(getMain().getFileSystemManager().getIzouParentLocation(), "logs/org.intellimate.izou.log");
+        if (!file.exists()) {
+            return sendNotFound("log file not found");
+        }
+        if (!request.getMethod().toLowerCase().equals("get")) {
+            return sendMethodNotAllows(request.getMethod());
+        }
+        return sendFile(file, "text/plain", 200);
+    }
+
+    private Response sendFile(File file, String contentType, int status) {
+        FileInputStream fileInputStream;
+        try {
+            fileInputStream = new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+            return sendNotFound("file not found");
+        }
+        return new ResponseImpl(status, new HashMap<>(), contentType, file.length(), fileInputStream);
+    }
+
     private Response handleException(Throwable throwable, String message, int status) {
         ErrorResponse build = ErrorResponse.newBuilder()
                 .setCode(message)
@@ -443,6 +477,14 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
                 .setDetail(detail)
                 .build();
         return sendMessage(errorResponse, 404);
+    }
+
+    private Response sendMethodNotAllows(String method) {
+        ErrorResponse errorResponse = ErrorResponse.newBuilder()
+                .setCode("method not allowed")
+                .setDetail(String.format("method %s is not allowed", method))
+                .build();
+        return sendMessage(errorResponse, 405);
     }
 
     private Response sendInternalServerError(Throwable cause) {
