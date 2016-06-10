@@ -30,7 +30,7 @@ import static org.bouncycastle.asn1.x500.style.RFC4519Style.l;
 public class AddOnInformationManager extends IzouModule {
     private final IdentifiableSet<AddOnInformation> addOnInformations;
     private final IdentifiableSet<AddOnModel> addOns;
-    private InternalConfig internalConfig;
+    private InternalConfig internalConfig = null;
     private List<AddOn> selectedAddOns = new ArrayList<>();
     private final String addonConfigFile;
 
@@ -259,7 +259,14 @@ public class AddOnInformationManager extends IzouModule {
         writeToFile(finalAddons);
     }
 
-    public void initInternalConfigFile(InternalConfig internalConfig) {
+    /**
+     * initialises the InternalConfig
+     * @param internalConfig the InternalConfig to init to
+     */
+    public synchronized void initInternalConfigFile(InternalConfig internalConfig) {
+        if (this.internalConfig != null) {
+            throw new IllegalStateException("InternalConfig is already set");
+        }
         this.internalConfig = internalConfig;
         this.selectedAddOns = internalConfig.addOns;
     }
