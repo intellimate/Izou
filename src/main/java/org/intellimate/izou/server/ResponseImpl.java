@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * the implementation for {@link Response}
  * @author LeanderK
  * @version 1.0
  */

@@ -27,6 +27,8 @@ import java.net.Socket;
 import java.nio.charset.Charset;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -64,6 +66,10 @@ public class ServerRequests extends IzouModule implements AddonThreadPoolUser {
         this.client = Client.create();
     }
 
+    /**
+     * retrieves the refresh-token from the server
+     * @throws ClientHandlerException if an error occured communication with the server
+     */
     void refreshToken() throws ClientHandlerException {
         WebResource.Builder builder = client.resource(izouServerURL + "/authentication/refreshIzou/izou")
                 .header("Authorization", "Bearer " + refreshToken)
@@ -117,7 +123,7 @@ public class ServerRequests extends IzouModule implements AddonThreadPoolUser {
                 }
                 InputStream stream = ByteStreams.limit(socket.getInputStream(), bodySize);
                 InputStream streamWithoutClose = new DelegatingInputstream(stream);
-                RequestImpl request = new RequestImpl(httpRequest, streamWithoutClose, bodySize);
+                RequestImpl request = new RequestImpl(httpRequest, streamWithoutClose, (int) httpRequest.getBodySize());
                 Response response;
                 try {
                     response = callback.apply(request);
@@ -130,12 +136,16 @@ public class ServerRequests extends IzouModule implements AddonThreadPoolUser {
                 while (result != -1) {
                     result = streamWithoutClose.read();
                 }
+                Map<String, List<String>> headers = response.getHeaders();
+                if (headers == null) {
+                    headers = new HashMap<>();
+                }
                 org.intellimate.server.proto.HttpResponse.newBuilder()
                         .setContentType(response.getContentType())
                         .setStatus(response.getStatus())
                         .setBodySize(response.getDataSize())
                         .addAllHeaders(
-                                response.getHeaders().entrySet().stream()
+                                headers.entrySet().stream()
                                         .map(entry ->
                                                 org.intellimate.server.proto.HttpResponse.Header.newBuilder()
                                                         .setKey(entry.getKey())
@@ -191,6 +201,12 @@ public class ServerRequests extends IzouModule implements AddonThreadPoolUser {
         }
     }
 
+    /**
+     * returns the message specifying the newest version for izou
+     * @return a the newest Izou-version
+     * @throws ClientHandlerException if an exception occurred communication with the server
+     * @throws InvalidProtocolBufferException if unabble to parse the response
+     */
     public Izou getNewestVersion() throws ClientHandlerException, InvalidProtocolBufferException {
         assureInit();
         ClientResponse jsonResponse = doGet("/izou");
@@ -202,6 +218,12 @@ public class ServerRequests extends IzouModule implements AddonThreadPoolUser {
         return builder.build();
     }
 
+    /**
+     * returns the inputStream for the url
+     * @param url the url to download from
+     * @return an inputStream
+     * @throws ClientHandlerException if an exception occurred while communication with the server
+     */
     public InputStream download(String url) throws ClientHandlerException {
         assureInit();
 
@@ -216,6 +238,12 @@ public class ServerRequests extends IzouModule implements AddonThreadPoolUser {
         return response.getEntityInputStream();
     }
 
+    /**
+     * returns the Addon and with all its dependencies populated
+     * @param id the id of the addon
+     * @return the addon or empty if not existing
+     * @throws ClientHandlerException if an exception occurred while communicating with the server
+     */
     public Optional<App> getAddonAndDependencies(int id) throws ClientHandlerException {
         assureInit();
         Function<String, ClientResponse> doGetWithPlatform = route -> {
@@ -305,7 +333,7 @@ public class ServerRequests extends IzouModule implements AddonThreadPoolUser {
      * returns the IzouId on the Server, if fetched
      * @return the id or empty
      */
-    public Optional<Integer> getIzouId() {
+    Optional<Integer> getIzouId() {
         if (izouId == -1) {
             return Optional.empty();
         } else {
@@ -317,7 +345,7 @@ public class ServerRequests extends IzouModule implements AddonThreadPoolUser {
      * returns the route Izou is reachable at, if fetched
      * @return the route or empty if not fetched
      */
-    public Optional<String> getIzouRoute() {
+    Optional<String> getIzouRoute() {
         return Optional.ofNullable(izouRoute);
     }
 }

@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
+ * the implementation for {@link Request}
  * @author LeanderK
  * @version 1.0
  */

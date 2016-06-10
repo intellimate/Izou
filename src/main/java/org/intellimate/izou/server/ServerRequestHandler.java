@@ -4,6 +4,7 @@ import org.intellimate.server.proto.HttpRequest;
 import org.intellimate.server.proto.HttpResponse;
 
 /**
+ * this interface specifies the Response-Handler
  * @author LeanderK
  * @version 1.0
  */

@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
+ * this class takes all the request from the server to Izou and handles them where possible or delegates to an addon
  * @author LeanderK
  * @version 1.0
  */
@@ -35,11 +36,19 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
     private static JsonFormat.Parser PARSER = JsonFormat.parser();
     private CompletableFuture<Void> updateFuture;
 
-
+    /**
+     * creates a new RequestHandler
+     * @param main an instance of main
+     */
     public RequestHandler(Main main) {
         super(main);
     }
 
+    /**
+     * this method handles the requests from the server
+     * @param request the request to handle
+     * @return an response
+     */
     Response handleRequests(Request request) {
         if (request.getUrl().startsWith("/apps")) {
             if (getMain().getState().equals(IzouInstanceStatus.Status.DISABLED)) {
@@ -52,6 +61,11 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
         return sendNotFound("illegal request, no suitable route found");
     }
 
+    /**
+     * handles all request for {@code /apps} and sub-urls
+     * @param request the request
+     * @return a response
+     */
     private Response handleApps(Request request) {
         String url = request.getUrl();
         Pattern serverIDPattern = Pattern.compile("/apps/(?<id>\\d+)(/.*)?");
@@ -59,19 +73,27 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
         if (url.equals("/apps")) {
             return handleListApps(request);
         } else if (serverIDMatcher.matches()) {
-            return handleAddonHTTPRequest(request, serverIDMatcher, id -> getMain().getAddOnInformationManager().getAddOn(Integer.parseInt(id)));
+            return handleAddonHTTPRequest(request, serverIDMatcher.group("id"), id -> getMain().getAddOnInformationManager().getAddOn(Integer.parseInt(id)));
         } else if (url.matches("/apps/dev/\\w+(/.*)?")) {
             Pattern pattern = Pattern.compile("/apps/dev/(?<id>\\w+)(/.*)?");
             Matcher devIDMatcher = pattern.matcher(url);
             if (request.getMethod().equals("POST") && url.matches("/apps/dev/\\w+/\\d+/\\d+/\\d+")) {
                 return saveLocalApp(request, url);
             } else if (request.getMethod().equals("GET") && devIDMatcher.matches()) {
-                return handleAddonHTTPRequest(request, devIDMatcher, id -> getMain().getAddOnInformationManager().getAddOn(id));
+                return handleAddonHTTPRequest(request, devIDMatcher.group("id"), id -> getMain().getAddOnInformationManager().getAddOn(id));
             }
         }
         return sendNotFound("no suitable route found");
     }
 
+    /**
+     * this method handles a direct request to save an app from the body of the request.
+     * <p>
+     * this method is mainly used for development, where you want to upload your apps directly to Izou
+     * @param request the request
+     * @param url the url to match
+     * @return a response
+     */
     private Response saveLocalApp(Request request, String url) {
         Pattern pattern = Pattern.compile("/apps/dev/(?<id>\\w+)/(?<major>\\d+)/(?<minor>\\d+)/(?<patch>\\d+)");
         Matcher matcher = pattern.matcher(url);
@@ -137,6 +159,11 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
         return sendStringMessage("OK", 201);
     }
 
+    /**
+     * handles a request to the list of apps ({@code /apps})
+     * @param request the request to handle
+     * @return a response
+     */
     private Response handleListApps(Request request) {
         if (request.getMethod().equals("GET")) {
             return returnAddonsList();
@@ -174,6 +201,10 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
         return sendNotFound("illegal request, no suitable route found");
     }
 
+    /**
+     * constructs a list of addons and packs them into a response
+     * @return a response
+     */
     private Response returnAddonsList() {
         List<AddOnInformation> installed = null;
         List<AddOn> scheduledToDelete = null;
@@ -235,8 +266,14 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
         return new AddOn(app.getName(), null, id);
     }
 
-    private Response handleAddonHTTPRequest(Request httpRequest, Matcher matcher, Function<String, Optional<AddOnModel>> getAddon) {
-        String id = matcher.group("id");
+    /**
+     * handles a request to an
+     * @param httpRequest the request for the addon
+     * @param id the id of the addon
+     * @param getAddon the method to retrieve an addon for the id
+     * @return a reponse
+     */
+    private Response handleAddonHTTPRequest(Request httpRequest, String id, Function<String, Optional<AddOnModel>> getAddon) {
         Boolean sameApp = httpRequest.getParams().entrySet().stream()
                 .filter(param -> param.getKey().equals("app"))
                 .map(Map.Entry::getValue)
@@ -268,6 +305,11 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
                 .orElseGet(() -> sendNotFound("Addon does not server route: "+finalRequest.getUrl()));
     }
 
+    /**
+     * handles a request for {@code /status}
+     * @param request the request
+     * @return a response
+     */
     private Response handleStatus(Request request) {
         if (request.getMethod().equals("GET")) {
             IzouInstanceStatus.Status status = IzouInstanceStatus.Status.RUNNING;
@@ -315,6 +357,10 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
         return sendNotFound("illegal request, no suitable route found");
     }
 
+    /**
+     * handles a request to {@code /status} with patch and the value Disabled
+     * @return a response
+     */
     private Response handleDisabledRequests() {
         if (!getMain().getState().equals(IzouInstanceStatus.Status.DISABLED)) {
             try {
@@ -333,6 +379,10 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
         }
     }
 
+    /**
+     * handles a request to {@code /status} with patch and the value Running
+     * @return a response
+     */
     private Response handleRunningRequests() {
         if (getMain().getState().equals(IzouInstanceStatus.Status.DISABLED)) {
             try {
@@ -351,6 +401,10 @@ class RequestHandler extends IzouModule implements AddonThreadPoolUser {
         }
     }
 
+    /**
+     * handles a request to {@code /status} with patch and the value Updating
+     * @return a response
+     */
     private Response handleUpdateRequest() {
         Optional<UpdateManager> updatesManager = getMain().getUpdateManager();
         if (updatesManager.isPresent()) {

@@ -7,6 +7,7 @@ import org.intellimate.izou.util.IzouModule;
 import java.util.Optional;
 
 /**
+ * this class provides an interface to the communication with izou for other modules of the system.
  * @author LeanderK
  * @version 1.0
  */

@@ -19,6 +19,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.TrustManagerFactory;
 /**
+ * this class is needed for the jvm to accept lets-encrypts certificates
  * @author LeanderK
  * @version 1.0
  */
