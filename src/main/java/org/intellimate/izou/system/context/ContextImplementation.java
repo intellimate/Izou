@@ -14,6 +14,7 @@ import org.intellimate.izou.output.OutputExtensionModel;
 import org.intellimate.izou.output.OutputPluginModel;
 import org.intellimate.izou.resource.ResourceModel;
 import org.intellimate.izou.resource.ResourceBuilderModel;
+import org.intellimate.izou.server.CommunicationManager;
 import org.intellimate.izou.system.Context;
 import org.intellimate.izou.system.file.FileSubscriber;
 import org.intellimate.izou.system.file.ReloadableFile;
@@ -47,14 +48,14 @@ public class ContextImplementation implements Context {
     private final Output output = new OutputImpl();
     private final System system = new SystemImpl();
     private final AddOns addOns = new AddOnsImpl();
+    private final ServerInformation serverInformation = new ServerInformationImpl();
 
     /**
      * creates a new context for the addOn
      *
      * A context contains all the "global" or generally necessary information an addOn might need that it otherwise does
      * not have access too
-     *
-     * @param addOn the addOn for which to create a new context
+     *  @param addOn the addOn for which to create a new context
      * @param main instance of main
      * @param logLevel the logLevel to initialize the IzouLogger with
      */
@@ -158,6 +159,16 @@ public class ContextImplementation implements Context {
     @Override
     public AddOns getAddOns() {
         return addOns;
+    }
+
+    /**
+     * Returns the API, which contains information bout to the server and the connection
+     *
+     * @return ServerInformation
+     */
+    @Override
+    public ServerInformation getServerInformation() {
+        return serverInformation;
     }
 
     private class FilesImpl implements Files {
@@ -839,6 +850,39 @@ public class ContextImplementation implements Context {
         @Override
         public void registerInitializedListener(Runnable runnable) {
             main.getAddOnManager().addInitializedListener(runnable);
+        }
+    }
+
+    private class ServerInformationImpl implements ServerInformation {
+
+        /**
+         * returns the URL of the server this is instance is communicating with
+         *
+         * @return the
+         */
+        @Override
+        public Optional<String> getIzouServerURL() {
+            return main.getCommunicationManager().map(CommunicationManager::getIzouServerURL);
+        }
+
+        /**
+         * returns the id of izou, or empty if not yet fetched
+         *
+         * @return the id or empty
+         */
+        @Override
+        public Optional<Integer> getIzouId() {
+            return main.getCommunicationManager().flatMap(CommunicationManager::getIzouId);
+        }
+
+        /**
+         * returns the route izou is reachable at, concatenated with the server-url it constructs the whole url
+         *
+         * @return the route or empty
+         */
+        @Override
+        public Optional<String> getIzouRoute() {
+            return main.getCommunicationManager().flatMap(CommunicationManager::getIzouRoute);
         }
     }
 }

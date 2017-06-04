@@ -1,6 +1,9 @@
 package org.intellimate.izou.addon;
 
+import com.sun.jersey.api.client.ClientHandlerException;
 import org.apache.logging.log4j.Level;
+import org.intellimate.izou.config.AddOn;
+import org.intellimate.izou.identification.AddOnInformation;
 import org.intellimate.izou.identification.AddOnInformationManager;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.security.SecurityFunctions;
@@ -24,18 +27,21 @@ import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
  * Manages all the AddOns.
  */
 //TODO isolate pf4j calls & catch errors accordingly
+//TODO update methods
 public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
     private IdentifiableSet<AddOnModel> addOns = new IdentifiableSet<>();
     private HashMap<AddOnModel, PluginWrapper> pluginWrappers = new HashMap<>();
     private Set<AspectOrAffected> aspectOrAffectedSet = new HashSet<>();
     private List<Runnable> initializedCallback = new ArrayList<>();
-    private AddOnInformationManager addOnInformationManager;
+    private SynchronizationManager synchronizationManager;
+    private final AddOnFileManager addOnFileManager;
 
     /**
      * Creates a new instance of the AddOnManager
@@ -44,13 +50,15 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
      */
     public AddOnManager(Main main) {
         super(main);
-        addOnInformationManager = main.getAddOnInformationManager();
+        synchronizationManager = new SynchronizationManager(main);
+        addOnFileManager = new AddOnFileManager(main);
     }
 
     /**
     * Retrieves and registers all AddOns.
     */
-    public void retrieveAndRegisterAddOns() {
+    public void retrieveAndRegisterAddOns() throws IOException {
+        synchronizationManager.copyOrDeleteDownloadedApps();
         addOns.addAll(loadAddOns());
         registerAllAddOns(addOns);
         initialized();
@@ -82,8 +90,8 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
      * @param addOns
      */
     public void registerAllAddOns(IdentifiableSet<AddOnModel> addOns) {
-        initAddOns(addOns);
         createAddOnInfos(addOns);
+        initAddOns(addOns);
         List<CompletableFuture<Void>> futures = addOns.stream()
                 .map(addOn -> submit((Runnable) addOn::register))
                 .collect(Collectors.toList());
@@ -98,7 +106,7 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
      * Checks that addOns have all required properties and creating the addOn information list if they do
      */
     private void createAddOnInfos(IdentifiableSet<AddOnModel> addOns) {
-        addOns.stream().forEach(addOn -> addOnInformationManager.registerAddOn(addOn));
+        addOns.stream().forEach(addOn -> getMain().getAddOnInformationManager().registerAddOn(addOn));
     }
 
     /**
@@ -144,6 +152,22 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
         try {
             debug("retrieving addons from the plugins");
             List<AddOnModel> addOns = pluginManager.getExtensions(AddOnModel.class);
+            Collection<AddOnModel> removedDuplicates = addOns.stream()
+                    .filter(addOn -> addOn.getClass().getClassLoader() instanceof IzouPluginClassLoader)
+                    .collect(Collectors.toMap(
+                            addOn -> ((IzouPluginClassLoader) addOn.getClass().getClassLoader()).getPluginDescriptor().getPluginId(),
+                            Function.identity(),
+                            ((addOn, addOnModel2) -> {
+                                debug(String.format(
+                                        "multiple Extensions with the same PluginId %s discovered! %s and %s.",
+                                        ((IzouPluginClassLoader) addOn.getClass().getClassLoader()).getPluginDescriptor().getPluginId(),
+                                        addOn.toString(),
+                                        addOnModel2.toString()));
+                                return addOn;
+                            })
+                    ))
+                    .values();
+            addOns = new ArrayList<>(removedDuplicates);
             debug("retrieved: " + addOns.toString());
             KeyManager keyManager = new KeyManager();
             addOns.stream()
@@ -336,5 +360,58 @@ public class AddOnManager extends IzouModule implements AddonThreadPoolUser {
 
             return keyStore;
         }
+    }
+
+    /**
+     * synchronizes the apps with the server
+     * @return true if something changed
+     * @throws IOException if in the early stages of the synchronization something went wrong with the File-IO
+     * @throws ClientHandlerException if in the early stages of the synchronization something went wrong with the Network-IO
+     */
+    public boolean synchronizeApps() throws IOException, ClientHandlerException{
+        return synchronizationManager.synchronizeApps();
+    }
+
+    /**
+     * returns whether the AddOnManager is currently synchronizing
+     * @return true if synchronizing
+     */
+    public boolean isSynchronizing() {
+        return synchronizationManager.isBusy();
+    }
+
+    /**
+     * returns the List of the installed zip-files
+     * @return a list of the ZipFiles
+     */
+    public List<String> getInstalledAppsRawNames() throws IOException {
+        return addOnFileManager.getInstalledAppsRawNames();
+    }
+
+    /**
+     * returns all the installed Addons (inclusive the dependencies)
+     * @return a list of installed Addons
+     * @throws IOException if an Exception occurred while trying to access the File-System
+     */
+    public List<AddOnInformation> getInstalledWithDependencies() throws IOException {
+        return addOnFileManager.getInstalledWithDependencies();
+    }
+
+    /**
+     * returns the apps scheduled to install
+     * @return a list of addons
+     * @throws IOException if an Exception occurred while trying to access the File-System
+     */
+    public List<AddOn> getScheduledToInstall() throws IOException {
+        return addOnFileManager.getScheduledToInstall();
+    }
+
+    /**
+     * returns teh Downloaded apps
+     * @return a list of addons
+     * @throws IOException if an Exception occurred while trying to access the File-System
+     */
+    public List<AddOn> getScheduledToDelete() throws IOException {
+        return addOnFileManager.getScheduledToDelete();
     }
 }

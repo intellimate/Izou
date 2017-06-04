@@ -18,13 +18,6 @@ import java.util.Optional;
 @AddonAccessible
 public interface AddOnInformation extends Identifiable {
     /**
-     * Gets the name of the addOn.
-     *
-     * @return The name of the addOn.
-     */
-    String getName();
-
-    /**
      * Gets the version of the addOn.
      *
      * @return The version of the addOn.

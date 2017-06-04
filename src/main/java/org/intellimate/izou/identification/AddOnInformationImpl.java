@@ -14,19 +14,17 @@ import java.util.Optional;
  * @version 1.0
  */
 class AddOnInformationImpl implements AddOnInformation {
-    private final String name;
     private final Version version;
     private final Version sdkVersion;
     private final String provider;
     private final String id;
-    private final Optional<Integer> serverID;
+    private final int serverID;
     private final String artifactID;
 
     /**
      * Creates a new instance of AddOnInformation, which holds all the public information of an addOn and is registered
      * in the {@link AddOnInformationManager} with the serverID.
      *
-     * @param name The name of the AddOn.
      * @param version The version of the AddOn.
      * @param provider The author of the AddOn.
      * @param id The unique ID of the AddOn.
@@ -37,31 +35,19 @@ class AddOnInformationImpl implements AddOnInformation {
      * @throws MissingArgumentException Thrown if the config file of an addon is not complete, in other words if
      * an argument is missing in the file
      */
-    public AddOnInformationImpl(String name, String provider, String version, String id, String sdkVersion,
+    public AddOnInformationImpl(String provider, String version, String id, String sdkVersion,
                                 Optional<Integer> serverID, String artifactID) throws MissingArgumentException {
 
-        if (!checkField(name) || !checkField(provider) || !checkField(version) || !checkField(id)
+        if (!checkField(provider) || !checkField(version) || !checkField(id)
                 || !checkField(sdkVersion) || !checkField(artifactID)) {
             throw new MissingArgumentException("AddOnInformation is not complete - an argument is missing");
         }
-
-        this.name = name;
         this.version = new Version(version);
         this.provider = provider;
         this.id = id;
         this.sdkVersion = new Version(sdkVersion);
-        this.serverID = serverID;
+        this.serverID = serverID.orElse(-1);
         this.artifactID = artifactID;
-    }
-
-    /**
-     * Gets the name of the addOn.
-     *
-     * @return The name of the addOn.
-     */
-    @Override
-    public String getName() {
-        return name;
     }
 
     /**
@@ -111,7 +97,11 @@ class AddOnInformationImpl implements AddOnInformation {
      */
     @Override
     public Optional<Integer> getServerID() {
-        return serverID;
+        if (serverID == -1) {
+            return Optional.empty();
+        } else {
+            return Optional.of(serverID);
+        }
     }
 
     /**

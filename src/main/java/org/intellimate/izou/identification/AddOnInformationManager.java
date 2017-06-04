@@ -1,15 +1,27 @@
 package org.intellimate.izou.identification;
 
+import com.esotericsoftware.yamlbeans.YamlWriter;
 import org.apache.commons.cli.MissingArgumentException;
 import org.intellimate.izou.addon.AddOnModel;
+import org.intellimate.izou.config.AddOn;
+import org.intellimate.izou.config.InternalConfig;
 import org.intellimate.izou.main.Main;
 import org.intellimate.izou.util.IdentifiableSet;
 import org.intellimate.izou.util.IzouModule;
+import org.intellimate.server.proto.IzouInstanceStatus;
 import ro.fortsoft.pf4j.IzouPluginClassLoader;
 import ro.fortsoft.pf4j.PluginDescriptor;
 
-import java.util.Optional;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.*;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
+import static javafx.scene.input.KeyCode.M;
+import static org.bouncycastle.asn1.x500.style.RFC4519Style.l;
 
 /**
  * The AddOnInformationManager is a class that gives access to all kinds of information about registered addOns in Izou.
@@ -18,12 +30,18 @@ import java.util.function.Supplier;
 public class AddOnInformationManager extends IzouModule {
     private final IdentifiableSet<AddOnInformation> addOnInformations;
     private final IdentifiableSet<AddOnModel> addOns;
+    private InternalConfig internalConfig = null;
+    private List<AddOn> selectedAddOns = new ArrayList<>();
+    private final String addonConfigFile;
 
     /**
      * Creates a new instance of AddOnInformationManager.
+     * @param main an instance of main
+     * @param addonConfigFile the config file for the addons
      */
-    public AddOnInformationManager(Main main) {
+    public AddOnInformationManager(Main main, String addonConfigFile) {
         super(main);
+        this.addonConfigFile = addonConfigFile;
         addOnInformations = new IdentifiableSet<>();
         addOns = new IdentifiableSet<>();
         IdentificationManagerImpl identificationManager = (IdentificationManagerImpl) IdentificationManagerM.getInstance();
@@ -41,7 +59,6 @@ public class AddOnInformationManager extends IzouModule {
     public void registerAddOn(AddOnModel addOn) {
         PluginDescriptor descriptor = addOn.getPlugin().getDescriptor();
 
-        String name = descriptor.getTitle();
         String version = descriptor.getVersion().toString();
         String provider = descriptor.getProvider();
         String id = descriptor.getPluginId();
@@ -50,7 +67,7 @@ public class AddOnInformationManager extends IzouModule {
         Optional<Integer> serverID = descriptor.getServerID();
 
         try {
-            AddOnInformation addOnInformation = new AddOnInformationImpl(name, provider, version, id, sdkVersion,
+            AddOnInformation addOnInformation = new AddOnInformationImpl(provider, version, id, sdkVersion,
                     serverID, artifactID);
             addOnInformations.add(addOnInformation);
             addOns.add(addOn);
@@ -200,6 +217,77 @@ public class AddOnInformationManager extends IzouModule {
      */
     public IdentifiableSet<AddOnInformation> getAllAddOnInformations() {
        return addOnInformations;
+    }
+
+    /**
+     * adds an addon to selected List
+     * @param addOn the addon to Add
+     */
+    public void addAddonToSelectedList(AddOn addOn) throws IOException {
+        ArrayList<AddOn> addOns = new ArrayList<>(selectedAddOns);
+        addOns.add(addOn);
+        synchro(addOns);
+        this.selectedAddOns = addOns;
+    }
+
+    /**
+     * sets the selected list
+     * @param addOns the addons to set
+     */
+    public void setSelectedList(List<AddOn> addOns) throws IOException {
+        synchro(addOns);
+        this.selectedAddOns = addOns;
+    }
+
+    /**
+     * returns the selected Addons
+     * @return the selected
+     */
+    public List<AddOn> getSelectedAddOns() {
+        return selectedAddOns;
+    }
+
+    /**
+     * sets a new state to the config-file
+     * @param status the state to set the file to
+     * @throws IOException if an exception occurred while writing to the file
+     */
+    public void setNewStateToConfig(IzouInstanceStatus.Status status) throws IOException {
+        this.internalConfig = internalConfig.createNew(status);
+        //needed because only arrayList ist guaranteed to no print
+        ArrayList<AddOn> finalAddons = new ArrayList<>(selectedAddOns);
+        writeToFile(finalAddons);
+    }
+
+    /**
+     * initialises the InternalConfig
+     * @param internalConfig the InternalConfig to init to
+     */
+    public synchronized void initInternalConfigFile(InternalConfig internalConfig) {
+        if (this.internalConfig != null) {
+            throw new IllegalStateException("InternalConfig is already set");
+        }
+        this.internalConfig = internalConfig;
+        this.selectedAddOns = internalConfig.addOns;
+    }
+
+    private void synchro(List<AddOn> selectedAddOns) throws IOException {
+        //needed because only arrayList ist guaranteed to no print
+        ArrayList<AddOn> finalAddons = new ArrayList<>(selectedAddOns);
+        writeToFile(finalAddons);
+    }
+
+    private void writeToFile(ArrayList<AddOn> addOns) throws IOException {
+        File configFile = new File(addonConfigFile);
+        if (!configFile.exists()) {
+            configFile.createNewFile();
+        }
+        this.internalConfig = internalConfig.createNew(addOns);
+        try (FileWriter writer = new FileWriter(addonConfigFile)) {
+            YamlWriter yamlWriter = new YamlWriter(writer);
+            yamlWriter.getConfig().setPropertyElementType(InternalConfig.class, "addOns", AddOn.class);
+            yamlWriter.write(internalConfig);
+        }
     }
 
     /**

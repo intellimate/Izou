@@ -3,9 +3,12 @@ package org.intellimate.izou.system;
 import org.apache.logging.log4j.spi.ExtendedLogger;
 import org.intellimate.izou.security.storage.SecureStorage;
 import org.intellimate.izou.security.storage.SecureStorageImpl;
+import org.intellimate.izou.server.ServerRequests;
 import org.intellimate.izou.system.context.*;
 import org.intellimate.izou.system.context.System;
 import ro.fortsoft.pf4j.AddonAccessible;
+
+import java.util.Optional;
 
 /**
  * The Izou context is a means for all addOns to get general information they might need. Every addOn its own context
@@ -82,6 +85,13 @@ public interface Context {
      * @return AddOns.
      */
     AddOns getAddOns();
+
+    /**
+     * Returns the API, which contains information bout to the server and the connection
+     *
+     * @return ServerInformation
+     */
+    ServerInformation getServerInformation();
 
     /**
      * Gets the Secure Storage object of Izou. {@link SecureStorageImpl} allows addOns to safely store data so that other
